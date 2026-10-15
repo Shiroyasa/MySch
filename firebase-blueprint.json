@@ -1,0 +1,235 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profile",
+      "description": "User profile with role-based access control metadata",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 128 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "role": { "type": "string", "enum": ["super_admin", "admin", "guru", "wali_kelas", "kepala_sekolah", "siswa"] },
+        "nipOrNis": { "type": "string", "maxLength": 30 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "isActive": { "type": "boolean" },
+        "photoURL": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email", "displayName", "role", "isActive"]
+    },
+    "students": {
+      "title": "Student Record",
+      "description": "Comprehensive student profile and academic enrollment",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "nisn": { "type": "string", "maxLength": 20 },
+        "nis": { "type": "string", "maxLength": 20 },
+        "fullName": { "type": "string", "maxLength": 100 },
+        "gender": { "type": "string", "enum": ["L", "P"] },
+        "classId": { "type": "string", "maxLength": 64 },
+        "className": { "type": "string", "maxLength": 64 },
+        "majorId": { "type": "string", "maxLength": 32 },
+        "majorCode": { "type": "string", "maxLength": 20 },
+        "address": { "type": "string", "maxLength": 255 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "parentName": { "type": "string", "maxLength": 100 },
+        "parentPhone": { "type": "string", "maxLength": 20 },
+        "status": { "type": "string", "enum": ["aktif", "lulus", "mutasi", "keluar"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "nisn", "nis", "fullName", "gender", "classId", "status"]
+    },
+    "teachers": {
+      "title": "Teacher Record",
+      "description": "Teacher profile and assignment metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "nip": { "type": "string", "maxLength": 30 },
+        "fullName": { "type": "string", "maxLength": 100 },
+        "gender": { "type": "string", "enum": ["L", "P"] },
+        "email": { "type": "string", "maxLength": 128 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "subjects": { "type": "string", "maxLength": 200 },
+        "isHomeroom": { "type": "boolean" },
+        "homeroomClassId": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "nip", "fullName", "gender", "email"]
+    },
+    "classes": {
+      "title": "Class Record",
+      "description": "School class grade and major grouping",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 64 },
+        "gradeLevel": { "type": "string", "enum": ["X", "XI", "XII"] },
+        "majorId": { "type": "string", "maxLength": 32 },
+        "majorCode": { "type": "string", "maxLength": 20 },
+        "academicYearId": { "type": "string", "maxLength": 32 },
+        "homeroomTeacherId": { "type": "string", "maxLength": 64 },
+        "homeroomTeacherName": { "type": "string", "maxLength": 100 },
+        "studentCount": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "name", "gradeLevel", "majorCode"]
+    },
+    "attendanceSessions": {
+      "title": "Attendance Session",
+      "description": "Session grouping for daily or subject-based attendance",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "date": { "type": "string", "maxLength": 20 },
+        "classId": { "type": "string", "maxLength": 64 },
+        "className": { "type": "string", "maxLength": 64 },
+        "type": { "type": "string", "enum": ["harian", "mapel"] },
+        "subjectId": { "type": "string", "maxLength": 64 },
+        "subjectName": { "type": "string", "maxLength": 100 },
+        "teacherId": { "type": "string", "maxLength": 64 },
+        "teacherName": { "type": "string", "maxLength": 100 },
+        "academicYearId": { "type": "string", "maxLength": 32 },
+        "semesterId": { "type": "string", "maxLength": 32 },
+        "status": { "type": "string", "enum": ["draft", "final"] },
+        "totalStudents": { "type": "number" },
+        "presentCount": { "type": "number" },
+        "sickCount": { "type": "number" },
+        "leaveCount": { "type": "number" },
+        "absentCount": { "type": "number" },
+        "lateCount": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "date", "classId", "type", "status"]
+    },
+    "attendanceRecords": {
+      "title": "Individual Attendance Record",
+      "description": "Per-student attendance entry for a specific session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "sessionId": { "type": "string", "maxLength": 64 },
+        "date": { "type": "string", "maxLength": 20 },
+        "studentId": { "type": "string", "maxLength": 64 },
+        "studentName": { "type": "string", "maxLength": 100 },
+        "nisn": { "type": "string", "maxLength": 20 },
+        "classId": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["H", "S", "I", "A", "T"] },
+        "note": { "type": "string", "maxLength": 200 },
+        "updatedBy": { "type": "string", "maxLength": 100 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "sessionId", "studentId", "status"]
+    },
+    "assessments": {
+      "title": "Assessment Header",
+      "description": "Component of grading configured by teacher",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "title": { "type": "string", "maxLength": 100 },
+        "classId": { "type": "string", "maxLength": 64 },
+        "className": { "type": "string", "maxLength": 64 },
+        "subjectId": { "type": "string", "maxLength": 64 },
+        "subjectName": { "type": "string", "maxLength": 100 },
+        "teacherId": { "type": "string", "maxLength": 64 },
+        "teacherName": { "type": "string", "maxLength": 100 },
+        "academicYearId": { "type": "string", "maxLength": 32 },
+        "semesterId": { "type": "string", "maxLength": 32 },
+        "type": { "type": "string", "enum": ["tugas", "praktik", "proyek", "formatif", "sumatif"] },
+        "weight": { "type": "number" },
+        "maxScore": { "type": "number" },
+        "date": { "type": "string", "maxLength": 20 },
+        "status": { "type": "string", "enum": ["draft", "final", "dipublikasikan"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "title", "classId", "subjectId", "type", "weight", "status"]
+    },
+    "assessmentScores": {
+      "title": "Student Assessment Score",
+      "description": "Individual student grade entry for an assessment",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "assessmentId": { "type": "string", "maxLength": 64 },
+        "studentId": { "type": "string", "maxLength": 64 },
+        "studentName": { "type": "string", "maxLength": 100 },
+        "nisn": { "type": "string", "maxLength": 20 },
+        "classId": { "type": "string", "maxLength": 64 },
+        "subjectId": { "type": "string", "maxLength": 64 },
+        "score": { "type": "number" },
+        "feedback": { "type": "string", "maxLength": 255 },
+        "updatedBy": { "type": "string", "maxLength": 100 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "assessmentId", "studentId", "score"]
+    },
+    "auditLogs": {
+      "title": "Audit Log Record",
+      "description": "System and security activity audit trail",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userName": { "type": "string", "maxLength": 100 },
+        "userRole": { "type": "string", "maxLength": 30 },
+        "action": { "type": "string", "maxLength": 100 },
+        "module": { "type": "string", "maxLength": 60 },
+        "details": { "type": "string", "maxLength": 500 },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "userId", "action", "module", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "Stores user accounts and RBAC profiles"
+    },
+    "/admins/{adminId}": {
+      "schema": "users",
+      "description": "Stores verified admin identities"
+    },
+    "/students/{studentId}": {
+      "schema": "students",
+      "description": "Student master records and enrollments"
+    },
+    "/teachers/{teacherId}": {
+      "schema": "teachers",
+      "description": "Teacher profiles and subjects"
+    },
+    "/classes/{classId}": {
+      "schema": "classes",
+      "description": "Class groups in SMK Mardi Yuana Cikembar"
+    },
+    "/attendanceSessions/{sessionId}": {
+      "schema": "attendanceSessions",
+      "description": "Attendance sessions"
+    },
+    "/attendanceRecords/{recordId}": {
+      "schema": "attendanceRecords",
+      "description": "Student attendance line records"
+    },
+    "/assessments/{assessmentId}": {
+      "schema": "assessments",
+      "description": "Assessment metadata and configuration"
+    },
+    "/assessmentScores/{scoreId}": {
+      "schema": "assessmentScores",
+      "description": "Student academic scores"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "auditLogs",
+      "description": "Security and activity audit log"
+    }
+  }
+}

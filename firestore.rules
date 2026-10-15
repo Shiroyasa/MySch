@@ -1,0 +1,119 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isBootstrappedAdmin() {
+      return isSignedIn() && request.auth.token.email == 'kkaito447@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || (isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    // Admins collection
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isBootstrappedAdmin() && isValidId(adminId);
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(userId) && (
+        isAdmin() || (
+          isOwner(userId) &&
+          incoming().uid == userId &&
+          incoming().role != 'super_admin' &&
+          incoming().role != 'admin'
+        )
+      );
+      allow update: if isSignedIn() && isValidId(userId) && (
+        isAdmin() || (
+          isOwner(userId) &&
+          incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'phone', 'updatedAt'])
+        )
+      );
+      allow delete: if isAdmin() && isValidId(userId);
+    }
+
+    // Students master collection
+    match /students/{studentId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if (isAdmin() || isSignedIn()) && isValidId(studentId);
+    }
+
+    // Teachers master collection
+    match /teachers/{teacherId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if (isAdmin() || isSignedIn()) && isValidId(teacherId);
+    }
+
+    // Classes collection
+    match /classes/{classId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if (isAdmin() || isSignedIn()) && isValidId(classId);
+    }
+
+    // Attendance sessions
+    match /attendanceSessions/{sessionId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn() && isValidId(sessionId);
+    }
+
+    // Attendance records
+    match /attendanceRecords/{recordId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn() && isValidId(recordId);
+    }
+
+    // Assessments
+    match /assessments/{assessmentId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn() && isValidId(assessmentId);
+    }
+
+    // Assessment scores
+    match /assessmentScores/{scoreId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn() && isValidId(scoreId);
+    }
+
+    // Audit logs
+    match /auditLogs/{logId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(logId);
+      allow update, delete: if false; // Immutable audit log
+    }
+
+    // Test connection doc
+    match /test/{testId} {
+      allow read, write: if true;
+    }
+  }
+}
