@@ -5,9 +5,14 @@ import firebaseConfig from '../../firebase-applet-config.json';
 
 // Initialize Firebase
 export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId); /* CRITICAL: The app will break without this line */
+export const db = getFirestore(app, (firebaseConfig as any).firestoreDatabaseId); /* CRITICAL: The app will break without this line */
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope('https://www.googleapis.com/auth/spreadsheets');
+googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
+
+// In-memory token cache (DO NOT store in localStorage per security guidelines)
+let cachedAccessToken: string | null = null;
 
 // Operation types for strict Firestore error handling
 export enum OperationType {
@@ -77,6 +82,10 @@ testConnection().catch(console.error);
 export async function loginWithGoogle() {
   try {
     const result = await signInWithPopup(auth, googleProvider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    if (credential?.accessToken) {
+      cachedAccessToken = credential.accessToken;
+    }
     return result.user;
   } catch (error) {
     console.error('Google sign-in error:', error);
@@ -84,6 +93,11 @@ export async function loginWithGoogle() {
   }
 }
 
+export function getCachedGoogleToken(): string | null {
+  return cachedAccessToken;
+}
+
 export async function logoutUser() {
+  cachedAccessToken = null;
   return fbSignOut(auth);
 }

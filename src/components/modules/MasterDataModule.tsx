@@ -14,10 +14,19 @@ import {
   Edit2,
   Trash2,
   Eye,
+  EyeOff,
+  Lock,
   Check,
   X,
   Filter,
   CheckCircle2,
+  Gem,
+  Crown,
+  Castle,
+  Swords,
+  Scroll,
+  Hourglass,
+  Sparkles,
 } from 'lucide-react';
 import { exportToExcel } from '../../utils/exportUtils';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
@@ -99,6 +108,8 @@ export const MasterDataModule: React.FC = () => {
   const [sPhone, setSPhone] = useState('');
   const [sParentName, setSParentName] = useState('');
   const [sParentPhone, setSParentPhone] = useState('');
+  const [sPassword, setSPassword] = useState('siswa123');
+  const [showSPassword, setShowSPassword] = useState(false);
 
   const openAddStudentModal = () => {
     setEditingStudent(null);
@@ -108,9 +119,10 @@ export const MasterDataModule: React.FC = () => {
     setSGender('L');
     setSClassId(classes[0]?.id || '');
     setSAddress('Cikembar, Sukabumi');
-    setSPhone('085811223344');
+    setSPhone(''); // Tanpa hint nomor telepon
     setSParentName('');
-    setSParentPhone('081299887766');
+    setSParentPhone(''); // Tanpa hint nomor telepon
+    setSPassword('siswa123');
     setShowStudentModal(true);
   };
 
@@ -122,9 +134,10 @@ export const MasterDataModule: React.FC = () => {
     setSGender(std.gender);
     setSClassId(std.classId);
     setSAddress(std.address);
-    setSPhone(std.phone);
+    setSPhone(std.phone || '');
     setSParentName(std.parentName);
-    setSParentPhone(std.parentPhone);
+    setSParentPhone(std.parentPhone || '');
+    setSPassword(std.password || 'siswa123');
     setShowStudentModal(true);
   };
 
@@ -147,6 +160,7 @@ export const MasterDataModule: React.FC = () => {
         phone: sPhone,
         parentName: sParentName,
         parentPhone: sParentPhone,
+        password: sPassword.trim() || 'siswa123',
       });
       showToast(`Data siswa ${sName} berhasil diperbarui.`);
     } else {
@@ -163,6 +177,7 @@ export const MasterDataModule: React.FC = () => {
         phone: sPhone,
         parentName: sParentName,
         parentPhone: sParentPhone,
+        password: sPassword.trim() || 'siswa123',
         status: 'aktif',
       });
       showToast(`Siswa baru ${sName} berhasil didaftarkan.`);
@@ -196,6 +211,8 @@ export const MasterDataModule: React.FC = () => {
   const [tSubjects, setTSubjects] = useState('');
   const [tIsHomeroom, setTIsHomeroom] = useState(false);
   const [tHomeroomClassId, setTHomeroomClassId] = useState(classes[0]?.id || '');
+  const [tPassword, setTPassword] = useState('password123');
+  const [showTPassword, setShowTPassword] = useState(false);
 
   const openAddTeacherModal = () => {
     setEditingTeacher(null);
@@ -203,10 +220,11 @@ export const MasterDataModule: React.FC = () => {
     setTName('');
     setTGender('L');
     setTEmail('');
-    setTPhone('081234567890');
+    setTPhone('');
     setTSubjects(subjects[0]?.name || 'Kompetensi Kejuruan');
     setTIsHomeroom(false);
     setTHomeroomClassId(classes[0]?.id || '');
+    setTPassword('password123');
     setShowTeacherModal(true);
   };
 
@@ -216,10 +234,11 @@ export const MasterDataModule: React.FC = () => {
     setTName(tch.fullName);
     setTGender(tch.gender);
     setTEmail(tch.email);
-    setTPhone(tch.phone);
+    setTPhone(tch.phone || '');
     setTSubjects(tch.subjects.join(', '));
     setTIsHomeroom(tch.isHomeroom);
     setTHomeroomClassId(tch.homeroomClassId || classes[0]?.id || '');
+    setTPassword(tch.password || 'password123');
     setShowTeacherModal(true);
   };
 
@@ -241,6 +260,7 @@ export const MasterDataModule: React.FC = () => {
         isHomeroom: tIsHomeroom,
         homeroomClassId: tIsHomeroom ? targetClass?.id : undefined,
         homeroomClassName: tIsHomeroom ? targetClass?.name : undefined,
+        password: tPassword.trim() || 'password123',
       });
       showToast(`Data guru ${tName} berhasil diperbarui.`);
     } else {
@@ -254,6 +274,7 @@ export const MasterDataModule: React.FC = () => {
         isHomeroom: tIsHomeroom,
         homeroomClassId: tIsHomeroom ? targetClass?.id : undefined,
         homeroomClassName: tIsHomeroom ? targetClass?.name : undefined,
+        password: tPassword.trim() || 'password123',
       });
       showToast(`Pendidik baru ${tName} berhasil ditambahkan.`);
     }
@@ -590,23 +611,33 @@ export const MasterDataModule: React.FC = () => {
         </div>
       )}
 
-      {/* Title & Tabs */}
+      {/* Title & Tabs with JRPG Grand Codex Styling */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-3 dark:border-slate-800">
-        <div>
-          <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
-            Master Data Manajemen Sekolah
-          </h1>
-          <p className="text-xs text-slate-500">SMK Mardi Yuana Cikembar &bull; Kurikulum Merdeka Terakreditasi A</p>
+        <div className="flex items-center gap-2.5">
+          <div className="relative rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-2.5 text-white shadow-md shadow-indigo-500/25 ring-1 ring-amber-400/50">
+            <Gem className="h-5 w-5 text-amber-300 animate-pulse" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                Master Data Manajemen Sekolah
+              </h1>
+              <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-black text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                GRAND CODEX
+              </span>
+            </div>
+            <p className="text-xs text-slate-500">SMK Mardi Yuana Cikembar &bull; Kurikulum Merdeka Terakreditasi A (Unggul)</p>
+          </div>
         </div>
 
-        <div className="flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-slate-100/70 p-1 dark:border-slate-800 dark:bg-slate-800/60">
+        <div className="flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white/70 p-1 dark:border-slate-800 dark:bg-slate-800/60 backdrop-blur-md">
           {[
-            { id: 'students', label: `Siswa (${students.length})`, icon: Users },
-            { id: 'teachers', label: `Guru (${teachers.length})`, icon: GraduationCap },
-            { id: 'classes', label: `Kelas (${classes.length})`, icon: School },
-            { id: 'majors', label: `Jurusan (${majors.length})`, icon: BookOpen },
-            { id: 'subjects', label: `Mapel (${subjects.length})`, icon: BookOpen },
-            { id: 'years', label: 'Tahun Ajaran', icon: Calendar },
+            { id: 'students', label: `Siswa (${students.length})`, icon: Gem },
+            { id: 'teachers', label: `Guru (${teachers.length})`, icon: Crown },
+            { id: 'classes', label: `Kelas (${classes.length})`, icon: Castle },
+            { id: 'majors', label: `Jurusan (${majors.length})`, icon: Swords },
+            { id: 'subjects', label: `Mapel (${subjects.length})`, icon: Scroll },
+            { id: 'years', label: 'Tahun Ajaran', icon: Hourglass },
           ].map(tab => {
             const Icon = tab.icon;
             const isAct = activeTab === tab.id;
@@ -614,9 +645,9 @@ export const MasterDataModule: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                   isAct
-                    ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
                 }`}
               >
@@ -1215,6 +1246,31 @@ export const MasterDataModule: React.FC = () => {
                 </div>
               </div>
 
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  Password Akun Siswa (untuk Login)
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                  <input
+                    type={showSPassword ? 'text' : 'password'}
+                    value={sPassword}
+                    onChange={e => setSPassword(e.target.value)}
+                    placeholder="Masukkan password akun siswa..."
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-10 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowSPassword(!showSPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  >
+                    {showSPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-1">Digunakan siswa untuk login ke portal web &amp; mobile.</p>
+              </div>
+
               <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
@@ -1347,6 +1403,31 @@ export const MasterDataModule: React.FC = () => {
                     </select>
                   </div>
                 )}
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
+                  Password Akun Guru / Karyawan (untuk Login)
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                  <input
+                    type={showTPassword ? 'text' : 'password'}
+                    value={tPassword}
+                    onChange={e => setTPassword(e.target.value)}
+                    placeholder="Masukkan password akun pendidik/staf..."
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-10 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowTPassword(!showTPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  >
+                    {showTPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-slate-400 mt-1">Digunakan untuk login ke sistem dengan NIP atau email guru.</p>
               </div>
 
               <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">

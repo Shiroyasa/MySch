@@ -16,6 +16,12 @@ import {
   PlusCircle,
   AlertCircle,
   Trash2,
+  Hourglass,
+  Sparkles,
+  ShieldCheck,
+  Swords,
+  Scroll,
+  Gem,
 } from 'lucide-react';
 import { exportToExcel, exportToPdf, exportToCsv } from '../../utils/exportUtils';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
@@ -255,14 +261,19 @@ export const AttendanceModule: React.FC = () => {
 
       {/* Module Navigation Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-3 dark:border-slate-800">
-        <div className="flex items-center gap-2">
-          <div className="rounded-xl bg-blue-100 p-2 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300">
-            <CalendarCheck className="h-5 w-5" />
+        <div className="flex items-center gap-2.5">
+          <div className="relative rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 p-2.5 text-white shadow-md shadow-blue-500/25 ring-1 ring-amber-400/50">
+            <Hourglass className="h-5 w-5 text-amber-300 animate-pulse" />
           </div>
           <div>
-            <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
-              Manajemen Presensi &amp; Absensi Siswa
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
+                Presensi &amp; Absensi Siswa
+              </h1>
+              <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-black text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                CHRONO SEAL
+              </span>
+            </div>
             <p className="text-xs text-slate-500">SMK Mardi Yuana Cikembar &bull; Kurikulum Merdeka Vokasi</p>
           </div>
         </div>

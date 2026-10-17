@@ -2,10 +2,11 @@
   "entities": {
     "users": {
       "title": "User Profile",
-      "description": "User profile with role-based access control metadata",
+      "description": "User profile with role-based access control and profile customization",
       "type": "object",
       "properties": {
         "uid": { "type": "string", "maxLength": 128 },
+        "id": { "type": "string", "maxLength": 128 },
         "email": { "type": "string", "maxLength": 128 },
         "displayName": { "type": "string", "maxLength": 100 },
         "role": { "type": "string", "enum": ["super_admin", "admin", "guru", "wali_kelas", "kepala_sekolah", "siswa"] },
@@ -13,10 +14,11 @@
         "phone": { "type": "string", "maxLength": 20 },
         "isActive": { "type": "boolean" },
         "photoURL": { "type": "string", "maxLength": 500 },
+        "permissions": { "type": "array" },
         "createdAt": { "type": "string" },
         "updatedAt": { "type": "string" }
       },
-      "required": ["uid", "email", "displayName", "role", "isActive"]
+      "required": ["email", "displayName", "role"]
     },
     "students": {
       "title": "Student Record",
@@ -80,6 +82,48 @@
       },
       "required": ["id", "name", "gradeLevel", "majorCode"]
     },
+    "majors": {
+      "title": "Major Record",
+      "description": "Vocational program / specialization",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 32 },
+        "code": { "type": "string", "maxLength": 20 },
+        "name": { "type": "string", "maxLength": 100 },
+        "headOfMajor": { "type": "string", "maxLength": 100 },
+        "classCount": { "type": "number" },
+        "studentCount": { "type": "number" }
+      },
+      "required": ["id", "code", "name"]
+    },
+    "subjects": {
+      "title": "Subject Record",
+      "description": "Curriculum course / subject",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "code": { "type": "string", "maxLength": 20 },
+        "name": { "type": "string", "maxLength": 100 },
+        "group": { "type": "string", "enum": ["A", "B", "C"] },
+        "kkm": { "type": "number" },
+        "hoursPerWeek": { "type": "number" }
+      },
+      "required": ["id", "code", "name", "group", "kkm"]
+    },
+    "academicYears": {
+      "title": "Academic Year",
+      "description": "School year and semester metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 32 },
+        "year": { "type": "string", "maxLength": 20 },
+        "semester": { "type": "string", "enum": ["Ganjil", "Genap"] },
+        "isActive": { "type": "boolean" },
+        "startDate": { "type": "string" },
+        "endDate": { "type": "string" }
+      },
+      "required": ["id", "year", "semester", "isActive"]
+    },
     "attendanceSessions": {
       "title": "Attendance Session",
       "description": "Session grouping for daily or subject-based attendance",
@@ -127,6 +171,24 @@
         "updatedAt": { "type": "string" }
       },
       "required": ["id", "sessionId", "studentId", "status"]
+    },
+    "attendanceCorrections": {
+      "title": "Attendance Correction",
+      "description": "Dispensations and status correction records",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "recordId": { "type": "string", "maxLength": 128 },
+        "studentName": { "type": "string", "maxLength": 100 },
+        "date": { "type": "string", "maxLength": 20 },
+        "oldStatus": { "type": "string", "maxLength": 10 },
+        "newStatus": { "type": "string", "maxLength": 10 },
+        "reason": { "type": "string", "maxLength": 255 },
+        "requestedBy": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "recordId", "studentName", "newStatus", "reason"]
     },
     "assessments": {
       "title": "Assessment Header",
@@ -188,6 +250,48 @@
         "timestamp": { "type": "string" }
       },
       "required": ["id", "userId", "action", "module", "timestamp"]
+    },
+    "chatMessages": {
+      "title": "Chat Message",
+      "description": "Real-time communication in student room and moderation channel",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "senderId": { "type": "string", "maxLength": 128 },
+        "senderName": { "type": "string", "maxLength": 100 },
+        "senderRole": { "type": "string", "maxLength": 30 },
+        "senderClass": { "type": "string", "maxLength": 64 },
+        "content": { "type": "string", "maxLength": 1000 },
+        "timestamp": { "type": "string" },
+        "category": { "type": "string", "enum": ["tugas", "mapel", "diskusi", "pengumuman", "santai"] },
+        "isModerated": { "type": "boolean" },
+        "moderatedBy": { "type": "string", "maxLength": 100 },
+        "moderationReason": { "type": "string", "maxLength": 255 }
+      },
+      "required": ["id", "senderId", "senderName", "content", "timestamp"]
+    },
+    "notifications": {
+      "title": "Notification Item",
+      "description": "Personalized and broadcast alert notifications",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "title": { "type": "string", "maxLength": 120 },
+        "message": { "type": "string", "maxLength": 500 },
+        "type": { "type": "string", "enum": ["info", "success", "warning", "alert"] },
+        "isRead": { "type": "boolean" },
+        "link": { "type": "string", "maxLength": 255 },
+        "createdAt": { "type": "string" },
+        "targetRole": { "type": "string", "maxLength": 30 },
+        "recipientId": { "type": "string", "maxLength": 128 },
+        "recipientName": { "type": "string", "maxLength": 100 },
+        "senderRole": { "type": "string", "maxLength": 30 },
+        "senderName": { "type": "string", "maxLength": 100 },
+        "isBroadcast": { "type": "boolean" },
+        "urgency": { "type": "string", "enum": ["normal", "penting", "darurat"] },
+        "category": { "type": "string", "enum": ["akademik", "presensi", "profil", "sistem", "pengumuman"] }
+      },
+      "required": ["id", "title", "message", "type", "createdAt"]
     }
   },
   "firestore": {
@@ -211,13 +315,29 @@
       "schema": "classes",
       "description": "Class groups in SMK Mardi Yuana Cikembar"
     },
+    "/majors/{majorId}": {
+      "schema": "majors",
+      "description": "Vocational departments and majors"
+    },
+    "/subjects/{subjectId}": {
+      "schema": "subjects",
+      "description": "Academic curriculum subjects"
+    },
+    "/academicYears/{yearId}": {
+      "schema": "academicYears",
+      "description": "Academic calendar years and semesters"
+    },
     "/attendanceSessions/{sessionId}": {
       "schema": "attendanceSessions",
-      "description": "Attendance sessions"
+      "description": "Daily and subject attendance sessions"
     },
     "/attendanceRecords/{recordId}": {
       "schema": "attendanceRecords",
       "description": "Student attendance line records"
+    },
+    "/attendanceCorrections/{correctionId}": {
+      "schema": "attendanceCorrections",
+      "description": "Attendance status changes and dispensations"
     },
     "/assessments/{assessmentId}": {
       "schema": "assessments",
@@ -230,6 +350,14 @@
     "/auditLogs/{logId}": {
       "schema": "auditLogs",
       "description": "Security and activity audit log"
+    },
+    "/chatMessages/{messageId}": {
+      "schema": "chatMessages",
+      "description": "Student room chat messages with teacher/admin moderation"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "notifications",
+      "description": "Per-profile targeted notifications and school-wide broadcasts"
     }
   }
 }

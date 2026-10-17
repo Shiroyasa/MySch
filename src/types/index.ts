@@ -42,6 +42,7 @@ export interface Student {
   parentName: string;
   parentPhone: string;
   status: 'aktif' | 'lulus' | 'mutasi' | 'keluar';
+  password?: string;
   photoURL?: string;
   createdAt: string;
   updatedAt?: string;
@@ -58,6 +59,7 @@ export interface Teacher {
   isHomeroom: boolean;
   homeroomClassId?: string;
   homeroomClassName?: string;
+  password?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -248,6 +250,8 @@ export interface NotificationItem {
   senderRole?: UserRole;
   senderName?: string;
   isBroadcast?: boolean;
+  category?: 'akademik' | 'presensi' | 'pengumuman' | 'keamanan' | 'profil' | 'umum';
+  urgency?: 'normal' | 'penting' | 'mendesak';
 }
 
 export interface ChatMessage {
@@ -262,4 +266,107 @@ export interface ChatMessage {
   timestamp: string;
   isAnnouncement?: boolean;
   deleted?: boolean;
+  deletedBy?: string;
+  category?: 'tugas' | 'mapel' | 'diskusi' | 'pengumuman' | 'santai';
+  // Direct Message (DM per profile)
+  isDirectMessage?: boolean;
+  recipientId?: string;
+  recipientName?: string;
 }
+
+// ==========================================
+// ADMINISTRASI PKL (PRAKTEK KERJA LAPANGAN)
+// ==========================================
+
+export interface IndustryMou {
+  id: string;
+  mouNumber: string; // Nomor Surat MoU / PKS
+  startDate: string; // Format YYYY-MM-DD
+  endDate: string; // Format YYYY-MM-DD
+  status: 'aktif' | 'hampir_habis' | 'kadaluarsa';
+  scope: string; // e.g. "PKL Siswa, Guru Magang, Rekrutmen Lulusan"
+  documentTitle: string;
+}
+
+export interface IndustryPlacementRecord {
+  id: string;
+  studentId: string;
+  studentName: string;
+  nisn: string;
+  className: string;
+  majorCode: string;
+  academicYear: string;
+  period: string; // e.g. "Juli - Desember 2026"
+  schoolMentorName: string; // Guru Pembimbing
+  industryMentorName: string; // Pembimbing DUDI
+  status: 'sedang_berjalan' | 'selesai' | 'ditarik';
+  finalScore?: number;
+  grade?: 'A' | 'B' | 'C' | 'D';
+}
+
+export interface IndustryEvaluation {
+  rating: number; // 1 to 5
+  workCultureScore: number; // 0 - 100
+  guidanceScore: number; // 0 - 100
+  facilityScore: number; // 0 - 100
+  curriculumRelevanceScore: number; // 0 - 100
+  recommendation: 'Sangat Direkomendasikan' | 'Direkomendasikan' | 'Perlu Evaluasi' | 'Tidak Direkomendasikan';
+  notes: string;
+  evaluatorName: string;
+  evaluatedAt: string;
+}
+
+export interface IndustryPartner {
+  id: string;
+  name: string;
+  sector: string; // Bidang usaha (e.g. "Teknologi Informasi & Software", "Otomotif & Manufaktur", dll)
+  address: string;
+  city: string;
+  hrdName: string;
+  hrdPhone: string;
+  hrdEmail: string;
+  hrdPosition: string;
+  quota: number; // Kuota penerimaan siswa
+  activePlacementsCount: number; // Jumlah siswa aktif saat ini
+  status: 'aktif' | 'nonaktif';
+  mouHistory: IndustryMou[];
+  placements: IndustryPlacementRecord[];
+  evaluation: IndustryEvaluation;
+  createdAt: string;
+}
+
+export interface PklVisitRecord {
+  id: string;
+  partnerId: string;
+  partnerName: string;
+  teacherId: string;
+  teacherName: string;
+  visitDate: string;
+  visitType: 'Monitoring Awal' | 'Supervisi Rutin' | 'Evaluasi Tengah PKL' | 'Penarikan Siswa';
+  studentCount: number;
+  studentNames: string[];
+  attendanceRate: number; // % kehadiran siswa saat kunjungan
+  guidanceNotes: string;
+  industryFeedback: string;
+  status: 'terlaksana' | 'terjadwal' | 'tertunda';
+}
+
+export interface PklStudentReportItem {
+  id: string;
+  studentId: string;
+  studentName: string;
+  nisn: string;
+  className: string;
+  majorCode: string;
+  partnerId: string;
+  partnerName: string;
+  reportTitle: string;
+  submissionStatus: 'sudah_dikumpulkan' | 'belum_dikumpulkan' | 'revisi';
+  submissionDate?: string;
+  schoolMentorScore: number;
+  industryMentorScore: number;
+  finalScore: number;
+  grade: 'A' | 'B' | 'C' | 'D';
+  absorbedStatus: 'terserap_kerja' | 'melanjutkan_kuliah' | 'wirausaha' | 'mencari_kerja';
+}
+

@@ -12,10 +12,12 @@ import { UserManagementModule } from './components/modules/UserManagementModule'
 import { AuditLogModule } from './components/modules/AuditLogModule';
 import { SettingsModule } from './components/modules/SettingsModule';
 import { StudentModule } from './components/modules/StudentModule';
-import { LandingPage } from './components/pages/LandingPage';
+import { StudentChatRoom } from './components/modules/StudentChatRoom';
+import { PklModule } from './components/modules/PklModule';
 import { LoginPage } from './components/pages/LoginPage';
 import { LogoutModal } from './components/common/LogoutModal';
-import { ChevronRight } from 'lucide-react';
+import { AnimeBackground } from './components/common/AnimeBackground';
+import { ChevronRight, Sparkles } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const {
@@ -37,10 +39,16 @@ const MainContent: React.FC = () => {
         return 'Profil Siswa';
       case 'student-grades':
         return 'Nilai Siswa (Per Profile & Keseluruhan)';
+      case 'student-chat':
+        return 'Ruang Obrolan & Forum Siswa';
+      case 'student-chat-monitor':
+        return 'Pantauan & Moderasi Chat Siswa';
       case 'attendance':
         return 'Presensi & Absensi Siswa';
       case 'grading':
         return 'Penilaian Akademik & Nilai';
+      case 'pkl':
+        return 'Administrasi PKL & Hubungan Industri (DUDI)';
       case 'master-data':
         return 'Master Data Sekolah';
       case 'reports':
@@ -67,7 +75,10 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50 font-sans text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
+    <div className="relative flex h-screen w-full overflow-hidden font-sans text-slate-900 transition-colors dark:text-slate-100">
+      {/* Clean Anime Scenery & Sakura Background */}
+      <AnimeBackground />
+
       {/* Sidebar Navigation */}
       <Sidebar
         collapsed={sidebarCollapsed}
@@ -77,43 +88,27 @@ const MainContent: React.FC = () => {
       />
 
       {/* Main View Area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
         {/* Top Header */}
         <Header onToggleMobileSidebar={() => setMobileSidebarOpen(true)} />
 
-        {/* Breadcrumb sub-header */}
-        <div className="flex items-center justify-between border-b border-slate-200 bg-white/60 px-4 py-2.5 backdrop-blur-xs dark:border-slate-800/80 dark:bg-slate-900/60 sm:px-6">
-          <nav className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-            <button
-              onClick={handleHomeClick}
-              className="hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors"
-            >
-              MySchool
-            </button>
-            <ChevronRight className="h-3 w-3 text-slate-300 dark:text-slate-600" />
-            <span className="font-bold text-slate-800 dark:text-slate-200">
-              {getBreadcrumbTitle()}
-            </span>
-          </nav>
 
-          <div className="hidden sm:flex items-center gap-2 text-[11px] text-slate-400">
-            <span>SMK Mardi Yuana Cikembar</span>
-            <span>&bull;</span>
-            <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">Sistem Aktif</span>
-          </div>
-        </div>
-
-        {/* Scrollable Page View */}
+        {/* Scrollable Page View with Clean Glass Backdrop */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="mx-auto max-w-7xl">
             {/* Student Specific Views */}
             {activeNav === 'student-profile' && <StudentModule initialTab="profile" />}
             {activeNav === 'student-grades' && <StudentModule initialTab="grades" />}
+            {activeNav === 'student-chat' && <StudentChatRoom />}
+
+            {/* Admin & Teacher Chat Monitoring View */}
+            {activeNav === 'student-chat-monitor' && <StudentChatRoom isAdminView={true} />}
 
             {/* General Modules */}
             {activeNav === 'dashboard' && <DashboardRouter />}
             {activeNav === 'attendance' && <AttendanceModule />}
             {activeNav === 'grading' && <GradingModule />}
+            {activeNav === 'pkl' && <PklModule />}
             {activeNav === 'master-data' && <MasterDataModule />}
             {activeNav === 'reports' && <ReportsModule />}
             {activeNav === 'ai-studio' && <AiStudioModule />}
@@ -146,10 +141,6 @@ const MainContent: React.FC = () => {
 
 const AppRouter: React.FC = () => {
   const { pageView } = useApp();
-
-  if (pageView === 'landing') {
-    return <LandingPage />;
-  }
 
   if (pageView === 'login') {
     return <LoginPage />;

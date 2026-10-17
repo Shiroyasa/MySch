@@ -17,7 +17,15 @@ import {
   ShieldCheck,
   Sparkles,
   QrCode,
-  School,
+  Crown,
+  Swords,
+  Scroll,
+  Gem,
+  Hourglass,
+  Trophy,
+  Target,
+  Flame,
+  Castle,
 } from 'lucide-react';
 import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
 
@@ -174,27 +182,26 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
         </div>
       )}
 
-      {/* Header Banner - Status Role Siswa Aktif */}
-      <div className="rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-800 to-cyan-800 p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+      {/* Header Banner - JRPG Cadet Status Card */}
+      <div className="rounded-3xl bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-blue-500/20 backdrop-blur-xl">
+        <div className="absolute right-0 top-0 bottom-0 w-96 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-500/30 via-cyan-500/10 to-transparent pointer-events-none" />
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-white/10 text-white font-extrabold text-2xl border border-white/20 shadow-inner">
+            <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white font-black text-2xl border-2 border-amber-400 shadow-lg ring-4 ring-indigo-500/30">
               {student.fullName.charAt(0)}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-emerald-500/25 px-2.5 py-0.5 text-[11px] font-bold text-emerald-200 border border-emerald-400/30">
-                  Status Role: Siswa Aktif
-                </span>
-                <span className="text-[11px] text-blue-200 hidden sm:inline">
-                  SMK Mardi Yuana Cikembar
+                <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-3 py-0.5 text-[11px] font-extrabold text-cyan-300 border border-cyan-400/30 shadow-xs">
+                  <ShieldCheck className="h-3 w-3 text-cyan-300" />
+                  <span>Status: Siswa Aktif</span>
                 </span>
               </div>
-              <h1 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">
+              <h1 className="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
                 {student.fullName}
               </h1>
               <p className="mt-1 text-xs sm:text-sm text-blue-100 font-medium">
-                NISN: <span className="font-mono font-bold">{student.nisn}</span> &bull; NIS: <span className="font-mono font-bold">{student.nis}</span> &bull; Kelas: <span className="font-bold">{student.className}</span> ({student.majorCode})
+                NISN: <span className="font-mono font-bold text-amber-300">{student.nisn}</span> &bull; NIS: <span className="font-mono font-bold">{student.nis}</span> &bull; Kelas: <span className="font-extrabold text-cyan-300">{student.className}</span> ({student.majorCode})
               </p>
             </div>
           </div>
@@ -202,60 +209,60 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setActiveTab('profile')}
-              className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-md ${
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer ${
                 activeTab === 'profile'
-                  ? 'bg-white text-blue-900'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white ring-2 ring-white/60'
                   : 'bg-white/15 text-white border border-white/30 hover:bg-white/25'
               }`}
             >
-              <User className="h-4 w-4" />
-              <span>Profil Siswa</span>
+              <ShieldCheck className="h-4 w-4 text-cyan-300" />
+              <span>1. Profil Siswa</span>
             </button>
             <button
               onClick={() => setActiveTab('grades')}
-              className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-md ${
+              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer ${
                 activeTab === 'grades'
-                  ? 'bg-white text-blue-900'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white ring-2 ring-white/60'
                   : 'bg-white/15 text-white border border-white/30 hover:bg-white/25'
               }`}
             >
-              <Award className="h-4 w-4" />
-              <span>Nilai Siswa</span>
+              <Swords className="h-4 w-4 text-amber-300" />
+              <span>2. Nilai Siswa (Trials)</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Tabs Navigation (Hanya Profil Siswa & Nilai Siswa) */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-2 dark:border-slate-800">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-2 dark:border-slate-800/80">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/70 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 backdrop-blur-md">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'profile'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
             }`}
           >
-            <User className="h-3.5 w-3.5" />
-            <span>1. Profil Siswa</span>
+            <ShieldCheck className="h-3.5 w-3.5" />
+            <span>1. Profil Siswa (Status Card)</span>
           </button>
 
           <button
             onClick={() => setActiveTab('grades')}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
               activeTab === 'grades'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
             }`}
           >
-            <Award className="h-3.5 w-3.5" />
-            <span>2. Nilai Siswa (Per Profile &amp; Keseluruhan)</span>
+            <Swords className="h-3.5 w-3.5" />
+            <span>2. Nilai Siswa (Battle Mastery &amp; Trials)</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
-          <span className="inline-block h-2 w-2 rounded-full bg-emerald-500"></span>
+        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold">
+          <Hourglass className="h-3.5 w-3.5 text-blue-500" />
           <span>Semester {activeAcademicYear.activeSemester.toUpperCase()} &bull; T.A. {activeAcademicYear.name}</span>
         </div>
       </div>
@@ -263,38 +270,78 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
       {/* ==================== 1. FITUR PROFIL SISWA ==================== */}
       {activeTab === 'profile' && (
         <div className="space-y-6">
-          {/* Quick Stats */}
+          {/* Quick Stats with JRPG HP, MP, EXP Gauges */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-              <span className="text-xs font-semibold text-slate-500">Status Kesiswaan</span>
-              <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400">
-                Aktif
+            <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> Status Kesiswaan
+              </span>
+              <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                Aktif <span className="text-amber-500 text-xs">✦ S-Tier</span>
               </p>
-              <span className="text-[11px] text-slate-400">Terdaftar Dapodik Resmi</span>
+              <div className="mt-2 space-y-1">
+                <div className="flex justify-between text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                  <span>Dapodik Kemdikbud</span>
+                  <span>Verified</span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div className="h-full rounded-full bg-emerald-500 w-full" />
+                </div>
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-              <span className="text-xs font-semibold text-slate-500">Rata-Rata Nilai</span>
+            <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <Swords className="h-3.5 w-3.5 text-blue-500" /> MP Kompetensi (Rata-Rata)
+              </span>
               <p className="mt-2 text-2xl font-black text-blue-600 dark:text-blue-400 font-mono tabular-nums">
                 {overallAvg}
               </p>
-              <span className="text-[11px] text-blue-600 font-medium">Predikat A (Sangat Memuaskan)</span>
+              <div className="mt-2 space-y-1">
+                <div className="flex justify-between text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                  <span>Predikat A (Sangat Memuaskan)</span>
+                  <span>{overallAvg} MP</span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div className="h-full rounded-full bg-blue-500" style={{ width: `${overallAvg}%` }} />
+                </div>
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-              <span className="text-xs font-semibold text-slate-500">Ketuntasan KKM</span>
-              <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono tabular-nums">
+            <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <Trophy className="h-3.5 w-3.5 text-amber-500" /> Ketuntasan KKM
+              </span>
+              <p className="mt-2 text-2xl font-black text-amber-600 dark:text-amber-400 font-mono tabular-nums">
                 {allPassed ? '100%' : '85%'}
               </p>
-              <span className="text-[11px] text-emerald-600 font-medium">Semua Mapel Tuntas</span>
+              <div className="mt-2 space-y-1">
+                <div className="flex justify-between text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                  <span>Semua Mapel Tuntas</span>
+                  <span>Trial Clear</span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div className="h-full rounded-full bg-amber-500" style={{ width: allPassed ? '100%' : '85%' }} />
+                </div>
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-              <span className="text-xs font-semibold text-slate-500">Tingkat Kehadiran</span>
+            <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <Hourglass className="h-3.5 w-3.5 text-indigo-500" /> HP Kehadiran (Chrono)
+              </span>
               <p className="mt-2 text-2xl font-black text-indigo-600 dark:text-indigo-400 font-mono tabular-nums">
                 {attendanceRate}%
               </p>
-              <span className="text-[11px] text-slate-400">H: {hadirCount} &bull; S: {sakitCount} &bull; I: {izinCount} &bull; A: {alpaCount}</span>
+              <div className="mt-2 space-y-1">
+                <div className="flex justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>H: {hadirCount} &bull; S: {sakitCount} &bull; I: {izinCount} &bull; A: {alpaCount}</span>
+                  <span>Vitality</span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div className="h-full rounded-full bg-indigo-500" style={{ width: `${attendanceRate}%` }} />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -379,16 +426,16 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
               <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-5 text-white shadow-xl relative overflow-hidden">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-xs">
-                      <School className="h-4 w-4" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-xs ring-1 ring-amber-400">
+                      <Crown className="h-4 w-4 text-amber-300" />
                     </div>
                     <div>
-                      <p className="text-xs font-black tracking-wider uppercase">Kartu Pelajar Digital</p>
+                      <p className="text-xs font-black tracking-wider uppercase">Kartu Pelajar Siswa</p>
                       <p className="text-[10px] text-blue-300">SMK Mardi Yuana Cikembar</p>
                     </div>
                   </div>
-                  <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-[9px] font-bold text-emerald-300 border border-emerald-400/30">
-                    RESMI &bull; AKTIF
+                  <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[9px] font-bold text-emerald-300 border border-emerald-400/30">
+                    Resmi Terverifikasi
                   </span>
                 </div>
 
@@ -404,15 +451,15 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
-                  <span>NPSN: 20253654 &bull; Terakreditasi A</span>
+                  <span>NPSN: 20253654 &bull; Terakreditasi A (Unggul)</span>
                   <QrCode className="h-5 w-5 text-blue-300" />
                 </div>
               </div>
 
               {/* Homeroom Teacher Details */}
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3">
-                <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
-                  Guru Wali Kelas Binaan
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <ShieldCheck className="h-3.5 w-3.5 text-indigo-500" /> Guru Wali Kelas (Mentor)
                 </h3>
                 <div className="p-3.5 rounded-xl border border-blue-100 bg-blue-50/60 dark:border-blue-900/40 dark:bg-blue-950/30 space-y-1 text-xs">
                   <p className="font-extrabold text-slate-900 dark:text-white text-sm">
@@ -428,10 +475,10 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
 
                 <button
                   onClick={() => setActiveTab('grades')}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 text-xs font-bold text-white shadow-md hover:opacity-90 transition-opacity cursor-pointer"
                 >
-                  <Award className="h-4 w-4" />
-                  <span>Buka Lembar Nilai Siswa</span>
+                  <Swords className="h-4 w-4 text-amber-300" />
+                  <span>Buka Lembar Nilai Siswa (Trials)</span>
                 </button>
               </div>
             </div>
