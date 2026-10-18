@@ -20,7 +20,36 @@ import {
   OrnateCard,
   OrnateSectionHeader,
   AcademyCornerBadge,
+  BoxBgControl,
 } from '../common/AcademyOrnaments';
+
+interface JrpgFlipBoxProps {
+  boxId: string;
+  front: React.ReactNode;
+  back: React.ReactNode;
+  minHeightClass?: string;
+  onClick?: () => void;
+}
+
+const JrpgFlipBox: React.FC<JrpgFlipBoxProps> = ({
+  boxId,
+  front,
+  back,
+  minHeightClass = 'min-h-[188px]',
+  onClick,
+}) => {
+  return (
+    <OrnateCard
+      boxId={boxId}
+      onClick={onClick}
+      minFlipHeight={minHeightClass}
+      className="p-4"
+      flipBack={back}
+    >
+      {front}
+    </OrnateCard>
+  );
+};
 
 interface DashboardRouterProps {
   onNavigate?: (menuId: string) => void;
@@ -271,9 +300,15 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
 
     const totalPkl = Math.max(1, safeReports.length);
     const pklActive = safeReports.filter(
-      p => p.status === 'Disetujui' || p.status === 'Menunggu Review'
+      p =>
+        p.submissionStatus === 'sudah_dikumpulkan' ||
+        p.submissionStatus === 'revisi' ||
+        (p as any).status === 'Disetujui' ||
+        (p as any).status === 'Menunggu Review'
     ).length;
-    const pklCompleted = safeReports.filter(p => p.status === 'Disetujui').length;
+    const pklCompleted = safeReports.filter(
+      p => p.submissionStatus === 'sudah_dikumpulkan' || (p as any).status === 'Disetujui'
+    ).length;
     const pklPending = Math.max(0, safeReports.length - pklCompleted);
 
     const pklActivePct =
@@ -338,13 +373,36 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
   }, [attendanceAnalytics]);
 
   const appLogoUrl = visualSettings?.appLogoUrl || null;
+  const dashboardBannerBg =
+    visualSettings?.boxBgs?.['banner_dashboard'] ||
+    visualSettings?.moduleBannerBgs?.['dashboard'] ||
+    visualSettings?.perModuleBannerBgs?.['dashboard'] ||
+    visualSettings?.globalBannerBgUrl ||
+    null;
 
   return (
     <div className="space-y-6 pb-10">
       {/* ============================================================ */}
       {/* JRPG ASTRAL COMMAND BANNER - ORBITA                          */}
       {/* ============================================================ */}
-      <div className="relative overflow-hidden rounded-3xl border-2 border-[#D4AF37]/50 bg-gradient-to-r from-[#0B1736] via-[#132550] to-[#1D356B] p-6 sm:p-8 text-white shadow-[0_18px_45px_-15px_rgba(6,13,31,0.75)]">
+      <div className="group/banner relative overflow-hidden rounded-3xl border-2 border-[#D4AF37]/50 bg-gradient-to-r from-[#0B1736] via-[#132550] to-[#1D356B] p-6 sm:p-8 text-white shadow-[0_18px_45px_-15px_rgba(6,13,31,0.75)]">
+        {/* Custom Banner Image Background if set */}
+        {dashboardBannerBg && (
+          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+            <img
+              src={dashboardBannerBg}
+              alt=""
+              className="h-full w-full object-cover object-center"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#0B1736]/90 via-[#132550]/78 to-[#0B1736]/85 backdrop-blur-[1px]" />
+          </div>
+        )}
+
+        {/* Per-Banner Background Replacer Button */}
+        <div className="absolute top-3 right-3 z-30 opacity-90 sm:opacity-0 sm:group-hover/banner:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
+          <BoxBgControl boxKey="banner_dashboard" isBanner moduleKey="dashboard" />
+        </div>
+
         {/* Decorative JRPG Filigree Corners */}
         <span className="pointer-events-none absolute top-2 left-2 h-4 w-4 border-t-2 border-l-2 border-[#F3D77D]/80 rounded-tl-md" />
         <span className="pointer-events-none absolute top-2 right-2 h-4 w-4 border-t-2 border-r-2 border-[#F3D77D]/80 rounded-tr-md" />
@@ -387,7 +445,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             </div>
           </div>
 
-          {/* Right HUD Status Badges */}
+          {/* Right HUD Status Badge (Otoritas Role Hidden as Requested) */}
           <div className="flex flex-wrap items-center gap-3">
             <div className="rounded-2xl border border-[#D4AF37]/40 bg-[#071026]/70 px-4 py-2.5 backdrop-blur-md">
               <span className="text-[10px] font-bold uppercase tracking-wider text-[#F3D77D]/80 block">
@@ -400,168 +458,358 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                 </span>
               </div>
             </div>
-
-            <div className="rounded-2xl border border-cyan-400/40 bg-[#071026]/70 px-4 py-2.5 backdrop-blur-md">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300/80 block">
-                Otoritas Role
-              </span>
-              <div className="flex items-center gap-2 mt-0.5">
-                <Crown className="h-4 w-4 text-[#F3D77D]" />
-                <span className="text-sm font-black text-white uppercase">
-                  {(currentUser?.role || 'admin').replace('_', ' ')}
-                </span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
       {/* ============================================================ */}
-      {/* JRPG PARTY STATUS KPI CARDS (WITH HOVER ANIMATION & GAUGES)  */}
+      {/* JRPG 3D FLIPCARD KPI PRESENTATION BOXES (FLIP ON HOVER)      */}
       {/* ============================================================ */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <OrnateCard onClick={() => handleNavigate('attendance')} className="p-5">
-          <AcademyCornerBadge text="HP • PRESENSI" />
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Persentase Kehadiran
-              </p>
-              <h3 className="text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
-                {attendanceAnalytics.effectiveAttendancePct}%
-              </h3>
-              <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
-                {attendanceAnalytics.hadir} Hadir • {attendanceAnalytics.total} Rekaman
-              </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+        {/* FLIPCARD 1: KEHADIRAN */}
+        <JrpgFlipBox
+          boxId="kpi_attendance"
+          onClick={() => handleNavigate('attendance')}
+          front={
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <AcademyCornerBadge text="HP • PRESENSI" className="mb-0" />
+                  <div className="no-ornament flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 className="h-4 w-4" />
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+                    Persentase Kehadiran
+                  </p>
+                  <h3 className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 leading-tight">
+                    {attendanceAnalytics.effectiveAttendancePct}%
+                  </h3>
+                  <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                    {attendanceAnalytics.hadir} Hadir • {attendanceAnalytics.total} Rekaman
+                  </p>
+                </div>
+              </div>
+              <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80">
+                <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">
+                  <span>Indeks Disiplin</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">
+                    {attendanceAnalytics.effectiveAttendancePct}%
+                  </span>
+                </div>
+                <div className="jrpg-stat-bar">
+                  <div
+                    className="jrpg-stat-bar-fill bg-gradient-to-r from-emerald-500 to-teal-400"
+                    style={{ width: `${Math.min(100, attendanceAnalytics.effectiveAttendancePct)}%` }}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400">
-              <CheckCircle2 className="h-6 w-6" />
+          }
+          back={
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="pr-16">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-300 truncate">
+                    ✦ Detail Presensi
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Hadir (H)</span>
+                    <span className="font-black text-emerald-300 text-[11px] leading-tight block mt-0.5">
+                      {attendanceAnalytics.hadirPct}% ({attendanceAnalytics.hadir})
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Sakit (S)</span>
+                    <span className="font-black text-sky-300 text-[11px] leading-tight block mt-0.5">
+                      {attendanceAnalytics.sakitPct}% ({attendanceAnalytics.sakit})
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Izin (I)</span>
+                    <span className="font-black text-amber-300 text-[11px] leading-tight block mt-0.5">
+                      {attendanceAnalytics.izinPct}% ({attendanceAnalytics.izin})
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Alpa (A)</span>
+                    <span className="font-black text-rose-300 text-[11px] leading-tight block mt-0.5">
+                      {attendanceAnalytics.alpaPct}% ({attendanceAnalytics.alpa})
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[11px] font-extrabold text-[#F3D77D]">
+                <span>Kelola Presensi</span>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+              </div>
             </div>
-          </div>
-          <div className="mt-3">
-            <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">
-              <span>Index Disiplin Kehadiran</span>
-              <span className="text-emerald-600 dark:text-emerald-400">{attendanceAnalytics.effectiveAttendancePct}%</span>
-            </div>
-            <div className="jrpg-stat-bar">
-              <div
-                className="jrpg-stat-bar-fill bg-gradient-to-r from-emerald-500 to-teal-400"
-                style={{ width: `${Math.min(100, attendanceAnalytics.effectiveAttendancePct)}%` }}
-              />
-            </div>
-          </div>
-        </OrnateCard>
+          }
+        />
 
-        <OrnateCard onClick={() => handleNavigate('grading')} className="p-5">
-          <AcademyCornerBadge text="EXP • AKADEMIK" />
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Rata-rata &amp; Ketuntasan
-              </p>
-              <h3 className="text-3xl font-black text-blue-600 dark:text-cyan-400 mt-1">
-                {academicAnalytics.kkmPassPct}%
-              </h3>
-              <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
-                Rata-rata Skor: <strong>{academicAnalytics.avgScore}</strong> ({academicAnalytics.passedCount} Tuntas)
-              </p>
+        {/* FLIPCARD 2: PENILAIAN & KKM */}
+        <JrpgFlipBox
+          boxId="kpi_grading"
+          onClick={() => handleNavigate('grading')}
+          front={
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <AcademyCornerBadge text="EXP • AKADEMIK" className="mb-0" />
+                  <div className="no-ornament flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-600 dark:text-cyan-400">
+                    <Award className="h-4 w-4" />
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+                    Rata-rata &amp; Ketuntasan
+                  </p>
+                  <h3 className="text-2xl sm:text-3xl font-black text-blue-600 dark:text-cyan-400 mt-0.5 leading-tight">
+                    {academicAnalytics.kkmPassPct}%
+                  </h3>
+                  <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                    Rata-rata: <strong>{academicAnalytics.avgScore}</strong> ({academicAnalytics.passedCount} Tuntas)
+                  </p>
+                </div>
+              </div>
+              <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80">
+                <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">
+                  <span>Lulus KKM (&ge; 75)</span>
+                  <span className="text-blue-600 dark:text-cyan-400">{academicAnalytics.kkmPassPct}%</span>
+                </div>
+                <div className="jrpg-stat-bar">
+                  <div
+                    className="jrpg-stat-bar-fill bg-gradient-to-r from-blue-600 to-cyan-400"
+                    style={{ width: `${Math.min(100, academicAnalytics.kkmPassPct)}%` }}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/15 border border-blue-500/30 text-blue-600 dark:text-cyan-400">
-              <Award className="h-6 w-6" />
+          }
+          back={
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="pr-16">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-cyan-300 truncate">
+                    ✦ Distribusi Predikat
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Predikat A</span>
+                    <span className="font-black text-emerald-300 text-[11px] leading-tight block mt-0.5">
+                      {academicAnalytics.predAPct}% ({academicAnalytics.predA})
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Predikat B</span>
+                    <span className="font-black text-cyan-300 text-[11px] leading-tight block mt-0.5">
+                      {academicAnalytics.predBPct}% ({academicAnalytics.predB})
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Predikat C</span>
+                    <span className="font-black text-amber-300 text-[11px] leading-tight block mt-0.5">
+                      {academicAnalytics.predCPct}% ({academicAnalytics.predC})
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Remedial (D)</span>
+                    <span className="font-black text-rose-300 text-[11px] leading-tight block mt-0.5">
+                      {academicAnalytics.predDPct}% ({academicAnalytics.predD})
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[11px] font-extrabold text-[#F3D77D]">
+                <span>Kelola Penilaian</span>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+              </div>
             </div>
-          </div>
-          <div className="mt-3">
-            <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">
-              <span>Rasio Lulus KKM (&ge; 75)</span>
-              <span className="text-blue-600 dark:text-cyan-400">{academicAnalytics.kkmPassPct}%</span>
-            </div>
-            <div className="jrpg-stat-bar">
-              <div
-                className="jrpg-stat-bar-fill bg-gradient-to-r from-blue-600 to-cyan-400"
-                style={{ width: `${Math.min(100, academicAnalytics.kkmPassPct)}%` }}
-              />
-            </div>
-          </div>
-        </OrnateCard>
+          }
+        />
 
-        <OrnateCard onClick={() => handleNavigate('master-data')} className="p-5">
-          <AcademyCornerBadge text="GUILD • POPULASI" />
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Populasi Siswa &amp; Guru
-              </p>
-              <h3 className="text-3xl font-black text-amber-600 dark:text-amber-400 mt-1">
-                {students.length} <span className="text-sm font-bold text-slate-400">Siswa</span>
-              </h3>
-              <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
-                L: {pklAndStudentStatusStats.malePct}% ({pklAndStudentStatusStats.maleStudents}) • P: {pklAndStudentStatusStats.femalePct}% ({pklAndStudentStatusStats.femaleStudents})
-              </p>
+        {/* FLIPCARD 3: POPULASI SISWA & GURU */}
+        <JrpgFlipBox
+          boxId="kpi_population"
+          onClick={() => handleNavigate('master-data')}
+          front={
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <AcademyCornerBadge text="GUILD • POPULASI" className="mb-0" />
+                  <div className="no-ornament flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400">
+                    <Users className="h-4 w-4" />
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+                    Populasi Siswa &amp; Guru
+                  </p>
+                  <h3 className="text-2xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 mt-0.5 leading-tight">
+                    {students.length} <span className="text-xs font-bold text-slate-400">Siswa</span>
+                  </h3>
+                  <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                    L: {pklAndStudentStatusStats.malePct}% ({pklAndStudentStatusStats.maleStudents}) • P: {pklAndStudentStatusStats.femalePct}% ({pklAndStudentStatusStats.femaleStudents})
+                  </p>
+                </div>
+              </div>
+              <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80">
+                <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">
+                  <span>Rasio Gender (L / P)</span>
+                  <span className="text-amber-600 dark:text-amber-400">{teachers.length} Guru Aktif</span>
+                </div>
+                <div className="jrpg-stat-bar flex overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-amber-500 to-yellow-400"
+                    style={{ width: `${pklAndStudentStatusStats.malePct}%` }}
+                  />
+                  <div
+                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-400"
+                    style={{ width: `${pklAndStudentStatusStats.femalePct}%` }}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400">
-              <Users className="h-6 w-6" />
+          }
+          back={
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="pr-16">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-amber-300 truncate">
+                    ✦ Statistik Data Pokok
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Laki-laki (L)</span>
+                    <span className="font-black text-amber-300 text-[11px] leading-tight block mt-0.5">
+                      {pklAndStudentStatusStats.maleStudents} ({pklAndStudentStatusStats.malePct}%)
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Perempuan (P)</span>
+                    <span className="font-black text-purple-300 text-[11px] leading-tight block mt-0.5">
+                      {pklAndStudentStatusStats.femaleStudents} ({pklAndStudentStatusStats.femalePct}%)
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Total Rombel</span>
+                    <span className="font-black text-emerald-300 text-[11px] leading-tight block mt-0.5">
+                      {classes.length} Kelas
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Dewan Guru</span>
+                    <span className="font-black text-cyan-300 text-[11px] leading-tight block mt-0.5">
+                      {teachers.length} Pengajar
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[11px] font-extrabold text-[#F3D77D]">
+                <span>Buka Data Pokok</span>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+              </div>
             </div>
-          </div>
-          <div className="mt-3">
-            <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">
-              <span>Rasio Gender (L / P)</span>
-              <span className="text-amber-600 dark:text-amber-400">{teachers.length} Guru Aktif</span>
-            </div>
-            <div className="jrpg-stat-bar flex overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-amber-500 to-yellow-400"
-                style={{ width: `${pklAndStudentStatusStats.malePct}%` }}
-              />
-              <div
-                className="h-full bg-gradient-to-r from-indigo-500 to-purple-400"
-                style={{ width: `${pklAndStudentStatusStats.femalePct}%` }}
-              />
-            </div>
-          </div>
-        </OrnateCard>
+          }
+        />
 
-        <OrnateCard onClick={() => handleNavigate('pkl')} className="p-5">
-          <AcademyCornerBadge text="QUEST • PRAKERIN" />
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Administrasi PKL &amp; DUDI
-              </p>
-              <h3 className="text-3xl font-black text-purple-600 dark:text-purple-400 mt-1">
-                {pklAndStudentStatusStats.pklCompletedPct}%
-              </h3>
-              <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
-                {pklAndStudentStatusStats.pklPartnerCount} Mitra DUDI • {pklAndStudentStatusStats.pklTotal} Laporan
-              </p>
+        {/* FLIPCARD 4: ADMINISTRASI PRAKERIN / PKL (NO DUDI INDICATOR) */}
+        <JrpgFlipBox
+          boxId="kpi_pkl"
+          onClick={() => handleNavigate('pkl')}
+          front={
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between gap-2">
+                  <AcademyCornerBadge text="QUEST • PRAKERIN" className="mb-0" />
+                  <div className="no-ornament flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-600 dark:text-purple-400">
+                    <Briefcase className="h-4 w-4" />
+                  </div>
+                </div>
+                <div className="mt-2">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate">
+                    Administrasi Prakerin (PKL)
+                  </p>
+                  <h3 className="text-2xl sm:text-3xl font-black text-purple-600 dark:text-purple-400 mt-0.5 leading-tight">
+                    {pklAndStudentStatusStats.pklCompletedPct}%
+                  </h3>
+                  <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                    {pklAndStudentStatusStats.pklVisitCount} Monitoring • {pklAndStudentStatusStats.pklTotal} Laporan
+                  </p>
+                </div>
+              </div>
+              <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80">
+                <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">
+                  <span>Verifikasi Laporan</span>
+                  <span className="text-purple-600 dark:text-purple-400">
+                    {pklAndStudentStatusStats.pklCompletedPct}%
+                  </span>
+                </div>
+                <div className="jrpg-stat-bar">
+                  <div
+                    className="jrpg-stat-bar-fill bg-gradient-to-r from-purple-600 to-fuchsia-400"
+                    style={{
+                      width: `${Math.min(100, pklAndStudentStatusStats.pklCompletedPct)}%`,
+                    }}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-600 dark:text-purple-400">
-              <Briefcase className="h-6 w-6" />
+          }
+          back={
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="pr-16">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-purple-300 truncate">
+                    ✦ Progres Prakerin (PKL)
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">PKL Aktif</span>
+                    <span className="font-black text-emerald-300 text-[11px] leading-tight block mt-0.5">
+                      {pklAndStudentStatusStats.pklActivePct}%
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Terverifikasi</span>
+                    <span className="font-black text-cyan-300 text-[11px] leading-tight block mt-0.5">
+                      {pklAndStudentStatusStats.pklCompletedPct}%
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Review</span>
+                    <span className="font-black text-amber-300 text-[11px] leading-tight block mt-0.5">
+                      {pklAndStudentStatusStats.pklPendingPct}%
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Supervisi</span>
+                    <span className="font-black text-purple-300 text-[11px] leading-tight block mt-0.5">
+                      {pklAndStudentStatusStats.pklVisitCount} Kunjungan
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[11px] font-extrabold text-[#F3D77D]">
+                <span>Kelola Administrasi PKL</span>
+                <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+              </div>
             </div>
-          </div>
-          <div className="mt-3">
-            <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">
-              <span>Verifikasi Laporan PKL</span>
-              <span className="text-purple-600 dark:text-purple-400">
-                {pklAndStudentStatusStats.pklCompletedPct}%
-              </span>
-            </div>
-            <div className="jrpg-stat-bar">
-              <div
-                className="jrpg-stat-bar-fill bg-gradient-to-r from-purple-600 to-fuchsia-400"
-                style={{
-                  width: `${Math.min(100, pklAndStudentStatusStats.pklCompletedPct)}%`,
-                }}
-              />
-            </div>
-          </div>
-        </OrnateCard>
+          }
+        />
       </div>
 
       {/* ============================================================ */}
       {/* INTERACTIVE CHARTS & PERCENTAGE TELEMETRY HUB                */}
       {/* (Replaces old Student Directory with full Charts & % Stats)  */}
       {/* ============================================================ */}
-      <OrnateCard className="p-6">
+      <OrnateCard boxId="dashboard_charts_hub" className="p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#EFE2BE] dark:border-slate-800 pb-4 mb-6">
           <div>
             <OrnateSectionHeader
@@ -636,9 +884,12 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
         {activeChartView === 'kehadiran' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left: Radial Donut Chart & Detailed Breakdown */}
-            <div className="lg:col-span-5 rounded-2xl border border-[#EFE2BE] dark:border-slate-800 bg-[#FAF6EC]/60 dark:bg-slate-900/70 p-5 flex flex-col justify-between">
+            <OrnateCard
+              boxId="chart_kehadiran_donut"
+              className="lg:col-span-5 p-5 flex flex-col justify-between"
+            >
               <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 pr-16">
                   <span className="text-xs font-black uppercase tracking-wider text-[#9A7314] dark:text-[#F3D77D]">
                     Distribusi Persentase Presensi
                   </span>
@@ -741,12 +992,15 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                   <ChevronRight className="h-3.5 w-3.5" />
                 </button>
               </div>
-            </div>
+            </OrnateCard>
 
             {/* Right: Class-by-Class Attendance & Academic Bar Comparison Chart */}
-            <div className="lg:col-span-7 rounded-2xl border border-[#EFE2BE] dark:border-slate-800 bg-[#FAF6EC]/60 dark:bg-slate-900/70 p-5 flex flex-col justify-between">
+            <OrnateCard
+              boxId="chart_kehadiran_kelas"
+              className="lg:col-span-7 p-5 flex flex-col justify-between"
+            >
               <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 pr-16">
                   <div>
                     <span className="text-xs font-black uppercase tracking-wider text-[#9A7314] dark:text-[#F3D77D] block">
                       Grafik Perbandingan Kehadiran &amp; Ketuntasan Per Kelas
@@ -817,7 +1071,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                   ))}
                 </div>
               </div>
-            </div>
+            </OrnateCard>
           </div>
         )}
 
@@ -827,9 +1081,12 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
         {activeChartView === 'akademik' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left: Vertical Bar Chart of Predicate Distribution (A/B/C/D) */}
-            <div className="lg:col-span-5 rounded-2xl border border-[#EFE2BE] dark:border-slate-800 bg-[#FAF6EC]/60 dark:bg-slate-900/70 p-5 flex flex-col justify-between">
+            <OrnateCard
+              boxId="chart_akademik_predikat"
+              className="lg:col-span-5 p-5 flex flex-col justify-between"
+            >
               <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 pr-16">
                   <span className="text-xs font-black uppercase tracking-wider text-[#9A7314] dark:text-[#F3D77D]">
                     Chart Distribusi Predikat Nilai
                   </span>
@@ -894,31 +1151,68 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                   ))}
                 </div>
 
-                {/* Pass vs Remedial Split */}
-                <div className="mt-5 grid grid-cols-2 gap-3">
-                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
-                    <span className="text-[10px] font-bold uppercase text-emerald-700 dark:text-emerald-300 block">
-                      Tuntas KKM (&ge; 75)
-                    </span>
-                    <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">
-                      {academicAnalytics.kkmPassPct}% ({academicAnalytics.passedCount} Siswa)
-                    </span>
-                  </div>
-                  <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3">
-                    <span className="text-[10px] font-bold uppercase text-rose-700 dark:text-rose-300 block">
-                      Perlu Remedial / 0
-                    </span>
-                    <span className="text-xl font-black text-rose-600 dark:text-rose-400">
-                      {academicAnalytics.remedialPct}% ({academicAnalytics.remedialCount} Siswa)
-                    </span>
-                  </div>
+                {/* Pass vs Remedial Split Flipcards */}
+                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <JrpgFlipBox
+                    boxId="flip_tuntas_kkm"
+                    minHeightClass="min-h-[115px]"
+                    onClick={() => handleNavigate('grading')}
+                    front={
+                      <div>
+                        <span className="text-[10px] font-bold uppercase text-emerald-700 dark:text-emerald-300 block">
+                          Tuntas KKM (&ge; 75)
+                        </span>
+                        <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1 block">
+                          {academicAnalytics.kkmPassPct}% ({academicAnalytics.passedCount} Siswa)
+                        </span>
+                      </div>
+                    }
+                    back={
+                      <div className="text-xs">
+                        <span className="text-[10px] font-black uppercase text-emerald-300 block">
+                          ✦ Capaian Kompetensi
+                        </span>
+                        <p className="mt-1 text-slate-200">
+                          {academicAnalytics.passedCount} siswa melampaui batas KKM dengan rata-rata {academicAnalytics.avgScore}.
+                        </p>
+                      </div>
+                    }
+                  />
+                  <JrpgFlipBox
+                    boxId="flip_remedial_kkm"
+                    minHeightClass="min-h-[115px]"
+                    onClick={() => handleNavigate('grading')}
+                    front={
+                      <div>
+                        <span className="text-[10px] font-bold uppercase text-rose-700 dark:text-rose-300 block">
+                          Perlu Remedial / 0
+                        </span>
+                        <span className="text-xl font-black text-rose-600 dark:text-rose-400 mt-1 block">
+                          {academicAnalytics.remedialPct}% ({academicAnalytics.remedialCount} Siswa)
+                        </span>
+                      </div>
+                    }
+                    back={
+                      <div className="text-xs">
+                        <span className="text-[10px] font-black uppercase text-rose-300 block">
+                          ✦ Evaluasi Remedial
+                        </span>
+                        <p className="mt-1 text-slate-200">
+                          {academicAnalytics.remedialCount} siswa memerlukan pengayaan atau belum dinilai.
+                        </p>
+                      </div>
+                    }
+                  />
                 </div>
               </div>
-            </div>
+            </OrnateCard>
 
             {/* Right: Subject Mastery & Pass Rate Bars */}
-            <div className="lg:col-span-7 rounded-2xl border border-[#EFE2BE] dark:border-slate-800 bg-[#FAF6EC]/60 dark:bg-slate-900/70 p-5">
-              <div className="flex items-center justify-between mb-4">
+            <OrnateCard
+              boxId="chart_akademik_mapel"
+              className="lg:col-span-7 p-5"
+            >
+              <div className="flex items-center justify-between mb-4 pr-16">
                 <div>
                   <span className="text-xs font-black uppercase tracking-wider text-[#9A7314] dark:text-[#F3D77D] block">
                     Persentase Ketuntasan &amp; Rata-rata Nilai Per Mata Pelajaran
@@ -968,143 +1262,222 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                   </div>
                 ))}
               </div>
-            </div>
+            </OrnateCard>
           </div>
         )}
 
         {/* ============================================================ */}
-        {/* VIEW 3: PKL, CORRECTIONS & MAJOR DISTRIBUTION CHARTS         */}
+        {/* VIEW 3: PKL, CORRECTIONS & MAJOR DISTRIBUTION FLIPCARDS      */}
         {/* ============================================================ */}
         {activeChartView === 'pkl_bk' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            {/* PKL Placement Breakdown */}
-            <div className="rounded-2xl border border-[#EFE2BE] dark:border-slate-800 bg-[#FAF6EC]/60 dark:bg-slate-900/70 p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-wider text-[#9A7314] dark:text-[#F3D77D]">
-                  Persentase Administrasi PKL / DUDI
-                </span>
-                <Briefcase className="h-4 w-4 text-purple-500" />
-              </div>
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-xs font-bold mb-1">
-                    <span>Laporan PKL Aktif</span>
-                    <span className="text-emerald-600 dark:text-emerald-400">
-                      {pklAndStudentStatusStats.pklActivePct}% ({pklAndStudentStatusStats.pklActive})
+            {/* Flipcard 1: PKL Placement Breakdown */}
+            <JrpgFlipBox
+              boxId="chart_pkl_progres"
+              minHeightClass="min-h-[230px]"
+              onClick={() => handleNavigate('pkl')}
+              front={
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pr-16">
+                    <span className="text-xs font-black uppercase tracking-wider text-[#9A7314] dark:text-[#F3D77D]">
+                      Persentase Administrasi Prakerin (PKL)
                     </span>
+                    <Briefcase className="h-4 w-4 text-purple-500" />
                   </div>
-                  <div className="jrpg-stat-bar">
-                    <div
-                      className="jrpg-stat-bar-fill bg-emerald-500"
-                      style={{ width: `${pklAndStudentStatusStats.pklActivePct}%` }}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs font-bold mb-1">
-                    <span>Disetujui &amp; Terverifikasi</span>
-                    <span className="text-blue-600 dark:text-cyan-400">
-                      {pklAndStudentStatusStats.pklCompletedPct}% ({pklAndStudentStatusStats.pklCompleted})
-                    </span>
-                  </div>
-                  <div className="jrpg-stat-bar">
-                    <div
-                      className="jrpg-stat-bar-fill bg-blue-500"
-                      style={{ width: `${pklAndStudentStatusStats.pklCompletedPct}%` }}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs font-bold mb-1">
-                    <span>Menunggu Review / Revisi</span>
-                    <span className="text-amber-600 dark:text-amber-400">
-                      {pklAndStudentStatusStats.pklPendingPct}% ({pklAndStudentStatusStats.pklPending})
-                    </span>
-                  </div>
-                  <div className="jrpg-stat-bar">
-                    <div
-                      className="jrpg-stat-bar-fill bg-amber-500"
-                      style={{ width: `${pklAndStudentStatusStats.pklPendingPct}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Attendance Corrections & PKL Visits */}
-            <div className="rounded-2xl border border-[#EFE2BE] dark:border-slate-800 bg-[#FAF6EC]/60 dark:bg-slate-900/70 p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-wider text-[#9A7314] dark:text-[#F3D77D]">
-                  Verifikasi Koreksi &amp; Kunjungan DUDI
-                </span>
-                <ShieldAlert className="h-4 w-4 text-amber-500" />
-              </div>
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-xs font-bold mb-1">
-                    <span>Rasio Penyelesaian Koreksi Presensi</span>
-                    <span className="text-emerald-600 dark:text-emerald-400">
-                      {pklAndStudentStatusStats.corrResolvedPct}% ({pklAndStudentStatusStats.corrResolved}/{pklAndStudentStatusStats.corrTotal})
-                    </span>
-                  </div>
-                  <div className="jrpg-stat-bar">
-                    <div
-                      className="jrpg-stat-bar-fill bg-emerald-500"
-                      style={{ width: `${pklAndStudentStatusStats.corrResolvedPct}%` }}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2.5 pt-2">
-                  <div className="rounded-xl border border-[#EFE2BE] dark:border-slate-800 p-3 bg-white/70 dark:bg-slate-900">
-                    <span className="text-[10px] font-bold text-slate-400 block">Mitra Industri DUDI</span>
-                    <span className="text-lg font-black text-amber-600 dark:text-amber-400">
-                      {pklAndStudentStatusStats.pklPartnerCount} Mitra
-                    </span>
-                  </div>
-                  <div className="rounded-xl border border-[#EFE2BE] dark:border-slate-800 p-3 bg-white/70 dark:bg-slate-900">
-                    <span className="text-[10px] font-bold text-slate-400 block">Kunjungan Monitoring</span>
-                    <span className="text-lg font-black text-blue-600 dark:text-cyan-400">
-                      {pklAndStudentStatusStats.pklVisitCount} Kunjungan
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Major / Department Distribution */}
-            <div className="rounded-2xl border border-[#EFE2BE] dark:border-slate-800 bg-[#FAF6EC]/60 dark:bg-slate-900/70 p-5 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-wider text-[#9A7314] dark:text-[#F3D77D]">
-                  Proporsi Siswa Per Kompetensi Keahlian
-                </span>
-                <GraduationCap className="h-4 w-4 text-blue-500" />
-              </div>
-              <div className="space-y-3">
-                {majors.map(mj => {
-                  const mjCount = students.filter(s => s.majorCode === mj.code).length;
-                  const mjPct =
-                    students.length > 0 ? Number(((mjCount / students.length) * 100).toFixed(1)) : 0;
-                  return (
-                    <div key={mj.id}>
+                  <div className="space-y-3">
+                    <div>
                       <div className="flex justify-between text-xs font-bold mb-1">
-                        <span>
-                          {mj.name} ({mj.code})
-                        </span>
-                        <span className="text-blue-600 dark:text-cyan-400">
-                          {mjPct}% ({mjCount} Siswa)
+                        <span>Laporan PKL Aktif</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">
+                          {pklAndStudentStatusStats.pklActivePct}% ({pklAndStudentStatusStats.pklActive})
                         </span>
                       </div>
                       <div className="jrpg-stat-bar">
                         <div
-                          className="jrpg-stat-bar-fill bg-gradient-to-r from-[#D4AF37] to-amber-500"
-                          style={{ width: `${Math.max(8, mjPct)}%` }}
+                          className="jrpg-stat-bar-fill bg-emerald-500"
+                          style={{ width: `${pklAndStudentStatusStats.pklActivePct}%` }}
                         />
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1">
+                        <span>Disetujui &amp; Terverifikasi</span>
+                        <span className="text-blue-600 dark:text-cyan-400">
+                          {pklAndStudentStatusStats.pklCompletedPct}% ({pklAndStudentStatusStats.pklCompleted})
+                        </span>
+                      </div>
+                      <div className="jrpg-stat-bar">
+                        <div
+                          className="jrpg-stat-bar-fill bg-blue-500"
+                          style={{ width: `${pklAndStudentStatusStats.pklCompletedPct}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1">
+                        <span>Menunggu Review / Revisi</span>
+                        <span className="text-amber-600 dark:text-amber-400">
+                          {pklAndStudentStatusStats.pklPendingPct}% ({pklAndStudentStatusStats.pklPending})
+                        </span>
+                      </div>
+                      <div className="jrpg-stat-bar">
+                        <div
+                          className="jrpg-stat-bar-fill bg-amber-500"
+                          style={{ width: `${pklAndStudentStatusStats.pklPendingPct}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+              back={
+                <div className="flex flex-col justify-between h-full">
+                  <div>
+                    <span className="text-xs font-black uppercase tracking-wider text-[#F3D77D]">
+                      ✦ Ringkasan Praktik Kerja Lapangan
+                    </span>
+                    <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                      Total <strong>{pklAndStudentStatusStats.pklTotal}</strong> berkas laporan prakerin siswa terdata di database, dengan tingkat kelulusan verifikasi mencapai{' '}
+                      <strong className="text-emerald-300">{pklAndStudentStatusStats.pklCompletedPct}%</strong>.
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-bold text-[#F3D77D] pt-3 border-t border-white/10">
+                    <span>Klik untuk Buka Administrasi PKL</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </div>
+                </div>
+              }
+            />
+
+            {/* Flipcard 2: Attendance Corrections & Supervision Visits */}
+            <JrpgFlipBox
+              boxId="chart_pkl_koreksi"
+              minHeightClass="min-h-[230px]"
+              onClick={() => handleNavigate('attendance')}
+              front={
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pr-16">
+                    <span className="text-xs font-black uppercase tracking-wider text-[#9A7314] dark:text-[#F3D77D]">
+                      Verifikasi Koreksi &amp; Kunjungan Supervisi
+                    </span>
+                    <ShieldAlert className="h-4 w-4 text-amber-500" />
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-xs font-bold mb-1">
+                        <span>Rasio Penyelesaian Koreksi Presensi</span>
+                        <span className="text-emerald-600 dark:text-emerald-400">
+                          {pklAndStudentStatusStats.corrResolvedPct}% ({pklAndStudentStatusStats.corrResolved}/{pklAndStudentStatusStats.corrTotal})
+                        </span>
+                      </div>
+                      <div className="jrpg-stat-bar">
+                        <div
+                          className="jrpg-stat-bar-fill bg-emerald-500"
+                          style={{ width: `${pklAndStudentStatusStats.corrResolvedPct}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2.5 pt-2">
+                      <div className="rounded-xl border border-[#EFE2BE] dark:border-slate-800 p-3 bg-white/70 dark:bg-slate-900">
+                        <span className="text-[10px] font-bold text-slate-400 block">Mitra Industri</span>
+                        <span className="text-lg font-black text-amber-600 dark:text-amber-400">
+                          {pklAndStudentStatusStats.pklPartnerCount} Mitra
+                        </span>
+                      </div>
+                      <div className="rounded-xl border border-[#EFE2BE] dark:border-slate-800 p-3 bg-white/70 dark:bg-slate-900">
+                        <span className="text-[10px] font-bold text-slate-400 block">Kunjungan Monitoring</span>
+                        <span className="text-lg font-black text-blue-600 dark:text-cyan-400">
+                          {pklAndStudentStatusStats.pklVisitCount} Kunjungan
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+              back={
+                <div className="flex flex-col justify-between h-full">
+                  <div>
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-300">
+                      ✦ Detail Koreksi &amp; Supervisi
+                    </span>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                      <div className="rounded-lg bg-white/10 p-2.5">
+                        <span className="text-[10px] text-slate-300 block">Koreksi Selesai</span>
+                        <span className="font-black text-emerald-300">{pklAndStudentStatusStats.corrResolved} Berkas</span>
+                      </div>
+                      <div className="rounded-lg bg-white/10 p-2.5">
+                        <span className="text-[10px] text-slate-300 block">Menunggu Review</span>
+                        <span className="font-black text-amber-300">{pklAndStudentStatusStats.corrPending} Berkas</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-bold text-[#F3D77D] pt-3 border-t border-white/10">
+                    <span>Klik untuk Buka Modul Presensi</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </div>
+                </div>
+              }
+            />
+
+            {/* Flipcard 3: Major / Department Distribution */}
+            <JrpgFlipBox
+              boxId="chart_pkl_jurusan"
+              minHeightClass="min-h-[230px]"
+              onClick={() => handleNavigate('master-data')}
+              front={
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between pr-16">
+                    <span className="text-xs font-black uppercase tracking-wider text-[#9A7314] dark:text-[#F3D77D]">
+                      Proporsi Siswa Per Kompetensi Keahlian
+                    </span>
+                    <GraduationCap className="h-4 w-4 text-blue-500" />
+                  </div>
+                  <div className="space-y-3">
+                    {majors.map(mj => {
+                      const mjCount = students.filter(s => s.majorCode === mj.code).length;
+                      const mjPct =
+                        students.length > 0 ? Number(((mjCount / students.length) * 100).toFixed(1)) : 0;
+                      return (
+                        <div key={mj.id}>
+                          <div className="flex justify-between text-xs font-bold mb-1">
+                            <span>
+                              {mj.name} ({mj.code})
+                            </span>
+                            <span className="text-blue-600 dark:text-cyan-400">
+                              {mjPct}% ({mjCount} Siswa)
+                            </span>
+                          </div>
+                          <div className="jrpg-stat-bar">
+                            <div
+                              className="jrpg-stat-bar-fill bg-gradient-to-r from-[#D4AF37] to-amber-500"
+                              style={{ width: `${Math.max(8, mjPct)}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              }
+              back={
+                <div className="flex flex-col justify-between h-full">
+                  <div>
+                    <span className="text-xs font-black uppercase tracking-wider text-cyan-300">
+                      ✦ Detail Kompetensi Keahlian
+                    </span>
+                    <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                      Terdiri dari <strong>{majors.length} Program Keahlian</strong> dan{' '}
+                      <strong>{classes.length} Rombongan Belajar</strong> aktif dengan total{' '}
+                      <strong className="text-[#F3D77D]">{students.length} Siswa</strong>.
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-bold text-[#F3D77D] pt-3 border-t border-white/10">
+                    <span>Klik untuk Buka Data Pokok</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </div>
+                </div>
+              }
+            />
           </div>
         )}
       </OrnateCard>
@@ -1112,7 +1485,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
       {/* ============================================================ */}
       {/* JRPG TACTICAL TABLE: MATRIKS PERSENTASE & PERFORMA ROMBEL    */}
       {/* ============================================================ */}
-      <OrnateCard className="p-6">
+      <OrnateCard boxId="dashboard_class_matrix" className="p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <OrnateSectionHeader
             title="Matriks Persentase Kehadiran & Capaian Akademik Per Kelas"

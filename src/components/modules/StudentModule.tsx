@@ -28,7 +28,7 @@ import {
   Castle,
 } from 'lucide-react';
 import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
-import { AcademyHeroBanner } from '../common/AcademyOrnaments';
+import { AcademyHeroBanner, OrnateCard, AcademyCornerBadge } from '../common/AcademyOrnaments';
 
 interface StudentModuleProps {
   initialTab?: 'profile' | 'grades';
@@ -196,6 +196,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
 
       {/* Royal Academy Cadet Status Banner */}
       <AcademyHeroBanner
+        moduleKey="student-portal"
         kicker={`STATUS: SISWA AKTIF • KELAS ${student.className} (${student.majorCode})`}
         title={student.fullName.toUpperCase()}
         subtitle={`NISN: ${student.nisn} • NIS: ${student.nis} • Portal Akademik Peserta Didik MyAcademy`}
@@ -265,79 +266,240 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
       {/* ==================== 1. FITUR PROFIL SISWA ==================== */}
       {activeTab === 'profile' && (
         <div className="space-y-6">
-          {/* Quick Stats with JRPG HP, MP, EXP Gauges */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> Status Kesiswaan
-              </span>
-              <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                Aktif <span className="text-amber-500 text-xs">✦ S-Tier</span>
-              </p>
-              <div className="mt-2 space-y-1">
-                <div className="flex justify-between text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                  <span>Dapodik Kemdikbud</span>
-                  <span>Verified</span>
+          {/* Quick Stats with Stationary 3D Flipcards & JRPG Gauges */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+            <OrnateCard
+              boxId="std_kpi_status"
+              className="p-4"
+              minFlipHeight="min-h-[168px]"
+              flipBack={
+                <div className="flex flex-col justify-between h-full">
+                  <div>
+                    <div className="pr-16">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300 block truncate">
+                        ✦ Identitas Siswa
+                      </span>
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                      <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                        <span className="text-slate-300 block text-[10px] leading-tight">NISN</span>
+                        <span className="font-black text-emerald-300 text-[11px] leading-tight block mt-0.5 truncate">
+                          {student.nisn}
+                        </span>
+                      </div>
+                      <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                        <span className="text-slate-300 block text-[10px] leading-tight">Rombel</span>
+                        <span className="font-black text-amber-300 text-[11px] leading-tight block mt-0.5 truncate">
+                          {student.className}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-extrabold text-[#F3D77D]">
+                    <span>Dapodik Terverifikasi</span>
+                    <span>Aktif</span>
+                  </div>
                 </div>
-                <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <div className="h-full rounded-full bg-emerald-500 w-full" />
+              }
+            >
+              <div className="flex flex-col justify-between h-full">
+                <div>
+                  <AcademyCornerBadge text="STATUS • KESISWAAN" className="mb-1" />
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" /> Status Kesiswaan
+                  </span>
+                  <p className="mt-1.5 text-2xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                    Aktif <span className="text-amber-500 text-xs">✦ S-Tier</span>
+                  </p>
+                </div>
+                <div className="mt-2 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 space-y-1">
+                  <div className="flex justify-between text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                    <span>Dapodik Kemdikbud</span>
+                    <span>Verified</span>
+                  </div>
+                  <div className="jrpg-stat-bar">
+                    <div className="jrpg-stat-bar-fill bg-gradient-to-r from-emerald-500 to-teal-400 w-full" />
+                  </div>
                 </div>
               </div>
-            </div>
+            </OrnateCard>
 
-            <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Swords className="h-3.5 w-3.5 text-blue-500" /> MP Kompetensi (Rata-Rata)
-              </span>
-              <p className="mt-2 text-2xl font-black text-blue-600 dark:text-blue-400 font-mono tabular-nums">
-                {overallAvg}
-              </p>
-              <div className="mt-2 space-y-1">
-                <div className="flex justify-between text-[10px] font-bold text-blue-600 dark:text-blue-400">
-                  <span>Predikat A (Sangat Memuaskan)</span>
-                  <span>{overallAvg} MP</span>
+            <OrnateCard
+              boxId="std_kpi_avg"
+              className="p-4"
+              minFlipHeight="min-h-[168px]"
+              flipBack={
+                <div className="flex flex-col justify-between h-full">
+                  <div>
+                    <div className="pr-16">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 block truncate">
+                        ✦ Ringkasan Akademik
+                      </span>
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                      <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                        <span className="text-slate-300 block text-[10px] leading-tight">Rata-rata</span>
+                        <span className="font-black text-cyan-300 text-[11px] leading-tight block mt-0.5">
+                          {overallAvg} Poin
+                        </span>
+                      </div>
+                      <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                        <span className="text-slate-300 block text-[10px] leading-tight">Total Mapel</span>
+                        <span className="font-black text-amber-300 text-[11px] leading-tight block mt-0.5">
+                          {subjectGrades.length} Mapel
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-extrabold text-[#F3D77D]">
+                    <span>Capaian Kompetensi</span>
+                    <span>Sangat Baik</span>
+                  </div>
                 </div>
-                <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <div className="h-full rounded-full bg-blue-500" style={{ width: `${overallAvg}%` }} />
+              }
+            >
+              <div className="flex flex-col justify-between h-full">
+                <div>
+                  <AcademyCornerBadge text="EXP • KOMPETENSI" className="mb-1" />
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <Swords className="h-3.5 w-3.5 text-blue-500 shrink-0" /> Rata-Rata Nilai
+                  </span>
+                  <p className="mt-1.5 text-2xl font-black text-blue-600 dark:text-blue-400 font-mono tabular-nums">
+                    {overallAvg}
+                  </p>
+                </div>
+                <div className="mt-2 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 space-y-1">
+                  <div className="flex justify-between text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                    <span>Predikat A</span>
+                    <span>{overallAvg} MP</span>
+                  </div>
+                  <div className="jrpg-stat-bar">
+                    <div
+                      className="jrpg-stat-bar-fill bg-gradient-to-r from-blue-600 to-cyan-400"
+                      style={{ width: `${Math.min(100, Number(overallAvg) || 0)}%` }}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            </OrnateCard>
 
-            <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Trophy className="h-3.5 w-3.5 text-amber-500" /> Ketuntasan KKM
-              </span>
-              <p className="mt-2 text-2xl font-black text-amber-600 dark:text-amber-400 font-mono tabular-nums">
-                {allPassed ? '100%' : '85%'}
-              </p>
-              <div className="mt-2 space-y-1">
-                <div className="flex justify-between text-[10px] font-bold text-amber-600 dark:text-amber-400">
-                  <span>Semua Mapel Tuntas</span>
-                  <span>Trial Clear</span>
+            <OrnateCard
+              boxId="std_kpi_kkm"
+              className="p-4"
+              minFlipHeight="min-h-[168px]"
+              flipBack={
+                <div className="flex flex-col justify-between h-full">
+                  <div>
+                    <div className="pr-16">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 block truncate">
+                        ✦ Evaluasi KKM
+                      </span>
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                      <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                        <span className="text-slate-300 block text-[10px] leading-tight">Tuntas</span>
+                        <span className="font-black text-emerald-300 text-[11px] leading-tight block mt-0.5">
+                          {subjectGrades.filter(g => g.isPassed).length} Mapel
+                        </span>
+                      </div>
+                      <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                        <span className="text-slate-300 block text-[10px] leading-tight">Standar KKM</span>
+                        <span className="font-black text-amber-300 text-[11px] leading-tight block mt-0.5">
+                          &ge; 75.0
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-extrabold text-[#F3D77D]">
+                    <span>Status Semester</span>
+                    <span>{allPassed ? 'Lulus KKM' : 'Perlu Evaluasi'}</span>
+                  </div>
                 </div>
-                <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <div className="h-full rounded-full bg-amber-500" style={{ width: allPassed ? '100%' : '85%' }} />
+              }
+            >
+              <div className="flex flex-col justify-between h-full">
+                <div>
+                  <AcademyCornerBadge text="RANK • KETUNTASAN" className="mb-1" />
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <Trophy className="h-3.5 w-3.5 text-amber-500 shrink-0" /> Ketuntasan KKM
+                  </span>
+                  <p className="mt-1.5 text-2xl font-black text-amber-600 dark:text-amber-400 font-mono tabular-nums">
+                    {allPassed ? '100%' : '85%'}
+                  </p>
+                </div>
+                <div className="mt-2 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 space-y-1">
+                  <div className="flex justify-between text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                    <span>Semua Mapel Tuntas</span>
+                    <span>Trial Clear</span>
+                  </div>
+                  <div className="jrpg-stat-bar">
+                    <div
+                      className="jrpg-stat-bar-fill bg-gradient-to-r from-amber-500 to-yellow-400"
+                      style={{ width: allPassed ? '100%' : '85%' }}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            </OrnateCard>
 
-            <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Hourglass className="h-3.5 w-3.5 text-indigo-500" /> HP Kehadiran (Chrono)
-              </span>
-              <p className="mt-2 text-2xl font-black text-indigo-600 dark:text-indigo-400 font-mono tabular-nums">
-                {attendanceRate}%
-              </p>
-              <div className="mt-2 space-y-1">
-                <div className="flex justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                  <span>H: {hadirCount} &bull; S: {sakitCount} &bull; I: {izinCount} &bull; A: {alpaCount}</span>
-                  <span>Vitality</span>
+            <OrnateCard
+              boxId="std_kpi_attendance"
+              className="p-4"
+              minFlipHeight="min-h-[168px]"
+              flipBack={
+                <div className="flex flex-col justify-between h-full">
+                  <div>
+                    <div className="pr-16">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-indigo-300 block truncate">
+                        ✦ Rincian Kehadiran
+                      </span>
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                      <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                        <span className="text-slate-300 block text-[10px] leading-tight">Hadir / Sakit</span>
+                        <span className="font-black text-emerald-300 text-[11px] leading-tight block mt-0.5">
+                          H: {hadirCount} • S: {sakitCount}
+                        </span>
+                      </div>
+                      <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                        <span className="text-slate-300 block text-[10px] leading-tight">Izin / Alpa</span>
+                        <span className="font-black text-amber-300 text-[11px] leading-tight block mt-0.5">
+                          I: {izinCount} • A: {alpaCount}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-extrabold text-[#F3D77D]">
+                    <span>Rasio Presensi</span>
+                    <span>{attendanceRate}% Aktif</span>
+                  </div>
                 </div>
-                <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <div className="h-full rounded-full bg-indigo-500" style={{ width: `${attendanceRate}%` }} />
+              }
+            >
+              <div className="flex flex-col justify-between h-full">
+                <div>
+                  <AcademyCornerBadge text="HP • KEHADIRAN" className="mb-1" />
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <Hourglass className="h-3.5 w-3.5 text-indigo-500 shrink-0" /> HP Kehadiran
+                  </span>
+                  <p className="mt-1.5 text-2xl font-black text-indigo-600 dark:text-indigo-400 font-mono tabular-nums">
+                    {attendanceRate}%
+                  </p>
+                </div>
+                <div className="mt-2 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 space-y-1">
+                  <div className="flex justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                    <span>H: {hadirCount} &bull; S: {sakitCount} &bull; I: {izinCount} &bull; A: {alpaCount}</span>
+                    <span>Vitality</span>
+                  </div>
+                  <div className="jrpg-stat-bar">
+                    <div
+                      className="jrpg-stat-bar-fill bg-gradient-to-r from-indigo-500 to-purple-400"
+                      style={{ width: `${Math.min(100, Number(attendanceRate) || 0)}%` }}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            </OrnateCard>
           </div>
 
           {/* Main Profile & Digital Student Card */}

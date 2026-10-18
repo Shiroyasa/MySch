@@ -46,6 +46,7 @@ export const AuditLogModule: React.FC = () => {
   return (
     <div className="space-y-6">
       <AcademyHeroBanner
+        moduleKey="audit-logs"
         kicker="AEGIS SECURITY • JEJAK AUDIT SISTEM"
         title="AUDIT LOG & REKAM AKTIVITAS KEAMANAN"
         subtitle="Catatan aktivitas sistem dan perubahan data secara real-time yang tidak dapat diubah (Immutable Audit Trail)."

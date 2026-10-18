@@ -8,6 +8,7 @@ interface SortByControlProps {
   onChange: (val: SortOption) => void;
   className?: string;
   label?: string;
+  compact?: boolean;
 }
 
 export const SortByControl: React.FC<SortByControlProps> = ({
@@ -15,13 +16,16 @@ export const SortByControl: React.FC<SortByControlProps> = ({
   onChange,
   className = '',
   label = 'Urutkan:',
+  compact = false,
 }) => {
   return (
     <div className={`inline-flex items-center gap-1.5 ${className}`}>
-      <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">
-        <ArrowUpDown className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-        <span>{label}</span>
-      </span>
+      {!compact && (
+        <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">
+          <ArrowUpDown className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+          <span>{label}</span>
+        </span>
+      )}
       <select
         value={value}
         onChange={e => onChange(e.target.value as SortOption)}
@@ -40,9 +44,9 @@ export function sortDataItems<T>(
   items: T[],
   sortBy: SortOption,
   extractors: {
-    getName?: (item: T) => string;
-    getNis?: (item: T) => string;
-    getDate?: (item: T) => string;
+    getName?: (item: T) => string | undefined;
+    getNis?: (item: T) => string | undefined;
+    getDate?: (item: T) => string | undefined;
   }
 ): T[] {
   const copy = [...items];

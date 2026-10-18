@@ -10,7 +10,8 @@ interface DeleteConfirmModalProps {
   cancelLabel?: string;
   isLoading?: boolean;
   onConfirm: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
+  onClose?: () => void;
 }
 
 export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
@@ -23,17 +24,23 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   isLoading = false,
   onConfirm,
   onCancel,
+  onClose,
 }) => {
+  const handleClose = () => {
+    if (onCancel) onCancel();
+    else if (onClose) onClose();
+  };
+
   // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen && !isLoading) {
-        onCancel();
+        handleClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isLoading, onCancel]);
+  }, [isOpen, isLoading, onCancel, onClose]);
 
   if (!isOpen) return null;
 
@@ -41,7 +48,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200"
       onClick={() => {
-        if (!isLoading) onCancel();
+        if (!isLoading) handleClose();
       }}
     >
       <div
@@ -56,7 +63,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             <AlertTriangle className="h-6 w-6" />
           </div>
           <button
-            onClick={onCancel}
+            onClick={handleClose}
             disabled={isLoading}
             className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200 disabled:opacity-50"
             title="Tutup dialog"
@@ -87,7 +94,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
         <div className="mt-6 flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
           <button
             type="button"
-            onClick={onCancel}
+            onClick={handleClose}
             disabled={isLoading}
             className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 disabled:opacity-50 transition-colors"
           >

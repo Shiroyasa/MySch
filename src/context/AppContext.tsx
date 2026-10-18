@@ -21,6 +21,7 @@ import {
   PklVisitRecord,
   PklStudentReportItem,
   VisualSettings,
+  SchoolSettings,
   LessonSchedule,
 } from '../types';
 import {
@@ -96,6 +97,7 @@ import {
   firestoreDeletePklReport,
   firestoreClearAllPklData,
   firestoreSaveVisualSettings,
+  firestoreSaveSchoolSettings,
   firestoreSaveLessonSchedule,
   firestoreDeleteLessonSchedule,
   firestoreResetAssessmentScoresToZero,
@@ -118,6 +120,25 @@ export const defaultVisualSettings: VisualSettings = {
   globalBannerBgUrl: null,
   bannerOverlayOpacity: 72,
   moduleBannerBgs: {},
+  perModuleBannerBgs: {},
+  boxBgs: {},
+};
+
+export const defaultSchoolSettings: SchoolSettings = {
+  schoolName: 'SMK Mardi Yuana Cikembar',
+  npsn: '20258124',
+  nss: '402020610045',
+  accreditation: 'A (Unggul)',
+  principalName: 'Drs. Yohanes Kristianto, M.MPd.',
+  principalNip: '19680412 199403 1 005',
+  address: 'Jl. Pelabuhan II Km. 18, Cikembar, Kab. Sukabumi, Jawa Barat 43161',
+  phone: '(0266) 321455',
+  email: 'info@smkmardiyuana-ckb.sch.id',
+  website: 'https://smkmardiyuana-ckb.sch.id',
+  curriculum: 'Kurikulum Merdeka SMK Pusat Keunggulan',
+  defaultKkm: 75,
+  maxAlphaWarning: 3,
+  lateToleranceMinutes: 15,
 };
 
 interface AppContextType {
@@ -198,12 +219,14 @@ interface AppContextType {
   // Assessments
   assessments: Assessment[];
   assessmentScores: AssessmentScore[];
-  createAssessment: (asm: Omit<Assessment, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => string;
+  createAssessment: (asm: Omit<Assessment, 'id' | 'createdAt' | 'updatedAt' | 'status'> & { id?: string; status?: 'draft' | 'dipublikasikan' | string }) => string;
+  addAssessment: (asm: Omit<Assessment, 'id' | 'createdAt' | 'updatedAt' | 'status'> & { id?: string; status?: 'draft' | 'dipublikasikan' | string }) => string;
   updateAssessment: (id: string, data: Partial<Assessment>) => void;
   deleteAssessment: (assessmentId: string) => void;
   resetAssessmentScores: (assessmentId: string) => void;
   resetClassSubjectAllScores: (classId: string, subjectId: string) => void;
-  saveAssessmentScores: (assessmentId: string, scores: { studentId: string; score: number; feedback?: string }[]) => void;
+  saveAssessmentScores: (assessmentId: string, scores: { studentId: string; score: number; feedback?: string; notes?: string }[]) => void;
+  saveBatchScores: (assessmentId: string, scores: { studentId: string; score: number; feedback?: string; notes?: string }[]) => void;
   publishAssessment: (assessmentId: string) => void;
   customStudentReports: Record<string, any>;
   saveCustomStudentReport: (studentId: string, reportData: any) => void;
@@ -212,7 +235,9 @@ interface AppContextType {
   // Users & Profile
   updateCurrentUserProfile: (updates: Partial<User>) => void;
   addUser: (userData: Omit<User, 'id' | 'createdAt'> & { permissions?: string[] }) => void;
+  updateUser: (userId: string, updates: Partial<User>) => void;
   deleteUser: (userId: string) => { success: boolean; message: string };
+  addToast: (message: string, type?: 'success' | 'error' | 'warning' | 'info') => void;
 
   // Logs & Notifications
   auditLogs: AuditLog[];
@@ -272,6 +297,11 @@ interface AppContextType {
   // Visual Theme & Custom Backgrounds (Login, Menu Wallpaper, Logo & Header Banners)
   visualSettings: VisualSettings;
   updateVisualSettings: (updates: Partial<VisualSettings>) => void;
+  saveVisualSettingsToCloud: () => Promise<void>;
+
+  // School Identity & Academic Configuration Settings
+  schoolSettings: SchoolSettings;
+  updateSchoolSettings: (updates: Partial<SchoolSettings>) => void;
 
   // Lesson Schedules (Jadwal Pelajaran di Data Pokok)
   lessonSchedules: LessonSchedule[];
@@ -577,10 +607,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const legacyLoginBg = localStorage.getItem('myacademy_login_custom_bg');
       if (saved) {
         const parsed = JSON.parse(saved);
+        const mergedModuleBgs = {
+          ...(parsed.perModuleBannerBgs || {}),
+          ...(parsed.moduleBannerBgs || {}),
+        };
         return {
           ...defaultVisualSettings,
           ...parsed,
           loginBgUrl: parsed.loginBgUrl ?? legacyLoginBg ?? null,
+          moduleBannerBgs: mergedModuleBgs,
+          perModuleBannerBgs: mergedModuleBgs,
+          boxBgs: parsed.boxBgs || {},
         };
       }
       if (legacyLoginBg) {
@@ -593,6 +630,39 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {}
     return defaultVisualSettings;
   });
+
+  // School Identity & Academic Configuration Settings
+  const [schoolSettings, setSchoolSettings] = useState<SchoolSettings>(() => {
+    try {
+      const saved = localStorage.getItem('myschool_school_settings');
+      if (saved) {
+        return { ...defaultSchoolSettings, ...JSON.parse(saved) };
+      }
+    } catch (e) {}
+    return defaultSchoolSettings;
+  });
+
+  // Global Toast Feedback State
+  const [globalToasts, setGlobalToasts] = useState<
+    Array<{ id: string; message: string; type: 'success' | 'error' | 'warning' | 'info' }>
+  >([]);
+
+  const addToast = (
+    message: string,
+    type: 'success' | 'error' | 'warning' | 'info' = 'success'
+  ) => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    setGlobalToasts(prev => [...prev.slice(-3), { id, message, type }]);
+    setTimeout(() => {
+      setGlobalToasts(prev => prev.filter(t => t.id !== id));
+    }, 3600);
+  };
+
+  // Synchronous ref for assessments so createAssessment + saveAssessmentScores in the same tick always finds the assessment
+  const assessmentsRef = React.useRef<Assessment[]>(assessments);
+  useEffect(() => {
+    assessmentsRef.current = assessments;
+  }, [assessments]);
 
   // Lesson Schedules State (Jadwal Pelajaran)
   const [lessonSchedules, setLessonSchedules] = useState<LessonSchedule[]>(() => {
@@ -771,8 +841,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       },
       onVisualSettingsChange: data => {
         setVisualSettings(prev => {
+          const mergedModuleBgs = {
+            ...(prev.perModuleBannerBgs || {}),
+            ...(prev.moduleBannerBgs || {}),
+            ...(data.perModuleBannerBgs || {}),
+            ...(data.moduleBannerBgs || {}),
+          };
+          const next: VisualSettings = {
+            ...prev,
+            ...data,
+            // Preserve local oversized video dataURL if Firestore omitted it
+            loginBgUrl:
+              data.loginBgUrl !== undefined && data.loginBgUrl !== null
+                ? data.loginBgUrl
+                : data.loginBgType === 'live_preset' || data.loginBgType === 'default'
+                ? null
+                : prev.loginBgUrl,
+            menuBgUrl:
+              data.menuBgUrl !== undefined && data.menuBgUrl !== null
+                ? data.menuBgUrl
+                : data.menuBgType === 'live_preset' || data.menuBgType === 'default'
+                ? null
+                : prev.menuBgUrl,
+            moduleBannerBgs: mergedModuleBgs,
+            perModuleBannerBgs: mergedModuleBgs,
+            boxBgs: {
+              ...(prev.boxBgs || {}),
+              ...(data.boxBgs || {}),
+            },
+          };
+          try {
+            localStorage.setItem('myschool_visual_settings', JSON.stringify(next));
+          } catch {}
+          return next;
+        });
+      },
+      onSchoolSettingsChange: data => {
+        setSchoolSettings(prev => {
           const next = { ...prev, ...data };
-          localStorage.setItem('myschool_visual_settings', JSON.stringify(next));
+          try {
+            localStorage.setItem('myschool_school_settings', JSON.stringify(next));
+          } catch {}
           return next;
         });
       },
@@ -2149,34 +2258,59 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Assessment Operations
-  const createAssessment = (asm: Omit<Assessment, 'id' | 'createdAt' | 'updatedAt' | 'status'>): string => {
+  const createAssessment = (
+    asm: Omit<Assessment, 'id' | 'createdAt' | 'updatedAt' | 'status'> & {
+      id?: string;
+      status?: 'draft' | 'dipublikasikan' | string;
+    }
+  ): string => {
     const now = new Date().toISOString();
+    const newId = asm.id || `asm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const newAsm: Assessment = {
       ...asm,
-      id: `asm-${Date.now()}`,
-      status: 'draft',
+      id: newId,
+      status: (asm.status === 'published' ? 'dipublikasikan' : (asm.status as any)) || 'draft',
       createdAt: now,
       updatedAt: now,
     };
 
-    setAssessments(prev => [newAsm, ...prev]);
-    addAuditLog('CREATE_ASSESSMENT', 'Penilaian Akademik', `Membuat komponen penilaian baru: ${newAsm.title} (${newAsm.subjectName} - ${newAsm.className})`);
-    pushNotification('Komponen Penilaian Baru', `Komponen ${newAsm.title} (${newAsm.subjectName}) berhasil dibuat.`, 'success');
+    // Update synchronous ref immediately so saveAssessmentScores called in the same tick finds newAsm
+    assessmentsRef.current = [newAsm, ...assessmentsRef.current.filter(a => a.id !== newId)];
+
+    setAssessments(prev => {
+      const next = [newAsm, ...prev.filter(a => a.id !== newId)];
+      try {
+        localStorage.setItem('myschool_assessments', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+    addAuditLog(
+      'CREATE_ASSESSMENT',
+      'Penilaian Akademik',
+      `Membuat komponen penilaian baru: ${newAsm.title} (${newAsm.subjectName} - ${newAsm.className})`
+    );
     firestoreSaveAssessment(newAsm, []).catch(() => {});
     return newAsm.id;
   };
 
+  const addAssessment = createAssessment;
+
   const updateAssessment = (id: string, data: Partial<Assessment>) => {
     let updated: Assessment | undefined;
-    setAssessments(prev =>
-      prev.map(a => {
+    setAssessments(prev => {
+      const next = prev.map(a => {
         if (a.id === id) {
           updated = { ...a, ...data, updatedAt: new Date().toISOString() };
           return updated;
         }
         return a;
-      })
-    );
+      });
+      assessmentsRef.current = next;
+      try {
+        localStorage.setItem('myschool_assessments', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
     addAuditLog('UPDATE_ASSESSMENT', 'Penilaian Akademik', `Memperbarui komponen penilaian ID: ${id}`);
     if (updated) {
       firestoreSaveAssessment(updated, []).catch(() => {});
@@ -2184,7 +2318,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteAssessment = (assessmentId: string) => {
-    const target = assessments.find(a => a.id === assessmentId);
+    const target = assessmentsRef.current.find(a => a.id === assessmentId) || assessments.find(a => a.id === assessmentId);
     if (!target) return;
 
     const scoreIdsToDelete = assessmentScores
@@ -2194,12 +2328,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Clean cascade: delete assessment & associated scores locally and in Cloud Firestore
     setAssessments(prev => {
       const next = prev.filter(a => a.id !== assessmentId);
-      localStorage.setItem('myschool_assessments', JSON.stringify(next));
+      assessmentsRef.current = next;
+      try {
+        localStorage.setItem('myschool_assessments', JSON.stringify(next));
+      } catch {}
       return next;
     });
     setAssessmentScores(prev => {
       const next = prev.filter(s => s.assessmentId !== assessmentId);
-      localStorage.setItem('myschool_assessment_scores', JSON.stringify(next));
+      try {
+        localStorage.setItem('myschool_assessment_scores', JSON.stringify(next));
+      } catch {}
       return next;
     });
 
@@ -2209,7 +2348,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resetAssessmentScores = (assessmentId: string) => {
-    const target = assessments.find(a => a.id === assessmentId);
+    const target = assessmentsRef.current.find(a => a.id === assessmentId) || assessments.find(a => a.id === assessmentId);
     if (!target) return;
 
     const now = new Date().toISOString().split('T')[0];
@@ -2241,8 +2380,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ...zeroScores,
         ...prev.filter(s => s.assessmentId !== assessmentId),
       ];
-      localStorage.setItem('myschool_assessment_scores', JSON.stringify(next));
+      try {
+        localStorage.setItem('myschool_assessment_scores', JSON.stringify(next));
+      } catch {}
       return next;
+    });
+
+    // Clear any stale custom report overrides for this subject on students of this class
+    setCustomStudentReports(prev => {
+      const next = { ...prev };
+      let changed = false;
+      targetStudents.forEach(std => {
+        if (next[std.id]?.scores?.[target.subjectId]) {
+          const nextScores = { ...next[std.id].scores };
+          delete nextScores[target.subjectId];
+          next[std.id] = { ...next[std.id], scores: nextScores };
+          changed = true;
+        }
+        if (Array.isArray(next[std.id]?.academicScores)) {
+          next[std.id] = {
+            ...next[std.id],
+            academicScores: next[std.id].academicScores.map((item: any) =>
+              item.subjectId === target.subjectId ? { ...item, score: 0, predicate: 'D' } : item
+            ),
+          };
+          changed = true;
+        }
+      });
+      if (changed) {
+        try {
+          localStorage.setItem('myschool_student_reports_custom', JSON.stringify(next));
+        } catch {}
+        firestoreSaveCustomStudentReports(next).catch(() => {});
+      }
+      return changed ? next : prev;
     });
 
     addAuditLog('RESET_SCORES', 'Penilaian Akademik', `Mereset seluruh nilai siswa ke 0 pada penilaian: ${target.title} (${target.className}) dan menyinkronkan ke database.`);
@@ -2255,7 +2426,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const targetSubject = subjects.find(s => s.id === subjectId);
     if (!targetClass || !targetSubject) return;
 
-    const matchingAssessments = assessments.filter(
+    const matchingAssessments = assessmentsRef.current.filter(
       a => (a.classId === classId || a.className === targetClass.name) && a.subjectId === subjectId
     );
     const targetStudents = students.filter(
@@ -2292,8 +2463,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ...zeroScores,
         ...prev.filter(s => !matchingAsmIds.has(s.assessmentId) && !(s.classId === classId && s.subjectId === subjectId)),
       ];
-      localStorage.setItem('myschool_assessment_scores', JSON.stringify(next));
+      try {
+        localStorage.setItem('myschool_assessment_scores', JSON.stringify(next));
+      } catch {}
       return next;
+    });
+
+    // Also clear any custom student report overrides for this subject so Rapor Siswa immediately reflects 0
+    setCustomStudentReports(prev => {
+      const next = { ...prev };
+      let changed = false;
+      targetStudents.forEach(std => {
+        if (next[std.id]?.scores?.[subjectId]) {
+          const nextScores = { ...next[std.id].scores };
+          delete nextScores[subjectId];
+          next[std.id] = { ...next[std.id], scores: nextScores };
+          changed = true;
+        }
+        if (Array.isArray(next[std.id]?.academicScores)) {
+          next[std.id] = {
+            ...next[std.id],
+            academicScores: next[std.id].academicScores.map((item: any) =>
+              item.subjectId === subjectId ? { ...item, score: 0, predicate: 'D' } : item
+            ),
+          };
+          changed = true;
+        }
+      });
+      if (changed) {
+        try {
+          localStorage.setItem('myschool_student_reports_custom', JSON.stringify(next));
+        } catch {}
+        firestoreSaveCustomStudentReports(next).catch(() => {});
+      }
+      return changed ? next : prev;
     });
 
     addAuditLog(
@@ -2309,10 +2512,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     firestoreResetAssessmentScoresToZero(zeroScores, oldScoreIds).catch(() => {});
   };
 
-  const saveAssessmentScores = (assessmentId: string, scores: { studentId: string; score: number; feedback?: string }[]) => {
+  const saveAssessmentScores = (
+    assessmentId: string,
+    scores: { studentId: string; score: number; feedback?: string; notes?: string }[]
+  ) => {
     const now = new Date().toISOString().split('T')[0];
-    const asm = assessments.find(a => a.id === assessmentId);
-    if (!asm) return;
+    const asm =
+      assessmentsRef.current.find(a => a.id === assessmentId) ||
+      assessments.find(a => a.id === assessmentId);
 
     const newScores: AssessmentScore[] = scores.map(s => {
       const student = students.find(std => std.id === s.studentId);
@@ -2322,10 +2529,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         studentId: s.studentId,
         studentName: student?.fullName || 'Siswa',
         nisn: student?.nisn || '',
-        classId: asm.classId,
-        subjectId: asm.subjectId,
-        score: Number(s.score) || 0,
-        feedback: s.feedback || '',
+        classId: asm?.classId || student?.classId || classes[0]?.id || '',
+        subjectId: asm?.subjectId || subjects[0]?.id || '',
+        score: Math.min(100, Math.max(0, Number(s.score) || 0)),
+        feedback: s.feedback ?? s.notes ?? '',
         updatedBy: currentUser.displayName,
         updatedAt: now,
       };
@@ -2336,16 +2543,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ...newScores,
         ...prev.filter(ps => ps.assessmentId !== assessmentId),
       ];
-      localStorage.setItem('myschool_assessment_scores', JSON.stringify(next));
+      try {
+        localStorage.setItem('myschool_assessment_scores', JSON.stringify(next));
+      } catch {}
       return next;
     });
 
-    addAuditLog('INPUT_SCORES', 'Penilaian Akademik', `Menyimpan & menyinkronkan ${scores.length} nilai siswa untuk penilaian: ${asm.title} (${asm.className})`);
-    firestoreSaveAssessment(asm, newScores).catch(() => {});
+    if (asm) {
+      addAuditLog(
+        'INPUT_SCORES',
+        'Penilaian Akademik',
+        `Menyimpan & menyinkronkan ${scores.length} nilai siswa untuk penilaian: ${asm.title} (${asm.className})`
+      );
+      firestoreSaveAssessment(asm, newScores).catch(() => {});
+    } else {
+      firestoreResetAssessmentScoresToZero(newScores, []).catch(() => {});
+    }
   };
 
+  const saveBatchScores = saveAssessmentScores;
+
   const publishAssessment = (assessmentId: string) => {
-    const target = assessments.find(a => a.id === assessmentId);
+    const target =
+      assessmentsRef.current.find(a => a.id === assessmentId) ||
+      assessments.find(a => a.id === assessmentId);
     if (!target) return;
 
     updateAssessment(assessmentId, { status: 'dipublikasikan' });
@@ -2457,6 +2678,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       'keamanan'
     );
     firestoreAddUser(newUser).catch(() => {});
+  };
+
+  const updateUser = (userId: string, updates: Partial<User>) => {
+    let updatedTarget: User | undefined;
+    setUsers(prev => {
+      const nextUsers = prev.map(u => {
+        if (u.id === userId) {
+          updatedTarget = {
+            ...u,
+            ...updates,
+          };
+          return updatedTarget;
+        }
+        return u;
+      });
+      try {
+        localStorage.setItem('myschool_users', JSON.stringify(nextUsers));
+      } catch {}
+      return nextUsers;
+    });
+
+    if (userId === currentUser.id) {
+      setCurrentUser(curr => {
+        const nextCurr = { ...curr, ...updates };
+        try {
+          localStorage.setItem('myschool_current_user', JSON.stringify(nextCurr));
+        } catch {}
+        return nextCurr;
+      });
+    }
+
+    if (updatedTarget) {
+      firestoreUpdateUser(userId, updatedTarget).catch(() => {});
+      addAuditLog(
+        'UPDATE_USER',
+        'Manajemen Pengguna',
+        `Memperbarui akun pengguna: ${updatedTarget.displayName} (${updatedTarget.email})`
+      );
+    } else {
+      firestoreUpdateUser(userId, updates).catch(() => {});
+    }
   };
 
   const deleteUser = (userId: string): { success: boolean; message: string } => {
@@ -2765,21 +3027,84 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Visual Theme & Background Settings
   const updateVisualSettings = (updates: Partial<VisualSettings>) => {
     setVisualSettings(prev => {
+      const nextModuleBgs =
+        updates.moduleBannerBgs !== undefined
+          ? updates.moduleBannerBgs
+          : updates.perModuleBannerBgs !== undefined
+          ? updates.perModuleBannerBgs
+          : prev.moduleBannerBgs || prev.perModuleBannerBgs || {};
+
+      // Clear residual custom URL when switching to live_preset or default so wallpaper never gets stuck
+      const resolvedLoginBgUrl =
+        updates.loginBgUrl !== undefined
+          ? updates.loginBgUrl
+          : updates.loginBgType === 'live_preset' || updates.loginBgType === 'default'
+          ? null
+          : prev.loginBgUrl;
+
+      const resolvedMenuBgUrl =
+        updates.menuBgUrl !== undefined
+          ? updates.menuBgUrl
+          : updates.menuBgType === 'live_preset' || updates.menuBgType === 'default'
+          ? null
+          : prev.menuBgUrl;
+
       const next: VisualSettings = {
         ...prev,
         ...updates,
+        loginBgUrl: resolvedLoginBgUrl,
+        menuBgUrl: resolvedMenuBgUrl,
+        moduleBannerBgs: nextModuleBgs,
+        perModuleBannerBgs: nextModuleBgs,
+        boxBgs: updates.boxBgs !== undefined ? updates.boxBgs : prev.boxBgs || {},
         updatedAt: new Date().toISOString(),
       };
-      localStorage.setItem('myschool_visual_settings', JSON.stringify(next));
-      if (next.loginBgUrl) {
-        localStorage.setItem('myacademy_login_custom_bg', next.loginBgUrl);
-      } else {
-        localStorage.removeItem('myacademy_login_custom_bg');
+      try {
+        localStorage.setItem('myschool_visual_settings', JSON.stringify(next));
+        if (next.loginBgUrl && next.loginBgUrl.length < 500_000) {
+          localStorage.setItem('myacademy_login_custom_bg', next.loginBgUrl);
+        } else if (!next.loginBgUrl) {
+          localStorage.removeItem('myacademy_login_custom_bg');
+        }
+      } catch (err) {
+        console.warn('localStorage quota notice for visualSettings:', err);
       }
       firestoreSaveVisualSettings(next).catch(() => {});
       return next;
     });
     addAuditLog('UPDATE_VISUAL_THEME', 'Pengaturan Sistem', 'Memperbarui tema visual, logo aplikasi, atau wallpaper sistem.');
+  };
+
+  const saveVisualSettingsToCloud = async () => {
+    setIsSyncing(true);
+    try {
+      try {
+        localStorage.setItem('myschool_visual_settings', JSON.stringify(visualSettings));
+      } catch {}
+      await firestoreSaveVisualSettings(visualSettings);
+      setLastSyncTime(new Date());
+      addToast('Seluruh pengaturan visual, logo & background berhasil disimpan ke database!', 'success');
+    } catch {
+      addToast('Pengaturan visual disimpan secara lokal.', 'info');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const updateSchoolSettings = (updates: Partial<SchoolSettings>) => {
+    setSchoolSettings(prev => {
+      const next: SchoolSettings = {
+        ...prev,
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+      try {
+        localStorage.setItem('myschool_school_settings', JSON.stringify(next));
+      } catch {}
+      firestoreSaveSchoolSettings(next).catch(() => {});
+      return next;
+    });
+    addAuditLog('UPDATE_SCHOOL_SETTINGS', 'Pengaturan Sistem', 'Memperbarui konfigurasi identitas sekolah & aturan akademik.');
   };
 
   // Lesson Schedule CRUD (Jadwal Pelajaran)
@@ -2871,17 +3196,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         assessments,
         assessmentScores,
         createAssessment,
+        addAssessment,
         updateAssessment,
         deleteAssessment,
         resetAssessmentScores,
         resetClassSubjectAllScores,
         saveAssessmentScores,
+        saveBatchScores,
         publishAssessment,
         customStudentReports,
         saveCustomStudentReport,
         resetCustomStudentReport,
         addUser,
+        updateUser,
         deleteUser,
+        addToast,
         auditLogs,
         notifications,
         addAuditLog,
@@ -2913,6 +3242,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loadSamplePklData,
         visualSettings,
         updateVisualSettings,
+        saveVisualSettingsToCloud,
+        schoolSettings,
+        updateSchoolSettings,
         lessonSchedules,
         saveLessonSchedule,
         deleteLessonSchedule,
@@ -2923,6 +3255,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }}
     >
       {children}
+      {globalToasts.length > 0 && (
+        <div className="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4 sm:px-0">
+          {globalToasts.map(t => (
+            <div
+              key={t.id}
+              className={`pointer-events-auto flex items-center gap-3 rounded-xl border px-4 py-3 text-xs font-bold shadow-2xl backdrop-blur-md transition-all duration-300 ${
+                t.type === 'error'
+                  ? 'border-rose-400/60 bg-rose-950/95 text-rose-100'
+                  : t.type === 'warning'
+                  ? 'border-amber-400/60 bg-amber-950/95 text-amber-100'
+                  : t.type === 'info'
+                  ? 'border-sky-400/60 bg-slate-900/95 text-sky-100'
+                  : 'border-[#D4AF37]/70 bg-[#0B1528]/95 text-[#FDE68A]'
+              }`}
+            >
+              <span className="text-sm text-[#EAB308]">✦</span>
+              <span className="flex-1 leading-snug">{t.message}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </AppContext.Provider>
   );
 };

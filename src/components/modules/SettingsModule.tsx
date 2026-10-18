@@ -64,8 +64,12 @@ const compressUploadedImage = (file: File, maxWidth = 1800, quality = 0.82, keep
   });
 };
 
-const readMediaFileAsDataUrl = async (file: File, maxWidth = 1800, keepAlpha = false): Promise<{ url: string; isVideo: boolean }> => {
+const readMediaFileAsDataUrl = async (file: File, maxWidth = 1440, keepAlpha = false): Promise<{ url: string; isVideo: boolean }> => {
   if (file.type.startsWith('video/')) {
+    // If video file is over 650KB, use fast ObjectURL for instant smooth playback without QuotaExceededError
+    if (file.size > 650 * 1024) {
+      return { url: URL.createObjectURL(file), isVideo: true };
+    }
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = ev => resolve({ url: ev.target?.result as string, isVideo: true });
@@ -73,7 +77,7 @@ const readMediaFileAsDataUrl = async (file: File, maxWidth = 1800, keepAlpha = f
       reader.readAsDataURL(file);
     });
   }
-  const url = await compressUploadedImage(file, maxWidth, 0.84, keepAlpha);
+  const url = await compressUploadedImage(file, maxWidth, 0.8, keepAlpha);
   return { url, isVideo: false };
 };
 
@@ -118,14 +122,18 @@ export const SettingsModule: React.FC = () => {
     forceCloudResync,
     visualSettings,
     updateVisualSettings,
+    schoolSettings,
+    updateSchoolSettings,
     darkMode,
     toggleDarkMode,
+    addToast,
   } = useApp();
 
   // Active section tab
   const [activeSection, setActiveSection] = useState<'profile' | 'backgrounds' | 'school' | 'backup' | 'cloud-sync'>('backgrounds');
   const [syncFeedback, setSyncFeedback] = useState<string | null>(null);
   const [bgToast, setBgToast] = useState<string | null>(null);
+  const [isSavingVisuals, setIsSavingVisuals] = useState(false);
 
   const appLogoInputRef = useRef<HTMLInputElement>(null);
   const loginBgInputRef = useRef<HTMLInputElement>(null);
@@ -198,9 +206,12 @@ export const SettingsModule: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const dataUrl = await compressUploadedImage(file, 1600, 0.82);
-      updateVisualSettings({ moduleBannerBgUrl: dataUrl });
-      showBgToast('Background seluruh kotak header menu (Presensi, PKL, dll.) berhasil diperbarui!');
+      const dataUrl = await compressUploadedImage(file, 1280, 0.78);
+      updateVisualSettings({
+        globalBannerBgUrl: dataUrl,
+        moduleBannerBgUrl: dataUrl,
+      });
+      showBgToast('Background seluruh kotak header menu berhasil diperbarui & disimpan!');
     } catch (err) {
       console.error(err);
     } finally {
@@ -212,14 +223,22 @@ export const SettingsModule: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const dataUrl = await compressUploadedImage(file, 1600, 0.82);
+      const dataUrl = await compressUploadedImage(file, 1200, 0.78);
+      const nextModuleMap = {
+        ...(visualSettings?.moduleBannerBgs || {}),
+        ...(visualSettings?.perModuleBannerBgs || {}),
+        [moduleKey]: dataUrl,
+      };
+      const nextBoxBgs = {
+        ...(visualSettings?.boxBgs || {}),
+        [`banner_${moduleKey}`]: dataUrl,
+      };
       updateVisualSettings({
-        perModuleBannerBgs: {
-          ...(visualSettings?.perModuleBannerBgs || {}),
-          [moduleKey]: dataUrl,
-        },
+        moduleBannerBgs: nextModuleMap,
+        perModuleBannerBgs: nextModuleMap,
+        boxBgs: nextBoxBgs,
       });
-      showBgToast(`Background ${moduleLabel} berhasil diperbarui!`);
+      showBgToast(`Background ${moduleLabel} berhasil diperbarui & disimpan!`);
     } catch (err) {
       console.error(err);
     } finally {
@@ -228,10 +247,31 @@ export const SettingsModule: React.FC = () => {
   };
 
   const handleResetPerModuleBg = (moduleKey: string, moduleLabel: string) => {
-    const nextMap = { ...(visualSettings?.perModuleBannerBgs || {}) };
+    const nextMap = {
+      ...(visualSettings?.moduleBannerBgs || {}),
+      ...(visualSettings?.perModuleBannerBgs || {}),
+    };
     delete nextMap[moduleKey];
-    updateVisualSettings({ perModuleBannerBgs: nextMap });
+    const nextBoxBgs = { ...(visualSettings?.boxBgs || {}) };
+    delete nextBoxBgs[`banner_${moduleKey}`];
+    updateVisualSettings({
+      moduleBannerBgs: nextMap,
+      perModuleBannerBgs: nextMap,
+      boxBgs: nextBoxBgs,
+    });
     showBgToast(`Background ${moduleLabel} dikembalikan ke pengaturan global.`);
+  };
+
+  const handleExplicitSaveVisualSettings = () => {
+    setIsSavingVisuals(true);
+    updateVisualSettings({ ...visualSettings });
+    setTimeout(() => {
+      setIsSavingVisuals(false);
+      showBgToast('Seluruh pengaturan Logo, Background Menu, Login & Kotak berhasil disimpan ke Database Cloud!');
+      if (addToast) {
+        addToast('Pengaturan Visual & Background berhasil disimpan ke Database!', 'success');
+      }
+    }, 300);
   };
 
   // Admin Profile Form State
@@ -253,14 +293,33 @@ export const SettingsModule: React.FC = () => {
     setAdminPhone(currentUser.phone || '');
   }, [currentUser]);
 
-  // School Metadata State
-  const [schoolName, setSchoolName] = useState('SMK MARDI YUANA CIKEMBAR');
-  const [npsn, setNpsn] = useState('20253654');
-  const [accreditation, setAccreditation] = useState('A (Unggul)');
-  const [headmaster, setHeadmaster] = useState('Drs. H. Suryana, M.M.Pd.');
-  const [schoolPhone, setSchoolPhone] = useState('(0266) 632145');
-  const [address, setAddress] = useState('Jl. Pelabuhan II KM. 19 Cikembar, Kabupaten Sukabumi, Jawa Barat 43359');
+  // School Metadata State (Synced with AppContext & Cloud Firestore)
+  const [schoolName, setSchoolName] = useState(schoolSettings?.schoolName || 'SMK MARDI YUANA CIKEMBAR');
+  const [npsn, setNpsn] = useState(schoolSettings?.npsn || '20253654');
+  const [accreditation, setAccreditation] = useState(schoolSettings?.accreditation || 'A (Unggul)');
+  const [headmaster, setHeadmaster] = useState(
+    schoolSettings?.headmaster || schoolSettings?.principalName || 'Drs. H. Suryana, M.M.Pd.'
+  );
+  const [schoolPhone, setSchoolPhone] = useState(
+    schoolSettings?.schoolPhone || schoolSettings?.phone || '(0266) 632145'
+  );
+  const [address, setAddress] = useState(
+    schoolSettings?.address || 'Jl. Pelabuhan II KM. 19 Cikembar, Kabupaten Sukabumi, Jawa Barat 43359'
+  );
   const [schoolSuccessMsg, setSchoolSuccessMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (schoolSettings) {
+      setSchoolName(schoolSettings.schoolName || 'SMK MARDI YUANA CIKEMBAR');
+      setNpsn(schoolSettings.npsn || '20253654');
+      setAccreditation(schoolSettings.accreditation || 'A (Unggul)');
+      setHeadmaster(schoolSettings.headmaster || schoolSettings.principalName || 'Drs. H. Suryana, M.M.Pd.');
+      setSchoolPhone(schoolSettings.schoolPhone || schoolSettings.phone || '(0266) 632145');
+      setAddress(
+        schoolSettings.address || 'Jl. Pelabuhan II KM. 19 Cikembar, Kabupaten Sukabumi, Jawa Barat 43359'
+      );
+    }
+  }, [schoolSettings]);
 
   // Handle Save Admin Profile
   const handleSaveAdminProfile = (e: React.FormEvent) => {
@@ -295,22 +354,33 @@ export const SettingsModule: React.FC = () => {
       });
 
       setIsSavingProfile(false);
-      setProfileSuccessMsg('Perubahan profil admin berhasil disimpan dan disinkronkan!');
+      setProfileSuccessMsg('Perubahan profil admin berhasil disimpan ke Database dan disinkronkan!');
+      if (addToast) {
+        addToast('Profil Admin berhasil disimpan ke Database!', 'success');
+      }
       setNewPassword('');
       setConfirmPassword('');
 
       setTimeout(() => {
         setProfileSuccessMsg(null);
       }, 5000);
-    }, 400);
+    }, 300);
   };
 
-  // Handle Save School Info
+  // Handle Save School Info (Persisted to localStorage & Cloud Firestore)
   const handleSaveSchoolSettings = (e: React.FormEvent) => {
     e.preventDefault();
-    addAuditLog('UPDATE_SETTINGS', 'Pengaturan Lembaga', 'Memperbarui profil dan metadata resmi sekolah');
-    setSchoolSuccessMsg('Pengaturan lembaga sekolah berhasil disimpan!');
-    setTimeout(() => setSchoolSuccessMsg(null), 4000);
+    updateSchoolSettings({
+      schoolName: schoolName.trim() || 'SMK MARDI YUANA CIKEMBAR',
+      npsn: npsn.trim() || '20253654',
+      accreditation: accreditation.trim() || 'A (Unggul)',
+      headmaster: headmaster.trim() || 'Drs. H. Suryana, M.M.Pd.',
+      schoolPhone: schoolPhone.trim() || '(0266) 632145',
+      address: address.trim() || 'Jl. Pelabuhan II KM. 19 Cikembar, Kabupaten Sukabumi, Jawa Barat 43359',
+    });
+    setSchoolSuccessMsg('Pengaturan profil lembaga berhasil disimpan ke Database dan disinkronkan!');
+    showBgToast('Profil Lembaga berhasil disimpan ke Database Cloud!');
+    setTimeout(() => setSchoolSuccessMsg(null), 4500);
   };
 
   // Handle Backup
@@ -690,16 +760,13 @@ export const SettingsModule: React.FC = () => {
 
               {/* Live Preview Box for Menu Background */}
               <div className="relative h-44 w-full overflow-hidden rounded-2xl border-2 border-[#C8A44B]/70 bg-[#0B1528] shadow-inner">
-                {visualSettings?.menuBgType === 'live_preset' ? (
-                  <LiveWallpaperPresetLayer preset={visualSettings?.menuLivePreset || 'starlight_castle'} />
-                ) : (
-                  <SkyborneCastleBackground
-                    mode="banner"
-                    customBgUrl={visualSettings?.menuBgUrl || visualSettings?.loginBgUrl}
-                    bgType={visualSettings?.menuBgType === 'video' ? 'video' : 'image'}
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/35 to-transparent flex flex-col justify-end p-4">
+                <SkyborneCastleBackground
+                  mode="banner"
+                  customBgUrl={visualSettings?.menuBgUrl}
+                  bgType={visualSettings?.menuBgType || 'default'}
+                  livePreset={visualSettings?.menuLivePreset || 'starlight_castle'}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/35 to-transparent flex flex-col justify-end p-4 z-10">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-sky-300">
@@ -833,18 +900,18 @@ export const SettingsModule: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 4: Pengaturan Kotak Header Menu (Global) */}
+          {/* Card 4: Pengaturan Kotak Header Menu (Global & Per-Kotak) */}
           <div className="rounded-2xl border border-[#EFE2BE] bg-white/95 p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900/90 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3 dark:border-slate-800">
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
-                  4. Background Kotak Header Modul (Global &amp; Per-Menu)
+                  4. Background Kotak Header &amp; Kotak Presentasi (Global &amp; Per-Kotak)
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Tombol ganti background langsung di kotak header modul telah disembunyikan agar tampilan bersih. Anda dapat mengelolanya terpusat dari sini:
+                  Anda dapat mengganti background gambar di masing-masing kotak secara langsung (melalui tombol &ldquo;Ganti BG&rdquo; di pojok kanan atas setiap kotak) atau mengelolanya terpusat di sini:
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <input
                   ref={globalBannerBgInputRef}
                   type="file"
@@ -860,11 +927,11 @@ export const SettingsModule: React.FC = () => {
                   <ImagePlus className="h-3.5 w-3.5 text-[#FDE047]" />
                   <span>Upload BG Semua Kotak Header</span>
                 </button>
-                {visualSettings?.moduleBannerBgUrl && (
+                {(visualSettings?.globalBannerBgUrl || visualSettings?.moduleBannerBgUrl) && (
                   <button
                     type="button"
                     onClick={() => {
-                      updateVisualSettings({ moduleBannerBgUrl: null });
+                      updateVisualSettings({ globalBannerBgUrl: null, moduleBannerBgUrl: null });
                       showBgToast('Background kotak header global berhasil direset.');
                     }}
                     className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 cursor-pointer"
@@ -873,14 +940,33 @@ export const SettingsModule: React.FC = () => {
                     <span>Reset Global</span>
                   </button>
                 )}
+                {visualSettings?.boxBgs && Object.keys(visualSettings.boxBgs).length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateVisualSettings({ boxBgs: {} });
+                      showBgToast('Seluruh background kustom per-kotak berhasil direset ke default.');
+                    }}
+                    className="flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200 cursor-pointer"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    <span>Reset Semua BG Kotak ({Object.keys(visualSettings.boxBgs).length})</span>
+                  </button>
+                )}
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {MODULE_BANNER_LIST.map(mod => {
-                const customUrl = visualSettings?.perModuleBannerBgs?.[mod.key];
+                const customUrl =
+                  visualSettings?.boxBgs?.[`banner_${mod.key}`] ||
+                  visualSettings?.moduleBannerBgs?.[mod.key] ||
+                  visualSettings?.perModuleBannerBgs?.[mod.key];
                 const effectiveUrl =
-                  customUrl || visualSettings?.moduleBannerBgUrl || visualSettings?.loginBgUrl || null;
+                  customUrl ||
+                  visualSettings?.globalBannerBgUrl ||
+                  visualSettings?.moduleBannerBgUrl ||
+                  null;
 
                 return (
                   <div
@@ -947,6 +1033,27 @@ export const SettingsModule: React.FC = () => {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Bottom Action Bar: Save All Visual & Background Settings */}
+            <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                <span className="font-bold text-slate-800 dark:text-slate-200">Status Sinkronisasi Tema Visual:</span>{' '}
+                Seluruh perubahan Logo, Live Wallpaper, Background Menu, dan Background per-kotak disimpan ke Database Cloud.
+              </div>
+              <button
+                type="button"
+                onClick={handleExplicitSaveVisualSettings}
+                disabled={isSavingVisuals}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#132550] to-[#1D4ED8] border border-[#D4AF37]/60 px-6 py-3 text-xs font-extrabold text-white shadow-md hover:brightness-110 transition-all cursor-pointer disabled:opacity-50"
+              >
+                <Save className="h-4 w-4 text-[#FDE047]" />
+                <span>
+                  {isSavingVisuals
+                    ? 'Menyimpan Pengaturan...'
+                    : 'Simpan Semua Pengaturan Visual & Background'}
+                </span>
+              </button>
             </div>
           </div>
         </div>

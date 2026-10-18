@@ -32,6 +32,7 @@ import {
   PklVisitRecord,
   PklStudentReportItem,
   VisualSettings,
+  SchoolSettings,
   LessonSchedule,
 } from '../types';
 import {
@@ -73,6 +74,7 @@ export interface SyncCallbacks {
   onPklVisitsChange?: (data: PklVisitRecord[]) => void;
   onPklReportsChange?: (data: PklStudentReportItem[]) => void;
   onVisualSettingsChange?: (data: VisualSettings) => void;
+  onSchoolSettingsChange?: (data: SchoolSettings) => void;
   onLessonSchedulesChange?: (data: LessonSchedule[]) => void;
   onStudentReportsMapChange?: (data: Record<string, any>) => void;
   onSyncStatusChange?: (status: { isConnected: boolean; isSyncing: boolean; lastSync: Date; error?: string }) => void;
@@ -652,6 +654,27 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     }
   }
 
+  // 24. School Identity & Academic Configuration Settings
+  if (callbacks.onSchoolSettingsChange) {
+    try {
+      const unsubSchoolSettings = onSnapshot(
+        doc(db, 'settings', 'school_identity'),
+        docSnap => {
+          if (docSnap.exists()) {
+            callbacks.onSchoolSettingsChange?.(docSnap.data() as SchoolSettings);
+            handleUpdate();
+          }
+        },
+        error => {
+          handleFirestoreError(error, OperationType.GET, 'settings/school_identity');
+        }
+      );
+      unsubscribers.push(unsubSchoolSettings);
+    } catch (err) {
+      console.error('Error attaching school_identity listener:', err);
+    }
+  }
+
   return () => {
     unsubscribers.forEach(u => u());
   };
@@ -660,7 +683,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
 // Direct Firestore write mutations
 export async function firestoreAddStudent(student: Student): Promise<void> {
   try {
-    await setDoc(doc(db, 'students', student.id), student);
+    await setDoc(doc(db, 'students', student.id), sanitizeForFirestore(student));
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `students/${student.id}`);
   }
@@ -668,7 +691,7 @@ export async function firestoreAddStudent(student: Student): Promise<void> {
 
 export async function firestoreUpdateStudent(id: string, updates: Partial<Student>): Promise<void> {
   try {
-    await updateDoc(doc(db, 'students', id), updates);
+    await setDoc(doc(db, 'students', id), sanitizeForFirestore(updates), { merge: true });
   } catch (err) {
     handleFirestoreError(err, OperationType.UPDATE, `students/${id}`);
   }
@@ -686,7 +709,7 @@ export async function firestoreBatchImportStudents(students: Student[]): Promise
   try {
     const batch = writeBatch(db);
     students.forEach(std => {
-      batch.set(doc(db, 'students', std.id), std);
+      batch.set(doc(db, 'students', std.id), sanitizeForFirestore(std));
     });
     await batch.commit();
   } catch (err) {
@@ -696,7 +719,7 @@ export async function firestoreBatchImportStudents(students: Student[]): Promise
 
 export async function firestoreAddTeacher(teacher: Teacher): Promise<void> {
   try {
-    await setDoc(doc(db, 'teachers', teacher.id), teacher);
+    await setDoc(doc(db, 'teachers', teacher.id), sanitizeForFirestore(teacher));
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `teachers/${teacher.id}`);
   }
@@ -704,7 +727,7 @@ export async function firestoreAddTeacher(teacher: Teacher): Promise<void> {
 
 export async function firestoreUpdateTeacher(id: string, updates: Partial<Teacher>): Promise<void> {
   try {
-    await updateDoc(doc(db, 'teachers', id), updates);
+    await setDoc(doc(db, 'teachers', id), sanitizeForFirestore(updates), { merge: true });
   } catch (err) {
     handleFirestoreError(err, OperationType.UPDATE, `teachers/${id}`);
   }
@@ -720,7 +743,7 @@ export async function firestoreDeleteTeacher(id: string): Promise<void> {
 
 export async function firestoreAddClass(cls: ClassRoom): Promise<void> {
   try {
-    await setDoc(doc(db, 'classes', cls.id), cls);
+    await setDoc(doc(db, 'classes', cls.id), sanitizeForFirestore(cls));
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `classes/${cls.id}`);
   }
@@ -728,7 +751,7 @@ export async function firestoreAddClass(cls: ClassRoom): Promise<void> {
 
 export async function firestoreUpdateClass(id: string, updates: Partial<ClassRoom>): Promise<void> {
   try {
-    await updateDoc(doc(db, 'classes', id), updates);
+    await setDoc(doc(db, 'classes', id), sanitizeForFirestore(updates), { merge: true });
   } catch (err) {
     handleFirestoreError(err, OperationType.UPDATE, `classes/${id}`);
   }
@@ -744,7 +767,7 @@ export async function firestoreDeleteClass(id: string): Promise<void> {
 
 export async function firestoreAddSubject(sub: Subject): Promise<void> {
   try {
-    await setDoc(doc(db, 'subjects', sub.id), sub);
+    await setDoc(doc(db, 'subjects', sub.id), sanitizeForFirestore(sub));
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `subjects/${sub.id}`);
   }
@@ -752,7 +775,7 @@ export async function firestoreAddSubject(sub: Subject): Promise<void> {
 
 export async function firestoreUpdateSubject(id: string, updates: Partial<Subject>): Promise<void> {
   try {
-    await updateDoc(doc(db, 'subjects', id), updates);
+    await setDoc(doc(db, 'subjects', id), sanitizeForFirestore(updates), { merge: true });
   } catch (err) {
     handleFirestoreError(err, OperationType.UPDATE, `subjects/${id}`);
   }
@@ -768,7 +791,7 @@ export async function firestoreDeleteSubject(id: string): Promise<void> {
 
 export async function firestoreAddMajor(maj: Major): Promise<void> {
   try {
-    await setDoc(doc(db, 'majors', maj.id), maj);
+    await setDoc(doc(db, 'majors', maj.id), sanitizeForFirestore(maj));
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `majors/${maj.id}`);
   }
@@ -776,7 +799,7 @@ export async function firestoreAddMajor(maj: Major): Promise<void> {
 
 export async function firestoreUpdateMajor(id: string, updates: Partial<Major>): Promise<void> {
   try {
-    await updateDoc(doc(db, 'majors', id), updates);
+    await setDoc(doc(db, 'majors', id), sanitizeForFirestore(updates), { merge: true });
   } catch (err) {
     handleFirestoreError(err, OperationType.UPDATE, `majors/${id}`);
   }
@@ -792,7 +815,7 @@ export async function firestoreDeleteMajor(id: string): Promise<void> {
 
 export async function firestoreAddAcademicYear(year: AcademicYear): Promise<void> {
   try {
-    await setDoc(doc(db, 'academicYears', year.id), year);
+    await setDoc(doc(db, 'academicYears', year.id), sanitizeForFirestore(year));
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `academicYears/${year.id}`);
   }
@@ -810,7 +833,7 @@ export async function firestoreSetActiveAcademicYear(years: AcademicYear[], targ
   try {
     const batch = writeBatch(db);
     years.forEach(y => {
-      batch.update(doc(db, 'academicYears', y.id), { isActive: y.id === targetId });
+      batch.set(doc(db, 'academicYears', y.id), { isActive: y.id === targetId }, { merge: true });
     });
     await batch.commit();
   } catch (err) {
@@ -824,9 +847,9 @@ export async function firestoreSaveAttendance(
 ): Promise<void> {
   try {
     const batch = writeBatch(db);
-    batch.set(doc(db, 'attendanceSessions', session.id), session);
+    batch.set(doc(db, 'attendanceSessions', session.id), sanitizeForFirestore(session));
     records.forEach(rec => {
-      batch.set(doc(db, 'attendanceRecords', rec.id), rec);
+      batch.set(doc(db, 'attendanceRecords', rec.id), sanitizeForFirestore(rec));
     });
     await batch.commit();
   } catch (err) {
@@ -840,9 +863,9 @@ export async function firestoreSaveAssessment(
 ): Promise<void> {
   try {
     const batch = writeBatch(db);
-    batch.set(doc(db, 'assessments', assessment.id), assessment);
+    batch.set(doc(db, 'assessments', assessment.id), sanitizeForFirestore(assessment));
     scores.forEach(sc => {
-      batch.set(doc(db, 'assessmentScores', sc.id), sc);
+      batch.set(doc(db, 'assessmentScores', sc.id), sanitizeForFirestore(sc));
     });
     await batch.commit();
   } catch (err) {
@@ -852,7 +875,7 @@ export async function firestoreSaveAssessment(
 
 export async function firestoreAddUser(user: User): Promise<void> {
   try {
-    await setDoc(doc(db, 'users', user.id), user);
+    await setDoc(doc(db, 'users', user.id), sanitizeForFirestore(user));
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `users/${user.id}`);
   }
@@ -860,10 +883,14 @@ export async function firestoreAddUser(user: User): Promise<void> {
 
 export async function firestoreUpdateUser(userId: string, updates: Partial<User>): Promise<void> {
   try {
-    await updateDoc(doc(db, 'users', userId), {
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    });
+    await setDoc(
+      doc(db, 'users', userId),
+      sanitizeForFirestore({
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      }),
+      { merge: true }
+    );
   } catch (err) {
     handleFirestoreError(err, OperationType.UPDATE, `users/${userId}`);
   }
@@ -992,7 +1019,9 @@ export async function forceReseedFirestore(): Promise<{ success: boolean; count:
 }
 
 function sanitizeForFirestore<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj));
+  return JSON.parse(
+    JSON.stringify(obj, (_key, value) => (value === undefined ? null : value))
+  );
 }
 
 // Attendance Cascade Delete & Full Recap Sync
@@ -1119,9 +1148,33 @@ export async function firestoreClearAllPklData(
 
 export async function firestoreSaveVisualSettings(settings: VisualSettings): Promise<void> {
   try {
-    await setDoc(doc(db, 'settings', 'visual_theme'), sanitizeForFirestore(settings));
+    const MAX_FIELD_LEN = 700_000;
+    const safeSettings: VisualSettings = {
+      ...settings,
+      loginBgUrl:
+        settings.loginBgUrl && settings.loginBgUrl.length > MAX_FIELD_LEN
+          ? null
+          : settings.loginBgUrl,
+      menuBgUrl:
+        settings.menuBgUrl && settings.menuBgUrl.length > MAX_FIELD_LEN
+          ? null
+          : settings.menuBgUrl,
+      globalBannerBgUrl:
+        settings.globalBannerBgUrl && settings.globalBannerBgUrl.length > MAX_FIELD_LEN
+          ? null
+          : settings.globalBannerBgUrl,
+    };
+    await setDoc(doc(db, 'settings', 'visual_theme'), sanitizeForFirestore(safeSettings));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, 'settings/visual_theme');
+  }
+}
+
+export async function firestoreSaveSchoolSettings(settings: SchoolSettings): Promise<void> {
+  try {
+    await setDoc(doc(db, 'settings', 'school_identity'), sanitizeForFirestore(settings), { merge: true });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'settings/school_identity');
   }
 }
 

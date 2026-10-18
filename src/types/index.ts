@@ -23,6 +23,7 @@ export interface User {
   password?: string;
   isActive: boolean;
   createdAt: string;
+  lastLogin?: string;
 }
 
 export type AttendanceStatus = 'H' | 'S' | 'I' | 'A' | 'T'; // Hadir, Sakit, Izin, Alpa, Terlambat
@@ -44,6 +45,8 @@ export interface Student {
   status: 'aktif' | 'lulus' | 'mutasi' | 'keluar';
   password?: string;
   photoURL?: string;
+  name?: string;
+  enrollmentDate?: string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -387,8 +390,35 @@ export interface VisualSettings {
   menuBgOpacity?: number;
   ambientDarkMode?: boolean;
   globalBannerBgUrl: string | null;
+  moduleBannerBgUrl?: string | null;
   bannerOverlayOpacity: number;
   moduleBannerBgs: Record<string, string>;
+  perModuleBannerBgs?: Record<string, string>;
+  boxBgs?: Record<string, string>;
+  updatedAt?: string;
+}
+
+export interface SchoolSettings {
+  schoolName: string;
+  npsn: string;
+  nss?: string;
+  foundationName?: string;
+  accreditation: string;
+  headmaster?: string;
+  headmasterNip?: string;
+  principalName?: string;
+  principalNip?: string;
+  schoolPhone?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  address: string;
+  curriculum?: string;
+  defaultKkm?: number;
+  maxAlphaWarning?: number;
+  lateToleranceMinutes?: number;
+  logoUrl?: string;
+  city?: string;
   updatedAt?: string;
 }
 
@@ -401,12 +431,13 @@ export interface LessonSchedule {
   className: string;
   subjectId: string;
   subjectName: string;
-  subjectCode: string;
+  subjectCode?: string;
   teacherId: string;
   teacherName: string;
-  teacherNip: string;
+  teacherNip?: string;
   room: string;
-  semester: 'ganjil' | 'genap';
-  academicYear: string;
-  createdAt: string;
+  semester?: 'ganjil' | 'genap';
+  academicYear?: string;
+  createdAt?: string;
 }
+

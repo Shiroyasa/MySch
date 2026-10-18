@@ -108,7 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
     // GROUP 2: ADMINISTRASI PKL & DUDI
     {
-      groupTitle: 'ADMINISTRASI PKL & DUDI',
+      groupTitle: 'ADMINISTRASI PKL',
       roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah', 'siswa'],
       items: [
         {
@@ -116,8 +116,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: 'Administrasi PKL',
           icon: Building2,
           roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah', 'siswa'],
-          badge: 'DUDI',
-          badgeStyle: 'border border-[#C8A44B]/60 bg-[#2C2416] text-[#FBBF24]',
         },
       ],
     },

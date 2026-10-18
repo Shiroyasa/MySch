@@ -50,7 +50,12 @@ import {
 } from 'lucide-react';
 import { exportToExcel, exportToCsv, exportToPdf } from '../../utils/exportUtils';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
-import { AcademyHeroBanner, OrnateCard, CharacterMedallion } from '../common/AcademyOrnaments';
+import {
+  AcademyHeroBanner,
+  OrnateCard,
+  CharacterMedallion,
+  AcademyCornerBadge,
+} from '../common/AcademyOrnaments';
 import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 
 export const PklModule: React.FC = () => {
@@ -261,9 +266,9 @@ export const PklModule: React.FC = () => {
 
   // LOAD SAMPLE DATA TEMPLATE (Synced with Firestore Database)
   const handleLoadSampleData = () => {
-    loadSamplePklData(sampleIndustryPartners, samplePklVisits, samplePklReports);
+    loadSamplePklData();
     setExpandedPartnerId(sampleIndustryPartners[0]?.id || null);
-    showToast('Template data kemitraan DUDI & PKL berhasil dimuat dan disimpan ke Database Cloud!');
+    showToast('Template data kemitraan & PKL berhasil dimuat dan disimpan ke Database Cloud!');
   };
 
   // CRUD 1: PARTNER (CREATE, UPDATE, DELETE)
@@ -960,8 +965,9 @@ export const PklModule: React.FC = () => {
 
       {/* Royal Academy Banner */}
       <AcademyHeroBanner
-        kicker="MANAJEMEN HUBUNGAN INDUSTRI & VOKASI (DUDI)"
-        title="ADMINISTRASI PKL & KEMITRAAN DUDI"
+        moduleKey="pkl"
+        kicker="MANAJEMEN HUBUNGAN INDUSTRI & PRAKERIN"
+        title="ADMINISTRASI PRAKTIK KERJA LAPANGAN (PKL)"
         subtitle="Kelola database perusahaan mitra dunia usaha & industri, dokumen MoU/PKS, penempatan siswa, supervisi kunjungan, serta rekapitulasi nilai PKL."
         icon={Building2}
         rightContent={
@@ -979,10 +985,10 @@ export const PklModule: React.FC = () => {
               <button
                 onClick={handleLoadSampleData}
                 className="flex items-center gap-1.5 rounded-xl border border-emerald-400/40 bg-emerald-950/70 py-2 px-3 text-xs font-bold text-emerald-200 hover:bg-emerald-900/80 cursor-pointer transition-colors"
-                title="Muat contoh data mitra DUDI & penempatan PKL"
+                title="Muat contoh data mitra industri & penempatan PKL"
               >
                 <Sparkles className="h-3.5 w-3.5 text-[#EAB308]" />
-                <span>Muat Contoh DUDI</span>
+                <span>Muat Contoh Data</span>
               </button>
             )}
 
@@ -991,13 +997,13 @@ export const PklModule: React.FC = () => {
               className="flex items-center gap-1.5 rounded-xl bg-[#2563EB] py-2 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
-              <span>Tambah Mitra DUDI</span>
+              <span>Tambah Instansi Mitra</span>
             </button>
 
             <button
               onClick={() => {
                 if (partners.length === 0) {
-                  showToast('Tambahkan mitra DUDI terlebih dahulu sebelum menjadwalkan supervisi.');
+                  showToast('Tambahkan instansi mitra terlebih dahulu sebelum menjadwalkan supervisi.');
                   return;
                 }
                 setShowAddVisitModal(true);
@@ -1011,89 +1017,233 @@ export const PklModule: React.FC = () => {
         }
       />
 
-      {/* Top 4 Ornate Key Metrics Bar */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <OrnateCard className="p-5">
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
-                <Building2 className="h-3.5 w-3.5 text-blue-600" /> Mitra DUDI Aktif
-              </span>
-              <p
-                className="text-3xl font-black text-slate-900 dark:text-white mt-2"
-                style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
-              >
-                {partners.length}
-              </p>
+      {/* Top 4 Ornate Key Metrics Bar (Stationary In-Place 3D Flipcard & Per-Box BG Changer) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+        <OrnateCard
+          boxId="pkl_metric_partners"
+          className="p-4"
+          minFlipHeight="min-h-[172px]"
+          flipBack={
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="pr-16">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 block truncate">
+                    ✦ Detail Instansi PKL
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Instansi</span>
+                    <span className="font-black text-cyan-300 text-[11px] leading-tight block mt-0.5">
+                      {partners.length} Mitra
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Kuota PKL</span>
+                    <span className="font-black text-amber-300 text-[11px] leading-tight block mt-0.5">
+                      {totalCapacity} Siswa
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-extrabold text-[#F3D77D]">
+                <span>Sektor: {Math.max(0, sectors.length - 1)} Bidang</span>
+                <span>Terverifikasi</span>
+              </div>
             </div>
-            <CharacterMedallion variant="guild" />
-          </div>
-          <div className="mt-3 flex items-center justify-between text-[11px] font-bold text-emerald-600">
-            <span>Perusahaan Terafiliasi</span>
-            <span>Aktif</span>
+          }
+        >
+          <div className="flex flex-col justify-between h-full">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <AcademyCornerBadge text="MITRA • INSTANSI" className="mb-1.5" />
+                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 truncate">
+                  <Building2 className="h-3.5 w-3.5 text-blue-600 shrink-0" /> Instansi Penempatan
+                </span>
+                <p
+                  className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 leading-tight"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  {partners.length}
+                </p>
+              </div>
+              <CharacterMedallion variant="guild" />
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+              <span>Perusahaan Terafiliasi</span>
+              <span>Aktif</span>
+            </div>
           </div>
         </OrnateCard>
 
-        <OrnateCard className="p-5">
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
-                <Users className="h-3.5 w-3.5 text-indigo-600" /> Siswa Sedang PKL
-              </span>
-              <p
-                className="text-3xl font-black text-slate-900 dark:text-white mt-2"
-                style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
-              >
-                {totalActiveStudents}
-              </p>
+        <OrnateCard
+          boxId="pkl_metric_students"
+          className="p-4"
+          minFlipHeight="min-h-[172px]"
+          flipBack={
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="pr-16">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-indigo-300 block truncate">
+                    ✦ Rasio Penempatan
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Siswa Aktif</span>
+                    <span className="font-black text-emerald-300 text-[11px] leading-tight block mt-0.5">
+                      {totalActiveStudents} Siswa
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Keterisian</span>
+                    <span className="font-black text-indigo-300 text-[11px] leading-tight block mt-0.5">
+                      {totalCapacity > 0 ? Math.round((totalActiveStudents / totalCapacity) * 100) : 0}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-extrabold text-[#F3D77D]">
+                <span>Total Kuota: {totalCapacity}</span>
+                <span>Aktif</span>
+              </div>
             </div>
-            <CharacterMedallion variant="cadet" />
-          </div>
-          <div className="mt-3 flex items-center justify-between text-[11px] font-bold text-blue-600">
-            <span>Dari {totalCapacity} Kuota Tersedia</span>
-            <span>Terdata</span>
+          }
+        >
+          <div className="flex flex-col justify-between h-full">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <AcademyCornerBadge text="PESERTA • PRAKERIN" className="mb-1.5" />
+                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 truncate">
+                  <Users className="h-3.5 w-3.5 text-indigo-600 shrink-0" /> Siswa Sedang PKL
+                </span>
+                <p
+                  className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 leading-tight"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  {totalActiveStudents}
+                </p>
+              </div>
+              <CharacterMedallion variant="cadet" />
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-bold text-blue-600 dark:text-cyan-400">
+              <span>Dari {totalCapacity} Kuota Tersedia</span>
+              <span>Terdata</span>
+            </div>
           </div>
         </OrnateCard>
 
-        <OrnateCard className="p-5">
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
-                <FileCheck2 className="h-3.5 w-3.5 text-emerald-600" /> Kerja Sama MoU/PKS
-              </span>
-              <p
-                className="text-3xl font-black text-slate-900 dark:text-white mt-2"
-                style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
-              >
-                {activeMousCount}
-              </p>
+        <OrnateCard
+          boxId="pkl_metric_mou"
+          className="p-4"
+          minFlipHeight="min-h-[172px]"
+          flipBack={
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="pr-16">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300 block truncate">
+                    ✦ Legalitas MoU / PKS
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">MoU Aktif</span>
+                    <span className="font-black text-emerald-300 text-[11px] leading-tight block mt-0.5">
+                      {activeMousCount} Dokumen
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Cakupan</span>
+                    <span className="font-black text-amber-300 text-[11px] leading-tight block mt-0.5">
+                      {partners.length > 0 ? Math.round((activeMousCount / partners.length) * 100) : 0}% Mitra
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-extrabold text-[#F3D77D]">
+                <span>Status Dokumen</span>
+                <span>Berlaku</span>
+              </div>
             </div>
-            <CharacterMedallion variant="scholar" />
-          </div>
-          <div className="mt-3 flex items-center justify-between text-[11px] font-bold text-emerald-600">
-            <span>Berstatus Sah &amp; Berlaku</span>
-            <span>Terverifikasi</span>
+          }
+        >
+          <div className="flex flex-col justify-between h-full">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <AcademyCornerBadge text="DOKUMEN • KERJA SAMA" className="mb-1.5" />
+                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 truncate">
+                  <FileCheck2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Kerja Sama MoU/PKS
+                </span>
+                <p
+                  className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 leading-tight"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  {activeMousCount}
+                </p>
+              </div>
+              <CharacterMedallion variant="scholar" />
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+              <span>Berstatus Sah &amp; Berlaku</span>
+              <span>Terverifikasi</span>
+            </div>
           </div>
         </OrnateCard>
 
-        <OrnateCard className="p-5">
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
-                <Clock className="h-3.5 w-3.5 text-purple-600" /> Supervisi Kunjungan
-              </span>
-              <p
-                className="text-3xl font-black text-slate-900 dark:text-white mt-2"
-                style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
-              >
-                {visits.length}
-              </p>
+        <OrnateCard
+          boxId="pkl_metric_visits"
+          className="p-4"
+          minFlipHeight="min-h-[172px]"
+          flipBack={
+            <div className="flex flex-col justify-between h-full">
+              <div>
+                <div className="pr-16">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-purple-300 block truncate">
+                    ✦ Supervisi Pembimbing
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Kunjungan</span>
+                    <span className="font-black text-purple-300 text-[11px] leading-tight block mt-0.5">
+                      {visits.length} Sesi
+                    </span>
+                  </div>
+                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
+                    <span className="text-slate-300 block text-[10px] leading-tight">Laporan</span>
+                    <span className="font-black text-cyan-300 text-[11px] leading-tight block mt-0.5">
+                      {studentReports.length} Siswa
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-extrabold text-[#F3D77D]">
+                <span>Monitoring Lapangan</span>
+                <span>Tersinkron</span>
+              </div>
             </div>
-            <CharacterMedallion variant="aegis" />
-          </div>
-          <div className="mt-3 flex items-center justify-between text-[11px] font-bold text-purple-600">
-            <span>Monitoring Terjadwal</span>
-            <span>DUDI</span>
+          }
+        >
+          <div className="flex flex-col justify-between h-full">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <AcademyCornerBadge text="AGENDA • MONITORING" className="mb-1.5" />
+                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 truncate">
+                  <Clock className="h-3.5 w-3.5 text-purple-600 shrink-0" /> Supervisi Kunjungan
+                </span>
+                <p
+                  className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 leading-tight"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  {visits.length}
+                </p>
+              </div>
+              <CharacterMedallion variant="aegis" />
+            </div>
+            <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-bold text-purple-600 dark:text-purple-400">
+              <span>Monitoring Terjadwal</span>
+              <span>Aktif</span>
+            </div>
           </div>
         </OrnateCard>
       </div>
@@ -1109,7 +1259,7 @@ export const PklModule: React.FC = () => {
           }`}
         >
           <Building2 className="h-4 w-4" />
-          <span>A. Database Mitra Industri / DUDI</span>
+          <span>A. Database Instansi Mitra PKL</span>
         </button>
 
         <button
@@ -2075,12 +2225,11 @@ export const PklModule: React.FC = () => {
                               <div className="flex items-center justify-center gap-1.5">
                                 <button
                                   onClick={() => {
-                                    const updated = studentReports.map(rep =>
-                                      rep.id === r.id
-                                        ? { ...rep, submissionStatus: 'sudah_dikumpulkan' as const, submissionDate: new Date().toISOString().split('T')[0] }
-                                        : rep
-                                    );
-                                    saveReports(updated);
+                                    savePklReport({
+                                      ...r,
+                                      submissionStatus: 'sudah_dikumpulkan',
+                                      submissionDate: new Date().toISOString().split('T')[0],
+                                    });
                                     showToast(`Laporan ${r.studentName} ditandai SUDAH DIKUMPULKAN.`);
                                   }}
                                   className="rounded-lg bg-emerald-600 px-2 py-1 text-[10px] font-bold text-white hover:bg-emerald-700 cursor-pointer shadow-2xs"
@@ -2311,10 +2460,10 @@ export const PklModule: React.FC = () => {
                             value={r.absorbedStatus}
                             onChange={e => {
                               const newStatus = e.target.value as any;
-                              const updated = studentReports.map(rep =>
-                                rep.id === r.id ? { ...rep, absorbedStatus: newStatus } : rep
-                              );
-                              saveReports(updated);
+                              savePklReport({
+                                ...r,
+                                absorbedStatus: newStatus,
+                              });
                               showToast(`Status alumni ${r.studentName} berhasil diperbarui.`);
                             }}
                             className="rounded-lg border border-slate-200 bg-white p-1 text-[10px] font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
@@ -3518,26 +3667,20 @@ export const PklModule: React.FC = () => {
             <form
               onSubmit={e => {
                 e.preventDefault();
-                const updatedPartners = partners.map(p => {
-                  if (p.id === evaluatingPartner.id) {
-                    return {
-                      ...p,
-                      evaluation: {
-                        rating: evalForm.rating,
-                        workCultureScore: evalForm.workCultureScore,
-                        guidanceScore: evalForm.guidanceScore,
-                        facilityScore: evalForm.facilityScore,
-                        curriculumRelevanceScore: evalForm.curriculumRelevanceScore,
-                        recommendation: evalForm.recommendation,
-                        notes: evalForm.notes,
-                        evaluatorName: 'Wakasek Hubungan Industri & Tim Penilai',
-                        evaluatedAt: new Date().toISOString().split('T')[0],
-                      },
-                    };
-                  }
-                  return p;
+                savePklPartner({
+                  ...evaluatingPartner,
+                  evaluation: {
+                    rating: evalForm.rating,
+                    workCultureScore: evalForm.workCultureScore,
+                    guidanceScore: evalForm.guidanceScore,
+                    facilityScore: evalForm.facilityScore,
+                    curriculumRelevanceScore: evalForm.curriculumRelevanceScore,
+                    recommendation: evalForm.recommendation,
+                    notes: evalForm.notes,
+                    evaluatorName: 'Wakasek Hubungan Industri & Tim Penilai',
+                    evaluatedAt: new Date().toISOString().split('T')[0],
+                  },
                 });
-                savePartners(updatedPartners);
                 setShowEvaluationModal(false);
                 showToast(`Evaluasi perusahaan "${evaluatingPartner.name}" berhasil disimpan.`);
               }}

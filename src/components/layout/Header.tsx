@@ -345,8 +345,8 @@ export const Header: React.FC<{ onToggleMobileSidebar: () => void }> = ({ onTogg
               <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight max-w-[140px] truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 {currentUser.displayName}
               </p>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                {roleLabels[currentRole]?.label}
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium max-w-[140px] truncate">
+                {currentUser.email}
               </p>
             </div>
           </button>

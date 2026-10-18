@@ -1,9 +1,10 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { LiveWallpaperPresetLayer, isVideoUrl } from './SkyborneCastleBackground';
+import { LiveWallpaperPresetLayer, SkyborneCastleBackground, isVideoUrl } from './SkyborneCastleBackground';
 
 export const AnimeBackground: React.FC = () => {
   const { darkMode, visualSettings } = useApp();
+  const [mediaError, setMediaError] = React.useState(false);
 
   const menuBgType = visualSettings?.menuBgType || 'default';
   const menuBgUrl = visualSettings?.menuBgUrl || null;
@@ -11,25 +12,32 @@ export const AnimeBackground: React.FC = () => {
   const ambientDark = visualSettings?.ambientDarkMode !== false;
   const rawOpacity = typeof visualSettings?.menuBgOpacity === 'number' ? visualSettings.menuBgOpacity : 45;
 
-  // Ambient source: if menu has its own bg/live wallpaper, use it; in Ambient Dark Mode, can also reflect loginBgUrl ambience
-  const effectiveMediaUrl = menuBgUrl || (darkMode && ambientDark ? visualSettings?.loginBgUrl : null);
-  const effectiveIsLivePreset =
-    menuBgType === 'live_preset' ||
-    (darkMode && ambientDark && menuBgType === 'default' && visualSettings?.loginBgType === 'live_preset');
-  const effectivePreset =
-    menuBgType === 'live_preset'
-      ? menuLivePreset
-      : visualSettings?.loginLivePreset || 'starlight_castle';
+  const hasCustomMenuMedia = Boolean(
+    menuBgType !== 'default' &&
+      menuBgType !== 'live_preset' &&
+      menuBgUrl &&
+      typeof menuBgUrl === 'string' &&
+      menuBgUrl.trim().length > 0 &&
+      !mediaError
+  );
+
+  React.useEffect(() => {
+    setMediaError(false);
+  }, [menuBgUrl, menuBgType, menuLivePreset]);
+
+  const effectivePreset = menuLivePreset || 'starlight_castle';
 
   // Ambient palette adaptation based on active preset or wallpaper
   const ambientTint =
     effectivePreset === 'celestial_aurora'
-      ? 'from-[#041824]/90 via-[#062c28]/82 to-[#071526]/92'
+      ? 'from-[#041824]/92 via-[#062c28]/86 to-[#071526]/94'
       : effectivePreset === 'golden_sanctuary'
-      ? 'from-[#181006]/90 via-[#291707]/82 to-[#11152c]/92'
+      ? 'from-[#181006]/92 via-[#291707]/86 to-[#11152c]/94'
       : effectivePreset === 'cyber_emerald'
-      ? 'from-[#020c1b]/90 via-[#052925]/82 to-[#041226]/92'
-      : 'from-[#060d21]/88 via-[#0c1938]/80 to-[#091226]/90';
+      ? 'from-[#020c1b]/92 via-[#052925]/86 to-[#041226]/94'
+      : 'from-[#060d21]/92 via-[#0c1938]/85 to-[#091226]/94';
+
+  const normalizedOpacity = Math.max(0.18, Math.min(0.92, rawOpacity / 100));
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none" aria-hidden="true">
@@ -40,51 +48,74 @@ export const AnimeBackground: React.FC = () => {
         }`}
       />
 
-      {/* 2. Menu Live Wallpaper / Custom Menu Background Layer */}
-      {effectiveIsLivePreset && (
+      {/* 2A. Menu Live Wallpaper Preset Layer */}
+      {(menuBgType === 'live_preset' || (hasCustomMenuMedia && mediaError)) && (
         <div
-          className="absolute inset-0 transition-opacity duration-700"
+          className="absolute inset-0 transition-opacity duration-500"
           style={{
-            opacity: darkMode ? Math.min(0.85, (rawOpacity + 25) / 100) : Math.min(0.45, rawOpacity / 100),
+            opacity: darkMode
+              ? Math.min(0.9, normalizedOpacity + 0.2)
+              : Math.min(0.75, normalizedOpacity + 0.15),
           }}
         >
           <LiveWallpaperPresetLayer preset={effectivePreset} />
         </div>
       )}
 
-      {effectiveMediaUrl && (
+      {/* 2B. Custom Image or Video Live Wallpaper for Menu */}
+      {hasCustomMenuMedia && menuBgUrl && (
         <div
-          className="absolute inset-0 transition-opacity duration-700"
+          className="absolute inset-0 transition-opacity duration-500"
           style={{
-            opacity: darkMode ? Math.min(0.75, (rawOpacity + 15) / 100) : Math.min(0.55, rawOpacity / 100),
+            opacity: darkMode
+              ? Math.min(0.85, normalizedOpacity + 0.15)
+              : Math.min(0.8, normalizedOpacity + 0.1),
           }}
         >
-          {menuBgType === 'video' || isVideoUrl(effectiveMediaUrl) ? (
+          {menuBgType === 'video' || isVideoUrl(menuBgUrl) ? (
             <video
-              src={effectiveMediaUrl}
+              key={menuBgUrl}
+              src={menuBgUrl}
               autoPlay
               loop
               muted
               playsInline
-              className={`h-full w-full object-cover object-center ${
-                darkMode && ambientDark && !menuBgUrl ? 'blur-xl scale-110' : ''
-              }`}
+              onError={() => setMediaError(true)}
+              className="h-full w-full object-cover object-center"
             />
           ) : (
             <img
-              src={effectiveMediaUrl}
-              alt="Menu Ambient Background"
+              key={menuBgUrl}
+              src={menuBgUrl}
+              alt="ORBITA Menu Background"
               referrerPolicy="no-referrer"
-              className={`h-full w-full object-cover object-center ${
-                darkMode && ambientDark && !menuBgUrl ? 'blur-xl scale-110' : ''
-              }`}
+              onError={() => setMediaError(true)}
+              className="h-full w-full object-cover object-center"
             />
           )}
           {/* Ambient color-bleed blur layer for rich depth in Dark Mode */}
           {darkMode && ambientDark && (
-            <div
-              className="absolute inset-0 bg-gradient-to-t from-[#060d21]/80 via-[#0b1528]/45 to-[#060d21]/70 backdrop-blur-[2px]"
-            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#060d21]/78 via-[#0b1528]/42 to-[#060d21]/68 backdrop-blur-[1.5px]" />
+          )}
+        </div>
+      )}
+
+      {/* 2C. Default Scenic / Ambient Layer when menuBgType is 'default' (Never blank!) */}
+      {menuBgType === 'default' && (
+        <div
+          className="absolute inset-0 transition-opacity duration-500"
+          style={{
+            opacity: darkMode
+              ? ambientDark
+                ? Math.min(0.42, normalizedOpacity * 0.65)
+                : 0.18
+              : Math.min(0.22, normalizedOpacity * 0.38),
+          }}
+        >
+          {darkMode && ambientDark ? (
+            <LiveWallpaperPresetLayer preset={effectivePreset} />
+          ) : (
+            <SkyborneCastleBackground mode="banner" bgType="default" />
           )}
         </div>
       )}
@@ -131,3 +162,4 @@ export const AnimeBackground: React.FC = () => {
     </div>
   );
 };
+

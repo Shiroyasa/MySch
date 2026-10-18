@@ -598,7 +598,7 @@ export const MasterDataModule: React.FC = () => {
     const tchObj = teachers.find(t => t.id === schTeacherId) || teachers[0];
 
     saveLessonSchedule({
-      id: editingSchedule?.id,
+      id: editingSchedule?.id || `sch-${Date.now()}`,
       day: schDay,
       startTime: schStartTime,
       endTime: schEndTime,
@@ -713,6 +713,7 @@ export const MasterDataModule: React.FC = () => {
 
       {/* Royal Academy Banner & Tabs */}
       <AcademyHeroBanner
+        moduleKey="master-data"
         kicker="GRAND CODEX • BASIS DATA POKOK SEKOLAH"
         title="MASTER DATA MANAJEMEN SEKOLAH"
         subtitle="Pengelolaan terpusat data siswa aktif, tenaga pendidik, rombongan belajar, kompetensi keahlian (jurusan), mata pelajaran, jadwal pelajaran, dan tahun ajaran."

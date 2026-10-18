@@ -138,7 +138,7 @@ export const ReportsModule: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
-      alert('Ukuran file logo maksimal 2MB.');
+      showToast('Ukuran file logo maksimal 2MB.');
       return;
     }
     const reader = new FileReader();
@@ -761,6 +761,7 @@ export const ReportsModule: React.FC = () => {
 
       {/* Royal Academy Banner & Tab Navigation */}
       <AcademyHeroBanner
+        moduleKey="reports"
         kicker="PUSAT DOKUMEN & ARSIP LAPORAN SEKOLAH"
         title="PUSAT PELAPORAN & DOKUMEN RESMI"
         subtitle="Ekspor dokumen resmi PDF & Excel berumus dinamis, kustomisasi kop surat & tanda tangan digital, serta sinkronisasi Google Sheets."

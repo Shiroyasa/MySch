@@ -545,6 +545,7 @@ export const AttendanceModule: React.FC = () => {
         teacherName: signerWaliName,
       },
       `Laporan_Presensi_${currentClass?.name}`,
+      'portrait',
       {
         ...defaultReportConfig,
         leftSignerName: signerWaliName,

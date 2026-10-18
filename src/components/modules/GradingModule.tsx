@@ -792,6 +792,7 @@ export const GradingModule: React.FC = () => {
 
       {/* Royal Academy Banner & Tabs */}
       <AcademyHeroBanner
+        moduleKey="grading"
         kicker="STANDAR PENILAIAN KOMPETENSI VOKASI — ORBITA"
         title="PENILAIAN AKADEMIK & NILAI SISWA"
         subtitle="Pengelolaan bobot penilaian dinamis, kalkulasi leger nilai akhir otomatis, dan penyusunan transkrip rapor siswa yang tersinkron ke Cloud Firestore."

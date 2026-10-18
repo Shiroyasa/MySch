@@ -25,6 +25,9 @@ export const LiveWallpaperPresetLayer: React.FC<{
   preset: LiveWallpaperPreset;
   className?: string;
 }> = ({ preset, className = 'absolute inset-0' }) => {
+  const rawUid = React.useId().replace(/[^a-zA-Z0-9_-]/g, '');
+  const glowId = `glow-${preset}-${rawUid}`;
+
   const themes: Record<
     LiveWallpaperPreset,
     {
@@ -91,7 +94,7 @@ export const LiveWallpaperPresetLayer: React.FC<{
         preserveAspectRatio="xMidYMid slice"
       >
         <defs>
-          <radialGradient id={`glow-${preset}`} cx="50%" cy="50%" r="50%">
+          <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor={t.accentHex} stopOpacity="0.9" />
             <stop offset="100%" stopColor={t.accentHex} stopOpacity="0" />
           </radialGradient>
@@ -135,7 +138,7 @@ export const LiveWallpaperPresetLayer: React.FC<{
           { cx: 1620, cy: 640, r: 3.2, dur: '4.3s', dy: -35 },
         ].map((p, idx) => (
           <g key={idx}>
-            <circle cx={p.cx} cy={p.cy} r={p.r * 4} fill={`url(#glow-${preset})`}>
+            <circle cx={p.cx} cy={p.cy} r={p.r * 4} fill={`url(#${glowId})`}>
               <animate
                 attributeName="cy"
                 values={`${p.cy};${p.cy + p.dy};${p.cy}`}
@@ -175,13 +178,20 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
   livePreset = 'starlight_castle',
   mode = 'fullscreen',
 }) => {
+  const [mediaError, setMediaError] = React.useState(false);
+  const uid = React.useId().replace(/[^a-zA-Z0-9_-]/g, '');
+
+  React.useEffect(() => {
+    setMediaError(false);
+  }, [customBgUrl, bgType, livePreset]);
+
   const containerClass =
     mode === 'banner'
-      ? 'pointer-events-none absolute inset-0 z-0 overflow-hidden select-none'
-      : 'pointer-events-none fixed inset-0 z-0 overflow-hidden select-none';
+      ? 'pointer-events-none absolute inset-0 z-0 overflow-hidden select-none bg-[#0B1528]'
+      : 'pointer-events-none fixed inset-0 z-0 overflow-hidden select-none bg-[#0B1528]';
 
-  // 1. Live Wallpaper Preset Mode
-  if (bgType === 'live_preset' && !customBgUrl) {
+  // 1. Live Wallpaper Preset Mode (Prioritize whenever bgType is 'live_preset', never stuck on old customBgUrl)
+  if (bgType === 'live_preset') {
     return (
       <div className={containerClass} aria-hidden="true">
         <LiveWallpaperPresetLayer preset={livePreset} />
@@ -189,41 +199,62 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
     );
   }
 
-  // 2. Custom Video Live Wallpaper or Custom Image
-  if (customBgUrl) {
+  // 2. Custom Video Live Wallpaper or Custom Image (with automatic fallback if media fails or is blank)
+  const hasCustomMedia = Boolean(
+    customBgUrl &&
+      typeof customBgUrl === 'string' &&
+      customBgUrl.trim().length > 0 &&
+      !mediaError &&
+      (bgType !== 'default' || mode === 'banner')
+  );
+
+  if (hasCustomMedia && customBgUrl) {
     const isVideo = bgType === 'video' || isVideoUrl(customBgUrl);
     return (
       <div className={containerClass} aria-hidden="true">
+        {/* Non-blank fallback gradient while media loads */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(135deg, #060D24 0%, #102554 50%, #1E3A8A 100%)',
+          }}
+        />
         {isVideo ? (
           <video
+            key={customBgUrl}
             src={customBgUrl}
             autoPlay
             loop
             muted
             playsInline
-            className="h-full w-full object-cover object-center scale-[1.01]"
+            onError={() => setMediaError(true)}
+            className="relative z-[1] h-full w-full object-cover object-center scale-[1.01]"
           />
         ) : (
           <img
+            key={customBgUrl}
             src={customBgUrl}
-            alt="Skyborne Academy Background"
+            alt="ORBITA Background"
             referrerPolicy="no-referrer"
-            className="h-full w-full object-cover object-center scale-[1.01] transition-transform duration-700"
+            onError={() => setMediaError(true)}
+            className="relative z-[1] h-full w-full object-cover object-center scale-[1.01] transition-transform duration-700"
           />
         )}
         {/* Subtle atmospheric vignette for legibility */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 z-[2]"
           style={{
             background:
               mode === 'banner'
-                ? 'linear-gradient(90deg, rgba(11, 21, 40, 0.86) 0%, rgba(11, 21, 40, 0.58) 55%, rgba(11, 21, 40, 0.38) 100%)'
+                ? 'linear-gradient(90deg, rgba(11, 21, 40, 0.84) 0%, rgba(11, 21, 40, 0.56) 55%, rgba(11, 21, 40, 0.36) 100%)'
                 : 'radial-gradient(circle at 50% 50%, rgba(12, 24, 56, 0.12) 0%, rgba(10, 18, 42, 0.38) 100%)',
           }}
         />
       </div>
     );
   }
+
+  const g = (name: string) => `${name}-${uid}`;
 
   return (
     <div className={containerClass} aria-hidden="true">
@@ -239,7 +270,7 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
       >
         <defs>
           {/* Sky & Atmosphere Gradients */}
-          <linearGradient id="skyDayGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id={g('skyDayGrad')} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#1A56AC" />
             <stop offset="30%" stopColor="#2E77D0" />
             <stop offset="62%" stopColor="#6BACEB" />
@@ -247,74 +278,74 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
             <stop offset="100%" stopColor="#E1F1FD" />
           </linearGradient>
 
-          <radialGradient id="sunHaze" cx="65%" cy="38%" r="50%">
+          <radialGradient id={g('sunHaze')} cx="65%" cy="38%" r="50%">
             <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.65" />
             <stop offset="45%" stopColor="#BAE6FD" stopOpacity="0.28" />
             <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
           </radialGradient>
 
           {/* Cloud Gradients */}
-          <linearGradient id="cloudPure" x1="0%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id={g('cloudPure')} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.98" />
             <stop offset="70%" stopColor="#F0F7FF" stopOpacity="0.94" />
             <stop offset="100%" stopColor="#BFDBFE" stopOpacity="0.88" />
           </linearGradient>
-          <linearGradient id="cloudShade" x1="0%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id={g('cloudShade')} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#DBEAFE" stopOpacity="0.9" />
             <stop offset="100%" stopColor="#93C5FD" stopOpacity="0.75" />
           </linearGradient>
 
           {/* Snow Mountains */}
-          <linearGradient id="mountainLit" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={g('mountainLit')} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#F8FAFC" />
             <stop offset="55%" stopColor="#BFDBFE" />
             <stop offset="100%" stopColor="#60A5FA" />
           </linearGradient>
-          <linearGradient id="mountainShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id={g('mountainShadow')} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#93C5FD" />
             <stop offset="100%" stopColor="#3B82F6" />
           </linearGradient>
 
           {/* Castle Architecture */}
-          <linearGradient id="castleMarble" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id={g('castleMarble')} x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#FFFFFF" />
             <stop offset="60%" stopColor="#E2E8F0" />
             <stop offset="100%" stopColor="#94A3B8" />
           </linearGradient>
-          <linearGradient id="castleShadowWall" x1="0%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id={g('castleShadowWall')} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#CBD5E1" />
             <stop offset="100%" stopColor="#64748B" />
           </linearGradient>
-          <linearGradient id="spireBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={g('spireBlue')} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#2563EB" />
             <stop offset="50%" stopColor="#1E3A8A" />
             <stop offset="100%" stopColor="#0F172A" />
           </linearGradient>
 
           {/* Royal Banner Fabric & Gold Crest */}
-          <linearGradient id="royalBanner" x1="0%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id={g('royalBanner')} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#0F2557" />
             <stop offset="50%" stopColor="#173578" />
             <stop offset="100%" stopColor="#0A193B" />
           </linearGradient>
-          <linearGradient id="bannerGold" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={g('bannerGold')} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#FDE047" />
             <stop offset="50%" stopColor="#D97706" />
             <stop offset="100%" stopColor="#FEF08A" />
           </linearGradient>
 
           {/* Courtyard Stone & Terrace */}
-          <linearGradient id="courtyardFloor" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={g('courtyardFloor')} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#FFFBEB" />
             <stop offset="55%" stopColor="#F1F5F9" />
             <stop offset="100%" stopColor="#CBD5E1" />
           </linearGradient>
-          <linearGradient id="balustradeStone" x1="0%" y1="0%" x2="0%" y2="100%">
+          <linearGradient id={g('balustradeStone')} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#F8FAFC" />
             <stop offset="40%" stopColor="#CBD5E1" />
             <stop offset="100%" stopColor="#64748B" />
           </linearGradient>
-          <radialGradient id="cyanMagicGlow" cx="50%" cy="50%" r="50%">
+          <radialGradient id={g('cyanMagicGlow')} cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#E0F2FE" stopOpacity="1" />
             <stop offset="45%" stopColor="#38BDF8" stopOpacity="0.75" />
             <stop offset="100%" stopColor="#0284C7" stopOpacity="0" />
@@ -322,8 +353,8 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
         </defs>
 
         {/* 1. SKY BASE & ATMOSPHERIC SUNLIGHT */}
-        <rect width="1920" height="1080" fill="url(#skyDayGrad)" />
-        <rect width="1920" height="1080" fill="url(#sunHaze)" />
+        <rect width="1920" height="1080" fill={`url(#${g('skyDayGrad')})`} />
+        <rect width="1920" height="1080" fill={`url(#${g('sunHaze')})`} />
 
         {/* High Altitude Contrails / Wind Streaks */}
         <path d="M 1400 220 L 1850 60" stroke="#FFFFFF" strokeOpacity="0.45" strokeWidth="2.5" />
@@ -332,17 +363,17 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
         {/* 2. VOLUMETRIC CUMULUS CLOUDS IN UPPER & MID SKY */}
         <g>
           {/* Left Sky Giant Cumulus */}
-          <circle cx="420" cy="240" r="145" fill="url(#cloudShade)" />
-          <circle cx="550" cy="210" r="165" fill="url(#cloudPure)" />
-          <circle cx="380" cy="190" r="130" fill="url(#cloudPure)" />
-          <circle cx="690" cy="280" r="135" fill="url(#cloudPure)" />
-          <circle cx="810" cy="340" r="120" fill="url(#cloudPure)" />
-          <circle cx="940" cy="390" r="110" fill="url(#cloudPure)" />
+          <circle cx="420" cy="240" r="145" fill={`url(#${g('cloudShade')})`} />
+          <circle cx="550" cy="210" r="165" fill={`url(#${g('cloudPure')})`} />
+          <circle cx="380" cy="190" r="130" fill={`url(#${g('cloudPure')})`} />
+          <circle cx="690" cy="280" r="135" fill={`url(#${g('cloudPure')})`} />
+          <circle cx="810" cy="340" r="120" fill={`url(#${g('cloudPure')})`} />
+          <circle cx="940" cy="390" r="110" fill={`url(#${g('cloudPure')})`} />
 
           {/* Right Sky Clouds */}
-          <circle cx="1620" cy="340" r="130" fill="url(#cloudShade)" />
-          <circle cx="1560" cy="310" r="115" fill="url(#cloudPure)" />
-          <circle cx="1740" cy="360" r="125" fill="url(#cloudPure)" />
+          <circle cx="1620" cy="340" r="130" fill={`url(#${g('cloudShade')})`} />
+          <circle cx="1560" cy="310" r="115" fill={`url(#${g('cloudPure')})`} />
+          <circle cx="1740" cy="360" r="125" fill={`url(#${g('cloudPure')})`} />
         </g>
 
         {/* 3. FLOATING SKY ISLANDS (LEFT & RIGHT) */}
@@ -369,24 +400,24 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
 
         {/* 4. DISTANT SNOW-CAPPED ALPINE MOUNTAINS (LEFT HORIZON) */}
         <g>
-          <polygon points="280,580 590,260 890,580" fill="url(#mountainShadow)" />
-          <polygon points="280,580 590,260 640,580" fill="url(#mountainLit)" />
-          <polygon points="540,580 780,330 1040,580" fill="url(#mountainShadow)" />
-          <polygon points="540,580 780,330 810,580" fill="url(#mountainLit)" />
-          <polygon points="160,580 410,320 620,580" fill="url(#mountainLit)" opacity="0.85" />
+          <polygon points="280,580 590,260 890,580" fill={`url(#${g('mountainShadow')})`} />
+          <polygon points="280,580 590,260 640,580" fill={`url(#${g('mountainLit')})`} />
+          <polygon points="540,580 780,330 1040,580" fill={`url(#${g('mountainShadow')})`} />
+          <polygon points="540,580 780,330 810,580" fill={`url(#${g('mountainLit')})`} />
+          <polygon points="160,580 410,320 620,580" fill={`url(#${g('mountainLit')})`} opacity="0.85" />
         </g>
 
         {/* 5. LEFT MIDGROUND ACADEMY TOWN & ARCHED STONE VIADUCT BRIDGES + WATERFALL */}
         <g transform="translate(260, 340)">
           {/* Left Town Buildings & Gothic Roofs */}
-          <rect x="30" y="130" width="190" height="140" fill="url(#castleMarble)" />
-          <polygon points="30,130 125,45 220,130" fill="url(#spireBlue)" />
+          <rect x="30" y="130" width="190" height="140" fill={`url(#${g('castleMarble')})`} />
+          <polygon points="30,130 125,45 220,130" fill={`url(#${g('spireBlue')})`} />
           <polygon points="85,130 125,55 165,130" fill="#F8FAFC" />
           {/* Spires along the left ridge */}
-          <rect x="240" y="110" width="42" height="160" fill="url(#castleMarble)" />
-          <polygon points="261,35 235,112 287,112" fill="url(#spireBlue)" />
-          <rect x="365" y="95" width="38" height="175" fill="url(#castleMarble)" />
-          <polygon points="384,25 360,97 408,97" fill="url(#spireBlue)" />
+          <rect x="240" y="110" width="42" height="160" fill={`url(#${g('castleMarble')})`} />
+          <polygon points="261,35 235,112 287,112" fill={`url(#${g('spireBlue')})`} />
+          <rect x="365" y="95" width="38" height="175" fill={`url(#${g('castleMarble')})`} />
+          <polygon points="384,25 360,97 408,97" fill={`url(#${g('spireBlue')})`} />
 
           {/* Upper Stone Viaduct Bridge */}
           <rect x="220" y="195" width="520" height="22" fill="#E2E8F0" />
@@ -401,7 +432,7 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
           {/* Waterfall Gorge & Lower Grand Bridge */}
           <rect x="295" y="295" width="65" height="145" fill="#E0F2FE" opacity="0.85" />
           <rect x="310" y="295" width="25" height="145" fill="#FFFFFF" opacity="0.9" />
-          <rect x="190" y="275" width="540" height="95" fill="url(#castleShadowWall)" />
+          <rect x="190" y="275" width="540" height="95" fill={`url(#${g('castleShadowWall')})`} />
           {[230, 350, 470, 590].map((x, idx) => (
             <path
               key={idx}
@@ -415,31 +446,31 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
         {/* 6. COLOSSAL MAIN SKYBORNE ACADEMY CATHEDRAL CASTLE (RIGHT-CENTER) */}
         <g transform="translate(960, 15)">
           {/* Central Soaring Grand Spire */}
-          <rect x="285" y="55" width="120" height="480" fill="url(#castleMarble)" />
-          <polygon points="345,-35 275,60 415,60" fill="url(#spireBlue)" />
+          <rect x="285" y="55" width="120" height="480" fill={`url(#${g('castleMarble')})`} />
+          <polygon points="345,-35 275,60 415,60" fill={`url(#${g('spireBlue')})`} />
           {/* Secondary Flanking Towers */}
-          <rect x="195" y="160" width="95" height="390" fill="url(#castleMarble)" />
-          <polygon points="242,40 190,162 295,162" fill="url(#spireBlue)" />
+          <rect x="195" y="160" width="95" height="390" fill={`url(#${g('castleMarble')})`} />
+          <polygon points="242,40 190,162 295,162" fill={`url(#${g('spireBlue')})`} />
 
-          <rect x="400" y="145" width="100" height="405" fill="url(#castleMarble)" />
-          <polygon points="450,25 395,147 505,147" fill="url(#spireBlue)" />
+          <rect x="400" y="145" width="100" height="405" fill={`url(#${g('castleMarble')})`} />
+          <polygon points="450,25 395,147 505,147" fill={`url(#${g('spireBlue')})`} />
 
           {/* Outer Wing Towers */}
-          <rect x="115" y="250" width="85" height="310" fill="url(#castleMarble)" />
-          <polygon points="157,140 110,252 204,252" fill="url(#spireBlue)" />
+          <rect x="115" y="250" width="85" height="310" fill={`url(#${g('castleMarble')})`} />
+          <polygon points="157,140 110,252 204,252" fill={`url(#${g('spireBlue')})`} />
 
-          <rect x="495" y="230" width="90" height="330" fill="url(#castleMarble)" />
-          <polygon points="540,115 490,232 590,232" fill="url(#spireBlue)" />
+          <rect x="495" y="230" width="90" height="330" fill={`url(#${g('castleMarble')})`} />
+          <polygon points="540,115 490,232 590,232" fill={`url(#${g('spireBlue')})`} />
 
           {/* Far Right Wing & Turrets */}
-          <rect x="580" y="340" width="210" height="230" fill="url(#castleMarble)" />
-          <polygon points="580,340 685,260 790,340" fill="url(#spireBlue)" />
-          <rect x="630" y="210" width="46" height="350" fill="url(#castleMarble)" />
-          <polygon points="653,105 625,212 681,212" fill="url(#spireBlue)" />
+          <rect x="580" y="340" width="210" height="230" fill={`url(#${g('castleMarble')})`} />
+          <polygon points="580,340 685,260 790,340" fill={`url(#${g('spireBlue')})`} />
+          <rect x="630" y="210" width="46" height="350" fill={`url(#${g('castleMarble')})`} />
+          <polygon points="653,105 625,212 681,212" fill={`url(#${g('spireBlue')})`} />
 
           {/* Main Cathedral Facade & Grand Rose/Lancet Arch */}
-          <rect x="160" y="310" width="370" height="260" fill="url(#castleMarble)" />
-          <polygon points="345,175 245,315 445,315" fill="url(#spireBlue)" />
+          <rect x="160" y="310" width="370" height="260" fill={`url(#${g('castleMarble')})`} />
+          <polygon points="345,175 245,315 445,315" fill={`url(#${g('spireBlue')})`} />
           <polygon points="345,195 260,315 430,315" fill="#E2E8F0" />
 
           {/* Gothic Arched Windows */}
@@ -450,16 +481,34 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
           <path d="M 315 570 L 315 505 A 30 30 0 0 1 375 505 L 375 570 Z" fill="#1E293B" />
 
           {/* Royal Blue Vertical Banners on Castle Facade */}
-          <polygon points="315,285 375,285 375,455 345,485 315,455" fill="url(#royalBanner)" stroke="url(#bannerGold)" strokeWidth="2.5" />
+          <polygon
+            points="315,285 375,285 375,455 345,485 315,455"
+            fill={`url(#${g('royalBanner')})`}
+            stroke={`url(#${g('bannerGold')})`}
+            strokeWidth="2.5"
+          />
           {/* Golden Wing Emblem on Castle Banner */}
-          <path d="M 345 335 L 355 365 L 370 350 L 360 385 L 345 400 L 330 385 L 320 350 L 335 365 Z" fill="url(#bannerGold)" />
+          <path
+            d="M 345 335 L 355 365 L 370 350 L 360 385 L 345 400 L 330 385 L 320 350 L 335 365 Z"
+            fill={`url(#${g('bannerGold')})`}
+          />
 
           {/* Side Castle Banners */}
-          <polygon points="155,410 180,410 180,510 167,525 155,510" fill="url(#royalBanner)" stroke="url(#bannerGold)" strokeWidth="1.5" />
-          <polygon points="510,410 535,410 535,510 522,525 510,510" fill="url(#royalBanner)" stroke="url(#bannerGold)" strokeWidth="1.5" />
+          <polygon
+            points="155,410 180,410 180,510 167,525 155,510"
+            fill={`url(#${g('royalBanner')})`}
+            stroke={`url(#${g('bannerGold')})`}
+            strokeWidth="1.5"
+          />
+          <polygon
+            points="510,410 535,410 535,510 522,525 510,510"
+            fill={`url(#${g('royalBanner')})`}
+            stroke={`url(#${g('bannerGold')})`}
+            strokeWidth="1.5"
+          />
 
           {/* Glowing Cyan Celestial Astrolabe Sigil Floating on Main Spire */}
-          <circle cx="345" cy="235" r="58" fill="url(#cyanMagicGlow)" />
+          <circle cx="345" cy="235" r="58" fill={`url(#${g('cyanMagicGlow')})`} />
           <circle cx="345" cy="235" r="34" stroke="#E0F2FE" strokeWidth="2.5" />
           <circle cx="345" cy="235" r="22" stroke="#38BDF8" strokeWidth="1.5" strokeDasharray="4 4" />
           <path d="M 345 185 L 352 228 L 395 235 L 352 242 L 345 285 L 338 242 L 295 235 L 338 228 Z" fill="#E0F2FE" />
@@ -468,7 +517,7 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
         {/* 7. MIDGROUND COURTYARD PLAZA, GRAND MARBLE STEPS & MAGICAL FOUNTAIN */}
         <g transform="translate(880, 565)">
           {/* Wide Plaza Floor */}
-          <ellipse cx="390" cy="215" rx="420" ry="115" fill="url(#courtyardFloor)" />
+          <ellipse cx="390" cy="215" rx="420" ry="115" fill={`url(#${g('courtyardFloor')})`} />
           {/* Grand Staircase to Castle */}
           <polygon points="270,95 520,95 575,15 235,15" fill="#F8FAFC" />
           <polygon points="180,175 560,175 520,95 270,95" fill="#E2E8F0" />
@@ -476,7 +525,7 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
           {/* Circular Cyan Magical Fountain */}
           <ellipse cx="365" cy="205" rx="145" ry="42" fill="#0284C7" stroke="#E2E8F0" strokeWidth="6" />
           <ellipse cx="365" cy="205" rx="115" ry="32" fill="#38BDF8" />
-          <circle cx="365" cy="165" r="45" fill="url(#cyanMagicGlow)" />
+          <circle cx="365" cy="165" r="45" fill={`url(#${g('cyanMagicGlow')})`} />
           {/* Fountain Astrolabe Sculpture */}
           <circle cx="365" cy="162" r="24" stroke="#E0F2FE" strokeWidth="3" />
           <ellipse cx="365" cy="162" rx="12" ry="26" stroke="#FFFFFF" strokeWidth="2.5" />
@@ -503,13 +552,13 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
         {/* 8. FOREGROUND DIAGONAL STONE BALUSTRADE TERRACE & WROUGHT-IRON LANTERNS */}
         <g>
           {/* Sunlit Terrace Flagstone Floor (Bottom-Left to Bottom-Center) */}
-          <polygon points="0,750 480,715 1780,985 1780,1080 0,1080" fill="url(#courtyardFloor)" />
+          <polygon points="0,750 480,715 1780,985 1780,1080 0,1080" fill={`url(#${g('courtyardFloor')})`} />
           {/* Architectural Sun & Balustrade Shadows on Terrace Floor */}
           <polygon points="340,735 980,865 760,1080 180,1080" fill="#64748B" opacity="0.28" />
           <polygon points="620,795 1120,895 950,1080 480,1080" fill="#64748B" opacity="0.22" />
 
           {/* Diagonal Gothic Stone Balustrade Wall */}
-          <polygon points="445,675 1920,965 1920,1080 445,765" fill="url(#balustradeStone)" />
+          <polygon points="445,675 1920,965 1920,1080 445,765" fill={`url(#${g('balustradeStone')})`} />
           {/* Top Railing Ledge */}
           <polygon points="435,665 1920,955 1920,975 435,685" fill="#F8FAFC" />
 
@@ -557,14 +606,14 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
           {/* Hanging Royal Blue & Gold Banner */}
           <polygon
             points="10,135 155,135 155,485 82,555 10,485"
-            fill="url(#royalBanner)"
-            stroke="url(#bannerGold)"
+            fill={`url(#${g('royalBanner')})`}
+            stroke={`url(#${g('bannerGold')})`}
             strokeWidth="4"
           />
           {/* Golden Winged Sword Crest */}
           <path
             d="M 82 230 L 94 285 L 135 255 L 115 325 L 82 355 L 49 325 L 29 255 L 70 285 Z"
-            fill="url(#bannerGold)"
+            fill={`url(#${g('bannerGold')})`}
           />
         </g>
 
@@ -578,14 +627,14 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
           {/* Left Royal Blue & Gold Hanging Banner */}
           <polygon
             points="45,0 235,0 215,515 130,610 45,515"
-            fill="url(#royalBanner)"
-            stroke="url(#bannerGold)"
+            fill={`url(#${g('royalBanner')})`}
+            stroke={`url(#${g('bannerGold')})`}
             strokeWidth="5"
           />
           {/* Golden Winged Heraldic Crest on Left Banner */}
           <path
             d="M 135 165 L 152 245 L 200 205 L 175 305 L 135 348 L 95 305 L 70 205 L 118 245 Z"
-            fill="url(#bannerGold)"
+            fill={`url(#${g('bannerGold')})`}
           />
 
           {/* Wooden Scholar Desk & Stack of Two Hardcover Books (Bottom-Left) */}
