@@ -74,9 +74,14 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
   const studentClass = classes.find(c => c.id === student.classId) || classes[0];
   const homeroomTeacher = teachers.find(t => t.id === studentClass.homeroomTeacherId);
 
-  // Student assessments & scores
-  const classAssessments = assessments.filter(a => a.classId === student.classId && a.status === 'dipublikasikan');
+  const {
+    customStudentReports,
+  } = useApp();
+
+  // Student assessments & scores (include all class assessments so draft/published/reset scores sync immediately)
+  const classAssessments = assessments.filter(a => a.classId === student.classId);
   const myScores = assessmentScores.filter(sc => sc.studentId === student.id);
+  const savedCustomReport = customStudentReports?.[student.id];
 
   // Student Attendance Summary (100% synced with Presensi Database)
   const studentRecords = attendanceRecords.filter(r => r.studentId === student.id);
@@ -88,16 +93,17 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
   const totalSessions = hadirCount + sakitCount + izinCount + alpaCount + lateCount;
   const attendanceRate = totalSessions > 0 ? (((hadirCount + lateCount) / totalSessions) * 100).toFixed(1) : '100.0';
 
-  // Subject Grades Computation (Per Profile / Per Mapel)
+  // Subject Grades Computation (Per Profile / Per Mapel - 100% synced with GradingModule & Database)
   const subjectGrades = subjects.map(subj => {
     const subjAssessments = classAssessments.filter(a => a.subjectId === subj.id);
     let weightedSum = 0;
     let totalWeight = 0;
     const components = subjAssessments.map(asm => {
       const sc = myScores.find(s => s.assessmentId === asm.id);
-      const scoreVal = sc ? sc.score : 82;
-      weightedSum += scoreVal * (asm.weight / 100);
-      totalWeight += asm.weight;
+      const scoreVal = sc !== undefined ? Number(sc.score) : 0;
+      const weight = asm.weight > 0 ? asm.weight : 25;
+      weightedSum += scoreVal * weight;
+      totalWeight += weight;
       return {
         id: asm.id,
         title: asm.title,
@@ -105,11 +111,16 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
         weight: asm.weight,
         kkm: asm.kkm,
         score: scoreVal,
-        feedback: sc?.feedback || 'Capaian kompetensi sangat baik dan konsisten',
+        feedback: sc?.feedback || (scoreVal >= asm.kkm ? 'Capaian kompetensi sangat baik dan konsisten' : scoreVal > 0 ? 'Perlu penguatan kompetensi' : 'Nilai belum diinput / direset'),
       };
     });
 
-    const finalScore = totalWeight > 0 ? Math.round(weightedSum / (totalWeight / 100)) : 86;
+    const computedScore = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
+    const customSubjOverride = savedCustomReport?.subjects?.[subj.id];
+    const finalScore =
+      customSubjOverride && typeof customSubjOverride.score === 'number'
+        ? customSubjOverride.score
+        : computedScore;
     const predicate = finalScore >= 90 ? 'A' : finalScore >= 80 ? 'B' : finalScore >= 75 ? 'C' : 'D';
     const isPassed = finalScore >= subj.kkm;
 
@@ -126,7 +137,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
   const overallAvg =
     subjectGrades.length > 0
       ? (subjectGrades.reduce((acc, curr) => acc + curr.finalScore, 0) / subjectGrades.length).toFixed(1)
-      : '88.2';
+      : '0.0';
 
   const allPassed = subjectGrades.every(g => g.isPassed);
 

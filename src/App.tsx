@@ -69,7 +69,7 @@ const MainContent: React.FC = () => {
             {/* Footer */}
             <footer className="mt-12 border-t border-slate-200 pt-6 pb-4 text-center text-xs text-slate-400 dark:border-slate-800">
               <p className="font-semibold text-slate-600 dark:text-slate-400">
-                MySchool &bull; Sistem Absensi &amp; Penilaian Siswa SMK Mardi Yuana Cikembar
+                ORBITA &bull; Sistem Informasi Akademik &amp; Presensi Siswa SMK Mardi Yuana Cikembar
               </p>
               <p className="mt-1 text-[11px]">
                 NPSN: 20253654 &bull; Terakreditasi A (Unggul) &bull; Sukabumi, Jawa Barat

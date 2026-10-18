@@ -10,26 +10,73 @@ interface OrnateCardProps {
 }
 
 export const OrnateCard: React.FC<OrnateCardProps> = ({ children, className = '', onClick }) => {
+  const [hoverState, setHoverState] = React.useState<{ x: number; y: number; active: boolean }>({
+    x: 160,
+    y: 90,
+    active: false,
+  });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setHoverState({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      active: true,
+    });
+  };
+
   return (
     <div
       onClick={onClick}
-      className={`academy-ornate-card relative rounded-2xl border border-[#EFE2BE] bg-white/95 backdrop-blur-md shadow-[0_2px_16px_rgba(15,23,42,0.03)] dark:border-[#C8A44B]/35 dark:bg-[#0B1528]/80 dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)] transition-colors duration-300 ${className}`}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setHoverState(prev => ({ ...prev, active: true }))}
+      onMouseLeave={() => setHoverState(prev => ({ ...prev, active: false }))}
+      className={`group/jrpg academy-ornate-card relative overflow-hidden rounded-2xl border-[1.5px] border-[#DEC896] bg-gradient-to-b from-white/97 via-[#FDFBF6]/96 to-[#F9F5EB]/96 backdrop-blur-md shadow-[0_6px_22px_rgba(15,23,42,0.05),inset_0_0_0_1px_rgba(212,175,55,0.18)] dark:border-[#D4AF37]/45 dark:from-[#0D1A34]/94 dark:via-[#0A1428]/95 dark:to-[#070E1E]/96 dark:text-slate-100 dark:shadow-[0_10px_32px_rgba(0,0,0,0.5),inset_0_0_0_1px_rgba(250,204,21,0.12)] transition-all duration-300 ${className}`}
     >
-      {/* Top-Left 4-Point Golden Star Ornament */}
+      {/* Interactive Mouse-Tracking JRPG Arcane Spotlight */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 transition-opacity duration-300"
+        style={{
+          opacity: hoverState.active ? 1 : 0,
+          background: `radial-gradient(320px circle at ${hoverState.x}px ${hoverState.y}px, rgba(250, 204, 21, 0.14), rgba(59, 130, 246, 0.08) 45%, transparent 80%)`,
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Inner Filigree Bevel Frame */}
+      <div
+        className="pointer-events-none absolute inset-[3px] rounded-[13px] border border-[#D4AF37]/25 group-hover/jrpg:border-[#D4AF37]/55 transition-colors duration-300 z-[1]"
+        aria-hidden="true"
+      />
+
+      {/* 4 JRPG Corner Filigree Brackets & Star Runes */}
       <span
-        className="pointer-events-none absolute top-2 left-2.5 text-[9px] leading-none text-[#DFB858] select-none"
+        className="pointer-events-none absolute top-1.5 left-2 text-[9px] leading-none text-[#D4AF37] group-hover/jrpg:text-[#F59E0B] group-hover/jrpg:scale-125 transition-all duration-300 select-none z-[2]"
+        aria-hidden="true"
+      >
+        ❖
+      </span>
+      <span
+        className="pointer-events-none absolute top-1.5 right-2 text-[8px] leading-none text-[#D4AF37]/70 group-hover/jrpg:text-[#F59E0B] transition-all duration-300 select-none z-[2]"
         aria-hidden="true"
       >
         ✦
       </span>
-      {/* Bottom-Right 4-Point Golden Star Ornament */}
       <span
-        className="pointer-events-none absolute bottom-2 right-2.5 text-[9px] leading-none text-[#DFB858] select-none"
+        className="pointer-events-none absolute bottom-1.5 left-2 text-[8px] leading-none text-[#D4AF37]/70 group-hover/jrpg:text-[#F59E0B] transition-all duration-300 select-none z-[2]"
         aria-hidden="true"
       >
         ✦
       </span>
-      {children}
+      <span
+        className="pointer-events-none absolute bottom-1.5 right-2 text-[9px] leading-none text-[#D4AF37] group-hover/jrpg:text-[#F59E0B] group-hover/jrpg:scale-125 transition-all duration-300 select-none z-[2]"
+        aria-hidden="true"
+      >
+        ❖
+      </span>
+
+      {/* Content Layer */}
+      <div className="relative z-10">{children}</div>
     </div>
   );
 };
@@ -226,3 +273,53 @@ export const GoldCompassRose: React.FC<{ className?: string }> = ({ className = 
     </svg>
   );
 };
+
+export const OrnateSectionHeader: React.FC<{
+  title: string;
+  subtitle?: string;
+}> = ({ title, subtitle }) => {
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-[#D4AF37]">❖</span>
+        <h2
+          className="text-base sm:text-lg font-extrabold tracking-wide text-slate-900 dark:text-white uppercase"
+          style={{ fontFamily: "'Cinzel', 'Playfair Display', Georgia, serif" }}
+        >
+          {title}
+        </h2>
+      </div>
+      {subtitle && (
+        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{subtitle}</p>
+      )}
+    </div>
+  );
+};
+
+export const AcademyCornerBadge: React.FC<{ text: string }> = ({ text }) => {
+  return (
+    <div className="mb-2 inline-flex items-center gap-1 rounded-md border border-[#D4AF37]/40 bg-[#FAF6EC] dark:bg-slate-800/80 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-[#9A7314] dark:text-[#F3D77D]">
+      <span>✦</span>
+      <span>{text}</span>
+    </div>
+  );
+};
+
+export const OrnateDivider: React.FC = () => {
+  return (
+    <div className="my-4 flex items-center gap-3">
+      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent" />
+      <span className="text-xs text-[#D4AF37]">✦</span>
+      <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent" />
+    </div>
+  );
+};
+
+export const MagicRuneIcon: React.FC<{ className?: string }> = ({ className = 'h-4 w-4' }) => {
+  return (
+    <span className={`inline-flex items-center justify-center text-[#D4AF37] ${className}`}>
+      ✦
+    </span>
+  );
+};
+

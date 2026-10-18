@@ -98,6 +98,9 @@ import {
   firestoreSaveVisualSettings,
   firestoreSaveLessonSchedule,
   firestoreDeleteLessonSchedule,
+  firestoreResetAssessmentScoresToZero,
+  firestoreDeleteAssessmentAndScores,
+  firestoreSaveCustomStudentReports,
   forceReseedFirestore,
 } from '../services/firestoreSync';
 import { ReportCustomConfig, defaultReportConfig } from '../utils/exportUtils';
@@ -199,8 +202,12 @@ interface AppContextType {
   updateAssessment: (id: string, data: Partial<Assessment>) => void;
   deleteAssessment: (assessmentId: string) => void;
   resetAssessmentScores: (assessmentId: string) => void;
+  resetClassSubjectAllScores: (classId: string, subjectId: string) => void;
   saveAssessmentScores: (assessmentId: string, scores: { studentId: string; score: number; feedback?: string }[]) => void;
   publishAssessment: (assessmentId: string) => void;
+  customStudentReports: Record<string, any>;
+  saveCustomStudentReport: (studentId: string, reportData: any) => void;
+  resetCustomStudentReport: (studentId: string) => void;
 
   // Users & Profile
   updateCurrentUserProfile: (updates: Partial<User>) => void;
@@ -390,7 +397,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     handleSetPageView('app');
     setActiveNav(role === 'siswa' ? 'student-profile' : 'dashboard');
     addAuditLog('USER_LOGIN', 'Otentikasi', `Login berhasil sebagai: ${role.toUpperCase()} (${targetUser.displayName})`);
-    pushNotification('Selamat Datang!', `Berhasil masuk ke portal MySchool sebagai ${targetUser.displayName} (${role.toUpperCase()}).`, 'success');
+    pushNotification('Selamat Datang!', `Berhasil masuk ke portal ORBITA sebagai ${targetUser.displayName} (${role.toUpperCase()}).`, 'success');
   };
 
   const loginWithEmail = (input: string, passwordInput?: string): boolean => {
@@ -424,11 +431,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addAuditLog('USER_LOGIN', 'Otentikasi', `Login berhasil: ${found.displayName} (${found.role.toUpperCase()})`);
     pushNotification(
       'Selamat Datang Kembali!',
-      `Berhasil masuk ke portal MySchool sebagai ${found.displayName} (${found.role.toUpperCase()}).`,
+      `Berhasil masuk ke portal ORBITA sebagai ${found.displayName} (${found.role.toUpperCase()}).`,
       'success',
       found.id,
       found.role,
-      'Sistem MySchool',
+      'Sistem ORBITA',
       undefined,
       false,
       'profil'
@@ -505,6 +512,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [assessmentScores, setAssessmentScores] = useState<AssessmentScore[]>(() => {
     const cached = localStorage.getItem('myschool_assessment_scores');
     return cached ? JSON.parse(cached) : initialAssessmentScores;
+  });
+
+  const [customStudentReports, setCustomStudentReports] = useState<Record<string, any>>(() => {
+    try {
+      const saved = localStorage.getItem('myschool_student_reports_custom');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {};
   });
 
   // Logs & Notifications
@@ -766,6 +781,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setLessonSchedules(data);
           localStorage.setItem('myschool_lesson_schedules', JSON.stringify(data));
         }
+      },
+      onStudentReportsMapChange: data => {
+        setCustomStudentReports(data);
+        localStorage.setItem('myschool_student_reports_custom', JSON.stringify(data));
       },
       onUsersChange: data => {
         setUsers(data);
@@ -2168,22 +2187,126 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const target = assessments.find(a => a.id === assessmentId);
     if (!target) return;
 
-    // Clean cascade: delete assessment & associated scores
-    setAssessments(prev => prev.filter(a => a.id !== assessmentId));
-    setAssessmentScores(prev => prev.filter(s => s.assessmentId !== assessmentId));
+    const scoreIdsToDelete = assessmentScores
+      .filter(s => s.assessmentId === assessmentId)
+      .map(s => s.id);
+
+    // Clean cascade: delete assessment & associated scores locally and in Cloud Firestore
+    setAssessments(prev => {
+      const next = prev.filter(a => a.id !== assessmentId);
+      localStorage.setItem('myschool_assessments', JSON.stringify(next));
+      return next;
+    });
+    setAssessmentScores(prev => {
+      const next = prev.filter(s => s.assessmentId !== assessmentId);
+      localStorage.setItem('myschool_assessment_scores', JSON.stringify(next));
+      return next;
+    });
 
     addAuditLog('DELETE_ASSESSMENT', 'Penilaian Akademik', `Menghapus komponen penilaian: ${target.title} (${target.subjectName} - ${target.className})`);
-    pushNotification('Komponen Penilaian Dihapus', `Penilaian ${target.title} dan seluruh nilai siswa terkait telah dihapus permanen.`, 'alert');
-    deleteDoc(doc(db, 'assessments', assessmentId)).catch(() => {});
+    pushNotification('Komponen Penilaian Dihapus', `Penilaian ${target.title} dan seluruh nilai siswa terkait telah dihapus permanen dari database.`, 'alert');
+    firestoreDeleteAssessmentAndScores(assessmentId, scoreIdsToDelete).catch(() => {});
   };
 
   const resetAssessmentScores = (assessmentId: string) => {
     const target = assessments.find(a => a.id === assessmentId);
     if (!target) return;
 
-    setAssessmentScores(prev => prev.filter(s => s.assessmentId !== assessmentId));
-    addAuditLog('RESET_SCORES', 'Penilaian Akademik', `Mereset/mengosongkan seluruh nilai siswa pada penilaian: ${target.title}`);
-    pushNotification('Nilai Dikosongkan', `Nilai siswa pada komponen ${target.title} berhasil direset ke 0.`, 'info');
+    const now = new Date().toISOString().split('T')[0];
+    const targetClass = classes.find(c => c.id === target.classId);
+    const targetStudents = students.filter(
+      s => s.classId === target.classId || (targetClass && s.className === targetClass.name)
+    );
+
+    const oldScoreIds = assessmentScores
+      .filter(s => s.assessmentId === assessmentId)
+      .map(s => s.id);
+
+    const zeroScores: AssessmentScore[] = targetStudents.map(std => ({
+      id: `sc-${assessmentId}-${std.id}`,
+      assessmentId,
+      studentId: std.id,
+      studentName: std.fullName,
+      nisn: std.nisn,
+      classId: target.classId,
+      subjectId: target.subjectId,
+      score: 0,
+      feedback: '',
+      updatedBy: currentUser.displayName,
+      updatedAt: now,
+    }));
+
+    setAssessmentScores(prev => {
+      const next = [
+        ...zeroScores,
+        ...prev.filter(s => s.assessmentId !== assessmentId),
+      ];
+      localStorage.setItem('myschool_assessment_scores', JSON.stringify(next));
+      return next;
+    });
+
+    addAuditLog('RESET_SCORES', 'Penilaian Akademik', `Mereset seluruh nilai siswa ke 0 pada penilaian: ${target.title} (${target.className}) dan menyinkronkan ke database.`);
+    pushNotification('Nilai Berhasil Direset ke 0', `Seluruh nilai siswa pada komponen ${target.title} (${target.className}) telah direset ke 0 dan disimpan ke database.`, 'info');
+    firestoreResetAssessmentScoresToZero(zeroScores, oldScoreIds).catch(() => {});
+  };
+
+  const resetClassSubjectAllScores = (classId: string, subjectId: string) => {
+    const targetClass = classes.find(c => c.id === classId);
+    const targetSubject = subjects.find(s => s.id === subjectId);
+    if (!targetClass || !targetSubject) return;
+
+    const matchingAssessments = assessments.filter(
+      a => (a.classId === classId || a.className === targetClass.name) && a.subjectId === subjectId
+    );
+    const targetStudents = students.filter(
+      s => s.classId === classId || s.className === targetClass.name
+    );
+    const now = new Date().toISOString().split('T')[0];
+
+    const matchingAsmIds = new Set(matchingAssessments.map(a => a.id));
+    const oldScoreIds = assessmentScores
+      .filter(s => matchingAsmIds.has(s.assessmentId) || (s.classId === classId && s.subjectId === subjectId))
+      .map(s => s.id);
+
+    const zeroScores: AssessmentScore[] = [];
+    matchingAssessments.forEach(asm => {
+      targetStudents.forEach(std => {
+        zeroScores.push({
+          id: `sc-${asm.id}-${std.id}`,
+          assessmentId: asm.id,
+          studentId: std.id,
+          studentName: std.fullName,
+          nisn: std.nisn,
+          classId: asm.classId,
+          subjectId: asm.subjectId,
+          score: 0,
+          feedback: '',
+          updatedBy: currentUser.displayName,
+          updatedAt: now,
+        });
+      });
+    });
+
+    setAssessmentScores(prev => {
+      const next = [
+        ...zeroScores,
+        ...prev.filter(s => !matchingAsmIds.has(s.assessmentId) && !(s.classId === classId && s.subjectId === subjectId)),
+      ];
+      localStorage.setItem('myschool_assessment_scores', JSON.stringify(next));
+      return next;
+    });
+
+    addAuditLog(
+      'RESET_CLASS_SCORES',
+      'Penilaian Akademik',
+      `Mereset seluruh nilai mata pelajaran ${targetSubject.name} kelas ${targetClass.name} ke 0 dan menyinkronkan ke database.`
+    );
+    pushNotification(
+      'Seluruh Nilai Mapel Direset',
+      `Semua komponen nilai ${targetSubject.name} untuk kelas ${targetClass.name} berhasil direset ke 0 di seluruh menu & database.`,
+      'info'
+    );
+    firestoreResetAssessmentScoresToZero(zeroScores, oldScoreIds).catch(() => {});
   };
 
   const saveAssessmentScores = (assessmentId: string, scores: { studentId: string; score: number; feedback?: string }[]) => {
@@ -2201,19 +2324,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         nisn: student?.nisn || '',
         classId: asm.classId,
         subjectId: asm.subjectId,
-        score: s.score,
+        score: Number(s.score) || 0,
         feedback: s.feedback || '',
         updatedBy: currentUser.displayName,
         updatedAt: now,
       };
     });
 
-    setAssessmentScores(prev => [
-      ...newScores,
-      ...prev.filter(ps => ps.assessmentId !== assessmentId),
-    ]);
+    setAssessmentScores(prev => {
+      const next = [
+        ...newScores,
+        ...prev.filter(ps => ps.assessmentId !== assessmentId),
+      ];
+      localStorage.setItem('myschool_assessment_scores', JSON.stringify(next));
+      return next;
+    });
 
-    addAuditLog('INPUT_SCORES', 'Penilaian Akademik', `Menyimpan ${scores.length} nilai siswa untuk penilaian: ${asm.title}`);
+    addAuditLog('INPUT_SCORES', 'Penilaian Akademik', `Menyimpan & menyinkronkan ${scores.length} nilai siswa untuk penilaian: ${asm.title} (${asm.className})`);
     firestoreSaveAssessment(asm, newScores).catch(() => {});
   };
 
@@ -2223,7 +2350,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     updateAssessment(assessmentId, { status: 'dipublikasikan' });
     addAuditLog('PUBLISH_ASSESSMENT', 'Penilaian Akademik', `Mempublikasikan nilai untuk: ${target.title} (${target.className})`);
-    pushNotification('Nilai Baru Dipublikasikan', `Nilai ${target.title} (${target.subjectName}) kelas ${target.className} telah dipublikasikan.`, 'info');
+    pushNotification('Nilai Baru Dipublikasikan', `Nilai ${target.title} (${target.subjectName}) kelas ${target.className} telah dipublikasikan ke semua menu.`, 'success');
+  };
+
+  const saveCustomStudentReport = (studentId: string, reportData: any) => {
+    setCustomStudentReports(prev => {
+      const next = {
+        ...prev,
+        [studentId]: reportData,
+      };
+      localStorage.setItem('myschool_student_reports_custom', JSON.stringify(next));
+      firestoreSaveCustomStudentReports(next).catch(() => {});
+      return next;
+    });
+    addAuditLog('SAVE_STUDENT_REPORT', 'Penilaian Akademik', `Menyimpan & menyinkronkan draf rapor siswa ID: ${studentId} ke database.`);
+  };
+
+  const resetCustomStudentReport = (studentId: string) => {
+    setCustomStudentReports(prev => {
+      const next = { ...prev };
+      delete next[studentId];
+      localStorage.setItem('myschool_student_reports_custom', JSON.stringify(next));
+      firestoreSaveCustomStudentReports(next).catch(() => {});
+      return next;
+    });
+    addAuditLog('RESET_STUDENT_REPORT', 'Penilaian Akademik', `Mereset draf rapor siswa ID: ${studentId} kembali ke sinkronisasi nilai & presensi database.`);
   };
 
   // User Management
@@ -2723,8 +2874,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateAssessment,
         deleteAssessment,
         resetAssessmentScores,
+        resetClassSubjectAllScores,
         saveAssessmentScores,
         publishAssessment,
+        customStudentReports,
+        saveCustomStudentReport,
+        resetCustomStudentReport,
         addUser,
         deleteUser,
         auditLogs,

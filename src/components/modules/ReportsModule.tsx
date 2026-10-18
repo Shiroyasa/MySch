@@ -57,8 +57,12 @@ export const ReportsModule: React.FC = () => {
     attendanceRecords,
     assessments,
     assessmentScores,
+    saveAssessmentScores,
+    createAssessment,
+    resetClassSubjectAllScores,
     reportTemplate,
     saveReportTemplate,
+    customStudentReports,
   } = useApp();
 
   const [activeMainTab, setActiveMainTab] = useState<'export' | 'spreadsheet' | 'designer'>('export');
@@ -189,19 +193,43 @@ export const ReportsModule: React.FC = () => {
 
   // --- Interactive Spreadsheet State ---
   const [sheetType, setSheetType] = useState<'penilaian' | 'absensi'>('penilaian');
-  // Editable spreadsheet data map
+  // Editable spreadsheet data map synced with live assessmentScores
   const [editableScores, setEditableScores] = useState<Record<string, Record<string, number>>>(() => {
     const map: Record<string, Record<string, number>> = {};
     students.forEach(std => {
       map[std.id] = {
-        tugas: 85,
-        praktik: 80,
-        formatif: 82,
-        sumatif: 88,
+        tugas: 0,
+        praktik: 0,
+        formatif: 0,
+        sumatif: 0,
       };
     });
     return map;
   });
+
+  useEffect(() => {
+    setEditableScores(prev => {
+      const next = { ...prev };
+      classStudents.forEach(std => {
+        const stdScores = assessmentScores.filter(sc => sc.studentId === std.id);
+        const getScoreByType = (type: string) => {
+          const typeAss = currentAssessments.filter(a => a.type === type);
+          if (typeAss.length === 0) return 0;
+          const matching = stdScores.filter(s => typeAss.some(a => a.id === s.assessmentId));
+          if (matching.length === 0) return 0;
+          const sum = matching.reduce((acc, curr) => acc + Number(curr.score || 0), 0);
+          return Math.round(sum / matching.length);
+        };
+        next[std.id] = {
+          tugas: getScoreByType('tugas'),
+          praktik: getScoreByType('praktik'),
+          formatif: getScoreByType('formatif'),
+          sumatif: getScoreByType('sumatif'),
+        };
+      });
+      return next;
+    });
+  }, [classStudents, assessmentScores, currentAssessments]);
 
   const handleScoreCellEdit = (studentId: string, col: string, val: string) => {
     const num = Math.min(100, Math.max(0, parseInt(val) || 0));
@@ -266,19 +294,33 @@ export const ReportsModule: React.FC = () => {
     const list = classStudents.map((std, idx) => {
       const subjectScores: Record<string, number> = {};
       let totalScore = 0;
+      const savedCustomReport = customStudentReports?.[std.id];
 
       subjects.forEach(sub => {
-        // Find existing score or calculate from assessments or editableScores
-        const matchingScores = assessmentScores.filter(
-          sc => sc.studentId === std.id && assessments.some(a => a.id === sc.assessmentId && a.subjectId === sub.id)
+        const subAssessments = assessments.filter(
+          a => a.classId === currentClass?.id && a.subjectId === sub.id
         );
-        let score = 80;
-        if (matchingScores.length > 0) {
-          const sum = matchingScores.reduce((acc, curr) => acc + curr.score, 0);
-          score = Math.round(sum / matchingScores.length);
-        } else if (editableScores[std.id]) {
+        const matchingScores = assessmentScores.filter(
+          sc => sc.studentId === std.id && subAssessments.some(a => a.id === sc.assessmentId)
+        );
+        let score = 0;
+        const customOverride = savedCustomReport?.subjects?.[sub.id];
+        if (customOverride && typeof customOverride.score === 'number') {
+          score = customOverride.score;
+        } else if (matchingScores.length > 0) {
+          let wSum = 0;
+          let wTot = 0;
+          subAssessments.forEach(a => {
+            const found = matchingScores.find(m => m.assessmentId === a.id);
+            const val = found !== undefined ? Number(found.score) : 0;
+            const w = a.weight > 0 ? a.weight : 25;
+            wSum += val * w;
+            wTot += w;
+          });
+          score = wTot > 0 ? Math.round(wSum / wTot) : 0;
+        } else if (sub.id === currentSubject?.id && editableScores[std.id]) {
           const sc = editableScores[std.id];
-          score = Math.round((sc.tugas * 0.2) + (sc.praktik * 0.3) + (sc.formatif * 0.2) + (sc.sumatif * 0.3)) || 82;
+          score = Math.round((sc.tugas * 0.2) + (sc.praktik * 0.3) + (sc.formatif * 0.2) + (sc.sumatif * 0.3));
         }
         subjectScores[sub.id] = score;
         totalScore += score;
@@ -312,12 +354,12 @@ export const ReportsModule: React.FC = () => {
       ...item,
       rank: rankMap.get(item.studentId) || 1,
     }));
-  }, [classStudents, subjects, assessmentScores, assessments, editableScores]);
+  }, [classStudents, subjects, assessmentScores, assessments, editableScores, currentClass, currentSubject, customStudentReports]);
 
   // 3. Subject-Specific Grading Data for current class & subject
   const subjectGradingData = useMemo(() => {
     return classStudents.map((std, idx) => {
-      const sc = editableScores[std.id] || { tugas: 85, praktik: 82, formatif: 80, sumatif: 86 };
+      const sc = editableScores[std.id] || { tugas: 0, praktik: 0, formatif: 0, sumatif: 0 };
       const finalScore = Math.round((sc.tugas * 0.2) + (sc.praktik * 0.3) + (sc.formatif * 0.2) + (sc.sumatif * 0.3));
       const predicate = finalScore >= 90 ? 'A' : finalScore >= 80 ? 'B' : finalScore >= 75 ? 'C' : 'D';
       const isPassed = finalScore >= (currentSubject?.kkm || 75);
@@ -328,7 +370,9 @@ export const ReportsModule: React.FC = () => {
           ? 'Menguasai capaian pembelajaran dengan baik dan mandiri'
           : finalScore >= 75
           ? 'Mencapai kriteria ketuntasan minimal, perlu penguatan praktik'
-          : 'Belum mencapai KKM, direkomendasikan bimbingan remedial';
+          : finalScore > 0
+          ? 'Belum mencapai KKM, direkomendasikan bimbingan remedial'
+          : 'Nilai belum diinput / telah direset';
 
       return {
         no: idx + 1,
@@ -351,27 +395,49 @@ export const ReportsModule: React.FC = () => {
   // 4. Student Transcript (Individual Report Card Data)
   const studentTranscriptData = useMemo(() => {
     if (!activeStudent) return null;
+    const savedCustomReport = customStudentReports?.[activeStudent.id];
 
     const subjectsList = subjects.map((sub, index) => {
-      const matchingScores = assessmentScores.filter(
-        sc => sc.studentId === activeStudent.id && assessments.some(a => a.id === sc.assessmentId && a.subjectId === sub.id)
+      const subAssessments = assessments.filter(
+        a => a.classId === activeStudent.classId && a.subjectId === sub.id
       );
-      let score = 82;
-      if (matchingScores.length > 0) {
-        const sum = matchingScores.reduce((acc, curr) => acc + curr.score, 0);
-        score = Math.round(sum / matchingScores.length);
-      } else if (editableScores[activeStudent.id]) {
+      const matchingScores = assessmentScores.filter(
+        sc => sc.studentId === activeStudent.id && subAssessments.some(a => a.id === sc.assessmentId)
+      );
+      let score = 0;
+      const customOverride = savedCustomReport?.subjects?.[sub.id];
+      if (customOverride && typeof customOverride.score === 'number') {
+        score = customOverride.score;
+      } else if (matchingScores.length > 0) {
+        let wSum = 0;
+        let wTot = 0;
+        subAssessments.forEach(a => {
+          const found = matchingScores.find(m => m.assessmentId === a.id);
+          const val = found !== undefined ? Number(found.score) : 0;
+          const w = a.weight > 0 ? a.weight : 25;
+          wSum += val * w;
+          wTot += w;
+        });
+        score = wTot > 0 ? Math.round(wSum / wTot) : 0;
+      } else if (sub.id === currentSubject?.id && editableScores[activeStudent.id]) {
         const sc = editableScores[activeStudent.id];
-        score = Math.round((sc.tugas * 0.2) + (sc.praktik * 0.3) + (sc.formatif * 0.2) + (sc.sumatif * 0.3)) || 82;
+        score = Math.round((sc.tugas * 0.2) + (sc.praktik * 0.3) + (sc.formatif * 0.2) + (sc.sumatif * 0.3));
       }
-      const predicate = score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 75 ? 'C' : 'D';
+      const predicate =
+        customOverride?.predicate ||
+        (score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 75 ? 'C' : 'D');
       const isPassed = score >= sub.kkm;
       const feedback =
-        score >= 90
+        customOverride?.description ||
+        (score >= 90
           ? 'Menunjukkan penguasaan sangat baik dalam teori dan praktik kejuruan.'
           : score >= 80
           ? 'Menunjukkan penguasaan baik dan aktif dalam pengerjaan proyek.'
-          : 'Tuntas mencapai standar minimum, terus tingkatkan ketelitian.';
+          : score >= sub.kkm
+          ? 'Tuntas mencapai standar minimum, terus tingkatkan ketelitian.'
+          : score > 0
+          ? 'Perlu bimbingan remedial pada indikator kompetensi dasar.'
+          : 'Nilai belum diinput / telah direset.');
 
       return {
         no: index + 1,
@@ -391,12 +457,12 @@ export const ReportsModule: React.FC = () => {
 
     // Student attendance stats
     const attInfo = classAttendanceData.find(a => a.studentId === activeStudent.id) || {
-      h: 22,
-      s: 1,
+      h: 0,
+      s: 0,
       i: 0,
       a: 0,
-      t: 1,
-      rate: '95.6%',
+      t: 0,
+      rate: '100.0%',
     };
 
     return {
@@ -406,7 +472,7 @@ export const ReportsModule: React.FC = () => {
       averageScore,
       attendance: attInfo,
     };
-  }, [activeStudent, subjects, assessmentScores, assessments, editableScores, classAttendanceData]);
+  }, [activeStudent, subjects, assessmentScores, assessments, editableScores, classAttendanceData, currentSubject, customStudentReports]);
 
   // -------------------------------------------------------------
   // EXPORT HANDLERS SYNCHRONIZED BY REPORT TYPE
@@ -1487,7 +1553,73 @@ export const ReportsModule: React.FC = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (currentClass && currentSubject) {
+                    resetClassSubjectAllScores(currentClass.id, currentSubject.id);
+                    const next: Record<string, Record<string, number>> = { ...editableScores };
+                    classStudents.forEach(std => {
+                      next[std.id] = { tugas: 0, praktik: 0, formatif: 0, sumatif: 0 };
+                    });
+                    setEditableScores(next);
+                    showToast(`Seluruh nilai ${currentSubject.name} kelas ${currentClass.name} berhasil direset menjadi 0 di database.`);
+                  }
+                }}
+                className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-800/60 dark:bg-rose-950/50 dark:text-rose-300 shadow-2xs transition-colors"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span>Reset Nilai (0)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!currentClass || !currentSubject) return;
+                  const types: Array<{ key: 'tugas' | 'praktik' | 'formatif' | 'sumatif'; title: string; weight: number }> = [
+                    { key: 'tugas', title: `Tugas Mandiri ${currentSubject.name}`, weight: 20 },
+                    { key: 'praktik', title: `Praktikum ${currentSubject.name}`, weight: 30 },
+                    { key: 'formatif', title: `Ujian Formatif ${currentSubject.name}`, weight: 20 },
+                    { key: 'sumatif', title: `Asesmen Sumatif ${currentSubject.name}`, weight: 30 },
+                  ];
+                  types.forEach(t => {
+                    const targetAss = currentAssessments.find(a => a.type === t.key);
+                    let assId = targetAss?.id;
+                    if (!assId) {
+                      assId = createAssessment({
+                        title: t.title,
+                        subjectId: currentSubject.id,
+                        subjectName: currentSubject.name,
+                        classId: currentClass.id,
+                        className: currentClass.name,
+                        teacherId: 'tch-001',
+                        teacherName: 'Guru Pengampu',
+                        type: t.key,
+                        weight: t.weight,
+                        maxScore: 100,
+                        kkm: currentSubject.kkm || 75,
+                        date: new Date().toISOString().split('T')[0],
+                        semester: activeAcademicYear.activeSemester,
+                        academicYearId: activeAcademicYear.id,
+                      });
+                    }
+                    const scoresPayload = classStudents.map(std => {
+                      const val = Number(editableScores[std.id]?.[t.key] ?? 0);
+                      return {
+                        studentId: std.id,
+                        score: val,
+                        feedback: val >= (currentSubject.kkm || 75) ? 'Tuntas KKM' : val > 0 ? 'Perlu Penguatan' : 'Nilai direset (0)',
+                      };
+                    });
+                    saveAssessmentScores(assId, scoresPayload);
+                  });
+                  showToast(`Nilai lembar interaktif ${currentSubject.name} (${currentClass.name}) berhasil disimpan ke database & tersinkron ke semua menu.`);
+                }}
+                className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors"
+              >
+                <Save className="h-3.5 w-3.5" />
+                <span>Simpan Nilai</span>
+              </button>
               <button
                 onClick={handleDownloadExcel}
                 className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 shadow-2xs"

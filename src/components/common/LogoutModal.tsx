@@ -41,7 +41,7 @@ export const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onCon
                 Konfirmasi Keluar Sistem
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                MySchool &bull; SMK Mardi Yuana Cikembar
+                ORBITA &bull; SMK Mardi Yuana Cikembar
               </p>
             </div>
           </div>

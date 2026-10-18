@@ -343,7 +343,7 @@ export const SettingsModule: React.FC = () => {
     const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.setAttribute('download', `Backup_MySchool_SMK_Mardi_Yuana_${new Date().toISOString().split('T')[0]}.json`);
+    link.setAttribute('download', `Backup_ORBITA_SMK_Mardi_Yuana_${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -498,7 +498,7 @@ export const SettingsModule: React.FC = () => {
                     className="text-sm font-bold tracking-wider text-white uppercase mt-0.5"
                     style={{ fontFamily: "'Cinzel', 'Playfair Display', Georgia, serif" }}
                   >
-                    MY ACADEMY
+                    ORBITA
                   </p>
                   <p className="text-[11px] text-[#8DA2C0]">Sistem Informasi Akademik</p>
                 </div>
@@ -578,7 +578,7 @@ export const SettingsModule: React.FC = () => {
                     Pratinjau Latar Halaman Login (Live)
                   </p>
                   <p className="text-xs font-bold text-white">
-                    MY ACADEMY — Sistem Informasi Akademik Terpadu
+                    ORBITA — Sistem Informasi Akademik Terpadu
                   </p>
                 </div>
               </div>

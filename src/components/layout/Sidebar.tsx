@@ -273,7 +273,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className="truncate text-sm font-bold tracking-[0.12em] text-white uppercase leading-tight"
                   style={{ fontFamily: "'Cinzel', 'Playfair Display', Georgia, serif" }}
                 >
-                  MY ACADEMY
+                  ORBITA
                 </p>
                 <p className="truncate text-[11px] font-medium text-[#8DA2C0] mt-0.5">
                   Sistem Informasi Akademik

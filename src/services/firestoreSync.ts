@@ -74,6 +74,7 @@ export interface SyncCallbacks {
   onPklReportsChange?: (data: PklStudentReportItem[]) => void;
   onVisualSettingsChange?: (data: VisualSettings) => void;
   onLessonSchedulesChange?: (data: LessonSchedule[]) => void;
+  onStudentReportsMapChange?: (data: Record<string, any>) => void;
   onSyncStatusChange?: (status: { isConnected: boolean; isSyncing: boolean; lastSync: Date; error?: string }) => void;
 }
 
@@ -627,6 +628,30 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     }
   }
 
+  // 23. Custom Student Report Cards (Draf Rapor Siswa synced across devices)
+  if (callbacks.onStudentReportsMapChange) {
+    try {
+      const unsubStudentReports = onSnapshot(
+        doc(db, 'settings', 'student_reports'),
+        docSnap => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data && data.reports) {
+              callbacks.onStudentReportsMapChange?.(data.reports);
+              handleUpdate();
+            }
+          }
+        },
+        error => {
+          handleFirestoreError(error, OperationType.GET, 'settings/student_reports');
+        }
+      );
+      unsubscribers.push(unsubStudentReports);
+    } catch (err) {
+      console.error('Error attaching student_reports listener:', err);
+    }
+  }
+
   return () => {
     unsubscribers.forEach(u => u());
   };
@@ -1115,3 +1140,51 @@ export async function firestoreDeleteLessonSchedule(scheduleId: string): Promise
     handleFirestoreError(error, OperationType.DELETE, `lessonSchedules/${scheduleId}`);
   }
 }
+
+export async function firestoreResetAssessmentScoresToZero(
+  zeroScores: AssessmentScore[],
+  oldScoreIdsToDelete: string[] = []
+): Promise<void> {
+  try {
+    const batch = writeBatch(db);
+    oldScoreIdsToDelete.forEach(id => {
+      batch.delete(doc(db, 'assessmentScores', id));
+    });
+    zeroScores.forEach(sc => {
+      batch.set(doc(db, 'assessmentScores', sc.id), sanitizeForFirestore(sc));
+    });
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'assessmentScores/resetToZero');
+  }
+}
+
+export async function firestoreDeleteAssessmentAndScores(
+  assessmentId: string,
+  scoreIds: string[]
+): Promise<void> {
+  try {
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'assessments', assessmentId));
+    scoreIds.forEach(sid => {
+      batch.delete(doc(db, 'assessmentScores', sid));
+    });
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `assessments/${assessmentId}`);
+  }
+}
+
+export async function firestoreSaveCustomStudentReports(
+  reportsMap: Record<string, any>
+): Promise<void> {
+  try {
+    await setDoc(doc(db, 'settings', 'student_reports'), {
+      reports: sanitizeForFirestore(reportsMap),
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'settings/student_reports');
+  }
+}
+

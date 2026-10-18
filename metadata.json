@@ -1,6 +1,6 @@
 {
-  "name": "MySchool — Absensi & Penilaian Siswa",
-  "description": "Sistem Manajemen Sekolah Komprehensif untuk Absensi, Penilaian Akademik, Master Data, RBAC 6 Role, dan Analisis Siswa SMK Mardi Yuana Cikembar.",
+  "name": "ORBITA — Sistem Informasi Akademik & Presensi Siswa",
+  "description": "ORBITA: Sistem Manajemen Sekolah Komprehensif untuk Absensi, Penilaian Akademik, Master Data, RBAC 6 Role, dan Analisis Siswa SMK Mardi Yuana Cikembar.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

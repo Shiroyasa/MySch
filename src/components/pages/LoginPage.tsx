@@ -267,7 +267,7 @@ export const LoginPage: React.FC = () => {
             )}
           </div>
 
-          {/* MY ACADEMY Title */}
+          {/* ORBITA Title */}
           <h1
             className="text-2xl sm:text-[30px] font-extrabold tracking-[0.14em] uppercase leading-tight drop-shadow-[0_3px_12px_rgba(9,18,44,0.85)]"
             style={{
@@ -277,7 +277,7 @@ export const LoginPage: React.FC = () => {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            MY ACADEMY
+            ORBITA
           </h1>
 
           {/* Subtitle: Sistem Informasi Akademik */}

@@ -102,7 +102,7 @@ export const Header: React.FC<{ onToggleMobileSidebar: () => void }> = ({ onTogg
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold tracking-tight text-slate-900 dark:text-white text-base">
-                  MyAcademy
+                  ORBITA
                 </span>
                 <span className="text-slate-300 dark:text-slate-700">&bull;</span>
                 <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">

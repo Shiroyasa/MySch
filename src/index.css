@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
-@variant dark (&:where(.dark, .dark *));
 
 @layer base {
   html.dark {
     color-scheme: dark;
+    background-color: #060d1f;
+    color: #f8fafc;
   }
 
   body {
@@ -14,16 +15,16 @@
 
   /* Smooth tactile button micro-animations across all pages */
   button, [role="button"], a.btn {
-    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), 
-                box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), 
-                background-color 0.18s ease, 
-                color 0.18s ease, 
-                border-color 0.18s ease,
-                opacity 0.18s ease;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
+                background-color 0.2s ease, 
+                color 0.2s ease, 
+                border-color 0.2s ease,
+                opacity 0.2s ease;
   }
 
   button:hover:not(:disabled), [role="button"]:hover:not(:disabled) {
-    transform: translateY(-1px);
+    transform: translateY(-1.5px);
   }
 
   button:active:not(:disabled), [role="button"]:active:not(:disabled) {
@@ -43,12 +44,21 @@
 
 @keyframes pulseGlow {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+  50% { opacity: 0.82; transform: scale(1.04); }
 }
 
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes jrpgBorderPulse {
+  0%, 100% {
+    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.12), 0 0 16px rgba(212, 175, 55, 0.28), inset 0 0 12px rgba(212, 175, 55, 0.08);
+  }
+  50% {
+    box-shadow: 0 14px 36px -5px rgba(15, 23, 42, 0.18), 0 0 24px rgba(59, 130, 246, 0.32), inset 0 0 18px rgba(212, 175, 55, 0.14);
+  }
 }
 
 @keyframes sakuraFall {
@@ -92,59 +102,237 @@
   will-change: transform;
 }
 
-/* JRPG Glass & Royal Academy Card Ornament Styling */
+/* ========================================================================== */
+/* JRPG DIALOGUE BOX, CARD & TABLE SYSTEM + INTERACTIVE HOVER ANIMATIONS       */
+/* ========================================================================== */
+
 .jrpg-glass {
-  background-color: #ffffff;
-  border: 1px solid #EFE2BE;
-  box-shadow: 0 2px 16px rgba(15, 23, 42, 0.03);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(252, 249, 242, 0.96) 100%);
+  border: 1.5px solid #D9C391;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
 }
 
 html.dark .jrpg-glass {
-  background-color: rgba(15, 23, 42, 0.92);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  background: linear-gradient(180deg, rgba(13, 25, 48, 0.94) 0%, rgba(9, 17, 34, 0.96) 100%) !important;
+  border: 1.5px solid rgba(212, 175, 55, 0.38) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(250, 204, 21, 0.1) !important;
 }
 
-/* Universal Royal Academy Card Ornaments across all modules */
-main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament),
-main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament),
-main .jrpg-glass:not(.academy-ornate-card) {
+/* Universal JRPG Frame Styling for all Cards/Boxes inside main */
+main div.rounded-2xl[class*="border"]:not(.academy-ornate-card):not(.no-ornament),
+main div.rounded-3xl[class*="border"]:not(.academy-ornate-card):not(.no-ornament),
+main .jrpg-glass:not(.academy-ornate-card),
+.academy-ornate-card {
   position: relative;
-  border-color: #EFE2BE;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s ease,
+              background-color 0.28s ease;
 }
 
-html.dark main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament),
-html.dark main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament) {
-  border-color: rgba(245, 158, 11, 0.25);
+main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament),
+main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament) {
+  border-width: 1.5px;
+  border-color: #DEC896;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(252, 249, 241, 0.96) 100%);
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04), inset 0 0 0 1px rgba(212, 175, 55, 0.16);
 }
 
+/* Interactive Mouse Hover Effect on JRPG Boxes & Cards */
+main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.no-ornament):hover,
+main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.no-ornament):hover,
+main .jrpg-glass:hover,
+.academy-ornate-card:hover {
+  transform: translateY(-2.5px);
+  border-color: #D4AF37 !important;
+  box-shadow: 0 12px 30px -6px rgba(15, 23, 42, 0.12),
+              0 0 18px rgba(212, 175, 55, 0.26),
+              inset 0 0 0 1px rgba(250, 204, 21, 0.32) !important;
+}
+
+html.dark main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.no-ornament):hover,
+html.dark main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.no-ornament):hover,
+html.dark main .jrpg-glass:hover,
+html.dark .academy-ornate-card:hover {
+  transform: translateY(-2.5px);
+  border-color: rgba(250, 204, 21, 0.72) !important;
+  box-shadow: 0 14px 36px -6px rgba(0, 0, 0, 0.65),
+              0 0 22px rgba(234, 179, 8, 0.25),
+              0 0 35px rgba(59, 130, 246, 0.18),
+              inset 0 0 14px rgba(250, 204, 21, 0.12) !important;
+}
+
+/* Corner JRPG Star Runes on Cards */
 main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament)::before,
 main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament)::before,
 main .jrpg-glass:not(.academy-ornate-card)::before {
-  content: '✦';
+  content: '❖';
   position: absolute;
-  top: 7px;
-  left: 9px;
+  top: 6px;
+  left: 8px;
   font-size: 9px;
   line-height: 1;
-  color: #DFB858;
+  color: #D4AF37;
+  opacity: 0.75;
   pointer-events: none;
   user-select: none;
   z-index: 2;
+  transition: transform 0.3s ease, color 0.3s ease, opacity 0.3s ease, text-shadow 0.3s ease;
 }
 
 main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament)::after,
 main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament)::after,
 main .jrpg-glass:not(.academy-ornate-card)::after {
-  content: '✦';
+  content: '❖';
   position: absolute;
-  bottom: 7px;
-  right: 9px;
+  bottom: 6px;
+  right: 8px;
   font-size: 9px;
   line-height: 1;
-  color: #DFB858;
+  color: #D4AF37;
+  opacity: 0.75;
   pointer-events: none;
   user-select: none;
   z-index: 2;
+  transition: transform 0.3s ease, color 0.3s ease, opacity 0.3s ease, text-shadow 0.3s ease;
+}
+
+main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):hover::before,
+main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):hover::after {
+  opacity: 1;
+  color: #F59E0B;
+  transform: scale(1.25) rotate(90deg);
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+}
+
+/* ========================================================================== */
+/* JRPG TACTICAL ROSTER TABLE DESIGN & ROW HOVER ANIMATION                    */
+/* ========================================================================== */
+
+main table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+main table thead tr {
+  background: linear-gradient(90deg, #101E38 0%, #172B4D 50%, #101E38 100%) !important;
+  color: #FDE68A !important;
+  border-bottom: 2px solid #D4AF37 !important;
+}
+
+main table thead th {
+  color: #FEF3C7 !important;
+  font-family: 'Cinzel', 'Plus Jakarta Sans', serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  border-bottom: 1.5px solid rgba(212, 175, 55, 0.55) !important;
+  position: relative;
+}
+
+main table tbody tr {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.2s ease,
+              box-shadow 0.2s ease;
+  position: relative;
+}
+
+main table tbody tr:hover {
+  background: linear-gradient(90deg, rgba(250, 204, 21, 0.14) 0%, rgba(59, 130, 246, 0.08) 55%, rgba(250, 204, 21, 0.05) 100%) !important;
+  box-shadow: inset 4px 0 0 0 #EAB308, 0 3px 12px rgba(212, 175, 55, 0.14);
+}
+
+html.dark main table tbody tr:hover {
+  background: linear-gradient(90deg, rgba(234, 179, 8, 0.2) 0%, rgba(37, 99, 235, 0.18) 55%, rgba(15, 23, 42, 0.4) 100%) !important;
+  box-shadow: inset 4px 0 0 0 #FACC15, 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+main table tbody tr:hover td:first-child {
+  color: #D97706 !important;
+  font-weight: 800;
+}
+
+html.dark main table tbody tr:hover td:first-child {
+  color: #FDE047 !important;
+}
+
+/* ========================================================================== */
+/* COMPREHENSIVE DARK MODE PROTECTION (FIXES ANY WHITE BLANK CARDS/MENUS)     */
+/* ========================================================================== */
+
+html.dark body {
+  background-color: #060d1f !important;
+  color: #f8fafc !important;
+}
+
+html.dark header {
+  background-color: rgba(11, 21, 40, 0.92) !important;
+  border-color: rgba(212, 175, 55, 0.28) !important;
+}
+
+/* Prevent any bg-white, bg-slate-50, or parchment bg-[#FCFBF7] from staying white in Dark Mode */
+html.dark main .bg-white,
+html.dark main .bg-white\/95,
+html.dark main .bg-white\/90,
+html.dark main .bg-white\/80,
+html.dark .fixed .bg-white {
+  background: linear-gradient(180deg, rgba(13, 25, 48, 0.92) 0%, rgba(9, 18, 36, 0.95) 100%) !important;
+  border-color: rgba(212, 175, 55, 0.32) !important;
+  color: #f1f5f9 !important;
+}
+
+html.dark main .bg-\[\#FCFBF7\],
+html.dark main .bg-slate-50,
+html.dark main .bg-slate-50\/80,
+html.dark main .bg-slate-50\/70,
+html.dark main .bg-slate-50\/60,
+html.dark main .bg-slate-100 {
+  background-color: rgba(15, 29, 56, 0.78) !important;
+  border-color: rgba(212, 175, 55, 0.22) !important;
+  color: #e2e8f0 !important;
+}
+
+html.dark main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html.dark main select,
+html.dark main textarea,
+html.dark .fixed input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html.dark .fixed select,
+html.dark .fixed textarea {
+  background-color: rgba(10, 19, 38, 0.92) !important;
+  border-color: rgba(212, 175, 55, 0.32) !important;
+  color: #f8fafc !important;
+}
+
+html.dark main input:focus,
+html.dark main select:focus,
+html.dark main textarea:focus {
+  border-color: #FACC15 !important;
+  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.2) !important;
+}
+
+html.dark main .text-slate-900,
+html.dark main .text-slate-800,
+html.dark .fixed .text-slate-900,
+html.dark .fixed .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+html.dark main .text-slate-700,
+html.dark main .text-slate-600,
+html.dark .fixed .text-slate-700,
+html.dark .fixed .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark main .border-slate-200,
+html.dark main .border-slate-100,
+html.dark main .border-\[\#EFE2BE\] {
+  border-color: rgba(212, 175, 55, 0.25) !important;
+}
+
+html.dark main .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+html.dark main .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(212, 175, 55, 0.16) !important;
 }
 
 .jrpg-rank-s {
@@ -168,11 +356,11 @@ main .jrpg-glass:not(.academy-ornate-card)::after {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(212, 175, 55, 0.4);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.6);
+  background: rgba(212, 175, 55, 0.7);
 }
 
 @media print {
