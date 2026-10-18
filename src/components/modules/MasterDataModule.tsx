@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Student, Teacher, ClassRoom, Major, Subject, AcademicYear } from '../../types';
+import { Student, Teacher, ClassRoom, Major, Subject, AcademicYear, LessonSchedule } from '../../types';
 import {
   Users,
   GraduationCap,
@@ -27,10 +27,12 @@ import {
   Scroll,
   Hourglass,
   Sparkles,
+  Clock,
 } from 'lucide-react';
 import { exportToExcel } from '../../utils/exportUtils';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
+import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 
 export const MasterDataModule: React.FC = () => {
   const {
@@ -60,14 +62,18 @@ export const MasterDataModule: React.FC = () => {
     addAcademicYear,
     deleteAcademicYear,
     setActiveAcademicYear,
+    lessonSchedules,
+    saveLessonSchedule,
+    deleteLessonSchedule,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'classes' | 'majors' | 'subjects' | 'years'>('students');
+  const [activeTab, setActiveTab] = useState<'students' | 'teachers' | 'classes' | 'majors' | 'subjects' | 'schedules' | 'years'>('students');
 
-  // Search & Filter
+  // Search, Filter & Sort
   const [searchTerm, setSearchTerm] = useState('');
   const [filterClass, setFilterClass] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
+  const [sortBy, setSortBy] = useState<SortOption>('az');
 
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -548,16 +554,109 @@ export const MasterDataModule: React.FC = () => {
     });
   };
 
-  // Filter students
-  const filteredStudents = students.filter(s => {
-    const matchesSearch =
-      s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.nisn.includes(searchTerm) ||
-      s.nis.includes(searchTerm);
-    const matchesClass = filterClass === 'ALL' || s.className === filterClass;
-    const matchesStatus = filterStatus === 'ALL' || s.status === filterStatus;
-    return matchesSearch && matchesClass && matchesStatus;
+  // ==================== 7. LESSON SCHEDULE (JADWAL PELAJARAN) STATE ====================
+  const [filterScheduleDay, setFilterScheduleDay] = useState<string>('ALL');
+  const [filterScheduleClass, setFilterScheduleClass] = useState<string>('ALL');
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<LessonSchedule | null>(null);
+  const [schDay, setSchDay] = useState<LessonSchedule['day']>('Senin');
+  const [schStartTime, setSchStartTime] = useState('07:30');
+  const [schEndTime, setSchEndTime] = useState('09:00');
+  const [schClassId, setSchClassId] = useState(classes[0]?.id || '');
+  const [schSubjectId, setSchSubjectId] = useState(subjects[0]?.id || '');
+  const [schTeacherId, setSchTeacherId] = useState(teachers[0]?.id || '');
+  const [schRoom, setSchRoom] = useState('Lab RPL 1');
+
+  const openAddScheduleModal = () => {
+    setEditingSchedule(null);
+    setSchDay('Senin');
+    setSchStartTime('07:30');
+    setSchEndTime('09:00');
+    setSchClassId(classes[0]?.id || '');
+    setSchSubjectId(subjects[0]?.id || '');
+    setSchTeacherId(teachers[0]?.id || '');
+    setSchRoom('Lab RPL 1');
+    setShowScheduleModal(true);
+  };
+
+  const openEditScheduleModal = (sch: LessonSchedule) => {
+    setEditingSchedule(sch);
+    setSchDay(sch.day);
+    setSchStartTime(sch.startTime);
+    setSchEndTime(sch.endTime);
+    setSchClassId(sch.classId);
+    setSchSubjectId(sch.subjectId);
+    setSchTeacherId(sch.teacherId);
+    setSchRoom(sch.room);
+    setShowScheduleModal(true);
+  };
+
+  const handleSaveSchedule = (e: React.FormEvent) => {
+    e.preventDefault();
+    const clsObj = classes.find(c => c.id === schClassId) || classes[0];
+    const subObj = subjects.find(s => s.id === schSubjectId) || subjects[0];
+    const tchObj = teachers.find(t => t.id === schTeacherId) || teachers[0];
+
+    saveLessonSchedule({
+      id: editingSchedule?.id,
+      day: schDay,
+      startTime: schStartTime,
+      endTime: schEndTime,
+      classId: clsObj?.id || 'cls-xrpl1',
+      className: clsObj?.name || 'X RPL 1',
+      subjectId: subObj?.id || 'sub-pwpb',
+      subjectName: subObj?.name || 'Pemrograman Web',
+      teacherId: tchObj?.id || 'tch-1',
+      teacherName: tchObj?.fullName || 'Guru Pengampu',
+      room: schRoom.trim() || 'Ruang Teori 1',
+    });
+
+    showToast(
+      editingSchedule
+        ? `Jadwal pelajaran ${subObj?.name} (${clsObj?.name}) berhasil diperbarui.`
+        : `Jadwal pelajaran baru ${subObj?.name} (${clsObj?.name}) berhasil ditambahkan ke Data Pokok.`
+    );
+    setShowScheduleModal(false);
+  };
+
+  const handleDeleteScheduleClick = (sch: LessonSchedule) => {
+    setDeleteModalConfig({
+      isOpen: true,
+      title: 'Hapus Jadwal Pelajaran',
+      itemName: `${sch.subjectName} — ${sch.className} (${sch.day}, ${sch.startTime}-${sch.endTime})`,
+      description: 'Apakah Anda yakin ingin menghapus jadwal pelajaran ini dari Data Pokok sekolah?',
+      onConfirm: () => {
+        deleteLessonSchedule(sch.id);
+        closeDeleteModal();
+        showToast('Jadwal pelajaran berhasil dihapus dari database.');
+      },
+    });
+  };
+
+  const filteredSchedules = lessonSchedules.filter(sch => {
+    const matchDay = filterScheduleDay === 'ALL' || sch.day === filterScheduleDay;
+    const matchClass = filterScheduleClass === 'ALL' || sch.className === filterScheduleClass;
+    return matchDay && matchClass;
   });
+
+  // Filter & Sort students
+  const filteredStudents = sortDataItems(
+    students.filter(s => {
+      const matchesSearch =
+        s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.nisn.includes(searchTerm) ||
+        s.nis.includes(searchTerm);
+      const matchesClass = filterClass === 'ALL' || s.className === filterClass;
+      const matchesStatus = filterStatus === 'ALL' || s.status === filterStatus;
+      return matchesSearch && matchesClass && matchesStatus;
+    }),
+    sortBy,
+    {
+      getName: s => s.fullName || s.name,
+      getNis: s => s.nis,
+      getDate: s => s.enrollmentDate || '2025-07-14',
+    }
+  );
 
   const handleExportStudentsExcel = () => {
     const rows = filteredStudents.map((s, i) => ({
@@ -616,7 +715,7 @@ export const MasterDataModule: React.FC = () => {
       <AcademyHeroBanner
         kicker="GRAND CODEX • BASIS DATA POKOK SEKOLAH"
         title="MASTER DATA MANAJEMEN SEKOLAH"
-        subtitle="Pengelolaan terpusat data siswa aktif, tenaga pendidik, rombongan belajar, kompetensi keahlian (jurusan), mata pelajaran, dan tahun ajaran."
+        subtitle="Pengelolaan terpusat data siswa aktif, tenaga pendidik, rombongan belajar, kompetensi keahlian (jurusan), mata pelajaran, jadwal pelajaran, dan tahun ajaran."
         icon={Gem}
         rightContent={
           <div className="flex flex-wrap gap-1.5 rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 backdrop-blur-md">
@@ -626,6 +725,7 @@ export const MasterDataModule: React.FC = () => {
               { id: 'classes', label: `Kelas (${classes.length})`, icon: Castle },
               { id: 'majors', label: `Jurusan (${majors.length})`, icon: Swords },
               { id: 'subjects', label: `Mapel (${subjects.length})`, icon: Scroll },
+              { id: 'schedules', label: `Jadwal Pelajaran (${lessonSchedules.length})`, icon: Calendar },
               { id: 'years', label: 'Tahun Ajaran', icon: Hourglass },
             ].map(tab => {
               const Icon = tab.icon;
@@ -689,6 +789,8 @@ export const MasterDataModule: React.FC = () => {
                 <option value="mutasi">Mutasi / Diarsipkan</option>
                 <option value="lulus">Lulus</option>
               </select>
+
+              <SortByControl value={sortBy} onChange={setSortBy} />
             </div>
 
             <div className="flex items-center gap-2">
@@ -1051,7 +1153,155 @@ export const MasterDataModule: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 6: TAHUN AJARAN */}
+      {/* TAB 6: JADWAL PELAJARAN (DATA POKOK) */}
+      {activeTab === 'schedules' && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div>
+              <h2 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-blue-600" />
+                <span>Jadwal Pelajaran Sekolah ({filteredSchedules.length} Sesi Terjadwal)</span>
+              </h2>
+              <p className="text-xs text-slate-500">
+                Manajemen jadwal kegiatan belajar mengajar (KBM) mingguan per kelas, mata pelajaran, guru pengampu, dan ruang praktik/teori
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={filterScheduleDay}
+                onChange={e => setFilterScheduleDay(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              >
+                <option value="ALL">Semua Hari (Senin - Sabtu)</option>
+                {(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as const).map(d => (
+                  <option key={d} value={d}>
+                    Hari {d}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={filterScheduleClass}
+                onChange={e => setFilterScheduleClass(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              >
+                <option value="ALL">Semua Kelas</option>
+                {classes.map(c => (
+                  <option key={c.id} value={c.name}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                onClick={() => {
+                  const rows = filteredSchedules.map((sch, i) => ({
+                    No: i + 1,
+                    Hari: sch.day,
+                    'Jam Mulai': sch.startTime,
+                    'Jam Selesai': sch.endTime,
+                    Kelas: sch.className,
+                    'Mata Pelajaran': sch.subjectName,
+                    'Guru Pengampu': sch.teacherName,
+                    Ruangan: sch.room,
+                  }));
+                  exportToExcel(rows, 'Jadwal_Pelajaran_SMK_Mardi_Yuana');
+                }}
+                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+              >
+                <Download className="h-3.5 w-3.5 text-emerald-600" />
+                <span>Ekspor Excel</span>
+              </button>
+
+              <button
+                onClick={openAddScheduleModal}
+                className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Tambah Jadwal Pelajaran</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden dark:border-slate-800 dark:bg-slate-900">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300 font-bold">
+                    <th className="py-3 px-4 w-12 text-center">No</th>
+                    <th className="py-3 px-4">Hari</th>
+                    <th className="py-3 px-4">Jam Pelajaran</th>
+                    <th className="py-3 px-4">Kelas / Rombel</th>
+                    <th className="py-3 px-4">Mata Pelajaran</th>
+                    <th className="py-3 px-4">Guru Pengampu</th>
+                    <th className="py-3 px-4">Ruang / Lab</th>
+                    <th className="py-3 px-4 text-center w-24">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {filteredSchedules.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-xs text-slate-400">
+                        Belum ada jadwal pelajaran untuk filter hari/kelas yang dipilih.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredSchedules.map((sch, idx) => (
+                      <tr key={sch.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+                        <td className="py-3 px-4 text-center text-slate-400">{idx + 1}</td>
+                        <td className="py-3 px-4">
+                          <span className="rounded-lg bg-indigo-50 px-2.5 py-1 text-[11px] font-extrabold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+                            {sch.day}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 font-mono text-[11px] font-bold text-slate-700 dark:text-slate-200">
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="h-3 w-3 text-amber-500" />
+                            {sch.startTime} - {sch.endTime} WIB
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="rounded-md bg-blue-100 px-2.5 py-0.5 text-[11px] font-extrabold text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                            {sch.className}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{sch.subjectName}</td>
+                        <td className="py-3 px-4 text-slate-700 dark:text-slate-300 font-medium">{sch.teacherName}</td>
+                        <td className="py-3 px-4">
+                          <span className="rounded-md border border-amber-300/70 bg-amber-50/70 px-2 py-0.5 text-[11px] font-semibold text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                            {sch.room}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => openEditScheduleModal(sch)}
+                              className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/60 cursor-pointer"
+                              title="Edit Jadwal"
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteScheduleClick(sch)}
+                              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60 cursor-pointer"
+                              title="Hapus Jadwal"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 7: TAHUN AJARAN */}
       {activeTab === 'years' && (
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3 dark:border-slate-800">
@@ -1816,6 +2066,135 @@ export const MasterDataModule: React.FC = () => {
                 Tutup
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* JADWAL PELAJARAN ADD/EDIT MODAL */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+              <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
+                {editingSchedule ? 'Edit Jadwal Pelajaran' : 'Tambah Jadwal Pelajaran Baru'}
+              </h2>
+              <button onClick={() => setShowScheduleModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveSchedule} className="mt-4 space-y-3.5">
+              <div className="grid grid-cols-3 gap-2.5">
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Hari KBM</label>
+                  <select
+                    value={schDay}
+                    onChange={e => setSchDay(e.target.value as LessonSchedule['day'])}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    {(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as const).map(d => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Jam Mulai</label>
+                  <input
+                    type="time"
+                    value={schStartTime}
+                    onChange={e => setSchStartTime(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-mono font-bold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Jam Selesai</label>
+                  <input
+                    type="time"
+                    value={schEndTime}
+                    onChange={e => setSchEndTime(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-mono font-bold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Kelas / Rombel</label>
+                  <select
+                    value={schClassId}
+                    onChange={e => setSchClassId(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    {classes.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Ruang / Laboratorium</label>
+                  <input
+                    type="text"
+                    value={schRoom}
+                    onChange={e => setSchRoom(e.target.value)}
+                    placeholder="Contoh: Lab RPL 1"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Mata Pelajaran</label>
+                <select
+                  value={schSubjectId}
+                  onChange={e => setSchSubjectId(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                >
+                  {subjects.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Guru Pengampu</label>
+                <select
+                  value={schTeacherId}
+                  onChange={e => setSchTeacherId(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                >
+                  {teachers.map(t => (
+                    <option key={t.id} value={t.id}>
+                      {t.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowScheduleModal(false)}
+                  className="rounded-xl border border-slate-300 px-4 py-2 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-blue-600 px-5 py-2 font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer"
+                >
+                  Simpan Jadwal
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

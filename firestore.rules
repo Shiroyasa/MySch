@@ -121,6 +121,34 @@ service cloud.firestore {
       allow write: if isValidId(notificationId);
     }
 
+    // System & Visual Settings (Login & Header Banner backgrounds)
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isValidId(settingId);
+    }
+
+    // PKL Administration (Industry Partners, Visits, and Student Reports)
+    match /pklPartners/{partnerId} {
+      allow read: if true;
+      allow write: if isValidId(partnerId);
+    }
+
+    match /pklVisits/{visitId} {
+      allow read: if true;
+      allow write: if isValidId(visitId);
+    }
+
+    match /pklReports/{reportId} {
+      allow read: if true;
+      allow write: if isValidId(reportId);
+    }
+
+    // Lesson Schedules (Jadwal Pelajaran di Data Pokok)
+    match /lessonSchedules/{scheduleId} {
+      allow read: if true;
+      allow write: if isValidId(scheduleId);
+    }
+
     // Connection test document
     match /test/{testId} {
       allow read, write: if true;

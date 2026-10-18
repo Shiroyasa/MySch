@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import { AttendanceStatus } from '../../types';
 import {
@@ -22,10 +22,13 @@ import {
   RotateCcw,
   FileSpreadsheet,
   Search,
+  Database,
+  RefreshCw,
 } from 'lucide-react';
 import { exportToExcel, exportToPdf, exportToCsv, defaultReportConfig } from '../../utils/exportUtils';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
+import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 
 interface EditableAttendanceRow {
   studentId: string;
@@ -54,6 +57,8 @@ export const AttendanceModule: React.FC = () => {
     attendanceRecords,
     attendanceCorrections,
     saveAttendanceSessionAndRecords,
+    syncClassAttendanceRecapToDatabase,
+    resetClassAttendanceToZero,
     deleteAttendanceSession,
     clearAttendanceForClassAndDate,
     submitAttendanceCorrection,
@@ -63,21 +68,17 @@ export const AttendanceModule: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'input' | 'history' | 'correction' | 'editable_report'>('input');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [inputSearch, setInputSearch] = useState('');
   const [reportSearch, setReportSearch] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('az');
   const [reportPeriodLabel, setReportPeriodLabel] = useState('Rekapitulasi Semester Berjalan');
   const [signerWaliName, setSignerWaliName] = useState(defaultReportConfig.leftSignerName);
   const [signerWaliNip, setSignerWaliNip] = useState(defaultReportConfig.leftSignerNip);
   const [signerKepsekName, setSignerKepsekName] = useState(defaultReportConfig.rightSignerName);
   const [signerKepsekNip, setSignerKepsekNip] = useState(defaultReportConfig.rightSignerNip);
 
-  // Editable Attendance Report state per student
-  const [editableReportMap, setEditableReportMap] = useState<Record<string, EditableAttendanceRow>>(() => {
-    try {
-      const saved = localStorage.getItem('myschool_editable_attendance_report_v1');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return {};
-  });
+  // Editable Attendance Report local draft overrides (before or after syncing to DB)
+  const [editableReportMap, setEditableReportMap] = useState<Record<string, EditableAttendanceRow>>({});
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -110,38 +111,69 @@ export const AttendanceModule: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [attendanceType, setAttendanceType] = useState<'harian' | 'mapel'>('harian');
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>(subjects[0]?.id || '');
-  
-  // Student row entries state
+
+  // Ensure selectedClassId is valid when classes load from Firestore
+  useEffect(() => {
+    if (!selectedClassId && classes.length > 0) {
+      setSelectedClassId(classes[0].id);
+    }
+  }, [classes, selectedClassId]);
+
   const currentClass = classes.find(c => c.id === selectedClassId) || classes[0];
-  const classStudents = students.filter(s => s.className === currentClass?.name);
+  const classStudents = useMemo(
+    () =>
+      students.filter(
+        s => s.classId === currentClass?.id || s.className === currentClass?.name
+      ),
+    [students, currentClass]
+  );
+
+  // Find existing session in database for the currently selected Class + Date + Type (+ Subject)
+  const existingSession = useMemo(() => {
+    if (!currentClass) return undefined;
+    return attendanceSessions.find(
+      s =>
+        (s.classId === currentClass.id || s.className === currentClass.name) &&
+        s.date === selectedDate &&
+        s.type === attendanceType &&
+        (attendanceType === 'harian' || s.subjectId === selectedSubjectId)
+    );
+  }, [attendanceSessions, currentClass, selectedDate, attendanceType, selectedSubjectId]);
 
   // Map student ID to their attendance status and note
-  const [recordsMap, setRecordsMap] = useState<Record<string, { status: AttendanceStatus; note: string }>>(() => {
-    const initial: Record<string, { status: AttendanceStatus; note: string }> = {};
-    classStudents.forEach(std => {
-      initial[std.id] = { status: 'H', note: '' };
-    });
-    return initial;
-  });
+  const [recordsMap, setRecordsMap] = useState<Record<string, { status: AttendanceStatus; note: string }>>({});
+
+  // Automatically load saved records from database whenever Class, Date, Type, Subject, or DB Records change
+  useEffect(() => {
+    const nextMap: Record<string, { status: AttendanceStatus; note: string }> = {};
+    if (existingSession) {
+      const sessionRecords = attendanceRecords.filter(r => r.sessionId === existingSession.id);
+      classStudents.forEach(std => {
+        const found = sessionRecords.find(r => r.studentId === std.id);
+        nextMap[std.id] = {
+          status: found ? found.status : 'H',
+          note: found?.note || '',
+        };
+      });
+    } else {
+      classStudents.forEach(std => {
+        nextMap[std.id] = { status: 'H', note: '' };
+      });
+    }
+    setRecordsMap(nextMap);
+  }, [existingSession, attendanceRecords, classStudents]);
 
   // Re-sync students when class selection changes
   const handleClassChange = (newClassId: string) => {
     setSelectedClassId(newClassId);
-    const targetClass = classes.find(c => c.id === newClassId);
-    const targetStudents = students.filter(s => s.className === targetClass?.name);
-    const newMap: Record<string, { status: AttendanceStatus; note: string }> = {};
-    targetStudents.forEach(std => {
-      newMap[std.id] = { status: 'H', note: '' };
-    });
-    setRecordsMap(newMap);
   };
 
   const handleStatusChange = (studentId: string, status: AttendanceStatus) => {
     setRecordsMap(prev => ({
       ...prev,
       [studentId]: {
-        ...prev[studentId],
         status,
+        note: prev[studentId]?.note || '',
       },
     }));
   };
@@ -150,20 +182,19 @@ export const AttendanceModule: React.FC = () => {
     setRecordsMap(prev => ({
       ...prev,
       [studentId]: {
-        ...prev[studentId],
+        status: prev[studentId]?.status || 'H',
         note,
       },
     }));
   };
 
   const markAll = (status: AttendanceStatus) => {
-    setRecordsMap(prev => {
-      const next = { ...prev };
-      classStudents.forEach(std => {
-        next[std.id] = { ...next[std.id], status };
-      });
-      return next;
+    const next: Record<string, { status: AttendanceStatus; note: string }> = {};
+    classStudents.forEach(std => {
+      next[std.id] = { status, note: recordsMap[std.id]?.note || '' };
     });
+    setRecordsMap(next);
+    showToast(`Semua siswa kelas ${currentClass?.name || ''} ditandai ${status}. Klik Simpan untuk menyimpan ke database.`);
   };
 
   // Live counters
@@ -177,6 +208,7 @@ export const AttendanceModule: React.FC = () => {
   const attendanceRate = total > 0 ? (((counts.H + counts.T) / total) * 100).toFixed(1) : '100.0';
 
   const handleSave = (isFinal: boolean) => {
+    if (!currentClass) return;
     const recordsPayload = classStudents.map(std => ({
       studentId: std.id,
       status: recordsMap[std.id]?.status || 'H',
@@ -203,31 +235,62 @@ export const AttendanceModule: React.FC = () => {
       isFinal
     );
 
-    showToast(`Presensi ${currentClass.name} tanggal ${selectedDate} berhasil ${isFinal ? 'difinalisasi' : 'disimpan sebagai draf'}!`);
+    // Clear any stale local override for these students so Editable Report reflects live database counts
+    setEditableReportMap(prev => {
+      const next = { ...prev };
+      classStudents.forEach(std => {
+        delete next[std.id];
+      });
+      return next;
+    });
+
+    showToast(
+      `Presensi ${currentClass.name} (${selectedDate}) berhasil disimpan ke Database Cloud & tersinkron ke seluruh laporan!`
+    );
   };
 
   // Export handlers
   const handleExportExcel = () => {
+    if (!currentClass) return;
     const exportData = classStudents.map((std, idx) => ({
       No: idx + 1,
       NISN: std.nisn,
       NIS: std.nis,
       'Nama Siswa': std.fullName,
       Kelas: std.className,
-      Status: recordsMap[std.id]?.status === 'H' ? 'Hadir' : recordsMap[std.id]?.status === 'S' ? 'Sakit' : recordsMap[std.id]?.status === 'I' ? 'Izin' : recordsMap[std.id]?.status === 'T' ? 'Terlambat' : 'Alpa',
+      Status:
+        recordsMap[std.id]?.status === 'H'
+          ? 'Hadir'
+          : recordsMap[std.id]?.status === 'S'
+          ? 'Sakit'
+          : recordsMap[std.id]?.status === 'I'
+          ? 'Izin'
+          : recordsMap[std.id]?.status === 'T'
+          ? 'Terlambat'
+          : 'Alpa',
       Keterangan: recordsMap[std.id]?.note || '-',
     }));
 
     exportToExcel(exportData, `Presensi_SMK_MY_${currentClass.name}_${selectedDate}`);
+    showToast('Data presensi berhasil diekspor ke Excel (.xlsx).');
   };
 
   const handleExportPdf = () => {
+    if (!currentClass) return;
     const headers = ['No', 'NISN', 'Nama Siswa', 'Status', 'Keterangan'];
     const rows = classStudents.map((std, idx) => [
       idx + 1,
       std.nisn,
       std.fullName,
-      recordsMap[std.id]?.status === 'H' ? 'Hadir (H)' : recordsMap[std.id]?.status === 'S' ? 'Sakit (S)' : recordsMap[std.id]?.status === 'I' ? 'Izin (I)' : recordsMap[std.id]?.status === 'T' ? 'Terlambat (T)' : 'Alpa (A)',
+      recordsMap[std.id]?.status === 'H'
+        ? 'Hadir (H)'
+        : recordsMap[std.id]?.status === 'S'
+        ? 'Sakit (S)'
+        : recordsMap[std.id]?.status === 'I'
+        ? 'Izin (I)'
+        : recordsMap[std.id]?.status === 'T'
+        ? 'Terlambat (T)'
+        : 'Alpa (A)',
       recordsMap[std.id]?.note || '-',
     ]);
 
@@ -243,6 +306,7 @@ export const AttendanceModule: React.FC = () => {
       },
       `Presensi_${currentClass.name}_${selectedDate}`
     );
+    showToast('Dokumen PDF daftar hadir berhasil diunduh.');
   };
 
   // Correction form state for students
@@ -252,6 +316,12 @@ export const AttendanceModule: React.FC = () => {
   const [corReqStatus, setCorReqStatus] = useState<AttendanceStatus>('I');
   const [corReason, setCorReason] = useState<string>('');
 
+  useEffect(() => {
+    if (!corStudentId && students.length > 0) {
+      setCorStudentId(students[0].id);
+    }
+  }, [students, corStudentId]);
+
   const handleSubmitCorrection = (e: React.FormEvent) => {
     e.preventDefault();
     if (!corReason.trim()) {
@@ -259,9 +329,12 @@ export const AttendanceModule: React.FC = () => {
       return;
     }
 
-    const myStd = students.find(s => s.id === corStudentId) ||
+    const myStd =
+      students.find(s => s.id === corStudentId) ||
       students.find(s => s.fullName.toLowerCase() === currentUser.displayName.toLowerCase()) ||
       students[0];
+
+    if (!myStd) return;
 
     submitAttendanceCorrection({
       studentId: myStd.id,
@@ -277,26 +350,23 @@ export const AttendanceModule: React.FC = () => {
     });
 
     setCorReason('');
-    showToast(`Permohonan koreksi presensi ${myStd.fullName} berhasil diajukan.`);
+    showToast(`Permohonan koreksi presensi ${myStd.fullName} berhasil diajukan & tersimpan di database.`);
   };
 
-  // Compute or retrieve editable report rows for the selected class
-  const editableClassRows: EditableAttendanceRow[] = classStudents
-    .filter(
-      std =>
-        std.fullName.toLowerCase().includes(reportSearch.toLowerCase()) ||
-        std.nisn.toLowerCase().includes(reportSearch.toLowerCase())
-    )
-    .map(std => {
+  // Compute all rows for current class (unfiltered) so Save/Reset always covers every student in the class
+  const allClassEditableRows: EditableAttendanceRow[] = useMemo(() => {
+    return classStudents.map(std => {
       if (editableReportMap[std.id]) {
         return editableReportMap[std.id];
       }
       const myRecs = attendanceRecords.filter(r => r.studentId === std.id);
-      const hCount = myRecs.filter(r => r.status === 'H').length || 18;
+      const hCount = myRecs.filter(r => r.status === 'H').length;
       const sCount = myRecs.filter(r => r.status === 'S').length;
       const iCount = myRecs.filter(r => r.status === 'I').length;
       const aCount = myRecs.filter(r => r.status === 'A').length;
       const tCount = myRecs.filter(r => r.status === 'T').length;
+      const lastNoteRec = myRecs.find(r => r.note && r.note.trim().length > 0);
+
       return {
         studentId: std.id,
         nisn: std.nisn,
@@ -308,49 +378,101 @@ export const AttendanceModule: React.FC = () => {
         izin: iCount,
         alpa: aCount,
         terlambat: tCount,
-        teacherNote: aCount > 2 ? 'Perlu pembinaan kedisiplinan' : 'Kehadiran baik & disiplin',
+        teacherNote:
+          lastNoteRec?.note ||
+          (aCount > 2 ? 'Perlu pembinaan kedisiplinan' : 'Kehadiran baik & disiplin'),
         followUpAction: aCount > 2 ? 'Panggilan Wali Kelas' : 'Tidak Ada',
       };
     });
+  }, [classStudents, editableReportMap, attendanceRecords]);
+
+  // Filtered & sorted rows for table display
+  const editableClassRows: EditableAttendanceRow[] = useMemo(() => {
+    const filtered = allClassEditableRows.filter(
+      row =>
+        row.studentName.toLowerCase().includes(reportSearch.toLowerCase()) ||
+        row.nisn.toLowerCase().includes(reportSearch.toLowerCase()) ||
+        row.nis.toLowerCase().includes(reportSearch.toLowerCase())
+    );
+    return sortDataItems(filtered, sortBy, {
+      getName: r => r.studentName,
+      getNis: r => r.nis || r.nisn,
+      getDate: r => {
+        const std = classStudents.find(s => s.id === r.studentId);
+        return std?.createdAt || '';
+      },
+    });
+  }, [allClassEditableRows, reportSearch, sortBy, classStudents]);
 
   const handleUpdateEditableRow = (studentId: string, field: keyof EditableAttendanceRow, value: string | number) => {
-    const existing = editableClassRows.find(r => r.studentId === studentId);
+    const existing = allClassEditableRows.find(r => r.studentId === studentId);
     if (!existing) return;
     const updatedRow: EditableAttendanceRow = {
       ...existing,
       [field]: value,
     };
-    const nextMap = {
-      ...editableReportMap,
+    setEditableReportMap(prev => ({
+      ...prev,
       [studentId]: updatedRow,
-    };
-    setEditableReportMap(nextMap);
+    }));
   };
 
+  // Save Editable Report directly to Firestore Database & synchronize across all modules!
   const handleSaveEditableReport = () => {
-    const nextMap = { ...editableReportMap };
-    editableClassRows.forEach(row => {
-      nextMap[row.studentId] = row;
-    });
-    setEditableReportMap(nextMap);
-    localStorage.setItem('myschool_editable_attendance_report_v1', JSON.stringify(nextMap));
-    showToast(`Laporan presensi editable kelas ${currentClass?.name} berhasil disimpan.`);
+    if (!currentClass) return;
+    const payload = allClassEditableRows.map(r => ({
+      studentId: r.studentId,
+      fullName: r.studentName,
+      studentName: r.studentName,
+      nisn: r.nisn,
+      nis: r.nis,
+      h: Math.max(0, Number(r.hadir) || 0),
+      s: Math.max(0, Number(r.sakit) || 0),
+      i: Math.max(0, Number(r.izin) || 0),
+      a: Math.max(0, Number(r.alpa) || 0),
+      t: Math.max(0, Number(r.terlambat) || 0),
+      teacherNote: r.teacherNote,
+    }));
+
+    syncClassAttendanceRecapToDatabase(currentClass.id, payload);
+
+    // Clear temporary map because the database now holds the authoritative synced records
+    setEditableReportMap({});
+    showToast(
+      `Laporan presensi kelas ${currentClass.name} berhasil disimpan & tersinkron ke semua menu!`
+    );
   };
 
+  // Reset all attendance counts (H, S, I, A, T) to 0 for the selected class and sync to DB
   const handleResetEditableReportClass = () => {
-    const nextMap = { ...editableReportMap };
+    if (!currentClass) return;
+    resetClassAttendanceToZero(currentClass.id);
+
+    const zeroMap: Record<string, EditableAttendanceRow> = {};
     classStudents.forEach(std => {
-      delete nextMap[std.id];
+      zeroMap[std.id] = {
+        studentId: std.id,
+        nisn: std.nisn,
+        nis: std.nis,
+        studentName: std.fullName,
+        className: std.className,
+        hadir: 0,
+        sakit: 0,
+        izin: 0,
+        alpa: 0,
+        terlambat: 0,
+        teacherNote: 'Kehadiran telah direset',
+        followUpAction: 'Tidak Ada',
+      };
     });
-    setEditableReportMap(nextMap);
-    localStorage.setItem('myschool_editable_attendance_report_v1', JSON.stringify(nextMap));
-    showToast(`Data laporan presensi kelas ${currentClass?.name} direset ke kalkulasi sesi otomatis.`);
+    setEditableReportMap(zeroMap);
+    showToast(`Seluruh hitungan presensi kelas ${currentClass.name} berhasil direset menjadi 0 & disinkronkan!`);
   };
 
   const handleExportEditableReportExcel = () => {
     const data = editableClassRows.map((r, idx) => {
       const total = r.hadir + r.sakit + r.izin + r.alpa;
-      const rate = total > 0 ? Math.round((r.hadir / total) * 100) : 100;
+      const rate = total > 0 ? Math.round(((r.hadir + r.terlambat) / total) * 100) : 100;
       return {
         No: idx + 1,
         NISN: r.nisn,
@@ -375,7 +497,7 @@ export const AttendanceModule: React.FC = () => {
   const handleExportEditableReportCsv = () => {
     const data = editableClassRows.map((r, idx) => {
       const total = r.hadir + r.sakit + r.izin + r.alpa;
-      const rate = total > 0 ? Math.round((r.hadir / total) * 100) : 100;
+      const rate = total > 0 ? Math.round(((r.hadir + r.terlambat) / total) * 100) : 100;
       return {
         No: idx + 1,
         NISN: r.nisn,
@@ -398,7 +520,7 @@ export const AttendanceModule: React.FC = () => {
     const headers = ['No', 'NISN', 'Nama Siswa', 'H', 'S', 'I', 'A', 'T', 'Kehadiran', 'Catatan Wali Kelas'];
     const rows = editableClassRows.map((r, idx) => {
       const total = r.hadir + r.sakit + r.izin + r.alpa;
-      const rate = total > 0 ? Math.round((r.hadir / total) * 100) : 100;
+      const rate = total > 0 ? Math.round(((r.hadir + r.terlambat) / total) * 100) : 100;
       return [
         idx + 1,
         r.nisn,
@@ -434,21 +556,36 @@ export const AttendanceModule: React.FC = () => {
     showToast('Dokumen PDF Laporan Presensi berhasil diunduh.');
   };
 
+  const filteredInputStudents = useMemo(() => {
+    const filtered = classStudents.filter(
+      std =>
+        std.fullName.toLowerCase().includes(inputSearch.toLowerCase()) ||
+        std.nisn.toLowerCase().includes(inputSearch.toLowerCase()) ||
+        std.nis.toLowerCase().includes(inputSearch.toLowerCase())
+    );
+    return sortDataItems(filtered, sortBy, {
+      getName: s => s.fullName,
+      getNis: s => s.nis || s.nisn,
+      getDate: s => s.createdAt,
+    });
+  }, [classStudents, inputSearch, sortBy]);
+
   return (
     <div className="space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl dark:bg-blue-600 animate-in slide-in-from-bottom-3">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Royal Academy Banner & Navigation Tabs */}
       <AcademyHeroBanner
+        moduleKey="attendance"
         kicker="MANAJEMEN KEHADIRAN & PRESENSI HARIAN"
         title="PRESENSI & ABSENSI SISWA"
-        subtitle="Pencatatan kehadiran jam pelajaran, rekapitulasi laporan presensi interaktif (editable), riwayat sesi, dan verifikasi koreksi absensi."
+        subtitle="Pencatatan kehadiran jam pelajaran, rekapitulasi laporan presensi interaktif (editable), riwayat sesi, dan verifikasi koreksi absensi tersinkron langsung ke Cloud Database."
         icon={CalendarCheck}
         rightContent={
           <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 backdrop-blur-md">
@@ -569,14 +706,41 @@ export const AttendanceModule: React.FC = () => {
               </div>
 
               {/* Quick Actions */}
-              <div className="flex flex-col justify-end">
+              <div className="flex flex-col justify-end gap-1.5">
                 <button
                   type="button"
                   onClick={() => markAll('H')}
-                  className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2 px-3 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors"
+                  className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2 px-3 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors cursor-pointer"
                 >
                   <CheckCheck className="h-4 w-4" />
                   <span>Tandai Semua Hadir</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Secondary Bar: Search Student + Database Sync Status + Quick Save Button */}
+            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+              <div className="relative w-full sm:w-72">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                <input
+                  type="text"
+                  value={inputSearch}
+                  onChange={e => setInputSearch(e.target.value)}
+                  placeholder="Cari nama siswa atau NISN..."
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-8 pr-3 text-xs text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                <SortByControl value={sortBy} onChange={setSortBy} />
+
+                <button
+                  type="button"
+                  onClick={() => handleSave(true)}
+                  className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                >
+                  <Save className="h-3.5 w-3.5" />
+                  <span>Simpan Presensi</span>
                 </button>
               </div>
             </div>
@@ -625,7 +789,7 @@ export const AttendanceModule: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {classStudents.map((std, idx) => {
+                  {filteredInputStudents.map((std, idx) => {
                     const current = recordsMap[std.id] || { status: 'H', note: '' };
 
                     return (
@@ -654,7 +818,7 @@ export const AttendanceModule: React.FC = () => {
                                   key={btn.code}
                                   type="button"
                                   onClick={() => handleStatusChange(std.id, btn.code as AttendanceStatus)}
-                                  className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                                  className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
                                     isChecked
                                       ? `${btn.bg} shadow-xs scale-105 ring-2 ring-blue-500/30`
                                       : `border border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 ${btn.hover}`
@@ -1141,12 +1305,15 @@ export const AttendanceModule: React.FC = () => {
                   Tabel Editor Laporan Rekapitulasi Presensi — Kelas {currentClass?.name}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Klik langsung pada kolom angka (H, S, I, A, T) atau catatan wali kelas untuk menyunting laporan sebelum dicetak/diekspor.
+                  Klik langsung pada kolom angka (H, S, I, A, T) atau catatan wali kelas untuk menyunting laporan, lalu klik Simpan untuk menyinkronkan ke seluruh menu.
                 </p>
               </div>
-              <span className="text-xs font-bold text-blue-600">
-                {editableClassRows.length} Siswa Ditampilkan
-              </span>
+              <div className="flex flex-wrap items-center gap-3">
+                <SortByControl value={sortBy} onChange={setSortBy} />
+                <span className="text-xs font-bold text-blue-600">
+                  {editableClassRows.length} Siswa Ditampilkan
+                </span>
+              </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -1259,6 +1426,27 @@ export const AttendanceModule: React.FC = () => {
                   })}
                 </tbody>
               </table>
+            </div>
+
+            {/* Bottom Save & Reset Bar for Editable Report */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={handleResetEditableReportClass}
+                className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400 cursor-pointer transition-colors"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span>Reset Semua Presensi ke 0</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveEditableReport}
+                className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 cursor-pointer transition-colors"
+              >
+                <Save className="h-4 w-4" />
+                <span>Simpan Presensi</span>
+              </button>
             </div>
           </div>
         </div>

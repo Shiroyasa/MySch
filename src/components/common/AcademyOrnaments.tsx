@@ -1,5 +1,7 @@
 import React from 'react';
 import { BookOpen } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
+import { SkyborneCastleBackground } from './SkyborneCastleBackground';
 
 interface OrnateCardProps {
   children: React.ReactNode;
@@ -11,7 +13,7 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({ children, className = ''
   return (
     <div
       onClick={onClick}
-      className={`academy-ornate-card relative rounded-2xl border border-[#EFE2BE] bg-white shadow-[0_2px_16px_rgba(15,23,42,0.03)] dark:border-amber-500/25 dark:bg-slate-900 ${className}`}
+      className={`academy-ornate-card relative rounded-2xl border border-[#EFE2BE] bg-white/95 backdrop-blur-md shadow-[0_2px_16px_rgba(15,23,42,0.03)] dark:border-[#C8A44B]/35 dark:bg-[#0B1528]/80 dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)] transition-colors duration-300 ${className}`}
     >
       {/* Top-Left 4-Point Golden Star Ornament */}
       <span
@@ -38,6 +40,7 @@ interface AcademyHeroBannerProps {
   subtitle: string;
   icon?: React.ElementType;
   rightContent?: React.ReactNode;
+  moduleKey?: string;
 }
 
 export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
@@ -46,112 +49,40 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
   subtitle,
   icon: Icon = BookOpen,
   rightContent,
+  moduleKey,
 }) => {
+  const { visualSettings, activeNav } = useApp();
+
+  const targetKey = moduleKey || activeNav || 'default';
+  const perModuleBg = visualSettings?.moduleBannerBgs?.[targetKey];
+  const resolvedBgUrl =
+    perModuleBg ||
+    visualSettings?.globalBannerBgUrl ||
+    visualSettings?.loginBgUrl ||
+    null;
+
+  const overlayOpacity =
+    typeof visualSettings?.bannerOverlayOpacity === 'number'
+      ? Math.min(90, Math.max(15, visualSettings.bannerOverlayOpacity))
+      : 55;
+
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[#1E2E4F] bg-[#0B1528] px-6 py-7 sm:px-8 sm:py-8 text-white shadow-lg">
-      {/* Right-Side Fantasy Castle Architectural Scenic Illustration (Matches image.png) */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-        <svg
-          className="absolute right-0 top-0 h-full w-full sm:w-[72%] object-cover"
-          viewBox="0 0 900 280"
-          fill="none"
-          preserveAspectRatio="xMaxYMid slice"
-        >
-          <defs>
-            <linearGradient id="bannerSky" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#0B1528" stopOpacity="1" />
-              <stop offset="35%" stopColor="#162B52" stopOpacity="0.95" />
-              <stop offset="70%" stopColor="#3B69A8" stopOpacity="0.88" />
-              <stop offset="100%" stopColor="#6CA0DC" stopOpacity="0.9" />
-            </linearGradient>
-            <linearGradient id="castleStoneLit" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#E2E8F0" stopOpacity="0.7" />
-              <stop offset="50%" stopColor="#94A3B8" stopOpacity="0.6" />
-              <stop offset="100%" stopColor="#475569" stopOpacity="0.55" />
-            </linearGradient>
-            <linearGradient id="castleRoofDark" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#1E3A8A" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#0F172A" stopOpacity="0.9" />
-            </linearGradient>
-            <linearGradient id="fadeLeft" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#0B1528" stopOpacity="1" />
-              <stop offset="38%" stopColor="#0B1528" stopOpacity="0.88" />
-              <stop offset="72%" stopColor="#0B1528" stopOpacity="0.32" />
-              <stop offset="100%" stopColor="#0B1528" stopOpacity="0.08" />
-            </linearGradient>
-          </defs>
+    <div className="relative overflow-hidden rounded-2xl border border-[#C8A44B]/65 bg-[#0B1528] px-6 py-7 sm:px-8 sm:py-8 text-white shadow-lg">
+      {/* Scenic Background: Either Custom Uploaded Image or Skyborne Academy Castle Courtyard */}
+      <SkyborneCastleBackground
+        mode="banner"
+        customBgUrl={resolvedBgUrl}
+        bgType={visualSettings?.loginBgType}
+        livePreset={visualSettings?.loginLivePreset}
+      />
 
-          {/* Sky Backdrop */}
-          <rect width="900" height="280" fill="url(#bannerSky)" />
-
-          {/* Sunlit Cumulus Clouds on Far Right */}
-          <circle cx="820" cy="110" r="85" fill="#F8FAFC" opacity="0.45" />
-          <circle cx="730" cy="145" r="70" fill="#E0F2FE" opacity="0.35" />
-          <circle cx="875" cy="165" r="75" fill="#FFFBEB" opacity="0.5" />
-          <circle cx="620" cy="175" r="65" fill="#BAE6FD" opacity="0.25" />
-
-          {/* Distant Floating Citadel on Top Right */}
-          <g transform="translate(805, 22)" opacity="0.65">
-            <polygon points="10,28 52,28 42,45 30,58 18,42" fill="#475569" />
-            <rect x="22" y="14" width="16" height="14" fill="#CBD5E1" />
-            <polygon points="30,2 20,14 40,14" fill="#1E3A8A" />
-          </g>
-
-          {/* Grand European Fantasy Academy Castle Complex (Matches Banner Artwork) */}
-          <g transform="translate(380, 0)">
-            {/* Left Bridge & Viaduct Arches */}
-            <rect x="20" y="185" width="160" height="65" fill="#334155" opacity="0.55" />
-            {[35, 75, 115].map((x, idx) => (
-              <path
-                key={idx}
-                d={`M ${x} 250 L ${x} 210 A 14 14 0 0 1 ${x + 28} 210 L ${x + 28} 250 Z`}
-                fill="#0F172A"
-                opacity="0.65"
-              />
-            ))}
-
-            {/* Castle Main Keep, Rotunda & Soaring Spires */}
-            <rect x="175" y="105" width="220" height="165" fill="url(#castleStoneLit)" />
-            {/* Central Rotunda Dome & Towers */}
-            <rect x="235" y="65" width="95" height="195" fill="url(#castleStoneLit)" />
-            <path d="M 235 65 Q 282 28 330 65 Z" fill="url(#castleRoofDark)" />
-
-            {/* Left Tall Spire */}
-            <rect x="165" y="48" width="34" height="210" fill="url(#castleStoneLit)" />
-            <polygon points="182,-5 160,50 204,50" fill="url(#castleRoofDark)" />
-
-            {/* Center-Left Spire */}
-            <rect x="210" y="35" width="30" height="220" fill="url(#castleStoneLit)" />
-            <polygon points="225,-12 205,37 245,37" fill="url(#castleRoofDark)" />
-
-            {/* Center-Right Tallest Spire */}
-            <rect x="325" y="28" width="38" height="230" fill="url(#castleStoneLit)" />
-            <polygon points="344,-18 320,30 368,30" fill="url(#castleRoofDark)" />
-
-            {/* Right Outer Turrets */}
-            <rect x="385" y="75" width="36" height="185" fill="url(#castleStoneLit)" />
-            <polygon points="403,18 380,77 426,77" fill="url(#castleRoofDark)" />
-
-            <rect x="430" y="110" width="32" height="150" fill="url(#castleStoneLit)" />
-            <polygon points="446,60 426,112 466,112" fill="url(#castleRoofDark)" />
-
-            {/* Gothic Arched Windows */}
-            {[250, 272, 294, 312].map((x, i) => (
-              <rect key={i} x={x} y="90" width="8" height="28" rx="4" fill="#1E293B" opacity="0.75" />
-            ))}
-            {[177, 220, 339, 398].map((x, i) => (
-              <rect key={i} x={x} y="75" width="7" height="24" rx="3.5" fill="#FEF08A" opacity="0.55" />
-            ))}
-
-            {/* Lush Green Forest Base */}
-            <ellipse cx="220" cy="270" rx="180" ry="32" fill="#14532D" opacity="0.65" />
-            <ellipse cx="390" cy="275" rx="140" ry="28" fill="#166534" opacity="0.65" />
-          </g>
-
-          {/* Smooth Dark Navy Left Gradient Overlay for Crisp Text Readability */}
-          <rect width="900" height="280" fill="url(#fadeLeft)" />
-        </svg>
-      </div>
+      {/* Smooth Dark Navy Gradient Overlay for Crisp Text Readability */}
+      <div
+        className="pointer-events-none absolute inset-0 z-[1]"
+        style={{
+          background: `linear-gradient(90deg, rgba(11, 21, 40, ${Math.min(0.95, (overlayOpacity + 28) / 100)}) 0%, rgba(11, 21, 40, ${overlayOpacity / 100}) 52%, rgba(11, 21, 40, ${Math.max(0.18, (overlayOpacity - 22) / 100)}) 100%)`,
+        }}
+      />
 
       {/* Foreground Content */}
       <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
@@ -165,21 +96,21 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
 
           <div className="space-y-1.5">
             {/* Golden Kicker */}
-            <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#EAB308]">
+            <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#EAB308] drop-shadow-xs">
               <span>✦</span>
               <span>{kicker}</span>
             </div>
 
             {/* Regal Cinzel Serif Uppercase Title */}
             <h1
-              className="text-xl sm:text-[28px] font-bold uppercase tracking-[0.04em] text-white leading-tight drop-shadow-xs"
+              className="text-xl sm:text-[28px] font-bold uppercase tracking-[0.04em] text-white leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]"
               style={{ fontFamily: "'Cinzel', 'Playfair Display', Georgia, serif" }}
             >
               {title}
             </h1>
 
             {/* Subtitle */}
-            <p className="text-xs sm:text-[13px] text-slate-200/90 leading-relaxed max-w-2xl">
+            <p className="text-xs sm:text-[13px] text-slate-100/95 leading-relaxed max-w-2xl drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)]">
               {subtitle}
             </p>
           </div>

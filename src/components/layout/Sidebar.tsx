@@ -13,7 +13,6 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  MessageCircle,
   LogOut,
   Award,
   UserCheck,
@@ -48,7 +47,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   mobileOpen,
   onCloseMobile,
 }) => {
-  const { currentRole, activeNav, setActiveNav, attendanceCorrections, setShowLogoutModal } = useApp();
+  const { currentRole, activeNav, setActiveNav, attendanceCorrections, setShowLogoutModal, visualSettings } = useApp();
+  const [mousePos, setMousePos] = React.useState<{ x: number; y: number; active: boolean }>({
+    x: 120,
+    y: 220,
+    active: false,
+  });
 
   const pendingCorrectionsCount = attendanceCorrections.filter(c => c.status === 'pending').length;
 
@@ -121,7 +125,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     // GROUP 3: DATA POKOK & MASTER
     {
       groupTitle: 'DATA POKOK & MASTER',
-      roles: ['super_admin', 'admin', 'kepala_sekolah'],
+      roles: ['super_admin', 'admin'],
       items: [
         {
           id: 'master-data',
@@ -135,35 +139,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: Users,
           roles: ['super_admin', 'admin'],
         },
-        {
-          id: 'student-chat-monitor',
-          label: 'Pantauan Chat',
-          icon: MessageCircle,
-          roles: ['super_admin', 'admin'],
-          badge: 'LIVE',
-          badgeStyle: 'border border-emerald-500/50 bg-[#0A2E26] text-emerald-400',
-        },
-        {
-          id: 'audit-logs',
-          label: 'Audit Log & Akses',
-          icon: ShieldCheck,
-          roles: ['super_admin', 'kepala_sekolah'],
-        },
       ],
     },
 
     // GROUP 4: LAYANAN & PENGATURAN
     {
       groupTitle: 'LAYANAN & PENGATURAN',
-      roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah', 'siswa'],
+      roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
       items: [
         {
-          id: 'student-chat',
-          label: 'Obrolan Siswa',
-          icon: MessageCircle,
-          roles: ['siswa', 'guru', 'wali_kelas', 'kepala_sekolah'],
-          badge: 'DM',
-          badgeStyle: 'border border-cyan-500/50 bg-cyan-950/80 text-cyan-300',
+          id: 'audit-logs',
+          label: 'Audit Log & Akses',
+          icon: ShieldCheck,
+          roles: ['super_admin', 'admin', 'kepala_sekolah'],
         },
         {
           id: 'settings',
@@ -180,6 +168,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onCloseMobile();
   };
 
+  const handleSidebarMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePos({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      active: true,
+    });
+  };
+
   return (
     <>
       {/* Mobile Backdrop */}
@@ -190,19 +187,86 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
-      {/* Royal Midnight Navy Sidebar Container (Matches image.png) */}
+      {/* Royal Midnight Navy Sidebar Container with Magical Interactive Aura */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r border-[#182644] bg-[#0B162C] text-slate-300 transition-all duration-300 lg:static ${
+        onMouseMove={handleSidebarMouseMove}
+        onMouseEnter={() => setMousePos(prev => ({ ...prev, active: true }))}
+        onMouseLeave={() => setMousePos(prev => ({ ...prev, active: false }))}
+        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col overflow-hidden border-r border-[#182644] bg-[#0B162C]/95 backdrop-blur-xl text-slate-300 transition-all duration-300 lg:static ${
           collapsed ? 'w-20' : 'w-64'
         } ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
-        {/* Top Brand Emblem Header */}
-        <div className="flex h-20 items-center justify-between border-b border-[#182644] px-4">
+        {/* Magical Interactive Cursor Spotlight & Celestial Stardust Layer */}
+        <div
+          className="pointer-events-none absolute inset-0 z-0 overflow-hidden transition-opacity duration-500"
+          style={{ opacity: mousePos.active ? 1 : 0.35 }}
+          aria-hidden="true"
+        >
+          {/* Primary Golden-Sapphire Magical Cursor Orb */}
+          <div
+            className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-transform duration-75 ease-out"
+            style={{
+              left: `${mousePos.x}px`,
+              top: `${mousePos.y}px`,
+              width: '260px',
+              height: '260px',
+              background:
+                'radial-gradient(circle, rgba(250,204,21,0.16) 0%, rgba(59,130,246,0.14) 38%, rgba(14,165,233,0.05) 65%, transparent 80%)',
+              filter: 'blur(8px)',
+            }}
+          />
+          {/* Trailing Stardust Sparkle Nodes following Mouse */}
+          <span
+            className="absolute text-[10px] text-[#FDE047] transition-all duration-200 ease-out select-none"
+            style={{
+              left: `${mousePos.x - 26}px`,
+              top: `${mousePos.y - 18}px`,
+              opacity: mousePos.active ? 0.85 : 0,
+              textShadow: '0 0 8px rgba(250,204,21,0.9)',
+            }}
+          >
+            ✦
+          </span>
+          <span
+            className="absolute text-[8px] text-sky-300 transition-all duration-300 ease-out select-none"
+            style={{
+              left: `${mousePos.x + 28}px`,
+              top: `${mousePos.y + 14}px`,
+              opacity: mousePos.active ? 0.75 : 0,
+              textShadow: '0 0 8px rgba(56,189,248,0.9)',
+            }}
+          >
+            ✧
+          </span>
+          <span
+            className="absolute text-[7px] text-amber-200 transition-all duration-500 ease-out select-none"
+            style={{
+              left: `${mousePos.x + 12}px`,
+              top: `${mousePos.y - 28}px`,
+              opacity: mousePos.active ? 0.65 : 0,
+            }}
+          >
+            ⋆
+          </span>
+        </div>
+
+        {/* Top Brand Emblem Header (Supports Proportional Custom App Logo) */}
+        <div className="relative z-10 flex h-20 items-center justify-between border-b border-[#182644] px-4">
           {!collapsed ? (
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="relative flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl border border-[#C8A44B]/65 bg-[#122244] shadow-inner">
-                <span className="text-[7px] leading-none text-[#EAB308] mb-0.5">✦</span>
-                <BookOpen className="h-4.5 w-4.5 text-[#EAB308]" strokeWidth={1.8} />
+              <div className="group/logo relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#C8A44B]/75 bg-gradient-to-b from-[#15284E] to-[#0D1A36] p-1.5 shadow-[0_0_15px_rgba(200,164,75,0.22),inset_0_0_8px_rgba(250,204,21,0.12)]">
+                {visualSettings?.appLogoUrl ? (
+                  <img
+                    src={visualSettings.appLogoUrl}
+                    alt="Logo Aplikasi"
+                    className="max-h-full max-w-full object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover/logo:scale-105"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="text-[7px] leading-none text-[#EAB308] mb-0.5">✦</span>
+                    <BookOpen className="h-4.5 w-4.5 text-[#EAB308]" strokeWidth={1.8} />
+                  </div>
+                )}
               </div>
               <div className="overflow-hidden">
                 <p
@@ -217,9 +281,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             </div>
           ) : (
-            <div className="mx-auto flex h-10 w-10 flex-col items-center justify-center rounded-xl border border-[#C8A44B]/65 bg-[#122244]">
-              <span className="text-[7px] leading-none text-[#EAB308] mb-0.5">✦</span>
-              <BookOpen className="h-4.5 w-4.5 text-[#EAB308]" strokeWidth={1.8} />
+            <div className="mx-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#C8A44B]/75 bg-gradient-to-b from-[#15284E] to-[#0D1A36] p-1.5 shadow-[0_0_14px_rgba(200,164,75,0.2)]">
+              {visualSettings?.appLogoUrl ? (
+                <img
+                  src={visualSettings.appLogoUrl}
+                  alt="Logo Aplikasi"
+                  className="max-h-full max-w-full object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center">
+                  <span className="text-[7px] leading-none text-[#EAB308] mb-0.5">✦</span>
+                  <BookOpen className="h-4.5 w-4.5 text-[#EAB308]" strokeWidth={1.8} />
+                </div>
+              )}
             </div>
           )}
 
@@ -233,7 +307,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation Menu Items */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4">
+        <div className="relative z-10 flex-1 overflow-y-auto px-3 py-4 space-y-4">
           {navGroups
             .filter(group => group.roles.includes(currentRole))
             .map((group, groupIdx) => {
@@ -259,27 +333,67 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <button
                         key={item.id}
                         onClick={() => handleSelectNav(item.id)}
-                        className={`group relative flex w-full items-center rounded-xl transition-all duration-150 cursor-pointer ${
+                        className={`group relative flex w-full items-center overflow-hidden rounded-xl transition-all duration-300 cursor-pointer ${
                           collapsed ? 'justify-center px-2 py-2.5' : 'justify-between px-3.5 py-2.5'
                         } ${
                           isActive
-                            ? 'bg-[#2563EB] text-white font-bold shadow-[0_4px_14px_rgba(37,99,235,0.35)]'
-                            : 'text-[#CBD5E1] hover:bg-[#132342] hover:text-white font-medium'
+                            ? 'bg-gradient-to-r from-[#1D4ED8] via-[#2563EB] to-[#1E40AF] text-white font-bold shadow-[0_0_20px_rgba(37,99,235,0.55),inset_0_0_12px_rgba(250,204,21,0.28)] border border-[#FACC15]/45'
+                            : 'text-[#CBD5E1] hover:bg-[#132342]/90 hover:text-white hover:shadow-[0_0_14px_rgba(200,164,75,0.18)] border border-transparent hover:border-[#C8A44B]/30 font-medium'
                         }`}
                         title={collapsed ? item.label : undefined}
                       >
-                        {/* Golden Vertical Accent Bar on Active Item Left Edge (Matches image.png) */}
+                        {/* Magical Hover & Active Shimmer Aura */}
+                        <span
+                          className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${
+                            isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                          }`}
+                          style={{
+                            background: isActive
+                              ? 'radial-gradient(circle at 18% 50%, rgba(250,204,21,0.25), transparent 65%)'
+                              : 'radial-gradient(circle at 20% 50%, rgba(250,204,21,0.12), rgba(56,189,248,0.08) 50%, transparent 75%)',
+                          }}
+                          aria-hidden="true"
+                        />
+
+                        {/* Golden Vertical Accent Bar + Magical Sparkles on Active Item */}
                         {isActive && (
-                          <span
-                            className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-[#F59E0B]"
-                            aria-hidden="true"
-                          />
+                          <>
+                            <span
+                              className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-gradient-to-b from-[#FEF08A] via-[#F59E0B] to-[#FDE047] shadow-[0_0_10px_#FACC15]"
+                              aria-hidden="true"
+                            />
+                            <span
+                              className="pointer-events-none absolute right-2 top-1 text-[9px] text-[#FDE047] animate-pulse"
+                              aria-hidden="true"
+                            >
+                              ✦
+                            </span>
+                            <span
+                              className="pointer-events-none absolute right-6 bottom-1 text-[7px] text-sky-200 animate-ping"
+                              style={{ animationDuration: '2.6s' }}
+                              aria-hidden="true"
+                            >
+                              ⋆
+                            </span>
+                          </>
                         )}
 
-                        <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
+                        {/* Hover Sparkle when not active */}
+                        {!isActive && (
+                          <span
+                            className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-[#FACC15] opacity-0 group-hover:opacity-90 transition-all duration-300 group-hover:rotate-45"
+                            aria-hidden="true"
+                          >
+                            ✦
+                          </span>
+                        )}
+
+                        <div className={`relative z-10 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
                           <Icon
-                            className={`h-4 w-4 shrink-0 transition-colors ${
-                              isActive ? 'text-white' : 'text-[#8DA2C0] group-hover:text-white'
+                            className={`h-4 w-4 shrink-0 transition-all duration-300 ${
+                              isActive
+                                ? 'text-[#FDE047] drop-shadow-[0_0_6px_rgba(250,204,21,0.8)] scale-110'
+                                : 'text-[#8DA2C0] group-hover:text-[#FDE047] group-hover:scale-110'
                             }`}
                             strokeWidth={isActive ? 2.2 : 1.8}
                           />
@@ -292,7 +406,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                         {!collapsed && item.badge && (
                           <span
-                            className={`ml-2 shrink-0 rounded-md px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${
+                            className={`relative z-10 ml-2 shrink-0 rounded-md px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${
                               item.badgeStyle || 'bg-blue-600 text-white'
                             }`}
                           >
@@ -307,34 +421,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
             })}
         </div>
 
-        {/* Bottom Academy Crest Footer & Logout Trigger (Matches image.png) */}
-        <div className="border-t border-[#182644] p-4">
+        {/* Bottom Logout Trigger (My Academy logo & text removed as requested) */}
+        <div className="relative z-10 border-t border-[#182644] p-3">
           {!collapsed ? (
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#C8A44B]/60 bg-[#122244]">
-                  <BookOpen className="h-4 w-4 text-[#EAB308]" strokeWidth={1.8} />
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-bold text-white">My Academy</p>
-                  <p className="line-clamp-2 text-[10px] leading-tight text-[#8DA2C0] mt-0.5">
-                    Bersama Membangun Pendidikan yang Lebih Baik
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setShowLogoutModal(true)}
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#8DA2C0] hover:bg-rose-950/60 hover:text-rose-400 transition-colors cursor-pointer"
-                title="Keluar Akun (Log Out)"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </div>
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-rose-500/30 bg-rose-950/35 px-3.5 py-2.5 text-xs font-bold text-rose-300 hover:border-rose-500/60 hover:bg-rose-950/70 hover:text-white transition-all cursor-pointer"
+              title="Keluar Akun (Log Out)"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span>Keluar Sesi Akun</span>
+            </button>
           ) : (
             <button
               onClick={() => setShowLogoutModal(true)}
-              className="mx-auto flex h-9 w-9 items-center justify-center rounded-full border border-[#C8A44B]/60 bg-[#122244] text-[#EAB308] hover:border-rose-500/60 hover:text-rose-400 transition-colors cursor-pointer"
+              className="mx-auto flex h-9 w-9 items-center justify-center rounded-full border border-rose-500/40 bg-rose-950/40 text-rose-300 hover:border-rose-500/70 hover:text-white transition-colors cursor-pointer"
               title="Keluar Akun (Log Out)"
             >
               <LogOut className="h-4 w-4" />

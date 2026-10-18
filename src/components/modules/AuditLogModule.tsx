@@ -3,22 +3,32 @@ import { useApp } from '../../context/AppContext';
 import { ShieldAlert, Search, Filter, Download, ShieldCheck } from 'lucide-react';
 import { exportToExcel, exportToCsv } from '../../utils/exportUtils';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
+import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 
 export const AuditLogModule: React.FC = () => {
   const { auditLogs } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterModule, setFilterModule] = useState('ALL');
+  const [sortBy, setSortBy] = useState<SortOption>('tanggal');
 
   const modules = Array.from(new Set(auditLogs.map(l => l.module)));
 
-  const filteredLogs = auditLogs.filter(log => {
-    const matchesSearch =
-      log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.details.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesModule = filterModule === 'ALL' || log.module === filterModule;
-    return matchesSearch && matchesModule;
-  });
+  const filteredLogs = sortDataItems(
+    auditLogs.filter(log => {
+      const matchesSearch =
+        log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        log.details.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesModule = filterModule === 'ALL' || log.module === filterModule;
+      return matchesSearch && matchesModule;
+    }),
+    sortBy,
+    {
+      getName: l => l.userName,
+      getNis: l => l.id,
+      getDate: l => l.timestamp,
+    }
+  );
 
   const handleExport = () => {
     const rows = filteredLogs.map((l, i) => ({
@@ -64,18 +74,22 @@ export const AuditLogModule: React.FC = () => {
           />
         </div>
 
-        <select
-          value={filterModule}
-          onChange={e => setFilterModule(e.target.value)}
-          className="rounded-xl border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-        >
-          <option value="ALL">Semua Modul</option>
-          {modules.map(m => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={filterModule}
+            onChange={e => setFilterModule(e.target.value)}
+            className="rounded-xl border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          >
+            <option value="ALL">Semua Modul</option>
+            {modules.map(m => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+
+          <SortByControl value={sortBy} onChange={setSortBy} />
+        </div>
       </div>
 
       {/* Logs Table */}

@@ -29,6 +29,7 @@ import {
   CharacterMedallion,
   GoldCompassRose,
 } from '../common/AcademyOrnaments';
+import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 
 export const DashboardRouter: React.FC = () => {
   const {
@@ -41,7 +42,19 @@ export const DashboardRouter: React.FC = () => {
     auditLogs,
     setActiveNav,
     attendanceCorrections,
+    attendanceRecords,
+    lessonSchedules,
   } = useApp();
+
+  const [sortBy, setSortBy] = React.useState<SortOption>('az');
+
+  const sortedDashboardStudents = React.useMemo(() => {
+    return sortDataItems(students, sortBy, {
+      getName: s => s.name,
+      getNis: s => s.nis,
+      getDate: s => s.enrollmentDate || '2025-07-14',
+    });
+  }, [students, sortBy]);
 
   // Super Admin Dashboard (Matches Reference Image 1:1)
   if (currentRole === 'super_admin') {
@@ -170,136 +183,132 @@ export const DashboardRouter: React.FC = () => {
           </OrnateCard>
         </div>
 
-        {/* Bottom 2-Column Section: Audit Trail & Quick Management Access */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left 2 Columns: Aktivitas Sistem & Audit Trail Real-Time */}
-          <OrnateCard className="lg:col-span-2 p-6">
-            <div className="flex items-center justify-between border-b border-[#EFE2BE]/70 pb-3.5 dark:border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <ShieldCheck className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                <h2
-                  className="font-bold text-slate-900 dark:text-white text-sm sm:text-base"
-                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
-                >
-                  Aktivitas Sistem &amp; Audit Trail Real-Time
-                </h2>
+        {/* Rearranged Symmetrical 2-Column Section (Akses Cepat Removed as Requested) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left 7 Columns: Direktori Siswa & Status Presensi Terkini (Sortable A-Z, Z-A, Tanggal, NIS) */}
+          <OrnateCard className="lg:col-span-7 p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-[#EFE2BE]/70 pb-3.5 dark:border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <div>
+                    <h2
+                      className="font-bold text-slate-900 dark:text-white text-sm sm:text-base"
+                      style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                    >
+                      Direktori Siswa &amp; Sinkronisasi Presensi Real-Time
+                    </h2>
+                    <p className="text-[11px] text-slate-500">
+                      Data siswa terhubung langsung dengan rekap presensi database
+                    </p>
+                  </div>
+                </div>
+                <SortByControl value={sortBy} onChange={setSortBy} compact />
               </div>
-              <button
-                onClick={() => setActiveNav('audit-logs')}
-                className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400 flex items-center gap-1 cursor-pointer"
-              >
-                <span>Lihat Semua Log</span>
-                <span>&rarr;</span>
-              </button>
+
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-[#EFE2BE] text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:border-slate-800">
+                      <th className="py-2 pr-2">Nama Siswa</th>
+                      <th className="py-2 px-2">NIS</th>
+                      <th className="py-2 px-2">Kelas</th>
+                      <th className="py-2 px-2 text-center">H / S / I / A</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/70">
+                    {sortedDashboardStudents.slice(0, 6).map(std => {
+                      const recs = attendanceRecords.filter(r => r.studentId === std.id);
+                      const h = recs.filter(r => r.status === 'H').length;
+                      const s = recs.filter(r => r.status === 'S').length;
+                      const i = recs.filter(r => r.status === 'I').length;
+                      const a = recs.filter(r => r.status === 'A').length;
+                      return (
+                        <tr key={std.id} className="hover:bg-amber-50/30 dark:hover:bg-slate-800/40">
+                          <td className="py-2.5 pr-2 font-bold text-slate-900 dark:text-white">{std.name}</td>
+                          <td className="py-2.5 px-2 font-mono text-[11px] text-slate-500">{std.nis}</td>
+                          <td className="py-2.5 px-2">
+                            <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                              {std.className}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-2 text-center font-mono text-[11px]">
+                            <span className="font-bold text-emerald-600">{h}</span>
+                            <span className="mx-1 text-slate-300">/</span>
+                            <span className="font-bold text-blue-600">{s}</span>
+                            <span className="mx-1 text-slate-300">/</span>
+                            <span className="font-bold text-amber-600">{i}</span>
+                            <span className="mx-1 text-slate-300">/</span>
+                            <span className="font-bold text-rose-600">{a}</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            <div className="mt-4 space-y-3">
-              {auditLogs.slice(0, 5).map(log => (
-                <div
-                  key={log.id}
-                  className="rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] p-3.5 dark:border-slate-800 dark:bg-slate-800/60"
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-2 min-w-0">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                      <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                        {log.action}
-                      </span>
-                      <span className="font-bold text-xs text-slate-900 dark:text-white truncate">
-                        {log.userName}
-                      </span>
-                      <span className="text-[11px] text-slate-400">({log.userRole})</span>
-                    </div>
-                    <span className="text-[11px] text-slate-400 shrink-0 font-mono">
-                      {new Date(log.timestamp).toLocaleTimeString('id-ID', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                      })}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 pl-6">
-                    {log.details}
-                  </p>
-                </div>
-              ))}
+            <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 dark:border-slate-800">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span>Tersinkronisasi dengan Cloud Firestore ({students.length} Siswa)</span>
+              </div>
+              <GoldCompassRose className="h-8 w-8 opacity-90" />
             </div>
           </OrnateCard>
 
-          {/* Right Column: Akses Cepat Manajemen with Golden Compass Rose Ornament */}
-          <OrnateCard className="p-6 flex flex-col justify-between relative overflow-hidden">
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 border-b border-[#EFE2BE]/70 pb-3.5 mb-4 dark:border-slate-800">
-                <span className="text-sm text-[#EAB308]">✦</span>
-                <h2
-                  className="font-bold text-slate-900 dark:text-white text-sm sm:text-base"
-                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
-                >
-                  Akses Cepat Manajemen
-                </h2>
-              </div>
-
-              <div className="space-y-3">
+          {/* Right 5 Columns: Aktivitas Sistem & Audit Trail Real-Time */}
+          <OrnateCard className="lg:col-span-5 p-6 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between border-b border-[#EFE2BE]/70 pb-3.5 dark:border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <ShieldCheck className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <h2
+                    className="font-bold text-slate-900 dark:text-white text-sm sm:text-base"
+                    style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                  >
+                    Aktivitas Sistem &amp; Audit Trail
+                  </h2>
+                </div>
                 <button
-                  onClick={() => setActiveNav('user-management')}
-                  className="w-full flex items-start gap-3.5 p-3.5 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-blue-50/60 hover:border-blue-300 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer group"
+                  onClick={() => setActiveNav('audit-logs')}
+                  className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400 flex items-center gap-1 cursor-pointer"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100/90 text-blue-600 dark:bg-blue-950 dark:text-blue-300 group-hover:scale-105 transition-transform">
-                    <Users className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-extrabold text-slate-900 dark:text-white">
-                      Manajemen Akun &amp; Peran
-                    </p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
-                      Kelola kredensial Guru, Wali Kelas, Admin, Kepsek
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => setActiveNav('master-data')}
-                  className="w-full flex items-start gap-3.5 p-3.5 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-purple-50/60 hover:border-purple-300 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer group"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100/90 text-purple-600 dark:bg-purple-950 dark:text-purple-300 group-hover:scale-105 transition-transform">
-                    <Castle className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-extrabold text-slate-900 dark:text-white">
-                      Master Data &amp; Akademik
-                    </p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
-                      Atur Tahun Ajaran, Semester, Kelas, Jurusan
-                    </p>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => setActiveNav('reports')}
-                  className="w-full flex items-start gap-3.5 p-3.5 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-emerald-50/60 hover:border-emerald-300 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer group"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100/90 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-300 group-hover:scale-105 transition-transform">
-                    <FileCheck className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-extrabold text-slate-900 dark:text-white">
-                      Pusat Laporan &amp; Dokumen
-                    </p>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
-                      Cetak rekap absensi, legger nilai, dan rapor
-                    </p>
-                  </div>
+                  <span>Semua Log</span>
+                  <span>&rarr;</span>
                 </button>
               </div>
-            </div>
 
-            {/* Bottom-Right Golden Compass Rose Ornament (Matches Reference Image) */}
-            <div className="mt-4 flex items-center justify-between pt-2">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>Cloud Firestore Aktif</span>
+              <div className="mt-4 space-y-2.5">
+                {auditLogs.slice(0, 4).map(log => (
+                  <div
+                    key={log.id}
+                    className="rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] p-3 dark:border-slate-800 dark:bg-slate-800/60"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                        <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                          {log.action}
+                        </span>
+                        <span className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                          {log.userName}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 shrink-0 font-mono">
+                        {new Date(log.timestamp).toLocaleTimeString('id-ID', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-1 pl-5 line-clamp-1">
+                      {log.details}
+                    </p>
+                  </div>
+                ))}
               </div>
-              <GoldCompassRose className="h-10 w-10 opacity-90" />
             </div>
           </OrnateCard>
         </div>
@@ -424,70 +433,76 @@ export const DashboardRouter: React.FC = () => {
           </OrnateCard>
         </div>
 
-        <OrnateCard className="p-6">
-          <div className="flex items-center justify-between mb-4 border-b border-[#EFE2BE]/70 pb-3 dark:border-slate-800">
-            <div className="flex items-center gap-2">
-              <span className="text-[#EAB308]">✦</span>
-              <h2
-                className="text-base font-bold text-slate-900 dark:text-white"
-                style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
-              >
-                Aksi Tata Usaha &amp; Pengelolaan Akademik
-              </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <OrnateCard className="p-6">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4 border-b border-[#EFE2BE]/70 pb-3 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="text-[#EAB308]">✦</span>
+                <h2
+                  className="text-base font-bold text-slate-900 dark:text-white"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  Data Pokok Siswa Terdaftar
+                </h2>
+              </div>
+              <SortByControl value={sortBy} onChange={setSortBy} compact />
             </div>
-            <GoldCompassRose className="h-8 w-8" />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button
-              onClick={() => setActiveNav('master-data')}
-              className="flex flex-col items-start p-4 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-blue-50/80 hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800/50 transition-all text-left cursor-pointer group"
-            >
-              <div className="p-2.5 bg-blue-100 text-blue-600 rounded-xl mb-3 group-hover:scale-105 transition-transform">
-                <Gem className="h-5 w-5" />
-              </div>
-              <span className="font-extrabold text-xs text-slate-900 dark:text-white">Kelola Siswa (Cadets)</span>
-              <span className="text-[11px] text-slate-500 mt-1">Input, ubah, arsipkan, atau mutasi data siswa</span>
-            </button>
+            <div className="space-y-2">
+              {sortedDashboardStudents.slice(0, 5).map(std => (
+                <div
+                  key={std.id}
+                  className="flex items-center justify-between rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] px-3.5 py-2.5 text-xs dark:border-slate-800 dark:bg-slate-800/50"
+                >
+                  <div>
+                    <p className="font-bold text-slate-900 dark:text-white">{std.name}</p>
+                    <p className="text-[11px] text-slate-500">NIS: {std.nis} &bull; {std.major}</p>
+                  </div>
+                  <span className="rounded-lg bg-blue-100 px-2.5 py-1 text-[10px] font-extrabold text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                    {std.className}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </OrnateCard>
 
-            <button
-              onClick={() => setActiveNav('master-data')}
-              className="flex flex-col items-start p-4 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-emerald-50/80 hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-800/50 transition-all text-left cursor-pointer group"
-            >
-              <div className="p-2.5 bg-emerald-100 text-emerald-600 rounded-xl mb-3 group-hover:scale-105 transition-transform">
-                <Crown className="h-5 w-5" />
+          <OrnateCard className="p-6">
+            <div className="flex items-center justify-between mb-4 border-b border-[#EFE2BE]/70 pb-3 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <CalendarCheck className="h-4 w-4 text-emerald-600" />
+                <h2
+                  className="text-base font-bold text-slate-900 dark:text-white"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  Jadwal Pelajaran Aktif (Data Pokok)
+                </h2>
               </div>
-              <span className="font-extrabold text-xs text-slate-900 dark:text-white">Kelola Tenaga Pendidik</span>
-              <span className="text-[11px] text-slate-500 mt-1">Daftar guru, penugasan mata pelajaran &amp; wali kelas</span>
-            </button>
-
-            <button
-              onClick={() => setActiveNav('reports')}
-              className="flex flex-col items-start p-4 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-purple-50/80 hover:border-purple-300 dark:border-slate-700 dark:bg-slate-800/50 transition-all text-left cursor-pointer group"
-            >
-              <div className="p-2.5 bg-purple-100 text-purple-600 rounded-xl mb-3 group-hover:scale-105 transition-transform">
-                <Scroll className="h-5 w-5" />
-              </div>
-              <span className="font-extrabold text-xs text-slate-900 dark:text-white">Pusat Laporan &amp; Ekspor</span>
-              <span className="text-[11px] text-slate-500 mt-1">Unduh Buku Induk &amp; Data Kesiswaan Excel/PDF</span>
-            </button>
-
-            <button
-              onClick={() => setActiveNav('attendance')}
-              className="flex flex-col items-start p-4 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-amber-50/80 hover:border-amber-300 dark:border-slate-700 dark:bg-slate-800/50 transition-all text-left cursor-pointer group"
-            >
-              <div className="p-2.5 bg-amber-100 text-amber-600 rounded-xl mb-3 group-hover:scale-105 transition-transform">
-                <CalendarCheck className="h-5 w-5" />
-              </div>
-              <span className="font-extrabold text-xs text-slate-900 dark:text-white">Presensi Siswa</span>
-              <span className="text-[11px] text-slate-500 mt-1">Pantau keterisian presensi seluruh kelas hari ini</span>
-            </button>
-          </div>
-        </OrnateCard>
+              <GoldCompassRose className="h-7 w-7" />
+            </div>
+            <div className="space-y-2">
+              {lessonSchedules.slice(0, 5).map(sch => (
+                <div
+                  key={sch.id}
+                  className="flex items-center justify-between rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] px-3.5 py-2.5 text-xs dark:border-slate-800 dark:bg-slate-800/50"
+                >
+                  <div>
+                    <p className="font-bold text-slate-900 dark:text-white">{sch.subjectName}</p>
+                    <p className="text-[11px] text-slate-500">
+                      {sch.day}, {sch.startTime} - {sch.endTime} &bull; {sch.teacherName}
+                    </p>
+                  </div>
+                  <span className="rounded-lg bg-amber-100 px-2.5 py-1 text-[10px] font-extrabold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                    {sch.className}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </OrnateCard>
+        </div>
       </div>
     );
   }
 
-  // Guru Mata Pelajaran Dashboard
+  // Guru Mata Pelajaran Dashboard (Akses Cepat Removed, Layout Rearranged)
   if (currentRole === 'guru') {
     return (
       <div className="space-y-6">
@@ -497,60 +512,6 @@ export const DashboardRouter: React.FC = () => {
           subtitle="Mata Pelajaran: Pemrograman Web & Perangkat Bergerak dan Basis Data. Pantau kehadiran jam pelajaran dan kelola penilaian kompetensi siswa secara akurat."
           icon={GraduationCap}
         />
-
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <OrnateCard
-            onClick={() => setActiveNav('attendance')}
-            className="flex items-center gap-3 p-4 cursor-pointer hover:border-blue-400 transition-all"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
-              <CalendarCheck className="h-5 w-5" />
-            </div>
-            <div className="text-left">
-              <div className="font-extrabold text-xs text-slate-900 dark:text-white">Input Presensi</div>
-              <div className="text-[10px] text-slate-500">Sesi Mata Pelajaran</div>
-            </div>
-          </OrnateCard>
-
-          <OrnateCard
-            onClick={() => setActiveNav('grading')}
-            className="flex items-center gap-3 p-4 cursor-pointer hover:border-emerald-400 transition-all"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-              <GraduationCap className="h-5 w-5" />
-            </div>
-            <div className="text-left">
-              <div className="font-extrabold text-xs text-slate-900 dark:text-white">Input Nilai</div>
-              <div className="text-[10px] text-slate-500">Penilaian &amp; Ujian</div>
-            </div>
-          </OrnateCard>
-
-          <OrnateCard
-            onClick={() => setActiveNav('grading')}
-            className="flex items-center gap-3 p-4 cursor-pointer hover:border-purple-400 transition-all"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
-              <Scroll className="h-5 w-5" />
-            </div>
-            <div className="text-left">
-              <div className="font-extrabold text-xs text-slate-900 dark:text-white">Rekap &amp; Leger</div>
-              <div className="text-[10px] text-slate-500">Kalkulasi Nilai Akhir</div>
-            </div>
-          </OrnateCard>
-
-          <OrnateCard
-            onClick={() => setActiveNav('reports')}
-            className="flex items-center gap-3 p-4 cursor-pointer hover:border-amber-400 transition-all"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
-              <FileCheck className="h-5 w-5" />
-            </div>
-            <div className="text-left">
-              <div className="font-extrabold text-xs text-slate-900 dark:text-white">Laporan Kelas</div>
-              <div className="text-[10px] text-slate-500">Cetak PDF &amp; Excel</div>
-            </div>
-          </OrnateCard>
-        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <OrnateCard className="p-6">

@@ -12,12 +12,10 @@ import { UserManagementModule } from './components/modules/UserManagementModule'
 import { AuditLogModule } from './components/modules/AuditLogModule';
 import { SettingsModule } from './components/modules/SettingsModule';
 import { StudentModule } from './components/modules/StudentModule';
-import { StudentChatRoom } from './components/modules/StudentChatRoom';
 import { PklModule } from './components/modules/PklModule';
 import { LoginPage } from './components/pages/LoginPage';
 import { LogoutModal } from './components/common/LogoutModal';
 import { AnimeBackground } from './components/common/AnimeBackground';
-import { ChevronRight, Sparkles } from 'lucide-react';
 
 const MainContent: React.FC = () => {
   const {
@@ -30,49 +28,6 @@ const MainContent: React.FC = () => {
   } = useApp();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-
-  const getBreadcrumbTitle = () => {
-    switch (activeNav) {
-      case 'dashboard':
-        return currentRole === 'siswa' ? 'Profil Siswa' : 'Dashboard Utama';
-      case 'student-profile':
-        return 'Profil Siswa';
-      case 'student-grades':
-        return 'Nilai Siswa (Per Profile & Keseluruhan)';
-      case 'student-chat':
-        return 'Ruang Obrolan & Forum Siswa';
-      case 'student-chat-monitor':
-        return 'Pantauan & Moderasi Chat Siswa';
-      case 'attendance':
-        return 'Presensi & Absensi Siswa';
-      case 'grading':
-        return 'Penilaian Akademik & Nilai';
-      case 'pkl':
-        return 'Administrasi PKL & Hubungan Industri (DUDI)';
-      case 'master-data':
-        return 'Master Data Sekolah';
-      case 'reports':
-        return 'Pusat Laporan & Ekspor';
-      case 'ai-studio':
-        return 'Studio AI & Asisten Pedagogik';
-      case 'user-management':
-        return 'Manajemen Akun & Hak Akses';
-      case 'audit-logs':
-        return 'Audit Log Keamanan';
-      case 'settings':
-        return 'Profil & Pengaturan';
-      default:
-        return 'Dashboard';
-    }
-  };
-
-  const handleHomeClick = () => {
-    if (currentRole === 'siswa') {
-      setActiveNav('student-profile');
-    } else {
-      setActiveNav('dashboard');
-    }
-  };
 
   return (
     <div className="relative flex h-screen w-full overflow-hidden font-sans text-slate-900 transition-colors dark:text-slate-100">
@@ -92,17 +47,12 @@ const MainContent: React.FC = () => {
         {/* Top Header */}
         <Header onToggleMobileSidebar={() => setMobileSidebarOpen(true)} />
 
-
         {/* Scrollable Page View with Clean Glass Backdrop */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="mx-auto max-w-7xl">
             {/* Student Specific Views */}
             {activeNav === 'student-profile' && <StudentModule initialTab="profile" />}
             {activeNav === 'student-grades' && <StudentModule initialTab="grades" />}
-            {activeNav === 'student-chat' && <StudentChatRoom />}
-
-            {/* Admin & Teacher Chat Monitoring View */}
-            {activeNav === 'student-chat-monitor' && <StudentChatRoom isAdminView={true} />}
 
             {/* General Modules */}
             {activeNav === 'dashboard' && <DashboardRouter />}

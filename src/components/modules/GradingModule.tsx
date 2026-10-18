@@ -31,6 +31,7 @@ import {
 import { exportToExcel, exportToPdf, exportLegerExcelWithFormulas } from '../../utils/exportUtils';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
+import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 
 export const GradingModule: React.FC = () => {
   const {
@@ -79,14 +80,25 @@ export const GradingModule: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Filters
+  // Filters & Sort
   const [selectedClassId, setSelectedClassId] = useState<string>(classes[0]?.id || '');
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>(subjects[0]?.id || '');
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string>(assessments[0]?.id || '');
+  const [sortBy, setSortBy] = useState<SortOption>('az');
 
   const currentClass = classes.find(c => c.id === selectedClassId) || classes[0];
   const currentSubject = subjects.find(s => s.id === selectedSubjectId) || subjects[0];
-  const classStudents = students.filter(s => s.className === currentClass?.name);
+  const classStudents = useMemo(() => {
+    return sortDataItems(
+      students.filter(s => s.className === currentClass?.name),
+      sortBy,
+      {
+        getName: s => s.fullName || s.name,
+        getNis: s => s.nis,
+        getDate: s => s.enrollmentDate || '2025-07-14',
+      }
+    );
+  }, [students, currentClass?.name, sortBy]);
 
   // Filtered assessments for current class and subject
   const currentAssessments = assessments.filter(
@@ -579,6 +591,7 @@ export const GradingModule: React.FC = () => {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
+                <SortByControl value={sortBy} onChange={setSortBy} />
                 <button
                   type="button"
                   onClick={handleResetScoresClick}

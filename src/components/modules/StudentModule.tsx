@@ -78,15 +78,15 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
   const classAssessments = assessments.filter(a => a.classId === student.classId && a.status === 'dipublikasikan');
   const myScores = assessmentScores.filter(sc => sc.studentId === student.id);
 
-  // Student Attendance Summary
+  // Student Attendance Summary (100% synced with Presensi Database)
   const studentRecords = attendanceRecords.filter(r => r.studentId === student.id);
-  const totalSessions = studentRecords.length > 0 ? studentRecords.length : 30;
-  const hadirCount = studentRecords.filter(r => r.status === 'H').length || 29;
-  const sakitCount = studentRecords.filter(r => r.status === 'S').length || 1;
-  const izinCount = studentRecords.filter(r => r.status === 'I').length || 0;
-  const alpaCount = studentRecords.filter(r => r.status === 'A').length || 0;
-  const lateCount = studentRecords.filter(r => r.status === 'T').length || 0;
-  const attendanceRate = (((hadirCount + lateCount) / totalSessions) * 100).toFixed(1);
+  const hadirCount = studentRecords.filter(r => r.status === 'H').length;
+  const sakitCount = studentRecords.filter(r => r.status === 'S').length;
+  const izinCount = studentRecords.filter(r => r.status === 'I').length;
+  const alpaCount = studentRecords.filter(r => r.status === 'A').length;
+  const lateCount = studentRecords.filter(r => r.status === 'T').length;
+  const totalSessions = hadirCount + sakitCount + izinCount + alpaCount + lateCount;
+  const attendanceRate = totalSessions > 0 ? (((hadirCount + lateCount) / totalSessions) * 100).toFixed(1) : '100.0';
 
   // Subject Grades Computation (Per Profile / Per Mapel)
   const subjectGrades = subjects.map(subj => {

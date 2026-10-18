@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
+import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 
 // Role definitions with default tailored permissions
 interface RolePreset {
@@ -253,6 +254,13 @@ export const UserManagementModule: React.FC = () => {
 
   const canManageUsers = currentRole === 'super_admin' || currentRole === 'admin';
 
+  const [sortBy, setSortBy] = useState<SortOption>('az');
+  const sortedUsers = sortDataItems(users, sortBy, {
+    getName: u => u.displayName,
+    getNis: u => u.nipOrNis || u.id,
+    getDate: u => u.lastLogin || '2025-01-01',
+  });
+
   return (
     <div className="space-y-6">
       {/* Toast Notification */}
@@ -325,11 +333,14 @@ export const UserManagementModule: React.FC = () => {
       <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden dark:border-slate-800 dark:bg-slate-900">
         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">
-            Daftar Akun Pengguna Terdaftar ({users.length})
+            Daftar Akun Pengguna Terdaftar ({sortedUsers.length})
           </h2>
-          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-            Autentikasi Terverifikasi &bull; RBAC Aktif
-          </span>
+          <div className="flex items-center gap-3">
+            <SortByControl value={sortBy} onChange={setSortBy} compact />
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+              Autentikasi Terverifikasi &bull; RBAC Aktif
+            </span>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -347,7 +358,7 @@ export const UserManagementModule: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {users.map((u, idx) => {
+              {sortedUsers.map((u, idx) => {
                 const isSelf = u.id === currentUser.id;
                 const isRootSuperAdmin = u.email === 'kkaito447@gmail.com';
                 const userPreset = rolePresets[u.role] || rolePresets.guru;

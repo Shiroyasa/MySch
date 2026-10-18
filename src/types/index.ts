@@ -370,3 +370,43 @@ export interface PklStudentReportItem {
   absorbedStatus: 'terserap_kerja' | 'melanjutkan_kuliah' | 'wirausaha' | 'mencari_kerja';
 }
 
+export type LiveWallpaperPreset =
+  | 'starlight_castle'
+  | 'celestial_aurora'
+  | 'golden_sanctuary'
+  | 'cyber_emerald';
+
+export interface VisualSettings {
+  appLogoUrl?: string | null;
+  loginBgUrl: string | null;
+  loginBgType?: 'default' | 'image' | 'video' | 'live_preset';
+  loginLivePreset?: LiveWallpaperPreset;
+  menuBgUrl?: string | null;
+  menuBgType?: 'default' | 'image' | 'video' | 'live_preset';
+  menuLivePreset?: LiveWallpaperPreset;
+  menuBgOpacity?: number;
+  ambientDarkMode?: boolean;
+  globalBannerBgUrl: string | null;
+  bannerOverlayOpacity: number;
+  moduleBannerBgs: Record<string, string>;
+  updatedAt?: string;
+}
+
+export interface LessonSchedule {
+  id: string;
+  day: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat' | 'Sabtu';
+  startTime: string;
+  endTime: string;
+  classId: string;
+  className: string;
+  subjectId: string;
+  subjectName: string;
+  subjectCode: string;
+  teacherId: string;
+  teacherName: string;
+  teacherNip: string;
+  room: string;
+  semester: 'ganjil' | 'genap';
+  academicYear: string;
+  createdAt: string;
+}

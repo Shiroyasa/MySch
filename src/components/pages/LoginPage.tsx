@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
 import {
@@ -12,14 +12,12 @@ import {
   KeyRound,
   X,
   ChevronRight,
-  ImagePlus,
-  RotateCcw,
 } from 'lucide-react';
 import { loginWithGoogle } from '../../lib/firebase';
 import { SkyborneCastleBackground } from '../common/SkyborneCastleBackground';
 
 export const LoginPage: React.FC = () => {
-  const { loginWithEmail, loginWithRole } = useApp();
+  const { loginWithEmail, loginWithRole, visualSettings } = useApp();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,63 +26,6 @@ export const LoginPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
-
-  // Custom uploaded background image persisted in localStorage
-  const [customBgUrl, setCustomBgUrl] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem('myacademy_login_bg_v1');
-    } catch {
-      return null;
-    }
-  });
-  const bgFileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleBgFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const maxW = 1920;
-        const maxH = 1080;
-        let w = img.width;
-        let h = img.height;
-        if (w > maxW) {
-          h = Math.round((h * maxW) / w);
-          w = maxW;
-        }
-        if (h > maxH) {
-          w = Math.round((w * maxH) / h);
-          h = maxH;
-        }
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, w, h);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-          setCustomBgUrl(dataUrl);
-          try {
-            localStorage.setItem('myacademy_login_bg_v1', dataUrl);
-          } catch {}
-        }
-      };
-      if (typeof ev.target?.result === 'string') {
-        img.src = ev.target.result;
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleResetBg = () => {
-    setCustomBgUrl(null);
-    try {
-      localStorage.removeItem('myacademy_login_bg_v1');
-    } catch {}
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,9 +69,13 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#0c1c3e] font-sans select-none flex items-center justify-center p-2 sm:p-4">
       {/* ==================================================================== */}
-      {/* SKYBORNE ACADEMY CASTLE COURTYARD BACKGROUND                         */}
+      {/* SKYBORNE ACADEMY CASTLE COURTYARD BACKGROUND (Controlled in Settings)*/}
       {/* ==================================================================== */}
-      <SkyborneCastleBackground customBgUrl={customBgUrl} />
+      <SkyborneCastleBackground
+        customBgUrl={visualSettings?.loginBgUrl}
+        bgType={visualSettings?.loginBgType}
+        livePreset={visualSettings?.loginLivePreset}
+      />
 
       {/* Royal Ornamental Outer Viewport Frame (Gold & Navy Filigree) */}
       <div
@@ -160,179 +105,166 @@ export const LoginPage: React.FC = () => {
         <div className="absolute -bottom-1 -right-1 h-6 w-6 border-b-2 border-r-2 border-[#FDE047] rounded-br-md" />
       </div>
 
-      {/* Top-Right Custom Background Image Switcher */}
-      <div className="fixed top-5 right-6 z-30 flex items-center gap-1.5">
-        <input
-          ref={bgFileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleBgFileChange}
-          className="hidden"
-        />
-        <button
-          type="button"
-          onClick={() => bgFileInputRef.current?.click()}
-          className="flex items-center gap-1.5 rounded-xl border border-[#D4AF37]/60 bg-[#0F172A]/75 px-3 py-1.5 text-[11px] font-bold text-[#FEF3C7] backdrop-blur-md hover:bg-[#1E293B]/90 hover:border-[#FDE047] transition-all shadow-md cursor-pointer"
-          title="Pilih file gambar background dari perangkat Anda"
-        >
-          <ImagePlus className="h-3.5 w-3.5 text-[#FBBF24]" />
-          <span className="hidden sm:inline">Ganti Gambar Background</span>
-        </button>
-        {customBgUrl && (
-          <button
-            type="button"
-            onClick={handleResetBg}
-            className="flex items-center justify-center rounded-xl border border-[#D4AF37]/60 bg-[#0F172A]/75 p-1.5 text-[#FEF3C7] backdrop-blur-md hover:bg-rose-950/80 hover:text-rose-200 transition-all shadow-md cursor-pointer"
-            title="Kembalikan ke ilustrasi Skyborne Academy Castle Courtyard"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-          </button>
-        )}
-      </div>
-
       {/* ==================================================================== */}
       {/* CENTER LOGIN PORTAL CONTENT (MATCHING UPLOADED REFERENCE)            */}
       {/* ==================================================================== */}
       <div className="relative z-20 w-full max-w-[430px] mx-auto py-4 px-2 sm:px-0 flex flex-col items-center">
-        {/* 1. HERALDIC ACADEMY CREST EMBLEM */}
+        {/* 1. HERALDIC ACADEMY CREST EMBLEM (Supports Custom App Logo Proportionally) */}
         <div className="relative flex flex-col items-center text-center mb-4">
           <div className="relative h-28 w-28 sm:h-32 sm:w-32 flex items-center justify-center">
             {/* Ambient Dark & Gold Glow Behind Crest for Contrast Over Bright Sky */}
             <div className="absolute inset-1 rounded-full bg-[#0B1938]/55 blur-xl" />
             <div className="absolute inset-3 rounded-full bg-amber-400/25 blur-lg" />
 
-            {/* Custom Heraldic Crest SVG: 4-Point Star + Laurel Wreath + Shield + Open Book */}
-            <svg viewBox="0 0 140 150" className="relative h-full w-full drop-shadow-[0_6px_16px_rgba(0,0,0,0.65)]">
-              <defs>
-                <linearGradient id="crestGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#FFFBEB" />
-                  <stop offset="30%" stopColor="#FDE047" />
-                  <stop offset="70%" stopColor="#D97706" />
-                  <stop offset="100%" stopColor="#FEF08A" />
-                </linearGradient>
-                <linearGradient id="shieldNavy" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#1E3A8A" />
-                  <stop offset="50%" stopColor="#0F172A" />
-                  <stop offset="100%" stopColor="#090D16" />
-                </linearGradient>
-              </defs>
+            {visualSettings?.appLogoUrl ? (
+              <div className="relative flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-2xl border-2 border-[#D4AF37] bg-gradient-to-b from-[#0F1E3A]/95 to-[#091224]/95 p-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.65),inset_0_0_12px_rgba(250,204,21,0.2)]">
+                <div className="pointer-events-none absolute inset-1 rounded-xl border border-[#FDE68A]/35" />
+                <span className="pointer-events-none absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs text-[#FDE047] drop-shadow">
+                  ✦
+                </span>
+                <img
+                  src={visualSettings.appLogoUrl}
+                  alt="Logo Aplikasi"
+                  className="max-h-full max-w-full object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]"
+                />
+                <span className="pointer-events-none absolute -bottom-2.5 left-1/2 -translate-x-1/2 text-xs text-[#FDE047] drop-shadow">
+                  ✦
+                </span>
+              </div>
+            ) : (
+              /* Custom Heraldic Crest SVG: 4-Point Star + Laurel Wreath + Shield + Open Book */
+              <svg viewBox="0 0 140 150" className="relative h-full w-full drop-shadow-[0_6px_16px_rgba(0,0,0,0.65)]">
+                <defs>
+                  <linearGradient id="crestGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FFFBEB" />
+                    <stop offset="30%" stopColor="#FDE047" />
+                    <stop offset="70%" stopColor="#D97706" />
+                    <stop offset="100%" stopColor="#FEF08A" />
+                  </linearGradient>
+                  <linearGradient id="shieldNavy" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#1E3A8A" />
+                    <stop offset="50%" stopColor="#0F172A" />
+                    <stop offset="100%" stopColor="#090D16" />
+                  </linearGradient>
+                </defs>
 
-              {/* Outer Celestial Ring */}
-              <circle
-                cx="70"
-                cy="82"
-                r="46"
-                fill="none"
-                stroke="url(#crestGold)"
-                strokeWidth="1.2"
-                strokeDasharray="4 3"
-                opacity="0.85"
-              />
-              <circle
-                cx="70"
-                cy="82"
-                r="52"
-                fill="none"
-                stroke="url(#crestGold)"
-                strokeWidth="0.8"
-                opacity="0.45"
-              />
+                {/* Outer Celestial Ring */}
+                <circle
+                  cx="70"
+                  cy="82"
+                  r="46"
+                  fill="none"
+                  stroke="url(#crestGold)"
+                  strokeWidth="1.2"
+                  strokeDasharray="4 3"
+                  opacity="0.85"
+                />
+                <circle
+                  cx="70"
+                  cy="82"
+                  r="52"
+                  fill="none"
+                  stroke="url(#crestGold)"
+                  strokeWidth="0.8"
+                  opacity="0.45"
+                />
 
-              {/* Left & Right Laurel Wreath Branches */}
-              <path
-                d="M 70 134 C 42 132 22 108 24 76 C 25 58 35 44 48 36"
-                fill="none"
-                stroke="url(#crestGold)"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M 70 134 C 98 132 118 108 116 76 C 115 58 105 44 92 36"
-                fill="none"
-                stroke="url(#crestGold)"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-              />
-              {/* Laurel Leaves Left */}
-              {[
-                { x: 26, y: 98, rot: -25 },
-                { x: 23, y: 82, rot: -10 },
-                { x: 26, y: 66, rot: 10 },
-                { x: 33, y: 52, rot: 25 },
-                { x: 43, y: 40, rot: 40 },
-              ].map((lf, idx) => (
-                <ellipse
-                  key={idx}
-                  cx={lf.x}
-                  cy={lf.y}
-                  rx="6"
-                  ry="2.8"
-                  transform={`rotate(${lf.rot} ${lf.x} ${lf.y})`}
+                {/* Left & Right Laurel Wreath Branches */}
+                <path
+                  d="M 70 134 C 42 132 22 108 24 76 C 25 58 35 44 48 36"
+                  fill="none"
+                  stroke="url(#crestGold)"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M 70 134 C 98 132 118 108 116 76 C 115 58 105 44 92 36"
+                  fill="none"
+                  stroke="url(#crestGold)"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                />
+                {/* Laurel Leaves Left */}
+                {[
+                  { x: 26, y: 98, rot: -25 },
+                  { x: 23, y: 82, rot: -10 },
+                  { x: 26, y: 66, rot: 10 },
+                  { x: 33, y: 52, rot: 25 },
+                  { x: 43, y: 40, rot: 40 },
+                ].map((lf, idx) => (
+                  <ellipse
+                    key={idx}
+                    cx={lf.x}
+                    cy={lf.y}
+                    rx="6"
+                    ry="2.8"
+                    transform={`rotate(${lf.rot} ${lf.x} ${lf.y})`}
+                    fill="url(#crestGold)"
+                  />
+                ))}
+                {/* Laurel Leaves Right */}
+                {[
+                  { x: 114, y: 98, rot: 25 },
+                  { x: 117, y: 82, rot: 10 },
+                  { x: 114, y: 66, rot: -10 },
+                  { x: 107, y: 52, rot: -25 },
+                  { x: 97, y: 40, rot: -40 },
+                ].map((lf, idx) => (
+                  <ellipse
+                    key={idx}
+                    cx={lf.x}
+                    cy={lf.y}
+                    rx="6"
+                    ry="2.8"
+                    transform={`rotate(${lf.rot} ${lf.x} ${lf.y})`}
+                    fill="url(#crestGold)"
+                  />
+                ))}
+
+                {/* Heraldic Shield Base */}
+                <path
+                  d="M 38 46 L 102 46 L 102 84 C 102 108 86 124 70 132 C 54 124 38 108 38 84 Z"
+                  fill="url(#shieldNavy)"
+                  stroke="url(#crestGold)"
+                  strokeWidth="3.2"
+                  strokeLinejoin="round"
+                />
+                {/* Inner Shield Trim */}
+                <path
+                  d="M 43 51 L 97 51 L 97 83 C 97 103 83 117 70 125 C 57 117 43 103 43 83 Z"
+                  fill="none"
+                  stroke="url(#crestGold)"
+                  strokeWidth="1"
+                  opacity="0.7"
+                />
+
+                {/* Illuminated Open Book Inside Shield */}
+                <path
+                  d="M 49 72 Q 59 68 70 73 Q 81 68 91 72 L 91 98 Q 81 94 70 99 Q 59 94 49 98 Z"
+                  fill="none"
+                  stroke="url(#crestGold)"
+                  strokeWidth="2.5"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M 52 77 Q 61 74 70 78 M 52 84 Q 61 81 70 85 M 88 77 Q 79 74 70 78 M 88 84 Q 79 81 70 85"
+                  stroke="url(#crestGold)"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                />
+                <line x1="70" y1="62" x2="70" y2="105" stroke="url(#crestGold)" strokeWidth="2.2" />
+
+                {/* Radiant 4-Pointed North Star at the Crest Apex */}
+                <path
+                  d="M 70 4 L 75 24 L 95 29 L 75 34 L 70 54 L 65 34 L 45 29 L 65 24 Z"
                   fill="url(#crestGold)"
                 />
-              ))}
-              {/* Laurel Leaves Right */}
-              {[
-                { x: 114, y: 98, rot: 25 },
-                { x: 117, y: 82, rot: 10 },
-                { x: 114, y: 66, rot: -10 },
-                { x: 107, y: 52, rot: -25 },
-                { x: 97, y: 40, rot: -40 },
-              ].map((lf, idx) => (
-                <ellipse
-                  key={idx}
-                  cx={lf.x}
-                  cy={lf.y}
-                  rx="6"
-                  ry="2.8"
-                  transform={`rotate(${lf.rot} ${lf.x} ${lf.y})`}
-                  fill="url(#crestGold)"
-                />
-              ))}
-
-              {/* Heraldic Shield Base */}
-              <path
-                d="M 38 46 L 102 46 L 102 84 C 102 108 86 124 70 132 C 54 124 38 108 38 84 Z"
-                fill="url(#shieldNavy)"
-                stroke="url(#crestGold)"
-                strokeWidth="3.2"
-                strokeLinejoin="round"
-              />
-              {/* Inner Shield Trim */}
-              <path
-                d="M 43 51 L 97 51 L 97 83 C 97 103 83 117 70 125 C 57 117 43 103 43 83 Z"
-                fill="none"
-                stroke="url(#crestGold)"
-                strokeWidth="1"
-                opacity="0.7"
-              />
-
-              {/* Illuminated Open Book Inside Shield */}
-              <path
-                d="M 49 72 Q 59 68 70 73 Q 81 68 91 72 L 91 98 Q 81 94 70 99 Q 59 94 49 98 Z"
-                fill="none"
-                stroke="url(#crestGold)"
-                strokeWidth="2.5"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M 52 77 Q 61 74 70 78 M 52 84 Q 61 81 70 85 M 88 77 Q 79 74 70 78 M 88 84 Q 79 81 70 85"
-                stroke="url(#crestGold)"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-              />
-              <line x1="70" y1="62" x2="70" y2="105" stroke="url(#crestGold)" strokeWidth="2.2" />
-
-              {/* Radiant 4-Pointed North Star at the Crest Apex */}
-              <path
-                d="M 70 4 L 75 24 L 95 29 L 75 34 L 70 54 L 65 34 L 45 29 L 65 24 Z"
-                fill="url(#crestGold)"
-              />
-              {/* Diagonal Star Flare Rays */}
-              <line x1="58" y1="17" x2="82" y2="41" stroke="#FFFBEB" strokeWidth="1.5" />
-              <line x1="82" y1="17" x2="58" y2="41" stroke="#FFFBEB" strokeWidth="1.5" />
-              <circle cx="70" cy="29" r="4" fill="#FFFFFF" />
-            </svg>
+                {/* Diagonal Star Flare Rays */}
+                <line x1="58" y1="17" x2="82" y2="41" stroke="#FFFBEB" strokeWidth="1.5" />
+                <line x1="82" y1="17" x2="58" y2="41" stroke="#FFFBEB" strokeWidth="1.5" />
+                <circle cx="70" cy="29" r="4" fill="#FFFFFF" />
+              </svg>
+            )}
           </div>
 
           {/* MY ACADEMY Title */}
@@ -647,7 +579,7 @@ export const LoginPage: React.FC = () => {
                 {
                   role: 'siswa' as UserRole,
                   title: 'Portal Siswa (Cadet)',
-                  desc: 'Lihat Profil, Rapor Nilai, Presensi & Obrolan Kelas',
+                  desc: 'Lihat Profil, Rapor Nilai, Presensi & Administrasi PKL',
                   emailHint: 'ahmad.rizky@siswa.smkmy.sch.id',
                 },
               ].map(item => (

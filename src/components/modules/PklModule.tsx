@@ -51,9 +51,25 @@ import {
 import { exportToExcel, exportToCsv, exportToPdf } from '../../utils/exportUtils';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
 import { AcademyHeroBanner, OrnateCard, CharacterMedallion } from '../common/AcademyOrnaments';
+import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 
 export const PklModule: React.FC = () => {
-  const { classes, students, activeAcademicYear } = useApp();
+  const {
+    classes,
+    students,
+    activeAcademicYear,
+    pklPartners: partners,
+    pklVisits: visits,
+    pklReports: rawStudentReports,
+    savePklPartner,
+    deletePklPartner,
+    savePklVisit,
+    deletePklVisit,
+    savePklReport,
+    deletePklReport,
+    clearAllPklData,
+    loadSamplePklData,
+  } = useApp();
 
   // State
   const [activeTab, setActiveTab] = useState<'dudi_database' | 'automated_reports'>('dudi_database');
@@ -61,37 +77,19 @@ export const PklModule: React.FC = () => {
     'by_class_major' | 'by_company' | 'visits_attendance' | 'pending_reports' | 'grades' | 'graduate_absorption'
   >('by_class_major');
 
-  // DUDI Partners state - explicitly empty by default (cleaned upon user request)
-  const [partners, setPartners] = useState<IndustryPartner[]>(() => {
-    try {
-      const saved = localStorage.getItem('myschool_pkl_partners_v3');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return []; // completely cleared initially
-  });
-
-  // Visits state - explicitly empty by default
-  const [visits, setVisits] = useState<PklVisitRecord[]>(() => {
-    try {
-      const saved = localStorage.getItem('myschool_pkl_visits_v3');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return []; // completely cleared initially
-  });
-
-  // Student reports state - explicitly empty by default
-  const [studentReports, setStudentReports] = useState<PklStudentReportItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('myschool_pkl_reports_v3');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return []; // completely cleared initially
-  });
-
-  // Search & Filter
+  // Search, Filter & Sort
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSectorFilter, setSelectedSectorFilter] = useState('ALL');
   const [expandedPartnerId, setExpandedPartnerId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>('az');
+
+  const studentReports = useMemo(() => {
+    return sortDataItems(rawStudentReports, sortBy, {
+      getName: r => r.studentName,
+      getNis: r => r.nisn,
+      getDate: r => r.id,
+    });
+  }, [rawStudentReports, sortBy]);
 
   // Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -227,7 +225,7 @@ export const PklModule: React.FC = () => {
   }, [partners]);
 
   const filteredPartners = useMemo(() => {
-    return partners.filter(p => {
+    const matched = partners.filter(p => {
       const matchSearch =
         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.sector.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -236,56 +234,36 @@ export const PklModule: React.FC = () => {
       const matchSector = selectedSectorFilter === 'ALL' || p.sector === selectedSectorFilter;
       return matchSearch && matchSector;
     });
-  }, [partners, searchTerm, selectedSectorFilter]);
+    return sortDataItems(matched, sortBy, {
+      getName: p => p.name,
+      getNis: p => p.placements?.[0]?.nisn || p.id,
+      getDate: p => p.mouHistory?.[0]?.startDate || '2025-01-01',
+    });
+  }, [partners, searchTerm, selectedSectorFilter, sortBy]);
 
-  // Save helpers
-  const savePartners = (newPartners: IndustryPartner[]) => {
-    setPartners(newPartners);
-    localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(newPartners));
-  };
-
-  const saveVisits = (newVisits: PklVisitRecord[]) => {
-    setVisits(newVisits);
-    localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(newVisits));
-  };
-
-  const saveReports = (newReports: PklStudentReportItem[]) => {
-    setStudentReports(newReports);
-    localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(newReports));
-  };
-
-  // CLEAR ALL DATA FUNCTION (requested by user)
+  // CLEAR ALL DATA FUNCTION (Synced with Firestore Database)
   const handleClearAllPklData = () => {
     setDeleteModalConfig({
       isOpen: true,
       title: 'Kosongkan Seluruh Data Administrasi PKL',
       itemName: 'Database DUDI, Kunjungan Supervisi & Laporan PKL',
-      description: 'Apakah Anda yakin ingin MENGHAPUS SEMUA DATA di modul Administrasi PKL? Semua mitra DUDI, riwayat kerja sama, kunjungan pembimbing, dan laporan siswa akan dikosongkan total.',
+      description:
+        'Apakah Anda yakin ingin MENGHAPUS SEMUA DATA di modul Administrasi PKL? Semua mitra DUDI, riwayat kerja sama, kunjungan pembimbing, dan laporan siswa akan dikosongkan dari Database Cloud.',
       confirmLabel: 'Kosongkan Sekarang',
       onConfirm: () => {
-        savePartners([]);
-        saveVisits([]);
-        saveReports([]);
-        localStorage.removeItem('myschool_pkl_partners');
-        localStorage.removeItem('myschool_pkl_visits');
-        localStorage.removeItem('myschool_pkl_reports');
-        localStorage.removeItem('myschool_pkl_partners_v3');
-        localStorage.removeItem('myschool_pkl_visits_v3');
-        localStorage.removeItem('myschool_pkl_reports_v3');
+        clearAllPklData();
         setExpandedPartnerId(null);
         closeDeleteModal();
-        showToast('Seluruh data administrasi PKL berhasil dikosongkan.');
+        showToast('Seluruh data administrasi PKL berhasil dikosongkan dari Database Cloud.');
       },
     });
   };
 
-  // LOAD SAMPLE DATA TEMPLATE
+  // LOAD SAMPLE DATA TEMPLATE (Synced with Firestore Database)
   const handleLoadSampleData = () => {
-    savePartners(sampleIndustryPartners);
-    saveVisits(samplePklVisits);
-    saveReports(samplePklReports);
+    loadSamplePklData(sampleIndustryPartners, samplePklVisits, samplePklReports);
     setExpandedPartnerId(sampleIndustryPartners[0]?.id || null);
-    showToast('Template contoh data kemitraan DUDI & PKL berhasil dimuat.');
+    showToast('Template data kemitraan DUDI & PKL berhasil dimuat dan disimpan ke Database Cloud!');
   };
 
   // CRUD 1: PARTNER (CREATE, UPDATE, DELETE)
@@ -334,19 +312,19 @@ export const PklModule: React.FC = () => {
       createdAt: new Date().toISOString().split('T')[0],
     };
 
-    savePartners([newPartner, ...partners]);
+    savePklPartner(newPartner);
+    setExpandedPartnerId(newPartner.id);
     setShowAddPartnerModal(false);
-    showToast(`Mitra DUDI "${newPartner.name}" berhasil ditambahkan.`);
+    showToast(`Mitra DUDI "${newPartner.name}" berhasil disimpan ke Database Cloud!`);
   };
 
   const handleUpdatePartner = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingPartner) return;
 
-    const updated = partners.map(p => (p.id === editingPartner.id ? editingPartner : p));
-    savePartners(updated);
+    savePklPartner(editingPartner);
     setEditingPartner(null);
-    showToast(`Data mitra DUDI "${editingPartner.name}" berhasil diperbarui.`);
+    showToast(`Data mitra DUDI "${editingPartner.name}" berhasil diperbarui di Database Cloud!`);
   };
 
   const handleDeletePartner = (partner: IndustryPartner) => {
@@ -357,13 +335,9 @@ export const PklModule: React.FC = () => {
       description: `Apakah Anda yakin ingin menghapus "${partner.name}" beserta riwayat penempatan siswa dan MoU-nya dari database? Tindakan ini tidak dapat dibatalkan.`,
       confirmLabel: 'Hapus Perusahaan',
       onConfirm: () => {
-        const updated = partners.filter(p => p.id !== partner.id);
-        savePartners(updated);
-        // Also remove related student reports & visits
-        saveReports(studentReports.filter(r => r.partnerId !== partner.id));
-        saveVisits(visits.filter(v => v.partnerId !== partner.id));
+        deletePklPartner(partner.id);
         closeDeleteModal();
-        showToast(`Perusahaan "${partner.name}" berhasil dihapus.`);
+        showToast(`Perusahaan "${partner.name}" beserta data terkait berhasil dihapus dari Database Cloud.`);
       },
     });
   };
@@ -394,42 +368,44 @@ export const PklModule: React.FC = () => {
       grade,
     };
 
-    const updated = partners.map(p => {
-      if (p.id === placementModalPartner.id) {
-        return {
-          ...p,
-          placements: [newPlacement, ...(p.placements || [])],
-        };
-      }
-      return p;
-    });
-    savePartners(updated);
+    const currentPartner = partners.find(p => p.id === placementModalPartner.id) || placementModalPartner;
+    const updatedPartner: IndustryPartner = {
+      ...currentPartner,
+      placements: [newPlacement, ...(currentPartner.placements || [])],
+    };
+    savePklPartner(updatedPartner);
 
-    // Also auto-add to studentReports table if not present
+    // Also auto-add or sync to studentReports table in Firestore
     const existingReport = studentReports.find(r => r.studentId === student.id);
-    if (!existingReport) {
-      const newRep: PklStudentReportItem = {
-        id: `rep-${Date.now()}`,
-        studentId: student.id,
-        studentName: student.fullName,
-        nisn: student.nisn,
-        className: student.className,
-        majorCode: student.majorCode,
-        partnerId: placementModalPartner.id,
-        partnerName: placementModalPartner.name,
-        reportTitle: `Laporan Praktik Kerja Lapangan di ${placementModalPartner.name}`,
-        submissionStatus: 'belum_dikumpulkan',
-        schoolMentorScore: finalScore,
-        industryMentorScore: finalScore,
-        finalScore,
-        grade,
-        absorbedStatus: 'mencari_kerja',
-      };
-      saveReports([newRep, ...studentReports]);
-    }
+    const syncedReport: PklStudentReportItem = existingReport
+      ? {
+          ...existingReport,
+          partnerId: currentPartner.id,
+          partnerName: currentPartner.name,
+          finalScore,
+          grade,
+        }
+      : {
+          id: `rep-${Date.now()}`,
+          studentId: student.id,
+          studentName: student.fullName,
+          nisn: student.nisn,
+          className: student.className,
+          majorCode: student.majorCode,
+          partnerId: currentPartner.id,
+          partnerName: currentPartner.name,
+          reportTitle: `Laporan Praktik Kerja Lapangan di ${currentPartner.name}`,
+          submissionStatus: 'belum_dikumpulkan',
+          schoolMentorScore: finalScore,
+          industryMentorScore: finalScore,
+          finalScore,
+          grade,
+          absorbedStatus: 'mencari_kerja',
+        };
+    savePklReport(syncedReport);
 
     setPlacementModalPartner(null);
-    showToast(`Siswa ${student.fullName} berhasil ditempatkan di ${placementModalPartner.name}.`);
+    showToast(`Siswa ${student.fullName} berhasil ditempatkan di ${currentPartner.name} & tersinkron ke semua laporan!`);
   };
 
   const handleUpdatePlacement = (e: React.FormEvent) => {
@@ -440,20 +416,29 @@ export const PklModule: React.FC = () => {
     const finalScore = Number(placement.finalScore) || 85;
     const grade = finalScore >= 90 ? 'A' : finalScore >= 80 ? 'B' : finalScore >= 70 ? 'C' : 'D';
 
-    const updated = partners.map(p => {
-      if (p.id === partnerId) {
-        return {
-          ...p,
-          placements: p.placements.map(pl =>
-            pl.id === placement.id ? { ...placement, finalScore, grade } : pl
-          ),
-        };
-      }
-      return p;
-    });
-    savePartners(updated);
+    const targetPartner = partners.find(p => p.id === partnerId);
+    if (targetPartner) {
+      const updatedPartner: IndustryPartner = {
+        ...targetPartner,
+        placements: (targetPartner.placements || []).map(pl =>
+          pl.id === placement.id ? { ...placement, finalScore, grade } : pl
+        ),
+      };
+      savePklPartner(updatedPartner);
+    }
+
+    // Sync score & grade to studentReports in Firestore as well
+    const linkedReport = studentReports.find(r => r.studentId === placement.studentId);
+    if (linkedReport) {
+      savePklReport({
+        ...linkedReport,
+        finalScore,
+        grade,
+      });
+    }
+
     setEditingPlacement(null);
-    showToast(`Data penempatan siswa ${placement.studentName} berhasil diperbarui.`);
+    showToast(`Data penempatan & nilai siswa ${placement.studentName} berhasil disinkronkan ke Database Cloud!`);
   };
 
   const handleDeletePlacement = (partnerId: string, placementId: string, studentName: string) => {
@@ -464,30 +449,40 @@ export const PklModule: React.FC = () => {
       description: `Apakah Anda yakin ingin membatalkan penempatan siswa ${studentName} dari perusahaan ini?`,
       confirmLabel: 'Hapus Penempatan',
       onConfirm: () => {
-        const updated = partners.map(p => {
-          if (p.id === partnerId) {
-            return {
-              ...p,
-              placements: p.placements.filter(pl => pl.id !== placementId),
-            };
+        const targetPartner = partners.find(p => p.id === partnerId);
+        if (targetPartner) {
+          const removedPlc = (targetPartner.placements || []).find(pl => pl.id === placementId);
+          const updatedPartner: IndustryPartner = {
+            ...targetPartner,
+            placements: (targetPartner.placements || []).filter(pl => pl.id !== placementId),
+          };
+          savePklPartner(updatedPartner);
+
+          if (removedPlc) {
+            const linkedReport = studentReports.find(
+              r => r.studentId === removedPlc.studentId && r.partnerId === partnerId
+            );
+            if (linkedReport) {
+              deletePklReport(linkedReport.id);
+            }
           }
-          return p;
-        });
-        savePartners(updated);
+        }
         closeDeleteModal();
-        showToast(`Penempatan siswa ${studentName} berhasil dihapus.`);
+        showToast(`Penempatan siswa ${studentName} berhasil dihapus dari Database Cloud.`);
       },
     });
   };
 
-  // CRUD 3: MOU (CREATE, DELETE)
+  // CRUD 3: MOU (CREATE, UPDATE, DELETE)
   const handleAddMou = (e: React.FormEvent) => {
     e.preventDefault();
     if (!mouModalPartner) return;
 
     const newMou: IndustryMou = {
       id: `mou-${Date.now()}`,
-      mouNumber: mouForm.mouNumber || `MoU/SMKMY/DUDI/${new Date().getFullYear()}/${Math.floor(100 + Math.random() * 900)}`,
+      mouNumber:
+        mouForm.mouNumber ||
+        `MoU/SMKMY/DUDI/${new Date().getFullYear()}/${Math.floor(100 + Math.random() * 900)}`,
       startDate: mouForm.startDate,
       endDate: mouForm.endDate,
       status: mouForm.status,
@@ -495,36 +490,28 @@ export const PklModule: React.FC = () => {
       documentTitle: mouForm.documentTitle,
     };
 
-    const updated = partners.map(p => {
-      if (p.id === mouModalPartner.id) {
-        return {
-          ...p,
-          mouHistory: [newMou, ...(p.mouHistory || [])],
-        };
-      }
-      return p;
+    const targetPartner = partners.find(p => p.id === mouModalPartner.id) || mouModalPartner;
+    savePklPartner({
+      ...targetPartner,
+      mouHistory: [newMou, ...(targetPartner.mouHistory || [])],
     });
-    savePartners(updated);
     setMouModalPartner(null);
-    showToast(`MoU baru untuk ${mouModalPartner.name} berhasil disimpan.`);
+    showToast(`MoU baru untuk ${targetPartner.name} berhasil disimpan ke Database Cloud.`);
   };
 
   const handleUpdateMou = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingMou) return;
     const { partnerId, mou } = editingMou;
-    const updated = partners.map(p => {
-      if (p.id === partnerId) {
-        return {
-          ...p,
-          mouHistory: (p.mouHistory || []).map(m => (m.id === mou.id ? mou : m)),
-        };
-      }
-      return p;
-    });
-    savePartners(updated);
+    const targetPartner = partners.find(p => p.id === partnerId);
+    if (targetPartner) {
+      savePklPartner({
+        ...targetPartner,
+        mouHistory: (targetPartner.mouHistory || []).map(m => (m.id === mou.id ? mou : m)),
+      });
+    }
     setEditingMou(null);
-    showToast(`Dokumen MoU ${mou.mouNumber} berhasil diperbarui.`);
+    showToast(`Dokumen MoU ${mou.mouNumber} berhasil diperbarui di Database Cloud.`);
   };
 
   const handleDeleteMou = (partnerId: string, mouId: string, mouNumber: string) => {
@@ -535,18 +522,15 @@ export const PklModule: React.FC = () => {
       description: `Hapus nomor surat kerja sama ${mouNumber} dari riwayat?`,
       confirmLabel: 'Hapus Dokumen',
       onConfirm: () => {
-        const updated = partners.map(p => {
-          if (p.id === partnerId) {
-            return {
-              ...p,
-              mouHistory: p.mouHistory.filter(m => m.id !== mouId),
-            };
-          }
-          return p;
-        });
-        savePartners(updated);
+        const targetPartner = partners.find(p => p.id === partnerId);
+        if (targetPartner) {
+          savePklPartner({
+            ...targetPartner,
+            mouHistory: (targetPartner.mouHistory || []).filter(m => m.id !== mouId),
+          });
+        }
         closeDeleteModal();
-        showToast(`MoU ${mouNumber} berhasil dihapus.`);
+        showToast(`MoU ${mouNumber} berhasil dihapus dari Database Cloud.`);
       },
     });
   };
@@ -568,27 +552,26 @@ export const PklModule: React.FC = () => {
       teacherName: newVisitForm.teacherName,
       visitDate: newVisitForm.visitDate,
       visitType: newVisitForm.visitType,
-      studentCount: partner.placements.length || 1,
-      studentNames: partner.placements.map(p => p.studentName),
+      studentCount: partner.placements?.length || 1,
+      studentNames: (partner.placements || []).map(p => p.studentName),
       attendanceRate: Number(newVisitForm.attendanceRate) || 100,
       guidanceNotes: newVisitForm.guidanceNotes || 'Supervisi berkala berjalan sesuai SOP.',
       industryFeedback: newVisitForm.industryFeedback || 'Performa kerja siswa sangat baik.',
       status: newVisitForm.status,
     };
 
-    saveVisits([newVisit, ...visits]);
+    savePklVisit(newVisit);
     setShowAddVisitModal(false);
-    showToast(`Kunjungan ke ${partner.name} berhasil dicatat.`);
+    showToast(`Kunjungan supervisi ke ${partner.name} berhasil disimpan ke Database Cloud.`);
   };
 
   const handleUpdateVisit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingVisit) return;
 
-    const updated = visits.map(v => (v.id === editingVisit.id ? editingVisit : v));
-    saveVisits(updated);
+    savePklVisit(editingVisit);
     setEditingVisit(null);
-    showToast('Data supervisi kunjungan berhasil diperbarui.');
+    showToast('Data supervisi kunjungan berhasil diperbarui di Database Cloud.');
   };
 
   const handleDeleteVisit = (visit: PklVisitRecord) => {
@@ -596,12 +579,12 @@ export const PklModule: React.FC = () => {
       isOpen: true,
       title: 'Hapus Catatan Kunjungan Supervisi',
       itemName: `${visit.partnerName} (${visit.visitDate})`,
-      description: 'Apakah Anda yakin ingin menghapus log catatan supervisi ini?',
+      description: 'Apakah Anda yakin ingin menghapus log catatan supervisi ini dari database?',
       confirmLabel: 'Hapus Log',
       onConfirm: () => {
-        saveVisits(visits.filter(v => v.id !== visit.id));
+        deletePklVisit(visit.id);
         closeDeleteModal();
-        showToast('Catatan kunjungan berhasil dihapus.');
+        showToast('Catatan kunjungan berhasil dihapus dari Database Cloud.');
       },
     });
   };
@@ -629,7 +612,10 @@ export const PklModule: React.FC = () => {
       partnerName: partner ? partner.name : 'Mitra Industri Mandiri',
       reportTitle: studentReportForm.reportTitle || `Laporan PKL Siswa ${student.fullName}`,
       submissionStatus: studentReportForm.submissionStatus,
-      submissionDate: studentReportForm.submissionStatus === 'sudah_dikumpulkan' ? studentReportForm.submissionDate : undefined,
+      submissionDate:
+        studentReportForm.submissionStatus === 'sudah_dikumpulkan'
+          ? studentReportForm.submissionDate
+          : undefined,
       schoolMentorScore: sScore,
       industryMentorScore: iScore,
       finalScore,
@@ -637,9 +623,9 @@ export const PklModule: React.FC = () => {
       absorbedStatus: studentReportForm.absorbedStatus,
     };
 
-    saveReports([newReport, ...studentReports]);
+    savePklReport(newReport);
     setShowAddReportModal(false);
-    showToast(`Data laporan PKL untuk ${student.fullName} berhasil ditambahkan.`);
+    showToast(`Data laporan & nilai PKL ${student.fullName} berhasil disimpan ke Database Cloud!`);
   };
 
   const handleUpdateStudentReport = (e: React.FormEvent) => {
@@ -651,12 +637,13 @@ export const PklModule: React.FC = () => {
     const finalScore = Math.round(sScore * 0.4 + iScore * 0.6);
     const grade = finalScore >= 90 ? 'A' : finalScore >= 80 ? 'B' : finalScore >= 70 ? 'C' : 'D';
 
-    const updated = studentReports.map(r =>
-      r.id === editingReportItem.id ? { ...editingReportItem, finalScore, grade } : r
-    );
-    saveReports(updated);
+    savePklReport({
+      ...editingReportItem,
+      finalScore,
+      grade,
+    });
     setEditingReportItem(null);
-    showToast(`Laporan dan nilai ${editingReportItem.studentName} berhasil diperbarui.`);
+    showToast(`Laporan dan nilai ${editingReportItem.studentName} berhasil disinkronkan ke Database Cloud!`);
   };
 
   const handleDeleteStudentReport = (item: PklStudentReportItem) => {
@@ -664,12 +651,12 @@ export const PklModule: React.FC = () => {
       isOpen: true,
       title: 'Hapus Laporan PKL Siswa',
       itemName: item.studentName,
-      description: `Hapus entri laporan dan nilai PKL untuk ${item.studentName}?`,
+      description: `Hapus entri laporan dan nilai PKL untuk ${item.studentName} dari database?`,
       confirmLabel: 'Hapus Entri',
       onConfirm: () => {
-        saveReports(studentReports.filter(r => r.id !== item.id));
+        deletePklReport(item.id);
         closeDeleteModal();
-        showToast(`Laporan ${item.studentName} berhasil dihapus.`);
+        showToast(`Laporan ${item.studentName} berhasil dihapus dari Database Cloud.`);
       },
     });
   };
@@ -1171,6 +1158,8 @@ export const PklModule: React.FC = () => {
                   ))}
                 </select>
               </div>
+
+              <SortByControl value={sortBy} onChange={setSortBy} />
 
               <span className="text-xs text-slate-400 font-semibold px-2">
                 {filteredPartners.length} Mitra

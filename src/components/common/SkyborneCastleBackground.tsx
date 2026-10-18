@@ -1,25 +1,224 @@
 import React from 'react';
+import { LiveWallpaperPreset } from '../../types';
 
 interface SkyborneCastleBackgroundProps {
   customBgUrl?: string | null;
+  bgType?: 'default' | 'image' | 'video' | 'live_preset';
+  livePreset?: LiveWallpaperPreset;
+  mode?: 'fullscreen' | 'banner';
 }
 
-export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> = ({ customBgUrl }) => {
-  if (customBgUrl) {
+export const isVideoUrl = (url?: string | null): boolean => {
+  if (!url) return false;
+  const lower = url.toLowerCase();
+  return (
+    lower.startsWith('data:video/') ||
+    lower.endsWith('.mp4') ||
+    lower.endsWith('.webm') ||
+    lower.endsWith('.ogg') ||
+    lower.includes('.mp4?') ||
+    lower.includes('.webm?')
+  );
+};
+
+export const LiveWallpaperPresetLayer: React.FC<{
+  preset: LiveWallpaperPreset;
+  className?: string;
+}> = ({ preset, className = 'absolute inset-0' }) => {
+  const themes: Record<
+    LiveWallpaperPreset,
+    {
+      baseGrad: string;
+      orb1: string;
+      orb2: string;
+      orb3: string;
+      accentHex: string;
+    }
+  > = {
+    starlight_castle: {
+      baseGrad: 'linear-gradient(135deg, #060D24 0%, #102554 45%, #1E3A8A 80%, #172554 100%)',
+      orb1: 'rgba(56, 189, 248, 0.32)',
+      orb2: 'rgba(250, 204, 21, 0.24)',
+      orb3: 'rgba(99, 102, 241, 0.35)',
+      accentHex: '#FDE047',
+    },
+    celestial_aurora: {
+      baseGrad: 'linear-gradient(135deg, #041B2D 0%, #064E3B 48%, #0F766E 78%, #0F172A 100%)',
+      orb1: 'rgba(52, 211, 153, 0.36)',
+      orb2: 'rgba(34, 211, 238, 0.3)',
+      orb3: 'rgba(167, 243, 208, 0.22)',
+      accentHex: '#6EE7B7',
+    },
+    golden_sanctuary: {
+      baseGrad: 'linear-gradient(135deg, #1C1208 0%, #451A03 45%, #78350F 78%, #1E1B4B 100%)',
+      orb1: 'rgba(251, 191, 36, 0.35)',
+      orb2: 'rgba(245, 158, 11, 0.28)',
+      orb3: 'rgba(253, 230, 138, 0.22)',
+      accentHex: '#FDE68A',
+    },
+    cyber_emerald: {
+      baseGrad: 'linear-gradient(135deg, #020617 0%, #091E3A 45%, #065F46 82%, #022C22 100%)',
+      orb1: 'rgba(16, 185, 129, 0.35)',
+      orb2: 'rgba(59, 130, 246, 0.32)',
+      orb3: 'rgba(234, 179, 8, 0.2)',
+      accentHex: '#34D399',
+    },
+  };
+
+  const t = themes[preset] || themes.starlight_castle;
+
+  return (
+    <div className={`${className} overflow-hidden`} style={{ background: t.baseGrad }}>
+      {/* Animated Aurora / Nebula Waves */}
+      <div
+        className="absolute -top-24 -left-24 h-[480px] w-[480px] rounded-full blur-[100px] animate-pulse"
+        style={{ background: t.orb1, animationDuration: '5s' }}
+      />
+      <div
+        className="absolute top-1/4 -right-20 h-[440px] w-[440px] rounded-full blur-[110px] animate-pulse"
+        style={{ background: t.orb2, animationDuration: '7s' }}
+      />
+      <div
+        className="absolute -bottom-24 left-1/3 h-[500px] w-[500px] rounded-full blur-[120px] animate-pulse"
+        style={{ background: t.orb3, animationDuration: '6s' }}
+      />
+
+      {/* Animated Magical Starfield & Floating Runes SVG */}
+      <svg
+        className="absolute inset-0 h-full w-full object-cover opacity-85"
+        viewBox="0 0 1920 1080"
+        fill="none"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <defs>
+          <radialGradient id={`glow-${preset}`} cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor={t.accentHex} stopOpacity="0.9" />
+            <stop offset="100%" stopColor={t.accentHex} stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Celestial Astrolabe Rings */}
+        <g opacity="0.22" stroke={t.accentHex}>
+          <circle cx="960" cy="540" r="360" strokeWidth="1" strokeDasharray="8 12">
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from="0 960 540"
+              to="360 960 540"
+              dur="90s"
+              repeatCount="indefinite"
+            />
+          </circle>
+          <circle cx="960" cy="540" r="490" strokeWidth="1.2" strokeDasharray="4 16">
+            <animateTransform
+              attributeName="transform"
+              type="rotate"
+              from="360 960 540"
+              to="0 960 540"
+              dur="120s"
+              repeatCount="indefinite"
+            />
+          </circle>
+        </g>
+
+        {/* Floating Magical Particles & Twinkling Stars */}
+        {[
+          { cx: 220, cy: 180, r: 3.5, dur: '4s', dy: -35 },
+          { cx: 480, cy: 320, r: 2.5, dur: '5.5s', dy: -45 },
+          { cx: 760, cy: 150, r: 4, dur: '3.8s', dy: -30 },
+          { cx: 1180, cy: 210, r: 3, dur: '4.6s', dy: -40 },
+          { cx: 1490, cy: 290, r: 4.5, dur: '5.2s', dy: -50 },
+          { cx: 1710, cy: 170, r: 3, dur: '4.1s', dy: -35 },
+          { cx: 340, cy: 680, r: 3.5, dur: '6s', dy: -55 },
+          { cx: 840, cy: 790, r: 2.8, dur: '4.9s', dy: -40 },
+          { cx: 1340, cy: 740, r: 3.8, dur: '5.4s', dy: -45 },
+          { cx: 1620, cy: 640, r: 3.2, dur: '4.3s', dy: -35 },
+        ].map((p, idx) => (
+          <g key={idx}>
+            <circle cx={p.cx} cy={p.cy} r={p.r * 4} fill={`url(#glow-${preset})`}>
+              <animate
+                attributeName="cy"
+                values={`${p.cy};${p.cy + p.dy};${p.cy}`}
+                dur={p.dur}
+                repeatCount="indefinite"
+              />
+              <animate attributeName="opacity" values="0.3;0.95;0.3" dur={p.dur} repeatCount="indefinite" />
+            </circle>
+            <circle cx={p.cx} cy={p.cy} r={p.r} fill="#FFFFFF">
+              <animate
+                attributeName="cy"
+                values={`${p.cy};${p.cy + p.dy};${p.cy}`}
+                dur={p.dur}
+                repeatCount="indefinite"
+              />
+            </circle>
+          </g>
+        ))}
+
+        {/* Shooting Star Streaks */}
+        <g stroke={t.accentHex} strokeWidth="2" strokeLinecap="round" opacity="0.65">
+          <line x1="250" y1="120" x2="390" y2="210">
+            <animate attributeName="opacity" values="0;0.85;0" dur="6s" repeatCount="indefinite" />
+          </line>
+          <line x1="1420" y1="90" x2="1280" y2="195">
+            <animate attributeName="opacity" values="0;0.75;0" dur="8s" begin="2.5s" repeatCount="indefinite" />
+          </line>
+        </g>
+      </svg>
+    </div>
+  );
+};
+
+export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> = ({
+  customBgUrl,
+  bgType = 'default',
+  livePreset = 'starlight_castle',
+  mode = 'fullscreen',
+}) => {
+  const containerClass =
+    mode === 'banner'
+      ? 'pointer-events-none absolute inset-0 z-0 overflow-hidden select-none'
+      : 'pointer-events-none fixed inset-0 z-0 overflow-hidden select-none';
+
+  // 1. Live Wallpaper Preset Mode
+  if (bgType === 'live_preset' && !customBgUrl) {
     return (
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none" aria-hidden="true">
-        <img
-          src={customBgUrl}
-          alt="Skyborne Academy Castle Courtyard"
-          referrerPolicy="no-referrer"
-          className="h-full w-full object-cover object-center scale-[1.01] transition-transform duration-700"
-        />
-        {/* Subtle atmospheric vignette for login card legibility */}
+      <div className={containerClass} aria-hidden="true">
+        <LiveWallpaperPresetLayer preset={livePreset} />
+      </div>
+    );
+  }
+
+  // 2. Custom Video Live Wallpaper or Custom Image
+  if (customBgUrl) {
+    const isVideo = bgType === 'video' || isVideoUrl(customBgUrl);
+    return (
+      <div className={containerClass} aria-hidden="true">
+        {isVideo ? (
+          <video
+            src={customBgUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="h-full w-full object-cover object-center scale-[1.01]"
+          />
+        ) : (
+          <img
+            src={customBgUrl}
+            alt="Skyborne Academy Background"
+            referrerPolicy="no-referrer"
+            className="h-full w-full object-cover object-center scale-[1.01] transition-transform duration-700"
+          />
+        )}
+        {/* Subtle atmospheric vignette for legibility */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              'radial-gradient(circle at 50% 50%, rgba(12, 24, 56, 0.12) 0%, rgba(10, 18, 42, 0.38) 100%)',
+              mode === 'banner'
+                ? 'linear-gradient(90deg, rgba(11, 21, 40, 0.86) 0%, rgba(11, 21, 40, 0.58) 55%, rgba(11, 21, 40, 0.38) 100%)'
+                : 'radial-gradient(circle at 50% 50%, rgba(12, 24, 56, 0.12) 0%, rgba(10, 18, 42, 0.38) 100%)',
           }}
         />
       </div>
@@ -27,10 +226,9 @@ export const SkyborneCastleBackground: React.FC<SkyborneCastleBackgroundProps> =
   }
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden select-none" aria-hidden="true">
+    <div className={containerClass} aria-hidden="true">
       {/* ==================================================================== */}
       {/* SKYBORNE ACADEMY CASTLE COURTYARD — HIGH-DETAIL SCENIC ILLUSTRATION  */}
-      {/* Matches the uploaded "Skyborne Academy Castle Courtyard.png"         */}
       {/* ==================================================================== */}
       <svg
         className="h-full w-full object-cover"

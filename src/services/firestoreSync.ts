@@ -28,6 +28,11 @@ import {
   NotificationItem,
   ChatMessage,
   User,
+  IndustryPartner,
+  PklVisitRecord,
+  PklStudentReportItem,
+  VisualSettings,
+  LessonSchedule,
 } from '../types';
 import {
   initialStudents,
@@ -64,6 +69,11 @@ export interface SyncCallbacks {
   onDirectMessagesChange?: (data: ChatMessage[]) => void;
   onUsersChange: (data: User[]) => void;
   onReportTemplateChange?: (data: any) => void;
+  onPklPartnersChange?: (data: IndustryPartner[]) => void;
+  onPklVisitsChange?: (data: PklVisitRecord[]) => void;
+  onPklReportsChange?: (data: PklStudentReportItem[]) => void;
+  onVisualSettingsChange?: (data: VisualSettings) => void;
+  onLessonSchedulesChange?: (data: LessonSchedule[]) => void;
   onSyncStatusChange?: (status: { isConnected: boolean; isSyncing: boolean; lastSync: Date; error?: string }) => void;
 }
 
@@ -289,14 +299,12 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     const unsubSessions = onSnapshot(
       collection(db, 'attendanceSessions'),
       snapshot => {
-        if (!snapshot.empty) {
-          const list: AttendanceSession[] = [];
-          snapshot.forEach(docSnap => list.push(docSnap.data() as AttendanceSession));
-          // Sort descending by date
-          list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-          callbacks.onAttendanceSessionsChange(list);
-          handleUpdate();
-        }
+        const list: AttendanceSession[] = [];
+        snapshot.forEach(docSnap => list.push(docSnap.data() as AttendanceSession));
+        // Sort descending by date
+        list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        callbacks.onAttendanceSessionsChange(list);
+        handleUpdate();
       },
       error => {
         handleFirestoreError(error, OperationType.GET, 'attendanceSessions');
@@ -312,12 +320,10 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     const unsubRecords = onSnapshot(
       collection(db, 'attendanceRecords'),
       snapshot => {
-        if (!snapshot.empty) {
-          const list: AttendanceRecord[] = [];
-          snapshot.forEach(docSnap => list.push(docSnap.data() as AttendanceRecord));
-          callbacks.onAttendanceRecordsChange(list);
-          handleUpdate();
-        }
+        const list: AttendanceRecord[] = [];
+        snapshot.forEach(docSnap => list.push(docSnap.data() as AttendanceRecord));
+        callbacks.onAttendanceRecordsChange(list);
+        handleUpdate();
       },
       error => {
         handleFirestoreError(error, OperationType.GET, 'attendanceRecords');
@@ -514,6 +520,111 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     unsubscribers.push(unsubTemplates);
   } catch (err) {
     console.error('Error attaching reportTemplates listener:', err);
+  }
+
+  // 18. PKL Partners (DUDI)
+  if (callbacks.onPklPartnersChange) {
+    try {
+      const unsubPklPartners = onSnapshot(
+        collection(db, 'pklPartners'),
+        snapshot => {
+          const list: IndustryPartner[] = [];
+          snapshot.forEach(docSnap => list.push(docSnap.data() as IndustryPartner));
+          callbacks.onPklPartnersChange?.(list);
+          handleUpdate();
+        },
+        error => {
+          handleFirestoreError(error, OperationType.GET, 'pklPartners');
+        }
+      );
+      unsubscribers.push(unsubPklPartners);
+    } catch (err) {
+      console.error('Error attaching pklPartners listener:', err);
+    }
+  }
+
+  // 19. PKL Supervision Visits
+  if (callbacks.onPklVisitsChange) {
+    try {
+      const unsubPklVisits = onSnapshot(
+        collection(db, 'pklVisits'),
+        snapshot => {
+          const list: PklVisitRecord[] = [];
+          snapshot.forEach(docSnap => list.push(docSnap.data() as PklVisitRecord));
+          callbacks.onPklVisitsChange?.(list);
+          handleUpdate();
+        },
+        error => {
+          handleFirestoreError(error, OperationType.GET, 'pklVisits');
+        }
+      );
+      unsubscribers.push(unsubPklVisits);
+    } catch (err) {
+      console.error('Error attaching pklVisits listener:', err);
+    }
+  }
+
+  // 20. PKL Student Reports & Grades
+  if (callbacks.onPklReportsChange) {
+    try {
+      const unsubPklReports = onSnapshot(
+        collection(db, 'pklReports'),
+        snapshot => {
+          const list: PklStudentReportItem[] = [];
+          snapshot.forEach(docSnap => list.push(docSnap.data() as PklStudentReportItem));
+          callbacks.onPklReportsChange?.(list);
+          handleUpdate();
+        },
+        error => {
+          handleFirestoreError(error, OperationType.GET, 'pklReports');
+        }
+      );
+      unsubscribers.push(unsubPklReports);
+    } catch (err) {
+      console.error('Error attaching pklReports listener:', err);
+    }
+  }
+
+  // 21. Visual Theme & Background Settings
+  if (callbacks.onVisualSettingsChange) {
+    try {
+      const unsubVisualSettings = onSnapshot(
+        doc(db, 'settings', 'visual_theme'),
+        docSnap => {
+          if (docSnap.exists()) {
+            callbacks.onVisualSettingsChange?.(docSnap.data() as VisualSettings);
+            handleUpdate();
+          }
+        },
+        error => {
+          handleFirestoreError(error, OperationType.GET, 'settings/visual_theme');
+        }
+      );
+      unsubscribers.push(unsubVisualSettings);
+    } catch (err) {
+      console.error('Error attaching visual_theme listener:', err);
+    }
+  }
+
+  // 22. Lesson Schedules (Jadwal Pelajaran)
+  if (callbacks.onLessonSchedulesChange) {
+    try {
+      const unsubSchedules = onSnapshot(
+        collection(db, 'lessonSchedules'),
+        snapshot => {
+          const list: LessonSchedule[] = [];
+          snapshot.forEach(docSnap => list.push(docSnap.data() as LessonSchedule));
+          callbacks.onLessonSchedulesChange?.(list);
+          handleUpdate();
+        },
+        error => {
+          handleFirestoreError(error, OperationType.GET, 'lessonSchedules');
+        }
+      );
+      unsubscribers.push(unsubSchedules);
+    } catch (err) {
+      console.error('Error attaching lessonSchedules listener:', err);
+    }
   }
 
   return () => {
@@ -852,5 +963,155 @@ export async function forceReseedFirestore(): Promise<{ success: boolean; count:
     return { success: true, count: 14 };
   } catch (e: any) {
     return { success: false, count: 0, error: e?.message || 'Gagal menyinkronkan data' };
+  }
+}
+
+function sanitizeForFirestore<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+// Attendance Cascade Delete & Full Recap Sync
+export async function firestoreDeleteAttendanceSessionAndRecords(sessionId: string, recordIds: string[]): Promise<void> {
+  try {
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'attendanceSessions', sessionId));
+    recordIds.forEach(rid => {
+      batch.delete(doc(db, 'attendanceRecords', rid));
+    });
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `attendanceSessions/${sessionId}`);
+  }
+}
+
+export async function firestoreUpdateAttendanceRecord(record: AttendanceRecord): Promise<void> {
+  try {
+    await setDoc(doc(db, 'attendanceRecords', record.id), sanitizeForFirestore(record), { merge: true });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `attendanceRecords/${record.id}`);
+  }
+}
+
+export async function firestoreSyncClassAttendanceRecap(
+  sessionsToSave: AttendanceSession[],
+  recordsToSave: AttendanceRecord[],
+  sessionIdsToDelete: string[],
+  recordIdsToDelete: string[]
+): Promise<void> {
+  try {
+    const allOps: Array<{ type: 'setSession' | 'setRecord' | 'delSession' | 'delRecord'; payload: any }> = [];
+    sessionIdsToDelete.forEach(id => allOps.push({ type: 'delSession', payload: id }));
+    recordIdsToDelete.forEach(id => allOps.push({ type: 'delRecord', payload: id }));
+    sessionsToSave.forEach(s => allOps.push({ type: 'setSession', payload: s }));
+    recordsToSave.forEach(r => allOps.push({ type: 'setRecord', payload: r }));
+
+    const chunkSize = 400;
+    for (let i = 0; i < allOps.length; i += chunkSize) {
+      const chunk = allOps.slice(i, i + chunkSize);
+      const batch = writeBatch(db);
+      chunk.forEach(op => {
+        if (op.type === 'delSession') {
+          batch.delete(doc(db, 'attendanceSessions', op.payload));
+        } else if (op.type === 'delRecord') {
+          batch.delete(doc(db, 'attendanceRecords', op.payload));
+        } else if (op.type === 'setSession') {
+          batch.set(doc(db, 'attendanceSessions', op.payload.id), sanitizeForFirestore(op.payload));
+        } else if (op.type === 'setRecord') {
+          batch.set(doc(db, 'attendanceRecords', op.payload.id), sanitizeForFirestore(op.payload));
+        }
+      });
+      await batch.commit();
+    }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'attendanceSessions/RecapSync');
+  }
+}
+
+// PKL & DUDI Administration Cloud Firestore Sync
+export async function firestoreSavePklPartner(partner: IndustryPartner): Promise<void> {
+  try {
+    await setDoc(doc(db, 'pklPartners', partner.id), sanitizeForFirestore(partner));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `pklPartners/${partner.id}`);
+  }
+}
+
+export async function firestoreDeletePklPartner(partnerId: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, 'pklPartners', partnerId));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `pklPartners/${partnerId}`);
+  }
+}
+
+export async function firestoreSavePklVisit(visit: PklVisitRecord): Promise<void> {
+  try {
+    await setDoc(doc(db, 'pklVisits', visit.id), sanitizeForFirestore(visit));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `pklVisits/${visit.id}`);
+  }
+}
+
+export async function firestoreDeletePklVisit(visitId: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, 'pklVisits', visitId));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `pklVisits/${visitId}`);
+  }
+}
+
+export async function firestoreSavePklReport(report: PklStudentReportItem): Promise<void> {
+  try {
+    await setDoc(doc(db, 'pklReports', report.id), sanitizeForFirestore(report));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `pklReports/${report.id}`);
+  }
+}
+
+export async function firestoreDeletePklReport(reportId: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, 'pklReports', reportId));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `pklReports/${reportId}`);
+  }
+}
+
+export async function firestoreClearAllPklData(
+  partnerIds: string[],
+  visitIds: string[],
+  reportIds: string[]
+): Promise<void> {
+  try {
+    const batch = writeBatch(db);
+    partnerIds.forEach(id => batch.delete(doc(db, 'pklPartners', id)));
+    visitIds.forEach(id => batch.delete(doc(db, 'pklVisits', id)));
+    reportIds.forEach(id => batch.delete(doc(db, 'pklReports', id)));
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, 'pklData/clearAll');
+  }
+}
+
+export async function firestoreSaveVisualSettings(settings: VisualSettings): Promise<void> {
+  try {
+    await setDoc(doc(db, 'settings', 'visual_theme'), sanitizeForFirestore(settings));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'settings/visual_theme');
+  }
+}
+
+export async function firestoreSaveLessonSchedule(schedule: LessonSchedule): Promise<void> {
+  try {
+    await setDoc(doc(db, 'lessonSchedules', schedule.id), sanitizeForFirestore(schedule));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `lessonSchedules/${schedule.id}`);
+  }
+}
+
+export async function firestoreDeleteLessonSchedule(scheduleId: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, 'lessonSchedules', scheduleId));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `lessonSchedules/${scheduleId}`);
   }
 }

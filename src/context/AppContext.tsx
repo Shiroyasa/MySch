@@ -17,6 +17,11 @@ import {
   NotificationItem,
   ChatMessage,
   AttendanceStatus,
+  IndustryPartner,
+  PklVisitRecord,
+  PklStudentReportItem,
+  VisualSettings,
+  LessonSchedule,
 } from '../types';
 import {
   initialUsers,
@@ -35,6 +40,11 @@ import {
   initialNotifications,
   initialChatMessages,
 } from '../data/seedData';
+import {
+  sampleIndustryPartners,
+  samplePklVisits,
+  samplePklReports,
+} from '../data/pklSeedData';
 import { auth, db } from '../lib/firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, setDoc, deleteDoc } from 'firebase/firestore';
@@ -61,6 +71,9 @@ import {
   firestoreDeleteAcademicYear,
   firestoreSetActiveAcademicYear,
   firestoreSaveAttendance,
+  firestoreDeleteAttendanceSessionAndRecords,
+  firestoreUpdateAttendanceRecord,
+  firestoreSyncClassAttendanceRecap,
   firestoreSaveAssessment,
   firestoreAddUser,
   firestoreUpdateUser,
@@ -75,9 +88,34 @@ import {
   firestoreSendDirectMessage,
   firestoreDeleteDirectMessage,
   firestoreSaveReportTemplate,
+  firestoreSavePklPartner,
+  firestoreDeletePklPartner,
+  firestoreSavePklVisit,
+  firestoreDeletePklVisit,
+  firestoreSavePklReport,
+  firestoreDeletePklReport,
+  firestoreClearAllPklData,
+  firestoreSaveVisualSettings,
+  firestoreSaveLessonSchedule,
+  firestoreDeleteLessonSchedule,
   forceReseedFirestore,
 } from '../services/firestoreSync';
 import { ReportCustomConfig, defaultReportConfig } from '../utils/exportUtils';
+
+export const defaultVisualSettings: VisualSettings = {
+  appLogoUrl: null,
+  loginBgUrl: null,
+  loginBgType: 'default',
+  loginLivePreset: 'starlight_castle',
+  menuBgUrl: null,
+  menuBgType: 'default',
+  menuLivePreset: 'starlight_castle',
+  menuBgOpacity: 45,
+  ambientDarkMode: true,
+  globalBannerBgUrl: null,
+  bannerOverlayOpacity: 72,
+  moduleBannerBgs: {},
+};
 
 interface AppContextType {
   currentUser: User;
@@ -144,6 +182,12 @@ interface AppContextType {
   ) => string;
   deleteAttendanceSession: (sessionId: string) => void;
   clearAttendanceForClassAndDate: (classId: string, date: string, type?: 'harian' | 'mapel', subjectId?: string) => void;
+  resetClassAttendanceToZero: (classId: string) => void;
+  syncClassAttendanceRecapToDatabase: (
+    classId: string,
+    entriesOrClassName: any,
+    maybeEntries?: any[]
+  ) => void;
   submitAttendanceCorrection: (req: Omit<AttendanceCorrection, 'id' | 'requestedAt' | 'status'>) => void;
   reviewAttendanceCorrection: (id: string, status: 'approved' | 'rejected', reviewerNote?: string) => void;
   deleteAttendanceCorrection: (id: string) => void;
@@ -204,6 +248,28 @@ interface AppContextType {
   // Custom Report Template / PDF Layout Designer
   reportTemplate: ReportCustomConfig;
   saveReportTemplate: (template: ReportCustomConfig) => void;
+
+  // PKL & DUDI Administration (Cloud Synced)
+  pklPartners: IndustryPartner[];
+  pklVisits: PklVisitRecord[];
+  pklReports: PklStudentReportItem[];
+  savePklPartner: (partner: IndustryPartner, isNew?: boolean) => void;
+  deletePklPartner: (partnerId: string) => void;
+  savePklVisit: (visit: PklVisitRecord, isNew?: boolean) => void;
+  deletePklVisit: (visitId: string) => void;
+  savePklReport: (report: PklStudentReportItem, isNew?: boolean) => void;
+  deletePklReport: (reportId: string) => void;
+  clearAllPklData: () => void;
+  loadSamplePklData: () => void;
+
+  // Visual Theme & Custom Backgrounds (Login, Menu Wallpaper, Logo & Header Banners)
+  visualSettings: VisualSettings;
+  updateVisualSettings: (updates: Partial<VisualSettings>) => void;
+
+  // Lesson Schedules (Jadwal Pelajaran di Data Pokok)
+  lessonSchedules: LessonSchedule[];
+  saveLessonSchedule: (schedule: LessonSchedule, isNew?: boolean) => void;
+  deleteLessonSchedule: (scheduleId: string) => void;
 
   // Realtime Cloud Database Sync (Firestore)
   isFirestoreConnected: boolean;
@@ -464,12 +530,146 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return cached ? JSON.parse(cached) : defaultReportConfig;
   });
 
+  // PKL & DUDI States (Synced to Firestore)
+  const [pklPartners, setPklPartners] = useState<IndustryPartner[]>(() => {
+    try {
+      const saved = localStorage.getItem('myschool_pkl_partners_v3');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [];
+  });
+
+  const [pklVisits, setPklVisits] = useState<PklVisitRecord[]>(() => {
+    try {
+      const saved = localStorage.getItem('myschool_pkl_visits_v3');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [];
+  });
+
+  const [pklReports, setPklReports] = useState<PklStudentReportItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('myschool_pkl_reports_v3');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [];
+  });
+
+  // Visual Theme & Background Settings (Login & Module Header Banners)
+  const [visualSettings, setVisualSettings] = useState<VisualSettings>(() => {
+    try {
+      const saved = localStorage.getItem('myschool_visual_settings');
+      const legacyLoginBg = localStorage.getItem('myacademy_login_custom_bg');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          ...defaultVisualSettings,
+          ...parsed,
+          loginBgUrl: parsed.loginBgUrl ?? legacyLoginBg ?? null,
+        };
+      }
+      if (legacyLoginBg) {
+        return {
+          ...defaultVisualSettings,
+          loginBgUrl: legacyLoginBg,
+          globalBannerBgUrl: legacyLoginBg,
+        };
+      }
+    } catch (e) {}
+    return defaultVisualSettings;
+  });
+
+  // Lesson Schedules State (Jadwal Pelajaran)
+  const [lessonSchedules, setLessonSchedules] = useState<LessonSchedule[]>(() => {
+    try {
+      const saved = localStorage.getItem('myschool_lesson_schedules');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return [
+      {
+        id: 'sch-001',
+        day: 'Senin',
+        startTime: '07:30',
+        endTime: '09:45',
+        classId: 'cls-xrpl1',
+        className: 'X RPL 1',
+        subjectId: 'sub-pwpb',
+        subjectName: 'Pemrograman Web & Perangkat Bergerak',
+        subjectCode: 'PWPB',
+        teacherId: 'tch-001',
+        teacherName: 'Budi Santoso, S.Kom., M.T.',
+        teacherNip: '198405122010011008',
+        room: 'Lab RPL 1',
+        semester: 'ganjil',
+        academicYear: '2026/2027',
+        createdAt: '2026-07-15',
+      },
+      {
+        id: 'sch-002',
+        day: 'Senin',
+        startTime: '10:00',
+        endTime: '12:00',
+        classId: 'cls-xrpl1',
+        className: 'X RPL 1',
+        subjectId: 'sub-bd',
+        subjectName: 'Basis Data',
+        subjectCode: 'BD',
+        teacherId: 'tch-001',
+        teacherName: 'Budi Santoso, S.Kom., M.T.',
+        teacherNip: '198405122010011008',
+        room: 'Lab RPL 2',
+        semester: 'ganjil',
+        academicYear: '2026/2027',
+        createdAt: '2026-07-15',
+      },
+      {
+        id: 'sch-003',
+        day: 'Selasa',
+        startTime: '07:30',
+        endTime: '09:30',
+        classId: 'cls-xrpl2',
+        className: 'X RPL 2',
+        subjectId: 'sub-pwpb',
+        subjectName: 'Pemrograman Web & Perangkat Bergerak',
+        subjectCode: 'PWPB',
+        teacherId: 'tch-001',
+        teacherName: 'Budi Santoso, S.Kom., M.T.',
+        teacherNip: '198405122010011008',
+        room: 'Lab RPL 1',
+        semester: 'ganjil',
+        academicYear: '2026/2027',
+        createdAt: '2026-07-16',
+      },
+      {
+        id: 'sch-004',
+        day: 'Rabu',
+        startTime: '08:00',
+        endTime: '10:30',
+        classId: 'cls-xtkj1',
+        className: 'X TKJ 1',
+        subjectId: 'sub-aij',
+        subjectName: 'Administrasi Infrastruktur Jaringan',
+        subjectCode: 'AIJ',
+        teacherId: 'tch-002',
+        teacherName: 'Siti Aminah, S.Pd., M.Kom.',
+        teacherNip: '198709212012122003',
+        room: 'Lab Jaringan Cisco',
+        semester: 'ganjil',
+        academicYear: '2026/2027',
+        createdAt: '2026-07-17',
+      },
+    ];
+  });
+
   // Realtime Cloud Sync State (Firestore)
   const [isFirestoreConnected, setIsFirestoreConnected] = useState<boolean>(true);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(new Date());
 
-  // Mount Firestore real-time listeners for all 15 collections
+  // Mount Firestore real-time listeners for all collections
   useEffect(() => {
     // 1. Ensure Firestore is initially seeded with SMK Mardi Yuana Cikembar data
     ensureFirestorePopulated().catch(err => {
@@ -542,11 +742,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setReportTemplate(prev => ({ ...prev, ...data }));
         localStorage.setItem('myschool_report_template', JSON.stringify(data));
       },
+      onPklPartnersChange: data => {
+        setPklPartners(data);
+        localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(data));
+      },
+      onPklVisitsChange: data => {
+        setPklVisits(data);
+        localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(data));
+      },
+      onPklReportsChange: data => {
+        setPklReports(data);
+        localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(data));
+      },
+      onVisualSettingsChange: data => {
+        setVisualSettings(prev => {
+          const next = { ...prev, ...data };
+          localStorage.setItem('myschool_visual_settings', JSON.stringify(next));
+          return next;
+        });
+      },
+      onLessonSchedulesChange: data => {
+        if (data.length > 0) {
+          setLessonSchedules(data);
+          localStorage.setItem('myschool_lesson_schedules', JSON.stringify(data));
+        }
+      },
       onUsersChange: data => {
         setUsers(data);
         localStorage.setItem('myschool_users', JSON.stringify(data));
-        // Sinkronisasi Nama Profil across all devices:
-        // Jika dokumen user ini di Firestore telah diperbarui dari device lain, update state currentUser segera!
         setCurrentUser(curr => {
           const match = data.find(u => u.id === curr.id);
           if (match && (match.displayName !== curr.displayName || match.role !== curr.role || match.photoURL !== curr.photoURL || match.phone !== curr.phone)) {
@@ -1557,13 +1780,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const target = attendanceSessions.find(s => s.id === sessionId);
     if (!target) return;
 
+    const recordIdsToDelete = attendanceRecords.filter(r => r.sessionId === sessionId).map(r => r.id);
+
     setAttendanceSessions(prev => prev.filter(s => s.id !== sessionId));
     setAttendanceRecords(prev => prev.filter(r => r.sessionId !== sessionId));
 
     addAuditLog('DELETE_ATTENDANCE_SESSION', 'Absensi Siswa', `Menghapus sesi presensi: ${target.className} (${target.date})`);
-    pushNotification('Sesi Presensi Dihapus', `Rekaman presensi kelas ${target.className} tanggal ${target.date} telah dihapus.`, 'alert');
+    pushNotification('Sesi Presensi Dihapus', `Rekaman presensi kelas ${target.className} tanggal ${target.date} telah dihapus dari database.`, 'alert');
 
-    deleteDoc(doc(db, 'attendanceSessions', sessionId)).catch(() => {});
+    firestoreDeleteAttendanceSessionAndRecords(sessionId, recordIdsToDelete).catch(() => {});
   };
 
   const clearAttendanceForClassAndDate = (classId: string, date: string, type: 'harian' | 'mapel' = 'harian', subjectId?: string) => {
@@ -1571,16 +1796,246 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       s => s.classId === classId && s.date === date && s.type === type && (type === 'harian' || s.subjectId === subjectId)
     );
     const sessionIds = matchingSessions.map(s => s.id);
+    const recordIds = attendanceRecords
+      .filter(r => sessionIds.includes(r.sessionId) || (r.classId === classId && r.date === date))
+      .map(r => r.id);
 
     setAttendanceSessions(prev => prev.filter(s => !sessionIds.includes(s.id)));
-    setAttendanceRecords(prev => prev.filter(r => !sessionIds.includes(r.sessionId)));
+    setAttendanceRecords(prev => prev.filter(r => !sessionIds.includes(r.sessionId) && !(r.classId === classId && r.date === date)));
 
     addAuditLog('CLEAR_ATTENDANCE', 'Absensi Siswa', `Mengosongkan/menghapus rekaman presensi kelas ID ${classId} tanggal ${date}`);
-    pushNotification('Presensi Dikosongkan', `Rekaman presensi tanggal ${date} telah dikosongkan.`, 'info');
+    pushNotification('Presensi Dikosongkan', `Rekaman presensi tanggal ${date} telah dikosongkan dan dihapus dari database.`, 'info');
 
     sessionIds.forEach(sid => {
-      deleteDoc(doc(db, 'attendanceSessions', sid)).catch(() => {});
+      firestoreDeleteAttendanceSessionAndRecords(sid, recordIds).catch(() => {});
     });
+  };
+
+  const resetClassAttendanceToZero = (classId: string) => {
+    const targetClass = classes.find(c => c.id === classId) || classes[0];
+    if (!targetClass) return;
+
+    const oldClassSessionIds = attendanceSessions
+      .filter(s => s.classId === classId || s.className === targetClass.name)
+      .map(s => s.id);
+    const oldClassRecordIds = attendanceRecords
+      .filter(
+        r =>
+          r.classId === classId ||
+          oldClassSessionIds.includes(r.sessionId) ||
+          students.some(st => (st.classId === classId || st.className === targetClass.name) && st.id === r.studentId)
+      )
+      .map(r => r.id);
+
+    setAttendanceSessions(prev => {
+      const next = prev.filter(s => s.classId !== classId && s.className !== targetClass.name);
+      localStorage.setItem('myschool_attendance_sessions', JSON.stringify(next));
+      return next;
+    });
+
+    setAttendanceRecords(prev => {
+      const next = prev.filter(r => !oldClassRecordIds.includes(r.id));
+      localStorage.setItem('myschool_attendance_records', JSON.stringify(next));
+      return next;
+    });
+
+    addAuditLog(
+      'RESET_CLASS_ATTENDANCE',
+      'Absensi Siswa',
+      `Mereset seluruh hitungan presensi kelas ${targetClass.name} menjadi 0 di database Cloud Firestore`
+    );
+    pushNotification(
+      'Presensi Kelas Direset',
+      `Seluruh hitungan presensi kelas ${targetClass.name} telah direset menjadi 0 dan disinkronkan ke database.`,
+      'info'
+    );
+
+    firestoreSyncClassAttendanceRecap([], [], oldClassSessionIds, oldClassRecordIds).catch(() => {});
+  };
+
+  const syncClassAttendanceRecapToDatabase = (
+    classId: string,
+    entriesOrClassName: any,
+    maybeEntries?: any[]
+  ) => {
+    const rawEntries: any[] = Array.isArray(entriesOrClassName)
+      ? entriesOrClassName
+      : Array.isArray(maybeEntries)
+      ? maybeEntries
+      : [];
+
+    const targetClass = classes.find(c => c.id === classId) || classes[0];
+    if (!targetClass) return;
+    const now = new Date().toISOString();
+    const todayDate = now.split('T')[0];
+
+    const normalizedEntries = rawEntries.map(e => ({
+      studentId: e.studentId,
+      nisn: e.nisn || '',
+      nis: e.nis || '',
+      fullName: e.fullName || e.studentName || 'Siswa',
+      h: Math.max(0, Number(e.h ?? e.hadir ?? 0) || 0),
+      s: Math.max(0, Number(e.s ?? e.sakit ?? 0) || 0),
+      i: Math.max(0, Number(e.i ?? e.izin ?? 0) || 0),
+      a: Math.max(0, Number(e.a ?? e.alpa ?? 0) || 0),
+      t: Math.max(0, Number(e.t ?? e.terlambat ?? 0) || 0),
+      note: e.teacherNote || e.note || 'Tersinkronisasi dari Rekapitulasi Presensi',
+    }));
+
+    // 1. Sync any newly added or edited students in entries to Master Students
+    normalizedEntries.forEach(entry => {
+      const existingStd = students.find(st => st.id === entry.studentId);
+      if (!existingStd && entry.studentId) {
+        const newStudent: Student = {
+          id: entry.studentId,
+          nisn: entry.nisn || `00${Math.floor(10000000 + Math.random() * 90000000)}`,
+          nis: entry.nis || `2425${Math.floor(1000 + Math.random() * 8999)}`,
+          fullName: entry.fullName,
+          gender: 'L',
+          classId: targetClass.id,
+          className: targetClass.name,
+          majorId: targetClass.majorId,
+          majorCode: targetClass.majorCode,
+          address: 'Cikembar, Sukabumi',
+          phone: '',
+          parentName: 'Orang Tua / Wali',
+          parentPhone: '',
+          status: 'aktif',
+          createdAt: todayDate,
+        };
+        setStudents(prev => [...prev, newStudent]);
+        firestoreAddStudent(newStudent).catch(() => {});
+      } else if (existingStd && (existingStd.fullName !== entry.fullName || existingStd.nisn !== entry.nisn)) {
+        updateStudent(entry.studentId, { fullName: entry.fullName, nisn: entry.nisn });
+      }
+    });
+
+    // 2. Build synchronized AttendanceSessions & AttendanceRecords for this class
+    const classStudentIds = new Set(
+      students
+        .filter(st => st.classId === classId || st.className === targetClass.name)
+        .map(st => st.id)
+    );
+    normalizedEntries.forEach(e => classStudentIds.add(e.studentId));
+
+    const oldClassSessionIds = attendanceSessions
+      .filter(s => s.classId === classId || s.className === targetClass.name)
+      .map(s => s.id);
+    const oldClassRecordIds = attendanceRecords
+      .filter(
+        r =>
+          r.classId === classId ||
+          oldClassSessionIds.includes(r.sessionId) ||
+          classStudentIds.has(r.studentId)
+      )
+      .map(r => r.id);
+
+    const maxSessionsCount = Math.max(
+      0,
+      ...normalizedEntries.map(e => e.h + e.s + e.i + e.a + e.t)
+    );
+
+    const newSessions: AttendanceSession[] = [];
+    const newRecords: AttendanceRecord[] = [];
+
+    // Generate per-student status arrays of length maxSessionsCount
+    const studentStatusTimelines: Record<string, AttendanceStatus[]> = {};
+    normalizedEntries.forEach(entry => {
+      const statuses: AttendanceStatus[] = [];
+      for (let k = 0; k < entry.h; k++) statuses.push('H');
+      for (let k = 0; k < entry.s; k++) statuses.push('S');
+      for (let k = 0; k < entry.i; k++) statuses.push('I');
+      for (let k = 0; k < entry.a; k++) statuses.push('A');
+      for (let k = 0; k < entry.t; k++) statuses.push('T');
+      studentStatusTimelines[entry.studentId] = statuses;
+    });
+
+    for (let sIdx = 0; sIdx < maxSessionsCount; sIdx++) {
+      const sessionDateObj = new Date(Date.now() - (maxSessionsCount - 1 - sIdx) * 24 * 60 * 60 * 1000);
+      const sDate = sessionDateObj.toISOString().split('T')[0];
+      const sessionId = `ses-sync-${classId}-${sIdx + 1}`;
+
+      let present = 0, sick = 0, leave = 0, absent = 0, late = 0;
+
+      normalizedEntries.forEach(entry => {
+        const timeline = studentStatusTimelines[entry.studentId] || [];
+        if (sIdx < timeline.length) {
+          const st = timeline[sIdx];
+          if (st === 'H') present++;
+          else if (st === 'S') sick++;
+          else if (st === 'I') leave++;
+          else if (st === 'A') absent++;
+          else if (st === 'T') late++;
+
+          newRecords.push({
+            id: `att-${sessionId}-${entry.studentId}`,
+            sessionId,
+            date: sDate,
+            studentId: entry.studentId,
+            studentName: entry.fullName,
+            nisn: entry.nisn,
+            classId,
+            status: st,
+            note: entry.note,
+            updatedBy: currentUser.displayName,
+            createdAt: now,
+          });
+        }
+      });
+
+      if (present + sick + leave + absent + late > 0) {
+        newSessions.push({
+          id: sessionId,
+          date: sDate,
+          classId,
+          className: targetClass.name,
+          type: 'harian',
+          teacherId: currentUser.id,
+          teacherName: currentUser.displayName,
+          academicYearId: activeAcademicYear.id,
+          semester: activeAcademicYear.activeSemester,
+          status: 'final',
+          totalStudents: normalizedEntries.length,
+          presentCount: present,
+          sickCount: sick,
+          leaveCount: leave,
+          absentCount: absent,
+          lateCount: late,
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+    }
+
+    setAttendanceSessions(prev => {
+      const next = [
+        ...newSessions.reverse(),
+        ...prev.filter(s => s.classId !== classId && s.className !== targetClass.name),
+      ];
+      localStorage.setItem('myschool_attendance_sessions', JSON.stringify(next));
+      return next;
+    });
+    setAttendanceRecords(prev => {
+      const next = [
+        ...newRecords,
+        ...prev.filter(r => !oldClassRecordIds.includes(r.id)),
+      ];
+      localStorage.setItem('myschool_attendance_records', JSON.stringify(next));
+      return next;
+    });
+
+    addAuditLog(
+      'SYNC_ATTENDANCE_RECAP',
+      'Absensi Siswa',
+      `Menyimpan & menyinkronkan rekap presensi kelas ${targetClass.name} (${normalizedEntries.length} siswa) langsung ke database Cloud Firestore`
+    );
+    pushNotification(
+      'Rekap Presensi Tersinkronisasi',
+      `Data rekapitulasi presensi kelas ${targetClass.name} berhasil disimpan ke database dan disinkronkan ke seluruh menu.`,
+      'success'
+    );
+
+    firestoreSyncClassAttendanceRecap(newSessions, newRecords, oldClassSessionIds, oldClassRecordIds).catch(() => {});
   };
 
   const submitAttendanceCorrection = (req: Omit<AttendanceCorrection, 'id' | 'requestedAt' | 'status'>) => {
@@ -1615,21 +2070,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       )
     );
 
-    // If approved, update the attendance record as well!
+    // If approved, update or create the attendance record in state AND Firestore!
     if (status === 'approved') {
-      setAttendanceRecords(prev =>
-        prev.map(r => {
-          if (r.studentId === target.studentId && r.date === target.date) {
-            return {
-              ...r,
-              status: target.requestedStatus,
-              note: `Koreksi disetujui: ${target.reason}`,
-              updatedBy: currentUser.displayName,
-            };
-          }
-          return r;
-        })
-      );
+      const existingRec = attendanceRecords.find(r => r.studentId === target.studentId && r.date === target.date);
+      if (existingRec) {
+        const updatedRecord: AttendanceRecord = {
+          ...existingRec,
+          status: target.requestedStatus,
+          note: `Koreksi disetujui: ${target.reason}`,
+          updatedBy: currentUser.displayName,
+        };
+        setAttendanceRecords(prev => prev.map(r => (r.id === existingRec.id ? updatedRecord : r)));
+        firestoreUpdateAttendanceRecord(updatedRecord).catch(() => {});
+      } else {
+        const newRec: AttendanceRecord = {
+          id: `att-cor-${target.id}`,
+          sessionId: target.sessionId || `ses-cor-${target.date}`,
+          date: target.date,
+          studentId: target.studentId,
+          studentName: target.studentName,
+          nisn: target.nisn,
+          classId: target.classId,
+          status: target.requestedStatus,
+          note: `Koreksi disetujui: ${target.reason}`,
+          updatedBy: currentUser.displayName,
+          createdAt: new Date().toISOString(),
+        };
+        setAttendanceRecords(prev => [newRec, ...prev]);
+        firestoreUpdateAttendanceRecord(newRec).catch(() => {});
+      }
     }
 
     addAuditLog('REVIEW_CORRECTION', 'Koreksi Absensi', `${status === 'approved' ? 'Menyetujui' : 'Menolak'} permohonan koreksi absensi ${target.studentName}`);
@@ -1638,7 +2107,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       `Permohonan koreksi presensi siswa ${target.studentName} (${target.date}) telah ${status === 'approved' ? 'disetujui' : 'ditolak'}.`,
       status === 'approved' ? 'success' : 'alert'
     );
-    setDoc(doc(db, 'attendanceCorrections', id), { status, reviewedBy: currentUser.displayName, reviewedAt: new Date().toISOString() }, { merge: true }).catch(() => {});
+    setDoc(
+      doc(db, 'attendanceCorrections', id),
+      {
+        status,
+        reviewerNote: reviewerNote || (status === 'approved' ? 'Disetujui oleh Wali Kelas / Guru' : 'Ditolak'),
+        reviewedBy: currentUser.displayName,
+        reviewedAt: new Date().toISOString(),
+      },
+      { merge: true }
+    ).catch(() => {});
   };
 
   const deleteAttendanceCorrection = (id: string) => {
@@ -1890,6 +2368,298 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     firestoreClearNotifications(toClear).catch(() => {});
   };
 
+  // =========================================================================
+  // PKL & DUDI ADMINISTRATION METHODS (WITH BIDIRECTIONAL CLOUD SYNC)
+  // =========================================================================
+  const savePklPartner = (partner: IndustryPartner, isNew = false) => {
+    const activeCount = (partner.placements || []).filter(pl => pl.status === 'sedang_berjalan').length;
+    const normalizedPartner: IndustryPartner = {
+      ...partner,
+      activePlacementsCount: activeCount,
+    };
+
+    setPklPartners(prev => {
+      const exists = prev.some(p => p.id === normalizedPartner.id);
+      const next = exists
+        ? prev.map(p => (p.id === normalizedPartner.id ? normalizedPartner : p))
+        : [normalizedPartner, ...prev];
+      localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(next));
+      return next;
+    });
+
+    firestoreSavePklPartner(normalizedPartner).catch(() => {});
+
+    // Synchronize placements with pklReports so all tabs stay in sync
+    if (normalizedPartner.placements && normalizedPartner.placements.length > 0) {
+      setPklReports(prevReports => {
+        let updatedReports = [...prevReports];
+        normalizedPartner.placements.forEach(plc => {
+          const existingIdx = updatedReports.findIndex(r => r.studentId === plc.studentId);
+          const fScore = plc.finalScore || 86;
+          const grade = fScore >= 90 ? 'A' : fScore >= 80 ? 'B' : fScore >= 70 ? 'C' : 'D';
+          if (existingIdx >= 0) {
+            const updatedRep: PklStudentReportItem = {
+              ...updatedReports[existingIdx],
+              partnerId: normalizedPartner.id,
+              partnerName: normalizedPartner.name,
+              finalScore: fScore,
+              grade,
+            };
+            updatedReports[existingIdx] = updatedRep;
+            firestoreSavePklReport(updatedRep).catch(() => {});
+          } else {
+            const newRep: PklStudentReportItem = {
+              id: `rep-${plc.studentId}-${Date.now()}`,
+              studentId: plc.studentId,
+              studentName: plc.studentName,
+              nisn: plc.nisn,
+              className: plc.className,
+              majorCode: plc.majorCode,
+              partnerId: normalizedPartner.id,
+              partnerName: normalizedPartner.name,
+              reportTitle: `Laporan Praktik Kerja Lapangan di ${normalizedPartner.name}`,
+              submissionStatus: plc.status === 'selesai' ? 'sudah_dikumpulkan' : 'belum_dikumpulkan',
+              schoolMentorScore: fScore,
+              industryMentorScore: fScore,
+              finalScore: fScore,
+              grade,
+              absorbedStatus: 'terserap_kerja',
+            };
+            updatedReports = [newRep, ...updatedReports];
+            firestoreSavePklReport(newRep).catch(() => {});
+          }
+        });
+        localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(updatedReports));
+        return updatedReports;
+      });
+    }
+
+    addAuditLog(
+      isNew ? 'CREATE_PKL_PARTNER' : 'UPDATE_PKL_PARTNER',
+      'Administrasi PKL & DUDI',
+      `${isNew ? 'Menambahkan' : 'Memperbarui'} data mitra industri DUDI: ${normalizedPartner.name}`
+    );
+  };
+
+  const deletePklPartner = (partnerId: string) => {
+    const target = pklPartners.find(p => p.id === partnerId);
+    setPklPartners(prev => {
+      const next = prev.filter(p => p.id !== partnerId);
+      localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(next));
+      return next;
+    });
+    firestoreDeletePklPartner(partnerId).catch(() => {});
+
+    // Cascade delete associated visits and reports
+    const visitsToRemove = pklVisits.filter(v => v.partnerId === partnerId);
+    if (visitsToRemove.length > 0) {
+      setPklVisits(prev => {
+        const next = prev.filter(v => v.partnerId !== partnerId);
+        localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(next));
+        return next;
+      });
+      visitsToRemove.forEach(v => firestoreDeletePklVisit(v.id).catch(() => {}));
+    }
+
+    const reportsToRemove = pklReports.filter(r => r.partnerId === partnerId);
+    if (reportsToRemove.length > 0) {
+      setPklReports(prev => {
+        const next = prev.filter(r => r.partnerId !== partnerId);
+        localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(next));
+        return next;
+      });
+      reportsToRemove.forEach(r => firestoreDeletePklReport(r.id).catch(() => {}));
+    }
+
+    if (target) {
+      addAuditLog('DELETE_PKL_PARTNER', 'Administrasi PKL & DUDI', `Menghapus mitra DUDI: ${target.name}`);
+    }
+  };
+
+  const savePklVisit = (visit: PklVisitRecord, isNew = false) => {
+    setPklVisits(prev => {
+      const exists = prev.some(v => v.id === visit.id);
+      const next = exists ? prev.map(v => (v.id === visit.id ? visit : v)) : [visit, ...prev];
+      localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(next));
+      return next;
+    });
+    firestoreSavePklVisit(visit).catch(() => {});
+    addAuditLog(
+      isNew ? 'CREATE_PKL_VISIT' : 'UPDATE_PKL_VISIT',
+      'Administrasi PKL & DUDI',
+      `${isNew ? 'Menambahkan' : 'Memperbarui'} supervisi kunjungan PKL ke ${visit.partnerName} (${visit.visitDate})`
+    );
+  };
+
+  const deletePklVisit = (visitId: string) => {
+    const target = pklVisits.find(v => v.id === visitId);
+    setPklVisits(prev => {
+      const next = prev.filter(v => v.id !== visitId);
+      localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(next));
+      return next;
+    });
+    firestoreDeletePklVisit(visitId).catch(() => {});
+    if (target) {
+      addAuditLog('DELETE_PKL_VISIT', 'Administrasi PKL & DUDI', `Menghapus jadwal supervisi PKL: ${target.partnerName}`);
+    }
+  };
+
+  const savePklReport = (report: PklStudentReportItem, isNew = false) => {
+    setPklReports(prev => {
+      const exists = prev.some(r => r.id === report.id);
+      const next = exists ? prev.map(r => (r.id === report.id ? report : r)) : [report, ...prev];
+      localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(next));
+      return next;
+    });
+    firestoreSavePklReport(report).catch(() => {});
+
+    // Bidirectional sync: update or add student placement inside the corresponding partner
+    if (report.partnerId) {
+      setPklPartners(prevPartners => {
+        const nextPartners = prevPartners.map(p => {
+          if (p.id === report.partnerId) {
+            const existingPlc = (p.placements || []).find(pl => pl.studentId === report.studentId);
+            let nextPlacements = [...(p.placements || [])];
+            if (existingPlc) {
+              nextPlacements = nextPlacements.map(pl =>
+                pl.studentId === report.studentId
+                  ? { ...pl, finalScore: report.finalScore, grade: report.grade }
+                  : pl
+              );
+            } else {
+              nextPlacements = [
+                {
+                  id: `plc-${report.studentId}-${Date.now()}`,
+                  studentId: report.studentId,
+                  studentName: report.studentName,
+                  nisn: report.nisn,
+                  className: report.className,
+                  majorCode: report.majorCode,
+                  academicYear: activeAcademicYear.name,
+                  period: 'Juli - Desember 2026',
+                  schoolMentorName: 'Guru Pembimbing PKL',
+                  industryMentorName: p.hrdName || 'Pembimbing Industri DUDI',
+                  status: report.submissionStatus === 'sudah_dikumpulkan' ? 'selesai' : 'sedang_berjalan',
+                  finalScore: report.finalScore,
+                  grade: report.grade,
+                },
+                ...nextPlacements,
+              ];
+            }
+            const updatedPartner: IndustryPartner = {
+              ...p,
+              placements: nextPlacements,
+              activePlacementsCount: nextPlacements.filter(pl => pl.status === 'sedang_berjalan').length,
+            };
+            firestoreSavePklPartner(updatedPartner).catch(() => {});
+            return updatedPartner;
+          }
+          return p;
+        });
+        localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(nextPartners));
+        return nextPartners;
+      });
+    }
+
+    addAuditLog(
+      isNew ? 'CREATE_PKL_REPORT' : 'UPDATE_PKL_REPORT',
+      'Administrasi PKL & DUDI',
+      `${isNew ? 'Menambahkan' : 'Memperbarui'} laporan & nilai PKL siswa: ${report.studentName} (${report.finalScore})`
+    );
+  };
+
+  const deletePklReport = (reportId: string) => {
+    const target = pklReports.find(r => r.id === reportId);
+    setPklReports(prev => {
+      const next = prev.filter(r => r.id !== reportId);
+      localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(next));
+      return next;
+    });
+    firestoreDeletePklReport(reportId).catch(() => {});
+    if (target) {
+      addAuditLog('DELETE_PKL_REPORT', 'Administrasi PKL & DUDI', `Menghapus laporan PKL siswa: ${target.studentName}`);
+    }
+  };
+
+  const clearAllPklData = () => {
+    const pIds = pklPartners.map(p => p.id);
+    const vIds = pklVisits.map(v => v.id);
+    const rIds = pklReports.map(r => r.id);
+
+    setPklPartners([]);
+    setPklVisits([]);
+    setPklReports([]);
+    localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify([]));
+    localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify([]));
+    localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify([]));
+
+    firestoreClearAllPklData(pIds, vIds, rIds).catch(() => {});
+    addAuditLog('CLEAR_ALL_PKL', 'Administrasi PKL & DUDI', 'Mengosongkan seluruh data mitra DUDI, supervisi, dan laporan PKL dari database.');
+  };
+
+  const loadSamplePklData = () => {
+    setPklPartners(sampleIndustryPartners);
+    setPklVisits(samplePklVisits);
+    setPklReports(samplePklReports);
+    localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(sampleIndustryPartners));
+    localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(samplePklVisits));
+    localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(samplePklReports));
+
+    sampleIndustryPartners.forEach(p => firestoreSavePklPartner(p).catch(() => {}));
+    samplePklVisits.forEach(v => firestoreSavePklVisit(v).catch(() => {}));
+    samplePklReports.forEach(r => firestoreSavePklReport(r).catch(() => {}));
+    addAuditLog('SEED_PKL_SAMPLE', 'Administrasi PKL & DUDI', 'Memuat & menyinkronkan data contoh kemitraan DUDI ke Cloud Firestore.');
+  };
+
+  // Visual Theme & Background Settings
+  const updateVisualSettings = (updates: Partial<VisualSettings>) => {
+    setVisualSettings(prev => {
+      const next: VisualSettings = {
+        ...prev,
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem('myschool_visual_settings', JSON.stringify(next));
+      if (next.loginBgUrl) {
+        localStorage.setItem('myacademy_login_custom_bg', next.loginBgUrl);
+      } else {
+        localStorage.removeItem('myacademy_login_custom_bg');
+      }
+      firestoreSaveVisualSettings(next).catch(() => {});
+      return next;
+    });
+    addAuditLog('UPDATE_VISUAL_THEME', 'Pengaturan Sistem', 'Memperbarui tema visual, logo aplikasi, atau wallpaper sistem.');
+  };
+
+  // Lesson Schedule CRUD (Jadwal Pelajaran)
+  const saveLessonSchedule = (schedule: LessonSchedule, isNew = false) => {
+    setLessonSchedules(prev => {
+      const exists = prev.some(item => item.id === schedule.id);
+      const next = exists ? prev.map(item => (item.id === schedule.id ? schedule : item)) : [schedule, ...prev];
+      localStorage.setItem('myschool_lesson_schedules', JSON.stringify(next));
+      return next;
+    });
+    firestoreSaveLessonSchedule(schedule).catch(() => {});
+    addAuditLog(
+      isNew ? 'CREATE_SCHEDULE' : 'UPDATE_SCHEDULE',
+      'Jadwal Pelajaran',
+      `${isNew ? 'Menambahkan' : 'Memperbarui'} jadwal pelajaran: ${schedule.subjectName} (${schedule.className} - ${schedule.day})`
+    );
+  };
+
+  const deleteLessonSchedule = (scheduleId: string) => {
+    const target = lessonSchedules.find(s => s.id === scheduleId);
+    setLessonSchedules(prev => {
+      const next = prev.filter(s => s.id !== scheduleId);
+      localStorage.setItem('myschool_lesson_schedules', JSON.stringify(next));
+      return next;
+    });
+    firestoreDeleteLessonSchedule(scheduleId).catch(() => {});
+    if (target) {
+      addAuditLog('DELETE_SCHEDULE', 'Jadwal Pelajaran', `Menghapus jadwal pelajaran: ${target.subjectName} (${target.className})`);
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -1942,6 +2712,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         saveAttendanceSessionAndRecords,
         deleteAttendanceSession,
         clearAttendanceForClassAndDate,
+        resetClassAttendanceToZero,
+        syncClassAttendanceRecapToDatabase,
         submitAttendanceCorrection,
         reviewAttendanceCorrection,
         deleteAttendanceCorrection,
@@ -1973,6 +2745,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteDirectMessage,
         reportTemplate,
         saveReportTemplate,
+        pklPartners,
+        pklVisits,
+        pklReports,
+        savePklPartner,
+        deletePklPartner,
+        savePklVisit,
+        deletePklVisit,
+        savePklReport,
+        deletePklReport,
+        clearAllPklData,
+        loadSamplePklData,
+        visualSettings,
+        updateVisualSettings,
+        lessonSchedules,
+        saveLessonSchedule,
+        deleteLessonSchedule,
         isFirestoreConnected,
         isSyncing,
         lastSyncTime,

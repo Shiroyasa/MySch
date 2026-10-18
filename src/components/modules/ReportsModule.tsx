@@ -45,6 +45,7 @@ import {
 } from '../../utils/exportUtils';
 import { exportToGoogleSheets } from '../../utils/googleSheetsUtils';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
+import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 
 export const ReportsModule: React.FC = () => {
   const {
@@ -70,6 +71,7 @@ export const ReportsModule: React.FC = () => {
   const [selectedClassId, setSelectedClassId] = useState<string>(classes[0]?.id || '');
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>(subjects[0]?.id || '');
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+  const [sortBy, setSortBy] = useState<SortOption>('az');
 
   // Google Sheets state
   const [isExportingSheets, setIsExportingSheets] = useState(false);
@@ -86,8 +88,16 @@ export const ReportsModule: React.FC = () => {
   const currentClass = classes.find(c => c.id === selectedClassId) || classes[0];
   const currentSubject = subjects.find(s => s.id === selectedSubjectId) || subjects[0];
   const classStudents = useMemo(() => {
-    return students.filter(s => s.className === currentClass?.name);
-  }, [students, currentClass]);
+    return sortDataItems(
+      students.filter(s => s.className === currentClass?.name),
+      sortBy,
+      {
+        getName: s => s.fullName || s.name,
+        getNis: s => s.nis,
+        getDate: s => s.enrollmentDate || '2025-07-14',
+      }
+    );
+  }, [students, currentClass, sortBy]);
 
   // Keep selected student synced with class students
   useEffect(() => {
@@ -208,20 +218,22 @@ export const ReportsModule: React.FC = () => {
   // COMPUTED REAL DATA FOR EACH REPORT TYPE
   // -------------------------------------------------------------
 
-  // 1. Attendance Data per Student for current class
+  // 1. Attendance Data per Student for current class (100% synced with Presensi Database)
   const classAttendanceData = useMemo(() => {
     return classStudents.map((std, idx) => {
       const stdRecords = attendanceRecords.filter(r => r.studentId === std.id);
-      const h = stdRecords.filter(r => r.status === 'H').length || 18;
-      const s = stdRecords.filter(r => r.status === 'S').length || 1;
-      const i = stdRecords.filter(r => r.status === 'I').length || 0;
-      const a = stdRecords.filter(r => r.status === 'A').length || 0;
-      const t = stdRecords.filter(r => r.status === 'T').length || 1;
-      const total = h + s + i + a + t || 20;
-      const rateNum = ((h + t) / total) * 100;
+      const h = stdRecords.filter(r => r.status === 'H').length;
+      const s = stdRecords.filter(r => r.status === 'S').length;
+      const i = stdRecords.filter(r => r.status === 'I').length;
+      const a = stdRecords.filter(r => r.status === 'A').length;
+      const t = stdRecords.filter(r => r.status === 'T').length;
+      const total = h + s + i + a + t;
+      const rateNum = total > 0 ? ((h + t) / total) * 100 : 100;
       const rate = rateNum.toFixed(1) + '%';
       const statusLabel =
-        rateNum >= 90
+        total === 0
+          ? 'Belum Ada Sesi'
+          : rateNum >= 90
           ? 'Sangat Baik'
           : rateNum >= 80
           ? 'Baik'
@@ -846,9 +858,12 @@ export const ReportsModule: React.FC = () => {
               )}
 
               <div className="flex flex-col justify-end">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Aksi Ekspor &amp; Unduh
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Aksi Ekspor &amp; Urutan
+                  </label>
+                  <SortByControl value={sortBy} onChange={setSortBy} compact />
+                </div>
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={handleDownloadExcel}
