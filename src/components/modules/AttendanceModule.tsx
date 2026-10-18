@@ -16,15 +16,31 @@ import {
   PlusCircle,
   AlertCircle,
   Trash2,
-  Hourglass,
-  Sparkles,
   ShieldCheck,
-  Swords,
-  Scroll,
-  Gem,
+  Edit3,
+  Save,
+  RotateCcw,
+  FileSpreadsheet,
+  Search,
 } from 'lucide-react';
-import { exportToExcel, exportToPdf, exportToCsv } from '../../utils/exportUtils';
+import { exportToExcel, exportToPdf, exportToCsv, defaultReportConfig } from '../../utils/exportUtils';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
+import { AcademyHeroBanner } from '../common/AcademyOrnaments';
+
+interface EditableAttendanceRow {
+  studentId: string;
+  nisn: string;
+  nis: string;
+  studentName: string;
+  className: string;
+  hadir: number;
+  sakit: number;
+  izin: number;
+  alpa: number;
+  terlambat: number;
+  teacherNote: string;
+  followUpAction: string;
+}
 
 export const AttendanceModule: React.FC = () => {
   const {
@@ -45,8 +61,23 @@ export const AttendanceModule: React.FC = () => {
     deleteAttendanceCorrection,
   } = useApp();
 
-  const [activeTab, setActiveTab] = useState<'input' | 'history' | 'correction'>('input');
+  const [activeTab, setActiveTab] = useState<'input' | 'history' | 'correction' | 'editable_report'>('input');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [reportSearch, setReportSearch] = useState('');
+  const [reportPeriodLabel, setReportPeriodLabel] = useState('Rekapitulasi Semester Berjalan');
+  const [signerWaliName, setSignerWaliName] = useState(defaultReportConfig.leftSignerName);
+  const [signerWaliNip, setSignerWaliNip] = useState(defaultReportConfig.leftSignerNip);
+  const [signerKepsekName, setSignerKepsekName] = useState(defaultReportConfig.rightSignerName);
+  const [signerKepsekNip, setSignerKepsekNip] = useState(defaultReportConfig.rightSignerNip);
+
+  // Editable Attendance Report state per student
+  const [editableReportMap, setEditableReportMap] = useState<Record<string, EditableAttendanceRow>>(() => {
+    try {
+      const saved = localStorage.getItem('myschool_editable_attendance_report_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {};
+  });
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -249,6 +280,160 @@ export const AttendanceModule: React.FC = () => {
     showToast(`Permohonan koreksi presensi ${myStd.fullName} berhasil diajukan.`);
   };
 
+  // Compute or retrieve editable report rows for the selected class
+  const editableClassRows: EditableAttendanceRow[] = classStudents
+    .filter(
+      std =>
+        std.fullName.toLowerCase().includes(reportSearch.toLowerCase()) ||
+        std.nisn.toLowerCase().includes(reportSearch.toLowerCase())
+    )
+    .map(std => {
+      if (editableReportMap[std.id]) {
+        return editableReportMap[std.id];
+      }
+      const myRecs = attendanceRecords.filter(r => r.studentId === std.id);
+      const hCount = myRecs.filter(r => r.status === 'H').length || 18;
+      const sCount = myRecs.filter(r => r.status === 'S').length;
+      const iCount = myRecs.filter(r => r.status === 'I').length;
+      const aCount = myRecs.filter(r => r.status === 'A').length;
+      const tCount = myRecs.filter(r => r.status === 'T').length;
+      return {
+        studentId: std.id,
+        nisn: std.nisn,
+        nis: std.nis,
+        studentName: std.fullName,
+        className: std.className,
+        hadir: hCount,
+        sakit: sCount,
+        izin: iCount,
+        alpa: aCount,
+        terlambat: tCount,
+        teacherNote: aCount > 2 ? 'Perlu pembinaan kedisiplinan' : 'Kehadiran baik & disiplin',
+        followUpAction: aCount > 2 ? 'Panggilan Wali Kelas' : 'Tidak Ada',
+      };
+    });
+
+  const handleUpdateEditableRow = (studentId: string, field: keyof EditableAttendanceRow, value: string | number) => {
+    const existing = editableClassRows.find(r => r.studentId === studentId);
+    if (!existing) return;
+    const updatedRow: EditableAttendanceRow = {
+      ...existing,
+      [field]: value,
+    };
+    const nextMap = {
+      ...editableReportMap,
+      [studentId]: updatedRow,
+    };
+    setEditableReportMap(nextMap);
+  };
+
+  const handleSaveEditableReport = () => {
+    const nextMap = { ...editableReportMap };
+    editableClassRows.forEach(row => {
+      nextMap[row.studentId] = row;
+    });
+    setEditableReportMap(nextMap);
+    localStorage.setItem('myschool_editable_attendance_report_v1', JSON.stringify(nextMap));
+    showToast(`Laporan presensi editable kelas ${currentClass?.name} berhasil disimpan.`);
+  };
+
+  const handleResetEditableReportClass = () => {
+    const nextMap = { ...editableReportMap };
+    classStudents.forEach(std => {
+      delete nextMap[std.id];
+    });
+    setEditableReportMap(nextMap);
+    localStorage.setItem('myschool_editable_attendance_report_v1', JSON.stringify(nextMap));
+    showToast(`Data laporan presensi kelas ${currentClass?.name} direset ke kalkulasi sesi otomatis.`);
+  };
+
+  const handleExportEditableReportExcel = () => {
+    const data = editableClassRows.map((r, idx) => {
+      const total = r.hadir + r.sakit + r.izin + r.alpa;
+      const rate = total > 0 ? Math.round((r.hadir / total) * 100) : 100;
+      return {
+        No: idx + 1,
+        NISN: r.nisn,
+        NIS: r.nis,
+        'Nama Siswa': r.studentName,
+        Kelas: r.className,
+        'Hadir (H)': r.hadir,
+        'Sakit (S)': r.sakit,
+        'Izin (I)': r.izin,
+        'Alpa (A)': r.alpa,
+        'Terlambat (T)': r.terlambat,
+        'Total Hari': total,
+        'Persentase Kehadiran': `${rate}%`,
+        'Catatan Wali Kelas': r.teacherNote,
+        'Tindak Lanjut': r.followUpAction,
+      };
+    });
+    exportToExcel(data, `Laporan_Presensi_${currentClass?.name}_${activeAcademicYear.name}`, 'Rekap Presensi');
+    showToast('Laporan presensi berhasil diekspor ke Excel (.xlsx).');
+  };
+
+  const handleExportEditableReportCsv = () => {
+    const data = editableClassRows.map((r, idx) => {
+      const total = r.hadir + r.sakit + r.izin + r.alpa;
+      const rate = total > 0 ? Math.round((r.hadir / total) * 100) : 100;
+      return {
+        No: idx + 1,
+        NISN: r.nisn,
+        'Nama Siswa': r.studentName,
+        Kelas: r.className,
+        Hadir: r.hadir,
+        Sakit: r.sakit,
+        Izin: r.izin,
+        Alpa: r.alpa,
+        Terlambat: r.terlambat,
+        Persentase: `${rate}%`,
+        Catatan: r.teacherNote,
+      };
+    });
+    exportToCsv(data, `Laporan_Presensi_${currentClass?.name}_${activeAcademicYear.name}`);
+    showToast('Laporan presensi berhasil diekspor ke CSV (.csv).');
+  };
+
+  const handleExportEditableReportPdf = () => {
+    const headers = ['No', 'NISN', 'Nama Siswa', 'H', 'S', 'I', 'A', 'T', 'Kehadiran', 'Catatan Wali Kelas'];
+    const rows = editableClassRows.map((r, idx) => {
+      const total = r.hadir + r.sakit + r.izin + r.alpa;
+      const rate = total > 0 ? Math.round((r.hadir / total) * 100) : 100;
+      return [
+        idx + 1,
+        r.nisn,
+        r.studentName,
+        r.hadir,
+        r.sakit,
+        r.izin,
+        r.alpa,
+        r.terlambat,
+        `${rate}%`,
+        r.teacherNote,
+      ];
+    });
+
+    exportToPdf(
+      headers,
+      rows,
+      {
+        title: `LAPORAN REKAPITULASI PRESENSI SISWA (${reportPeriodLabel.toUpperCase()})`,
+        className: currentClass?.name,
+        academicYear: `${activeAcademicYear.name} (${activeAcademicYear.activeSemester.toUpperCase()})`,
+        teacherName: signerWaliName,
+      },
+      `Laporan_Presensi_${currentClass?.name}`,
+      {
+        ...defaultReportConfig,
+        leftSignerName: signerWaliName,
+        leftSignerNip: signerWaliNip,
+        rightSignerName: signerKepsekName,
+        rightSignerNip: signerKepsekNip,
+      }
+    );
+    showToast('Dokumen PDF Laporan Presensi berhasil diunduh.');
+  };
+
   return (
     <div className="space-y-6">
       {/* Toast Notification */}
@@ -259,58 +444,58 @@ export const AttendanceModule: React.FC = () => {
         </div>
       )}
 
-      {/* Module Navigation Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-3 dark:border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <div className="relative rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 p-2.5 text-white shadow-md shadow-blue-500/25 ring-1 ring-amber-400/50">
-            <Hourglass className="h-5 w-5 text-amber-300 animate-pulse" />
+      {/* Royal Academy Banner & Navigation Tabs */}
+      <AcademyHeroBanner
+        kicker="MANAJEMEN KEHADIRAN & PRESENSI HARIAN"
+        title="PRESENSI & ABSENSI SISWA"
+        subtitle="Pencatatan kehadiran jam pelajaran, rekapitulasi laporan presensi interaktif (editable), riwayat sesi, dan verifikasi koreksi absensi."
+        icon={CalendarCheck}
+        rightContent={
+          <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 backdrop-blur-md">
+            <button
+              onClick={() => setActiveTab('input')}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'input'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              Input Presensi
+            </button>
+            <button
+              onClick={() => setActiveTab('editable_report')}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                activeTab === 'editable_report'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Edit3 className="h-3.5 w-3.5 text-[#EAB308]" />
+              <span>Laporan Editable</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'history'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              Riwayat ({attendanceSessions.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('correction')}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'correction'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              Koreksi ({attendanceCorrections.length})
+            </button>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
-                Presensi &amp; Absensi Siswa
-              </h1>
-              <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-black text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                CHRONO SEAL
-              </span>
-            </div>
-            <p className="text-xs text-slate-500">SMK Mardi Yuana Cikembar &bull; Kurikulum Merdeka Vokasi</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100/70 p-1 dark:border-slate-800 dark:bg-slate-800/60">
-          <button
-            onClick={() => setActiveTab('input')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeTab === 'input'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            Input Presensi
-          </button>
-          <button
-            onClick={() => setActiveTab('history')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeTab === 'history'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            Riwayat &amp; Rekap ({attendanceSessions.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('correction')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeTab === 'correction'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            Koreksi Presensi ({attendanceCorrections.length})
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* TAB 1: INPUT PRESENSI */}
       {activeTab === 'input' && (
@@ -800,6 +985,280 @@ export const AttendanceModule: React.FC = () => {
                   </div>
                 ))
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: LAPORAN & REKAP PRESENSI EDITABLE (SESUAI HALAMAN LAPORAN) */}
+      {activeTab === 'editable_report' && (
+        <div className="space-y-6">
+          {/* Control & Export Bar */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                  Pilih Kelas Rekapitulasi
+                </label>
+                <select
+                  value={selectedClassId}
+                  onChange={e => handleClassChange(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-bold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                >
+                  {classes.map(cls => (
+                    <option key={cls.id} value={cls.id}>
+                      {cls.name} ({cls.majorCode})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                  Periode Laporan
+                </label>
+                <input
+                  type="text"
+                  value={reportPeriodLabel}
+                  onChange={e => setReportPeriodLabel(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  placeholder="Rekapitulasi Semester Ganjil"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                  Cari Siswa / NISN
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={reportSearch}
+                    onChange={e => setReportSearch(e.target.value)}
+                    placeholder="Ketik nama atau NISN..."
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-8 pr-3 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                  Aksi Simpan &amp; Ekspor Resmi
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={handleSaveEditableReport}
+                    className="flex-1 flex items-center justify-center gap-1 rounded-xl bg-blue-600 py-2.5 px-2.5 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer shadow-xs"
+                    title="Simpan Perubahan Laporan Presensi"
+                  >
+                    <Save className="h-3.5 w-3.5" />
+                    <span>Simpan</span>
+                  </button>
+                  <button
+                    onClick={handleExportEditableReportExcel}
+                    className="flex items-center justify-center gap-1 rounded-xl border border-emerald-200 bg-emerald-50 py-2.5 px-2.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-950/50 dark:text-emerald-300 cursor-pointer"
+                    title="Ekspor Excel (.xlsx)"
+                  >
+                    <FileSpreadsheet className="h-3.5 w-3.5" />
+                    <span>Excel</span>
+                  </button>
+                  <button
+                    onClick={handleExportEditableReportCsv}
+                    className="flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white py-2.5 px-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+                    title="Ekspor CSV (.csv)"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    <span>CSV</span>
+                  </button>
+                  <button
+                    onClick={handleExportEditableReportPdf}
+                    className="flex items-center justify-center gap-1 rounded-xl bg-indigo-600 py-2.5 px-2.5 text-xs font-bold text-white hover:bg-indigo-700 cursor-pointer shadow-xs"
+                    title="Cetak PDF Resmi"
+                  >
+                    <Printer className="h-3.5 w-3.5" />
+                    <span>PDF</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Signers & Reset Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+              <div>
+                <label className="text-[11px] font-semibold text-slate-500 block mb-1">Nama Wali Kelas (Penandatangan)</label>
+                <input
+                  type="text"
+                  value={signerWaliName}
+                  onChange={e => setSignerWaliName(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-slate-500 block mb-1">NIP Wali Kelas</label>
+                <input
+                  type="text"
+                  value={signerWaliNip}
+                  onChange={e => setSignerWaliNip(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-mono dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-slate-500 block mb-1">Nama Kepala Sekolah</label>
+                <input
+                  type="text"
+                  value={signerKepsekName}
+                  onChange={e => setSignerKepsekName(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] font-semibold text-slate-500 block mb-1">NIP Kepala Sekolah</label>
+                <input
+                  type="text"
+                  value={signerKepsekNip}
+                  onChange={e => setSignerKepsekNip(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-mono dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+              </div>
+              <div className="flex items-end">
+                <button
+                  onClick={handleResetEditableReportClass}
+                  className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-bold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 cursor-pointer"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  <span>Reset Hitungan Sesi</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Editable Attendance Report Table */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3 dark:border-slate-800">
+              <div>
+                <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                  Tabel Editor Laporan Rekapitulasi Presensi — Kelas {currentClass?.name}
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Klik langsung pada kolom angka (H, S, I, A, T) atau catatan wali kelas untuk menyunting laporan sebelum dicetak/diekspor.
+                </p>
+              </div>
+              <span className="text-xs font-bold text-blue-600">
+                {editableClassRows.length} Siswa Ditampilkan
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
+                    <th className="py-2.5 px-2 text-center w-10">No</th>
+                    <th className="py-2.5 px-2">NISN</th>
+                    <th className="py-2.5 px-3">Nama Lengkap Siswa</th>
+                    <th className="py-2.5 px-2 text-center text-emerald-700 dark:text-emerald-400 w-16">Hadir (H)</th>
+                    <th className="py-2.5 px-2 text-center text-amber-700 dark:text-amber-400 w-16">Sakit (S)</th>
+                    <th className="py-2.5 px-2 text-center text-blue-700 dark:text-blue-400 w-16">Izin (I)</th>
+                    <th className="py-2.5 px-2 text-center text-rose-700 dark:text-rose-400 w-16">Alpa (A)</th>
+                    <th className="py-2.5 px-2 text-center text-purple-700 dark:text-purple-400 w-16">Lambat (T)</th>
+                    <th className="py-2.5 px-2 text-center w-20">% Hadir</th>
+                    <th className="py-2.5 px-3">Catatan / Evaluasi Wali Kelas (Editable)</th>
+                    <th className="py-2.5 px-2">Tindak Lanjut</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {editableClassRows.map((row, idx) => {
+                    const total = row.hadir + row.sakit + row.izin + row.alpa;
+                    const rate = total > 0 ? Math.round((row.hadir / total) * 100) : 100;
+                    return (
+                      <tr key={row.studentId} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                        <td className="py-2 px-2 text-center text-slate-400 font-semibold">{idx + 1}</td>
+                        <td className="py-2 px-2 font-mono text-[11px] text-slate-500">{row.nisn}</td>
+                        <td className="py-2 px-3 font-bold text-slate-900 dark:text-white">{row.studentName}</td>
+                        <td className="py-2 px-1.5 text-center">
+                          <input
+                            type="number"
+                            min={0}
+                            value={row.hadir}
+                            onChange={e => handleUpdateEditableRow(row.studentId, 'hadir', Math.max(0, Number(e.target.value)))}
+                            className="w-14 rounded-lg border border-emerald-200 bg-emerald-50/50 py-1 px-1.5 text-center font-bold text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300"
+                          />
+                        </td>
+                        <td className="py-2 px-1.5 text-center">
+                          <input
+                            type="number"
+                            min={0}
+                            value={row.sakit}
+                            onChange={e => handleUpdateEditableRow(row.studentId, 'sakit', Math.max(0, Number(e.target.value)))}
+                            className="w-14 rounded-lg border border-amber-200 bg-amber-50/50 py-1 px-1.5 text-center font-bold text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300"
+                          />
+                        </td>
+                        <td className="py-2 px-1.5 text-center">
+                          <input
+                            type="number"
+                            min={0}
+                            value={row.izin}
+                            onChange={e => handleUpdateEditableRow(row.studentId, 'izin', Math.max(0, Number(e.target.value)))}
+                            className="w-14 rounded-lg border border-blue-200 bg-blue-50/50 py-1 px-1.5 text-center font-bold text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-300"
+                          />
+                        </td>
+                        <td className="py-2 px-1.5 text-center">
+                          <input
+                            type="number"
+                            min={0}
+                            value={row.alpa}
+                            onChange={e => handleUpdateEditableRow(row.studentId, 'alpa', Math.max(0, Number(e.target.value)))}
+                            className="w-14 rounded-lg border border-rose-200 bg-rose-50/50 py-1 px-1.5 text-center font-bold text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
+                          />
+                        </td>
+                        <td className="py-2 px-1.5 text-center">
+                          <input
+                            type="number"
+                            min={0}
+                            value={row.terlambat}
+                            onChange={e => handleUpdateEditableRow(row.studentId, 'terlambat', Math.max(0, Number(e.target.value)))}
+                            className="w-14 rounded-lg border border-purple-200 bg-purple-50/50 py-1 px-1.5 text-center font-bold text-purple-700 dark:border-purple-900/50 dark:bg-purple-950/40 dark:text-purple-300"
+                          />
+                        </td>
+                        <td className="py-2 px-2 text-center">
+                          <span
+                            className={`font-black ${
+                              rate >= 90
+                                ? 'text-emerald-600'
+                                : rate >= 75
+                                ? 'text-amber-600'
+                                : 'text-rose-600'
+                            }`}
+                          >
+                            {rate}%
+                          </span>
+                        </td>
+                        <td className="py-2 px-2">
+                          <input
+                            type="text"
+                            value={row.teacherNote}
+                            onChange={e => handleUpdateEditableRow(row.studentId, 'teacherNote', e.target.value)}
+                            className="w-full min-w-[180px] rounded-lg border border-slate-200 bg-slate-50/70 py-1 px-2.5 text-xs text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                          />
+                        </td>
+                        <td className="py-2 px-2">
+                          <select
+                            value={row.followUpAction}
+                            onChange={e => handleUpdateEditableRow(row.studentId, 'followUpAction', e.target.value)}
+                            className="rounded-lg border border-slate-200 bg-slate-50 py-1 px-2 text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                          >
+                            <option value="Tidak Ada">Tidak Ada</option>
+                            <option value="Teguran Lisan">Teguran Lisan</option>
+                            <option value="Panggilan Wali Kelas">Panggilan Wali Kelas</option>
+                            <option value="Konseling BK">Konseling BK</option>
+                            <option value="Panggilan Orang Tua">Panggilan Orang Tua</option>
+                          </select>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

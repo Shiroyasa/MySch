@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { exportToExcel, exportToPdf, exportLegerExcelWithFormulas } from '../../utils/exportUtils';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
+import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 
 export const GradingModule: React.FC = () => {
   const {
@@ -444,58 +445,47 @@ export const GradingModule: React.FC = () => {
         </div>
       )}
 
-      {/* Module Title & Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-3 dark:border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <div className="relative rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 p-2.5 text-white shadow-md shadow-blue-500/20">
-            <GraduationCap className="h-5 w-5 text-white" />
+      {/* Royal Academy Banner & Tabs */}
+      <AcademyHeroBanner
+        kicker="STANDAR PENILAIAN KOMPETENSI VOKASI"
+        title="PENILAIAN AKADEMIK & NILAI SISWA"
+        subtitle="Pengelolaan bobot penilaian dinamis, kalkulasi leger nilai akhir otomatis, dan penyusunan draf transkrip rapor siswa."
+        icon={GraduationCap}
+        rightContent={
+          <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 backdrop-blur-md">
+            <button
+              onClick={() => setActiveTab('input')}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'input'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              Input Nilai
+            </button>
+            <button
+              onClick={() => setActiveTab('leger')}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'leger'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              Rekap &amp; Leger Kelas
+            </button>
+            <button
+              onClick={() => setActiveTab('reportCard')}
+              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'reportCard'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              Draf Rapor Siswa
+            </button>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
-                Penilaian Akademik &amp; Nilai Siswa
-              </h1>
-              <span className="rounded bg-blue-500/10 px-2 py-0.5 text-[9px] font-black text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                Standar Penilaian Vokasi
-              </span>
-            </div>
-            <p className="text-xs text-slate-500">Bobot Dinamis, Leger Nilai, Transkrip Rapor &bull; SMK Mardi Yuana</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100/70 p-1 dark:border-slate-800 dark:bg-slate-800/60">
-          <button
-            onClick={() => setActiveTab('input')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeTab === 'input'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            Input Nilai
-          </button>
-          <button
-            onClick={() => setActiveTab('leger')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeTab === 'leger'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            Rekap &amp; Leger Kelas
-          </button>
-          <button
-            onClick={() => setActiveTab('reportCard')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeTab === 'reportCard'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            Draf Rapor Siswa
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* TAB 1: INPUT NILAI */}
       {activeTab === 'input' && (

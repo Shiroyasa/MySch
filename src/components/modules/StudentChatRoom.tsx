@@ -21,6 +21,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { UserRole, User as UserType } from '../../types';
+import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 
 interface StudentChatRoomProps {
   isAdminView?: boolean;
@@ -168,42 +169,32 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
 
   return (
     <div className="space-y-4">
-      {/* Top Banner / Header */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 animate-fade-in">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-cyan-600 to-blue-600 text-white shadow-md shadow-blue-500/20">
-              <MessageSquare className="h-6 w-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
-                  {activeTab === 'public'
-                    ? (isAdmin ? 'Pantauan & Forum Obrolan Siswa' : 'Ruang Obrolan & Forum Diskusi Siswa')
-                    : 'Pesan Langsung / Chat DM Pribadi Antar Profil'}
-                </h1>
-                <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                  SMK Mardi Yuana Cikembar
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {activeTab === 'public'
-                  ? 'Tempat bertukar ide belajar, tugas kejuruan, dan diskusi antar siswa yang terpantau aman oleh tim sekolah'
-                  : 'Kirim pesan 1-on-1 langsung per profil (Guru, Siswa, Admin TU, Kepala Sekolah) dengan enkripsi data cloud Firestore'}
-              </p>
-            </div>
-          </div>
-
-          {/* Tab Switcher & Quick Stats */}
+      {/* Royal Academy Banner / Header */}
+      <AcademyHeroBanner
+        kicker="FORUM KOMUNIKASI & DISKUSI AKADEMIK"
+        title={
+          activeTab === 'public'
+            ? isAdmin
+              ? 'PANTAUAN & FORUM OBROLAN SISWA'
+              : 'RUANG OBROLAN & FORUM DISKUSI SISWA'
+            : 'PESAN LANGSUNG / CHAT DM PRIBADI'
+        }
+        subtitle={
+          activeTab === 'public'
+            ? 'Tempat bertukar ide belajar, tugas kejuruan, dan diskusi antar siswa yang terpantau aman oleh tim sekolah.'
+            : 'Kirim pesan 1-on-1 langsung per profil (Guru, Siswa, Admin TU, Kepala Sekolah) dengan sinkronisasi Cloud Firestore.'
+        }
+        icon={MessageSquare}
+        rightContent={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center rounded-xl border border-slate-200 bg-slate-100/80 p-1 dark:border-slate-800 dark:bg-slate-800/80 text-xs">
+            <div className="flex items-center rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 text-xs">
               <button
                 type="button"
                 onClick={() => setActiveTab('public')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                   activeTab === 'public'
-                    ? 'bg-white text-blue-600 shadow-2xs dark:bg-slate-900 dark:text-white'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
+                    ? 'bg-[#2563EB] text-white shadow-2xs'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 <Users className="h-3.5 w-3.5" />
@@ -212,16 +203,16 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
               <button
                 type="button"
                 onClick={() => setActiveTab('dm')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all relative ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all relative cursor-pointer ${
                   activeTab === 'dm'
-                    ? 'bg-white text-blue-600 shadow-2xs dark:bg-slate-900 dark:text-white'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
+                    ? 'bg-[#2563EB] text-white shadow-2xs'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 <MessageCircle className="h-3.5 w-3.5" />
                 <span>Chat DM Pribadi</span>
                 {directMessages.some(m => m.recipientId === currentUser.id) && (
-                  <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
                 )}
               </button>
             </div>
@@ -229,15 +220,15 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
             {isAdmin && activeTab === 'public' && (
               <button
                 onClick={() => setShowModAnnounceForm(!showModAnnounceForm)}
-                className="flex items-center gap-1.5 rounded-xl bg-purple-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-purple-700 transition-colors"
+                className="flex items-center gap-1.5 rounded-xl border border-[#C8A44B]/60 bg-[#1B2A47] px-3 py-2 text-xs font-bold text-[#FDE68A] hover:bg-[#24375C] transition-colors cursor-pointer"
               >
-                <Megaphone className="h-3.5 w-3.5" />
-                <span>Pemberitahuan Moderator</span>
+                <Megaphone className="h-3.5 w-3.5 text-[#EAB308]" />
+                <span>Pengumuman Moderator</span>
               </button>
             )}
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* ======================================================== */}
       {/* VIEW 1: RUANG FORUM DISKUSI PUBLIK                        */}

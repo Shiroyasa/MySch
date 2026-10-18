@@ -20,6 +20,7 @@ import {
   Laptop,
   Globe,
 } from 'lucide-react';
+import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 
 export const SettingsModule: React.FC = () => {
   const {
@@ -166,70 +167,61 @@ export const SettingsModule: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Title & Navigation Tabs */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-3 dark:border-slate-800">
-        <div className="flex items-center gap-2">
-          <div className="rounded-xl bg-blue-100 p-2 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-            <Settings className="h-5 w-5" />
+      {/* Royal Academy Banner & Navigation Tabs */}
+      <AcademyHeroBanner
+        kicker="KONFIGURASI LEMBAGA & PENGGUNA"
+        title="PROFIL PENGGUNA & PENGATURAN SISTEM"
+        subtitle="Kelola profil akun login Anda, identitas resmi lembaga sekolah, pencadangan data terenkripsi, dan sinkronisasi Cloud Firestore."
+        icon={Settings}
+        rightContent={
+          <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 backdrop-blur-md">
+            <button
+              onClick={() => setActiveSection('profile')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeSection === 'profile'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <User className="h-3.5 w-3.5" />
+              <span>Profil ({currentUser.displayName.split(' ')[0]})</span>
+            </button>
+            <button
+              onClick={() => setActiveSection('school')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeSection === 'school'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <School className="h-3.5 w-3.5" />
+              <span>Profil Lembaga</span>
+            </button>
+            <button
+              onClick={() => setActiveSection('backup')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeSection === 'backup'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span>Cadangan Data</span>
+            </button>
+            <button
+              onClick={() => setActiveSection('cloud-sync')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeSection === 'cloud-sync'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Cloud className="h-3.5 w-3.5 text-emerald-400" />
+              <span>Cloud Sync</span>
+            </button>
           </div>
-          <div>
-            <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
-              Profil Pengguna &amp; Pengaturan Sistem
-            </h1>
-            <p className="text-xs text-slate-500">
-              Kelola profil akun login Anda, identitas resmi lembaga sekolah, dan pencadangan data
-            </p>
-          </div>
-        </div>
-
-        {/* Section Tabs */}
-        <div className="flex items-center rounded-xl bg-slate-100 p-1 dark:bg-slate-800/80">
-          <button
-            onClick={() => setActiveSection('profile')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeSection === 'profile'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-blue-400'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-            }`}
-          >
-            <User className="h-3.5 w-3.5" />
-            <span>Profil Admin ({currentUser.displayName.split(' ')[0]})</span>
-          </button>
-          <button
-            onClick={() => setActiveSection('school')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeSection === 'school'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-blue-400'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-            }`}
-          >
-            <School className="h-3.5 w-3.5" />
-            <span>Profil Lembaga</span>
-          </button>
-          <button
-            onClick={() => setActiveSection('backup')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeSection === 'backup'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-blue-400'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-            }`}
-          >
-            <ShieldCheck className="h-3.5 w-3.5" />
-            <span>Pencadangan Data</span>
-          </button>
-          <button
-            onClick={() => setActiveSection('cloud-sync')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeSection === 'cloud-sync'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-blue-400'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-            }`}
-          >
-            <Cloud className="h-3.5 w-3.5 text-emerald-500" />
-            <span>Sinkronisasi Cloud</span>
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* SECTION 1: PROFIL ADMIN */}
       {activeSection === 'profile' && (

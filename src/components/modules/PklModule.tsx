@@ -50,6 +50,7 @@ import {
 } from 'lucide-react';
 import { exportToExcel, exportToCsv, exportToPdf } from '../../utils/exportUtils';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
+import { AcademyHeroBanner, OrnateCard, CharacterMedallion } from '../common/AcademyOrnaments';
 
 export const PklModule: React.FC = () => {
   const { classes, students, activeAcademicYear } = useApp();
@@ -128,6 +129,7 @@ export const PklModule: React.FC = () => {
   const [editingPlacement, setEditingPlacement] = useState<{ partnerId: string; placement: IndustryPlacementRecord } | null>(null);
 
   const [mouModalPartner, setMouModalPartner] = useState<IndustryPartner | null>(null);
+  const [editingMou, setEditingMou] = useState<{ partnerId: string; mou: IndustryMou } | null>(null);
 
   const [showAddVisitModal, setShowAddVisitModal] = useState(false);
   const [editingVisit, setEditingVisit] = useState<PklVisitRecord | null>(null);
@@ -239,17 +241,17 @@ export const PklModule: React.FC = () => {
   // Save helpers
   const savePartners = (newPartners: IndustryPartner[]) => {
     setPartners(newPartners);
-    localStorage.setItem('myschool_pkl_partners', JSON.stringify(newPartners));
+    localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(newPartners));
   };
 
   const saveVisits = (newVisits: PklVisitRecord[]) => {
     setVisits(newVisits);
-    localStorage.setItem('myschool_pkl_visits', JSON.stringify(newVisits));
+    localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(newVisits));
   };
 
   const saveReports = (newReports: PklStudentReportItem[]) => {
     setStudentReports(newReports);
-    localStorage.setItem('myschool_pkl_reports', JSON.stringify(newReports));
+    localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(newReports));
   };
 
   // CLEAR ALL DATA FUNCTION (requested by user)
@@ -264,6 +266,12 @@ export const PklModule: React.FC = () => {
         savePartners([]);
         saveVisits([]);
         saveReports([]);
+        localStorage.removeItem('myschool_pkl_partners');
+        localStorage.removeItem('myschool_pkl_visits');
+        localStorage.removeItem('myschool_pkl_reports');
+        localStorage.removeItem('myschool_pkl_partners_v3');
+        localStorage.removeItem('myschool_pkl_visits_v3');
+        localStorage.removeItem('myschool_pkl_reports_v3');
         setExpandedPartnerId(null);
         closeDeleteModal();
         showToast('Seluruh data administrasi PKL berhasil dikosongkan.');
@@ -499,6 +507,24 @@ export const PklModule: React.FC = () => {
     savePartners(updated);
     setMouModalPartner(null);
     showToast(`MoU baru untuk ${mouModalPartner.name} berhasil disimpan.`);
+  };
+
+  const handleUpdateMou = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingMou) return;
+    const { partnerId, mou } = editingMou;
+    const updated = partners.map(p => {
+      if (p.id === partnerId) {
+        return {
+          ...p,
+          mouHistory: (p.mouHistory || []).map(m => (m.id === mou.id ? mou : m)),
+        };
+      }
+      return p;
+    });
+    savePartners(updated);
+    setEditingMou(null);
+    showToast(`Dokumen MoU ${mou.mouNumber} berhasil diperbarui.`);
   };
 
   const handleDeleteMou = (partnerId: string, mouId: string, mouNumber: string) => {
@@ -945,54 +971,37 @@ export const PklModule: React.FC = () => {
         onClose={closeDeleteModal}
       />
 
-      {/* Header Banner */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-xs backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/90">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20">
-              <Briefcase className="h-6 w-6" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                  Administrasi PKL &amp; Kemitraan DUDI
-                </h1>
-                <span className="rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-800/60 px-2.5 py-0.5 text-[10px] font-bold text-blue-700 dark:text-blue-300">
-                  Vokasi Unggul
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Kelola data mitra dunia usaha &amp; industri, penempatan siswa, supervisi kunjungan, serta rekapitulasi penilaian PKL
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
-            {/* Clear All Data Button */}
+      {/* Royal Academy Banner */}
+      <AcademyHeroBanner
+        kicker="MANAJEMEN HUBUNGAN INDUSTRI & VOKASI (DUDI)"
+        title="ADMINISTRASI PKL & KEMITRAAN DUDI"
+        subtitle="Kelola database perusahaan mitra dunia usaha & industri, dokumen MoU/PKS, penempatan siswa, supervisi kunjungan, serta rekapitulasi nilai PKL."
+        icon={Building2}
+        rightContent={
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handleClearAllPklData}
-              className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50/80 py-2 px-3 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/50 dark:text-rose-300 cursor-pointer transition-colors"
+              className="flex items-center gap-1.5 rounded-xl border border-rose-400/40 bg-rose-950/70 py-2 px-3 text-xs font-bold text-rose-200 hover:bg-rose-900/80 cursor-pointer transition-colors"
               title="Kosongkan seluruh data di menu Administrasi PKL"
             >
               <Trash2 className="h-3.5 w-3.5" />
               <span>Kosongkan Data PKL</span>
             </button>
 
-            {/* Load Sample Template Button */}
             {partners.length === 0 && (
               <button
                 onClick={handleLoadSampleData}
-                className="flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50/80 py-2 px-3 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-900/60 dark:bg-emerald-950/50 dark:text-emerald-300 cursor-pointer transition-colors"
+                className="flex items-center gap-1.5 rounded-xl border border-emerald-400/40 bg-emerald-950/70 py-2 px-3 text-xs font-bold text-emerald-200 hover:bg-emerald-900/80 cursor-pointer transition-colors"
                 title="Muat contoh data mitra DUDI & penempatan PKL"
               >
-                <Sparkles className="h-3.5 w-3.5" />
+                <Sparkles className="h-3.5 w-3.5 text-[#EAB308]" />
                 <span>Muat Contoh DUDI</span>
               </button>
             )}
 
             <button
               onClick={() => setShowAddPartnerModal(true)}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 py-2 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+              className="flex items-center gap-1.5 rounded-xl bg-[#2563EB] py-2 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Tambah Mitra DUDI</span>
@@ -1006,52 +1015,100 @@ export const PklModule: React.FC = () => {
                 }
                 setShowAddVisitModal(true);
               }}
-              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+              className="flex items-center gap-1.5 rounded-xl border border-[#C8A44B]/60 bg-[#1B2A47] py-2 px-3.5 text-xs font-bold text-[#FDE68A] hover:bg-[#24375C] cursor-pointer"
             >
-              <Calendar className="h-3.5 w-3.5 text-indigo-600" />
+              <Calendar className="h-3.5 w-3.5 text-[#EAB308]" />
               <span>Jadwal Supervisi</span>
             </button>
           </div>
-        </div>
+        }
+      />
 
-        {/* Top 4 Key Metrics Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-slate-100 dark:border-slate-800">
-          <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5 dark:border-slate-800 dark:bg-slate-800/50">
-            <div className="flex items-center justify-between text-slate-500 text-xs">
-              <span>Mitra DUDI Aktif</span>
-              <Building2 className="h-4 w-4 text-blue-600" />
+      {/* Top 4 Ornate Key Metrics Bar */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <OrnateCard className="p-5">
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                <Building2 className="h-3.5 w-3.5 text-blue-600" /> Mitra DUDI Aktif
+              </span>
+              <p
+                className="text-3xl font-black text-slate-900 dark:text-white mt-2"
+                style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+              >
+                {partners.length}
+              </p>
             </div>
-            <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{partners.length}</p>
-            <span className="text-[10px] font-semibold text-emerald-600">Perusahaan Terafiliasi</span>
+            <CharacterMedallion variant="guild" />
           </div>
+          <div className="mt-3 flex items-center justify-between text-[11px] font-bold text-emerald-600">
+            <span>Perusahaan Terafiliasi</span>
+            <span>Aktif</span>
+          </div>
+        </OrnateCard>
 
-          <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5 dark:border-slate-800 dark:bg-slate-800/50">
-            <div className="flex items-center justify-between text-slate-500 text-xs">
-              <span>Siswa Sedang PKL</span>
-              <Users className="h-4 w-4 text-indigo-600" />
+        <OrnateCard className="p-5">
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                <Users className="h-3.5 w-3.5 text-indigo-600" /> Siswa Sedang PKL
+              </span>
+              <p
+                className="text-3xl font-black text-slate-900 dark:text-white mt-2"
+                style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+              >
+                {totalActiveStudents}
+              </p>
             </div>
-            <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{totalActiveStudents}</p>
-            <span className="text-[10px] font-semibold text-blue-600">Dari {totalCapacity} Kuota Tersedia</span>
+            <CharacterMedallion variant="cadet" />
           </div>
+          <div className="mt-3 flex items-center justify-between text-[11px] font-bold text-blue-600">
+            <span>Dari {totalCapacity} Kuota Tersedia</span>
+            <span>Terdata</span>
+          </div>
+        </OrnateCard>
 
-          <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5 dark:border-slate-800 dark:bg-slate-800/50">
-            <div className="flex items-center justify-between text-slate-500 text-xs">
-              <span>Kerja Sama MoU/PKS</span>
-              <FileCheck2 className="h-4 w-4 text-emerald-600" />
+        <OrnateCard className="p-5">
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                <FileCheck2 className="h-3.5 w-3.5 text-emerald-600" /> Kerja Sama MoU/PKS
+              </span>
+              <p
+                className="text-3xl font-black text-slate-900 dark:text-white mt-2"
+                style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+              >
+                {activeMousCount}
+              </p>
             </div>
-            <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{activeMousCount}</p>
-            <span className="text-[10px] font-semibold text-emerald-600">Berstatus Sah &amp; Berlaku</span>
+            <CharacterMedallion variant="scholar" />
           </div>
+          <div className="mt-3 flex items-center justify-between text-[11px] font-bold text-emerald-600">
+            <span>Berstatus Sah &amp; Berlaku</span>
+            <span>Terverifikasi</span>
+          </div>
+        </OrnateCard>
 
-          <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5 dark:border-slate-800 dark:bg-slate-800/50">
-            <div className="flex items-center justify-between text-slate-500 text-xs">
-              <span>Supervisi Kunjungan</span>
-              <Clock className="h-4 w-4 text-purple-600" />
+        <OrnateCard className="p-5">
+          <div className="flex items-start justify-between">
+            <div>
+              <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                <Clock className="h-3.5 w-3.5 text-purple-600" /> Supervisi Kunjungan
+              </span>
+              <p
+                className="text-3xl font-black text-slate-900 dark:text-white mt-2"
+                style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+              >
+                {visits.length}
+              </p>
             </div>
-            <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{visits.length}</p>
-            <span className="text-[10px] font-semibold text-purple-600">Monitoring Terjadwal</span>
+            <CharacterMedallion variant="aegis" />
           </div>
-        </div>
+          <div className="mt-3 flex items-center justify-between text-[11px] font-bold text-purple-600">
+            <span>Monitoring Terjadwal</span>
+            <span>DUDI</span>
+          </div>
+        </OrnateCard>
       </div>
 
       {/* Main Tabs Selection */}
@@ -1346,8 +1403,15 @@ export const PklModule: React.FC = () => {
                                       {mou.status}
                                     </span>
                                     <button
+                                      onClick={() => setEditingMou({ partnerId: partner.id, mou })}
+                                      className="text-slate-400 hover:text-blue-600 cursor-pointer"
+                                      title="Edit Dokumen MoU"
+                                    >
+                                      <Edit className="h-3 w-3" />
+                                    </button>
+                                    <button
                                       onClick={() => handleDeleteMou(partner.id, mou.id, mou.mouNumber)}
-                                      className="text-slate-400 hover:text-rose-600"
+                                      className="text-slate-400 hover:text-rose-600 cursor-pointer"
                                       title="Hapus MoU ini"
                                     >
                                       <Trash2 className="h-3 w-3" />
@@ -2837,6 +2901,144 @@ export const PklModule: React.FC = () => {
                   className="rounded-xl bg-emerald-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 cursor-pointer"
                 >
                   Simpan MoU
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ==================================================================== */}
+      {/* MODAL: EDIT DOKUMEN MOU / PKS                                        */}
+      {/* ==================================================================== */}
+      {editingMou && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Edit className="h-5 w-5 text-blue-600" />
+                <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">
+                  Edit Dokumen MoU / PKS
+                </h3>
+              </div>
+              <button
+                onClick={() => setEditingMou(null)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateMou} className="space-y-4 text-xs">
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Nomor Surat MoU/PKS *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingMou.mou.mouNumber}
+                  onChange={e =>
+                    setEditingMou({
+                      ...editingMou,
+                      mou: { ...editingMou.mou, mouNumber: e.target.value },
+                    })
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-mono font-bold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Judul Perjanjian</label>
+                <input
+                  type="text"
+                  value={editingMou.mou.documentTitle}
+                  onChange={e =>
+                    setEditingMou({
+                      ...editingMou,
+                      mou: { ...editingMou.mou, documentTitle: e.target.value },
+                    })
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Tanggal Mulai</label>
+                  <input
+                    type="date"
+                    value={editingMou.mou.startDate}
+                    onChange={e =>
+                      setEditingMou({
+                        ...editingMou,
+                        mou: { ...editingMou.mou, startDate: e.target.value },
+                      })
+                    }
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Tanggal Berakhir</label>
+                  <input
+                    type="date"
+                    value={editingMou.mou.endDate}
+                    onChange={e =>
+                      setEditingMou({
+                        ...editingMou,
+                        mou: { ...editingMou.mou, endDate: e.target.value },
+                      })
+                    }
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Status Berlaku</label>
+                  <select
+                    value={editingMou.mou.status}
+                    onChange={e =>
+                      setEditingMou({
+                        ...editingMou,
+                        mou: { ...editingMou.mou, status: e.target.value as any },
+                      })
+                    }
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs font-bold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    <option value="aktif">Aktif</option>
+                    <option value="akan_berakhir">Akan Berakhir</option>
+                    <option value="kadaluarsa">Kadaluarsa</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Ruang Lingkup</label>
+                  <input
+                    type="text"
+                    value={editingMou.mou.scope}
+                    onChange={e =>
+                      setEditingMou({
+                        ...editingMou,
+                        mou: { ...editingMou.mou, scope: e.target.value },
+                      })
+                    }
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingMou(null)}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                >
+                  Simpan Perubahan MoU
                 </button>
               </div>
             </form>

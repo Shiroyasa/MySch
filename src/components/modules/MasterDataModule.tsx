@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { exportToExcel } from '../../utils/exportUtils';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
+import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 
 export const MasterDataModule: React.FC = () => {
   const {
@@ -611,53 +612,42 @@ export const MasterDataModule: React.FC = () => {
         </div>
       )}
 
-      {/* Title & Tabs with JRPG Grand Codex Styling */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-3 dark:border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <div className="relative rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-2.5 text-white shadow-md shadow-indigo-500/25 ring-1 ring-amber-400/50">
-            <Gem className="h-5 w-5 text-amber-300 animate-pulse" />
+      {/* Royal Academy Banner & Tabs */}
+      <AcademyHeroBanner
+        kicker="GRAND CODEX • BASIS DATA POKOK SEKOLAH"
+        title="MASTER DATA MANAJEMEN SEKOLAH"
+        subtitle="Pengelolaan terpusat data siswa aktif, tenaga pendidik, rombongan belajar, kompetensi keahlian (jurusan), mata pelajaran, dan tahun ajaran."
+        icon={Gem}
+        rightContent={
+          <div className="flex flex-wrap gap-1.5 rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 backdrop-blur-md">
+            {[
+              { id: 'students', label: `Siswa (${students.length})`, icon: Gem },
+              { id: 'teachers', label: `Guru (${teachers.length})`, icon: Crown },
+              { id: 'classes', label: `Kelas (${classes.length})`, icon: Castle },
+              { id: 'majors', label: `Jurusan (${majors.length})`, icon: Swords },
+              { id: 'subjects', label: `Mapel (${subjects.length})`, icon: Scroll },
+              { id: 'years', label: 'Tahun Ajaran', icon: Hourglass },
+            ].map(tab => {
+              const Icon = tab.icon;
+              const isAct = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                    isAct
+                      ? 'bg-[#2563EB] text-white shadow-xs'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5 text-[#EAB308]" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
-                Master Data Manajemen Sekolah
-              </h1>
-              <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-black text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                GRAND CODEX
-              </span>
-            </div>
-            <p className="text-xs text-slate-500">SMK Mardi Yuana Cikembar &bull; Kurikulum Merdeka Terakreditasi A (Unggul)</p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap gap-1 rounded-xl border border-slate-200 bg-white/70 p-1 dark:border-slate-800 dark:bg-slate-800/60 backdrop-blur-md">
-          {[
-            { id: 'students', label: `Siswa (${students.length})`, icon: Gem },
-            { id: 'teachers', label: `Guru (${teachers.length})`, icon: Crown },
-            { id: 'classes', label: `Kelas (${classes.length})`, icon: Castle },
-            { id: 'majors', label: `Jurusan (${majors.length})`, icon: Swords },
-            { id: 'subjects', label: `Mapel (${subjects.length})`, icon: Scroll },
-            { id: 'years', label: 'Tahun Ajaran', icon: Hourglass },
-          ].map(tab => {
-            const Icon = tab.icon;
-            const isAct = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
-                  isAct
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-                }`}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+        }
+      />
 
       {/* TAB 1: DATA SISWA */}
       {activeTab === 'students' && (

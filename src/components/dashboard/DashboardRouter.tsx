@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useApp } from '../../context/AppContext';
 import {
   Crown,
@@ -7,247 +7,301 @@ import {
   Gem,
   Hourglass,
   Sparkles,
-  Flame,
   Trophy,
   Target,
   ShieldCheck,
   Castle,
   Wand2,
-  Compass,
   CheckCircle2,
   AlertCircle,
   Clock,
   Users,
-  GraduationCap,
-  CalendarCheck,
-  FileSpreadsheet,
   Download,
-  PlusCircle,
-  TrendingUp,
   FileCheck,
+  BookOpen,
+  CalendarCheck,
+  GraduationCap,
 } from 'lucide-react';
-import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
 import { StudentModule } from '../modules/StudentModule';
+import {
+  OrnateCard,
+  AcademyHeroBanner,
+  CharacterMedallion,
+  GoldCompassRose,
+} from '../common/AcademyOrnaments';
 
 export const DashboardRouter: React.FC = () => {
-  const { currentRole, currentUser, students, teachers, classes, attendanceSessions, assessments, assessmentScores, auditLogs, setActiveNav, attendanceCorrections } = useApp();
+  const {
+    currentRole,
+    currentUser,
+    students,
+    teachers,
+    classes,
+    assessments,
+    auditLogs,
+    setActiveNav,
+    attendanceCorrections,
+  } = useApp();
 
-  // Super Admin Dashboard
+  // Super Admin Dashboard (Matches Reference Image 1:1)
   if (currentRole === 'super_admin') {
     return (
       <div className="space-y-6">
-        {/* Banner with JRPG Grandmaster Theme */}
-        <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-indigo-500/20 backdrop-blur-xl">
-          <div className="absolute right-0 top-0 bottom-0 w-96 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/30 via-purple-500/10 to-transparent pointer-events-none" />
-          <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-indigo-500/20 px-3 py-1 text-xs font-bold text-amber-300 border border-amber-400/30 shadow-xs">
-              <Crown className="h-4 w-4 text-amber-300" />
-              <span>Pusat Kendali Sistem &amp; Manajemen</span>
-            </div>
-            <h1 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
-              Selamat Datang, {currentUser.displayName}
-            </h1>
-            <p className="mt-2 text-sm text-indigo-100/90 leading-relaxed">
-              Arsitektur Sistem &amp; Pusat Komando Sekolah. Mengawasi integritas data akademik, kehadiran siswa, aturan keamanan multi-peran, dan jejak audit sistem secara real-time.
-            </p>
-          </div>
-        </div>
+        {/* Royal Academy Scenic Castle Banner */}
+        <AcademyHeroBanner
+          kicker="PUSAT KENDALI SISTEM & MANAJEMEN"
+          title={`SELAMAT DATANG, ${currentUser.displayName.toUpperCase()}`}
+          subtitle="Arsitektur Sistem & Pusat Komando Sekolah. Mengawasi integritas data akademik, kehadiran siswa, aturan keamanan multi-peran, dan jejak audit sistem secara real-time."
+          icon={BookOpen}
+        />
 
-        {/* JRPG Concept Metric Cards with RPG Stat Bars */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Total Siswa / Guild Cadets */}
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85 transition-all hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Gem className="h-3.5 w-3.5 text-blue-500" /> Total Siswa (Cadets)
-              </span>
-              <div className="rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-2 text-white shadow-md shadow-blue-500/25">
-                <Gem className="h-4 w-4" />
+        {/* 4 Ornate KPI Cards with Character Medallions & Stat Bars */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Card 1: Total Siswa (Cadets) */}
+          <OrnateCard className="p-5 transition-all hover:shadow-md">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                  <Gem className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+                  <span>Total Siswa (Cadets)</span>
+                </span>
+                <p
+                  className="mt-2.5 text-3xl font-black text-slate-900 dark:text-white leading-none"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  {students.length}
+                </p>
               </div>
+              <CharacterMedallion variant="cadet" />
             </div>
-            <p className="mt-3 text-2xl font-black text-slate-900 dark:text-white">{students.length}</p>
-            {/* HP Style Bar */}
-            <div className="mt-2 space-y-1">
-              <div className="flex justify-between text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+            <div className="mt-4 space-y-1.5">
+              <div className="flex justify-between text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
                 <span>Roster Vitality</span>
                 <span>100% Aktif</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div className="h-full rounded-full bg-emerald-500 w-full" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          {/* Tenaga Pendidik / High Scholars */}
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85 transition-all hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Crown className="h-3.5 w-3.5 text-emerald-500" /> Guru &amp; Tenaga Pendidik
-              </span>
-              <div className="rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2 text-white shadow-md shadow-emerald-500/25">
-                <Crown className="h-4 w-4" />
+          {/* Card 2: Guru & Tenaga Pendidik */}
+          <OrnateCard className="p-5 transition-all hover:shadow-md">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                  <Crown className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                  <span>Guru &amp; Tenaga Pendidik</span>
+                </span>
+                <p
+                  className="mt-2.5 text-3xl font-black text-slate-900 dark:text-white leading-none"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  {teachers.length}
+                </p>
               </div>
+              <CharacterMedallion variant="scholar" />
             </div>
-            <p className="mt-3 text-2xl font-black text-slate-900 dark:text-white">{teachers.length}</p>
-            {/* MP Style Bar */}
-            <div className="mt-2 space-y-1">
-              <div className="flex justify-between text-[10px] font-bold text-cyan-600 dark:text-cyan-400">
+            <div className="mt-4 space-y-1.5">
+              <div className="flex justify-between text-[11px] font-bold text-teal-600 dark:text-teal-400">
                 <span>Scholar Mastery</span>
                 <span>5 Jurusan</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                <div className="h-full rounded-full bg-cyan-500 w-[92%]" />
+              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                <div className="h-full rounded-full bg-teal-500 w-[92%]" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          {/* Rombongan Belajar / Academy Guild Classes */}
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85 transition-all hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Castle className="h-3.5 w-3.5 text-purple-500" /> Rombel &amp; Guild Classes
-              </span>
-              <div className="rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 p-2 text-white shadow-md shadow-purple-500/25">
-                <Castle className="h-4 w-4" />
+          {/* Card 3: Rombel & Guild Classes */}
+          <OrnateCard className="p-5 transition-all hover:shadow-md">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                  <Castle className="h-3.5 w-3.5 text-purple-500 shrink-0" />
+                  <span>Rombel &amp; Guild Classes</span>
+                </span>
+                <p
+                  className="mt-2.5 text-3xl font-black text-slate-900 dark:text-white leading-none"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  {classes.length}
+                </p>
               </div>
+              <CharacterMedallion variant="guild" />
             </div>
-            <p className="mt-3 text-2xl font-black text-slate-900 dark:text-white">{classes.length}</p>
-            {/* EXP Style Bar */}
-            <div className="mt-2 space-y-1">
-              <div className="flex justify-between text-[10px] font-bold text-purple-600 dark:text-purple-400">
+            <div className="mt-4 space-y-1.5">
+              <div className="flex justify-between text-[11px] font-bold text-purple-600 dark:text-purple-400">
                 <span>Tier X, XI, XII</span>
                 <span>Aktif</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div className="h-full rounded-full bg-purple-500 w-[88%]" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          {/* Aktivitas Audit Log / Aegis Security */}
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85 transition-all hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 text-amber-500" /> Keamanan &amp; Audit Log
-              </span>
-              <div className="rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 p-2 text-white shadow-md shadow-amber-500/25">
-                <Flame className="h-4 w-4" />
+          {/* Card 4: Keamanan & Audit Log */}
+          <OrnateCard className="p-5 transition-all hover:shadow-md">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                  <ShieldCheck className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                  <span>Keamanan &amp; Audit Log</span>
+                </span>
+                <p
+                  className="mt-2.5 text-3xl font-black text-slate-900 dark:text-white leading-none"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  {auditLogs.length}
+                </p>
               </div>
+              <CharacterMedallion variant="aegis" />
             </div>
-            <p className="mt-3 text-2xl font-black text-slate-900 dark:text-white">{auditLogs.length}</p>
-            {/* Security Status */}
-            <div className="mt-2 space-y-1">
-              <div className="flex justify-between text-[10px] font-bold text-amber-600 dark:text-amber-400">
+            <div className="mt-4 space-y-1.5">
+              <div className="flex justify-between text-[11px] font-bold text-amber-600 dark:text-amber-400">
                 <span>Encrypted &amp; Live</span>
                 <span>Active Shield</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div className="h-full rounded-full bg-amber-500 w-full" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
         </div>
 
-        {/* Quick Links & Realtime Audit Logs */}
+        {/* Bottom 2-Column Section: Audit Trail & Quick Management Access */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-indigo-600" />
-                <h2 className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">
+          {/* Left 2 Columns: Aktivitas Sistem & Audit Trail Real-Time */}
+          <OrnateCard className="lg:col-span-2 p-6">
+            <div className="flex items-center justify-between border-b border-[#EFE2BE]/70 pb-3.5 dark:border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <ShieldCheck className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <h2
+                  className="font-bold text-slate-900 dark:text-white text-sm sm:text-base"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
                   Aktivitas Sistem &amp; Audit Trail Real-Time
                 </h2>
               </div>
               <button
                 onClick={() => setActiveNav('audit-logs')}
-                className="text-xs font-bold text-indigo-600 hover:underline dark:text-indigo-400 flex items-center gap-1 cursor-pointer"
+                className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400 flex items-center gap-1 cursor-pointer"
               >
-                <span>Lihat Semua ({auditLogs.length})</span>
+                <span>Lihat Semua Log</span>
                 <span>&rarr;</span>
               </button>
             </div>
+
             <div className="mt-4 space-y-3">
               {auditLogs.slice(0, 5).map(log => (
-                <div key={log.id} className="flex items-start gap-3 rounded-xl bg-slate-50/80 p-3 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-                  <div className="mt-0.5 rounded-lg bg-indigo-100 p-1.5 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
-                    <ShieldCheck className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-bold text-xs text-slate-900 dark:text-white truncate">
-                        {log.action} — <span className="font-medium text-slate-500 dark:text-slate-400">{log.module}</span>
-                      </p>
-                      <span className="text-[10px] text-slate-400 shrink-0 font-mono">
-                        {new Date(log.timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+                <div
+                  key={log.id}
+                  className="rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] p-3.5 dark:border-slate-800 dark:bg-slate-800/60"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-2 min-w-0">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                        {log.action}
                       </span>
+                      <span className="font-bold text-xs text-slate-900 dark:text-white truncate">
+                        {log.userName}
+                      </span>
+                      <span className="text-[11px] text-slate-400">({log.userRole})</span>
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">{log.details}</p>
-                    <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold mt-1 inline-flex items-center gap-1">
-                      <span>✦ Oleh:</span> {log.userName} ({log.userRole})
+                    <span className="text-[11px] text-slate-400 shrink-0 font-mono">
+                      {new Date(log.timestamp).toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                      })}
                     </span>
                   </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-1.5 pl-6">
+                    {log.details}
+                  </p>
                 </div>
               ))}
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="h-5 w-5 text-amber-500" />
-                <h2 className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">
-                  Aksi Cepat Sistem
+          {/* Right Column: Akses Cepat Manajemen with Golden Compass Rose Ornament */}
+          <OrnateCard className="p-6 flex flex-col justify-between relative overflow-hidden">
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 border-b border-[#EFE2BE]/70 pb-3.5 mb-4 dark:border-slate-800">
+                <span className="text-sm text-[#EAB308]">✦</span>
+                <h2
+                  className="font-bold text-slate-900 dark:text-white text-sm sm:text-base"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  Akses Cepat Manajemen
                 </h2>
               </div>
-              <div className="space-y-2.5">
+
+              <div className="space-y-3">
                 <button
-                  onClick={() => setActiveNav('master-data')}
-                  className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200/80 hover:bg-indigo-50/70 hover:border-indigo-300 dark:border-slate-700 dark:hover:bg-slate-800 transition-all text-left cursor-pointer group"
+                  onClick={() => setActiveNav('user-management')}
+                  className="w-full flex items-start gap-3.5 p-3.5 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-blue-50/60 hover:border-blue-300 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer group"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 group-hover:scale-110 transition-transform">
-                      <Gem className="h-4 w-4" />
-                    </div>
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Grand Codex (Master Data)</span>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100/90 text-blue-600 dark:bg-blue-950 dark:text-blue-300 group-hover:scale-105 transition-transform">
+                    <Users className="h-5 w-5" />
                   </div>
-                  <span className="text-xs text-indigo-500 font-bold">&rarr;</span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-extrabold text-slate-900 dark:text-white">
+                      Manajemen Akun &amp; Peran
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                      Kelola kredensial Guru, Wali Kelas, Admin, Kepsek
+                    </p>
+                  </div>
                 </button>
 
                 <button
-                  onClick={() => setActiveNav('user-management')}
-                  className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200/80 hover:bg-purple-50/70 hover:border-purple-300 dark:border-slate-700 dark:hover:bg-slate-800 transition-all text-left cursor-pointer group"
+                  onClick={() => setActiveNav('master-data')}
+                  className="w-full flex items-start gap-3.5 p-3.5 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-purple-50/60 hover:border-purple-300 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer group"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 group-hover:scale-110 transition-transform">
-                      <Crown className="h-4 w-4" />
-                    </div>
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Party Roster (Akun &amp; RBAC)</span>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100/90 text-purple-600 dark:bg-purple-950 dark:text-purple-300 group-hover:scale-105 transition-transform">
+                    <Castle className="h-5 w-5" />
                   </div>
-                  <span className="text-xs text-purple-500 font-bold">&rarr;</span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-extrabold text-slate-900 dark:text-white">
+                      Master Data &amp; Akademik
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                      Atur Tahun Ajaran, Semester, Kelas, Jurusan
+                    </p>
+                  </div>
                 </button>
 
                 <button
                   onClick={() => setActiveNav('reports')}
-                  className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200/80 hover:bg-emerald-50/70 hover:border-emerald-300 dark:border-slate-700 dark:hover:bg-slate-800 transition-all text-left cursor-pointer group"
+                  className="w-full flex items-start gap-3.5 p-3.5 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-emerald-50/60 hover:border-emerald-300 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:bg-slate-800 transition-all text-left cursor-pointer group"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 group-hover:scale-110 transition-transform">
-                      <Scroll className="h-4 w-4" />
-                    </div>
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200">Royal Scroll (Cetak Rapor)</span>
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100/90 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-300 group-hover:scale-105 transition-transform">
+                    <FileCheck className="h-5 w-5" />
                   </div>
-                  <span className="text-xs text-emerald-500 font-bold">&rarr;</span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-extrabold text-slate-900 dark:text-white">
+                      Pusat Laporan &amp; Dokumen
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                      Cetak rekap absensi, legger nilai, dan rapor
+                    </p>
+                  </div>
                 </button>
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                <CheckCircle2 className="h-4 w-4" />
-                <span>Basis Data Firestore: Online &amp; Terlindungi</span>
+            {/* Bottom-Right Golden Compass Rose Ornament (Matches Reference Image) */}
+            <div className="mt-4 flex items-center justify-between pt-2">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span>Cloud Firestore Aktif</span>
               </div>
+              <GoldCompassRose className="h-10 w-10 opacity-90" />
             </div>
-          </div>
+          </OrnateCard>
         </div>
       </div>
     );
@@ -257,123 +311,138 @@ export const DashboardRouter: React.FC = () => {
   if (currentRole === 'admin') {
     return (
       <div className="space-y-6">
-        <div className="rounded-3xl bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-blue-500/20 backdrop-blur-xl">
-          <div className="absolute right-0 top-0 bottom-0 w-96 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-500/30 via-cyan-500/10 to-transparent pointer-events-none" />
-          <div className="max-w-2xl relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-full bg-blue-500/20 px-3 py-1 text-xs font-bold text-cyan-300 border border-cyan-400/30 shadow-xs">
-              <Scroll className="h-4 w-4 text-cyan-300" />
-              <span>Arsip &amp; Rombel Tata Usaha</span>
-            </div>
-            <h1 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
-              Halo, {currentUser.displayName}
-            </h1>
-            <p className="mt-2 text-sm text-blue-100/90 leading-relaxed">
-              Pusat pengelolaan arsip master kesiswaan, kepegawaian instruktur guru, rombongan belajar vokasi, dan administrasi sekolah.
-            </p>
-          </div>
-        </div>
+        <AcademyHeroBanner
+          kicker="ARSIP & ROMBEL TATA USAHA"
+          title={`SELAMAT DATANG, ${currentUser.displayName.toUpperCase()}`}
+          subtitle="Pusat pengelolaan arsip master kesiswaan, kepegawaian instruktur guru, rombongan belajar vokasi, dan administrasi sekolah."
+          icon={Scroll}
+        />
 
-        {/* JRPG Stats with RPG Gauge Bars */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85 transition-all hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Gem className="h-3.5 w-3.5 text-blue-500" /> Siswa Aktif (Cadets)
-              </span>
-              <div className="p-2 rounded-xl bg-blue-500 text-white shadow-md shadow-blue-500/25">
-                <Gem className="h-4 w-4" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <OrnateCard className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                  <Gem className="h-3.5 w-3.5 text-blue-500" /> Siswa Aktif (Cadets)
+                </span>
+                <p
+                  className="mt-2.5 text-3xl font-black text-slate-900 dark:text-white"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  {students.length}
+                </p>
               </div>
+              <CharacterMedallion variant="cadet" />
             </div>
-            <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">{students.length}</p>
-            <div className="mt-2 space-y-1">
-              <div className="flex justify-between text-[10px] font-bold text-blue-600 dark:text-blue-400">
+            <div className="mt-4 space-y-1.5">
+              <div className="flex justify-between text-[11px] font-bold text-blue-600 dark:text-blue-400">
                 <span>Terdaftar Lengkap</span>
                 <span>100%</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div className="h-full rounded-full bg-blue-500 w-full" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85 transition-all hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Crown className="h-3.5 w-3.5 text-emerald-500" /> Guru &amp; Pegawai
-              </span>
-              <div className="p-2 rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/25">
-                <Crown className="h-4 w-4" />
+          <OrnateCard className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                  <Crown className="h-3.5 w-3.5 text-emerald-500" /> Guru &amp; Pegawai
+                </span>
+                <p
+                  className="mt-2.5 text-3xl font-black text-slate-900 dark:text-white"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  {teachers.length}
+                </p>
               </div>
+              <CharacterMedallion variant="scholar" />
             </div>
-            <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">{teachers.length}</p>
-            <div className="mt-2 space-y-1">
-              <div className="flex justify-between text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+            <div className="mt-4 space-y-1.5">
+              <div className="flex justify-between text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
                 <span>NIP &amp; SK Valid</span>
                 <span>Tercatat</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div className="h-full rounded-full bg-emerald-500 w-full" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85 transition-all hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Castle className="h-3.5 w-3.5 text-purple-500" /> Rombel (Guilds)
-              </span>
-              <div className="p-2 rounded-xl bg-purple-500 text-white shadow-md shadow-purple-500/25">
-                <Castle className="h-4 w-4" />
+          <OrnateCard className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                  <Castle className="h-3.5 w-3.5 text-purple-500" /> Rombel (Guilds)
+                </span>
+                <p
+                  className="mt-2.5 text-3xl font-black text-slate-900 dark:text-white"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  {classes.length}
+                </p>
               </div>
+              <CharacterMedallion variant="guild" />
             </div>
-            <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">{classes.length}</p>
-            <div className="mt-2 space-y-1">
-              <div className="flex justify-between text-[10px] font-bold text-purple-600 dark:text-purple-400">
+            <div className="mt-4 space-y-1.5">
+              <div className="flex justify-between text-[11px] font-bold text-purple-600 dark:text-purple-400">
                 <span>Wali Kelas Terisi</span>
                 <span>Lengkap</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div className="h-full rounded-full bg-purple-500 w-full" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85 transition-all hover:scale-[1.02]">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Target className="h-3.5 w-3.5 text-amber-500" /> Kapasitas Rombel
-              </span>
-              <div className="p-2 rounded-xl bg-amber-500 text-white shadow-md shadow-amber-500/25">
-                <Target className="h-4 w-4" />
+          <OrnateCard className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                  <Target className="h-3.5 w-3.5 text-amber-500" /> Kapasitas Rombel
+                </span>
+                <p
+                  className="mt-2.5 text-3xl font-black text-slate-900 dark:text-white"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  88%
+                </p>
               </div>
+              <CharacterMedallion variant="aegis" />
             </div>
-            <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">88%</p>
-            <div className="mt-2 space-y-1">
-              <div className="flex justify-between text-[10px] font-bold text-amber-600 dark:text-amber-400">
+            <div className="mt-4 space-y-1.5">
+              <div className="flex justify-between text-[11px] font-bold text-amber-600 dark:text-amber-400">
                 <span>Rata-rata 32 Siswa</span>
                 <span>Optimal</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div className="h-full rounded-full bg-amber-500 w-[88%]" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
         </div>
 
-        {/* Quick Operations with JRPG Theme */}
-        <div className="rounded-2xl border border-white/60 bg-white/85 p-6 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-          <div className="flex items-center gap-2 mb-4">
-            <Swords className="h-5 w-5 text-indigo-600" />
-            <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
-              Aksi Tata Usaha &amp; Pengelolaan Guild
-            </h2>
+        <OrnateCard className="p-6">
+          <div className="flex items-center justify-between mb-4 border-b border-[#EFE2BE]/70 pb-3 dark:border-slate-800">
+            <div className="flex items-center gap-2">
+              <span className="text-[#EAB308]">✦</span>
+              <h2
+                className="text-base font-bold text-slate-900 dark:text-white"
+                style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+              >
+                Aksi Tata Usaha &amp; Pengelolaan Akademik
+              </h2>
+            </div>
+            <GoldCompassRose className="h-8 w-8" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
               onClick={() => setActiveNav('master-data')}
-              className="flex flex-col items-start p-4 rounded-xl border border-slate-200/80 bg-slate-50/70 hover:bg-blue-50/80 hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-blue-950/40 transition-all text-left cursor-pointer group"
+              className="flex flex-col items-start p-4 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-blue-50/80 hover:border-blue-300 dark:border-slate-700 dark:bg-slate-800/50 transition-all text-left cursor-pointer group"
             >
-              <div className="p-2.5 bg-gradient-to-br from-blue-600 to-indigo-600 text-white rounded-xl mb-3 shadow-md group-hover:scale-110 transition-transform">
+              <div className="p-2.5 bg-blue-100 text-blue-600 rounded-xl mb-3 group-hover:scale-105 transition-transform">
                 <Gem className="h-5 w-5" />
               </div>
               <span className="font-extrabold text-xs text-slate-900 dark:text-white">Kelola Siswa (Cadets)</span>
@@ -382,9 +451,9 @@ export const DashboardRouter: React.FC = () => {
 
             <button
               onClick={() => setActiveNav('master-data')}
-              className="flex flex-col items-start p-4 rounded-xl border border-slate-200/80 bg-slate-50/70 hover:bg-emerald-50/80 hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-emerald-950/40 transition-all text-left cursor-pointer group"
+              className="flex flex-col items-start p-4 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-emerald-50/80 hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-800/50 transition-all text-left cursor-pointer group"
             >
-              <div className="p-2.5 bg-gradient-to-br from-emerald-600 to-teal-600 text-white rounded-xl mb-3 shadow-md group-hover:scale-110 transition-transform">
+              <div className="p-2.5 bg-emerald-100 text-emerald-600 rounded-xl mb-3 group-hover:scale-105 transition-transform">
                 <Crown className="h-5 w-5" />
               </div>
               <span className="font-extrabold text-xs text-slate-900 dark:text-white">Kelola Tenaga Pendidik</span>
@@ -393,27 +462,27 @@ export const DashboardRouter: React.FC = () => {
 
             <button
               onClick={() => setActiveNav('reports')}
-              className="flex flex-col items-start p-4 rounded-xl border border-slate-200/80 bg-slate-50/70 hover:bg-purple-50/80 hover:border-purple-300 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-purple-950/40 transition-all text-left cursor-pointer group"
+              className="flex flex-col items-start p-4 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-purple-50/80 hover:border-purple-300 dark:border-slate-700 dark:bg-slate-800/50 transition-all text-left cursor-pointer group"
             >
-              <div className="p-2.5 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-xl mb-3 shadow-md group-hover:scale-110 transition-transform">
+              <div className="p-2.5 bg-purple-100 text-purple-600 rounded-xl mb-3 group-hover:scale-105 transition-transform">
                 <Scroll className="h-5 w-5" />
               </div>
-              <span className="font-extrabold text-xs text-slate-900 dark:text-white">Royal Scroll (Laporan)</span>
+              <span className="font-extrabold text-xs text-slate-900 dark:text-white">Pusat Laporan &amp; Ekspor</span>
               <span className="text-[11px] text-slate-500 mt-1">Unduh Buku Induk &amp; Data Kesiswaan Excel/PDF</span>
             </button>
 
             <button
               onClick={() => setActiveNav('attendance')}
-              className="flex flex-col items-start p-4 rounded-xl border border-slate-200/80 bg-slate-50/70 hover:bg-amber-50/80 hover:border-amber-300 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-amber-950/40 transition-all text-left cursor-pointer group"
+              className="flex flex-col items-start p-4 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] hover:bg-amber-50/80 hover:border-amber-300 dark:border-slate-700 dark:bg-slate-800/50 transition-all text-left cursor-pointer group"
             >
-              <div className="p-2.5 bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-xl mb-3 shadow-md group-hover:scale-110 transition-transform">
-                <Hourglass className="h-5 w-5" />
+              <div className="p-2.5 bg-amber-100 text-amber-600 rounded-xl mb-3 group-hover:scale-105 transition-transform">
+                <CalendarCheck className="h-5 w-5" />
               </div>
               <span className="font-extrabold text-xs text-slate-900 dark:text-white">Presensi Siswa</span>
               <span className="text-[11px] text-slate-500 mt-1">Pantau keterisian presensi seluruh kelas hari ini</span>
             </button>
           </div>
-        </div>
+        </OrnateCard>
       </div>
     );
   }
@@ -422,81 +491,80 @@ export const DashboardRouter: React.FC = () => {
   if (currentRole === 'guru') {
     return (
       <div className="space-y-6">
-        <div className="rounded-3xl bg-gradient-to-r from-emerald-900 via-teal-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-emerald-500/20 backdrop-blur-xl">
-          <div className="absolute right-0 top-0 bottom-0 w-96 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-500/30 via-teal-500/10 to-transparent pointer-events-none" />
-          <div className="max-w-2xl relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-300 border border-emerald-400/30 shadow-xs">
-              <Wand2 className="h-4 w-4 text-emerald-300" />
-              <span>Portal Pembelajaran Guru Mata Pelajaran</span>
-            </div>
-            <h1 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
-              Selamat Mengajar, {currentUser.displayName}
-            </h1>
-            <p className="mt-2 text-sm text-emerald-100/90 leading-relaxed">
-              Mata Pelajaran: <strong>Pemrograman Web &amp; Perangkat Bergerak</strong> dan <strong>Basis Data</strong>.
-              Pantau kehadiran jam pelajaran dan kelola penilaian kompetensi siswa secara akurat.
-            </p>
-          </div>
-        </div>
+        <AcademyHeroBanner
+          kicker="PORTAL PEMBELAJARAN GURU MATA PELAJARAN"
+          title={`SELAMAT MENGAJAR, ${currentUser.displayName.toUpperCase()}`}
+          subtitle="Mata Pelajaran: Pemrograman Web & Perangkat Bergerak dan Basis Data. Pantau kehadiran jam pelajaran dan kelola penilaian kompetensi siswa secara akurat."
+          icon={GraduationCap}
+        />
 
-        {/* Quick action buttons with JRPG Theme */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <button
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <OrnateCard
             onClick={() => setActiveNav('attendance')}
-            className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-xs shadow-md shadow-blue-500/25 hover:scale-[1.02] transition-all cursor-pointer"
+            className="flex items-center gap-3 p-4 cursor-pointer hover:border-blue-400 transition-all"
           >
-            <Hourglass className="h-5 w-5 shrink-0 text-cyan-200" />
-            <div className="text-left">
-              <div className="font-extrabold">Input Presensi</div>
-              <div className="text-[10px] font-normal opacity-80">Chrono Sesi Mapel</div>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+              <CalendarCheck className="h-5 w-5" />
             </div>
-          </button>
+            <div className="text-left">
+              <div className="font-extrabold text-xs text-slate-900 dark:text-white">Input Presensi</div>
+              <div className="text-[10px] text-slate-500">Sesi Mata Pelajaran</div>
+            </div>
+          </OrnateCard>
 
-          <button
+          <OrnateCard
             onClick={() => setActiveNav('grading')}
-            className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white font-bold text-xs shadow-md shadow-emerald-500/25 hover:scale-[1.02] transition-all cursor-pointer"
+            className="flex items-center gap-3 p-4 cursor-pointer hover:border-emerald-400 transition-all"
           >
-            <Swords className="h-5 w-5 shrink-0 text-emerald-200" />
-            <div className="text-left">
-              <div className="font-extrabold">Input Nilai</div>
-              <div className="text-[10px] font-normal opacity-80">Battle Trials &amp; STS</div>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+              <GraduationCap className="h-5 w-5" />
             </div>
-          </button>
+            <div className="text-left">
+              <div className="font-extrabold text-xs text-slate-900 dark:text-white">Input Nilai</div>
+              <div className="text-[10px] text-slate-500">Penilaian &amp; Ujian</div>
+            </div>
+          </OrnateCard>
 
-          <button
+          <OrnateCard
             onClick={() => setActiveNav('grading')}
-            className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-bold text-xs shadow-md shadow-indigo-500/25 hover:scale-[1.02] transition-all cursor-pointer"
+            className="flex items-center gap-3 p-4 cursor-pointer hover:border-purple-400 transition-all"
           >
-            <Scroll className="h-5 w-5 shrink-0 text-purple-200" />
-            <div className="text-left">
-              <div className="font-extrabold">Rekap &amp; Leger</div>
-              <div className="text-[10px] font-normal opacity-80">Kalkulasi Nilai Akhir</div>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+              <Scroll className="h-5 w-5" />
             </div>
-          </button>
+            <div className="text-left">
+              <div className="font-extrabold text-xs text-slate-900 dark:text-white">Rekap &amp; Leger</div>
+              <div className="text-[10px] text-slate-500">Kalkulasi Nilai Akhir</div>
+            </div>
+          </OrnateCard>
 
-          <button
-            onClick={() => setActiveNav('ai-studio')}
-            className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-purple-600 via-pink-600 to-amber-500 text-white font-bold text-xs shadow-md hover:scale-[1.02] transition-all cursor-pointer"
+          <OrnateCard
+            onClick={() => setActiveNav('reports')}
+            className="flex items-center gap-3 p-4 cursor-pointer hover:border-amber-400 transition-all"
           >
-            <Sparkles className="h-5 w-5 shrink-0 text-amber-300" />
-            <div className="text-left">
-              <div className="font-extrabold">Analisis AI Cerdas</div>
-              <div className="text-[10px] font-normal opacity-80">Enchantment Pedagogik</div>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+              <FileCheck className="h-5 w-5" />
             </div>
-          </button>
+            <div className="text-left">
+              <div className="font-extrabold text-xs text-slate-900 dark:text-white">Laporan Kelas</div>
+              <div className="text-[10px] text-slate-500">Cetak PDF &amp; Excel</div>
+            </div>
+          </OrnateCard>
         </div>
 
-        {/* Class assignments & Active Assessments */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <div className="flex items-center gap-2 mb-3">
+          <OrnateCard className="p-6">
+            <div className="flex items-center gap-2 mb-4 border-b border-[#EFE2BE]/70 pb-3 dark:border-slate-800">
               <Castle className="h-4 w-4 text-emerald-600" />
-              <h2 className="font-extrabold text-sm text-slate-900 dark:text-white">
+              <h2
+                className="font-bold text-sm text-slate-900 dark:text-white"
+                style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+              >
                 Kelas Yang Diampu Semester Ini
               </h2>
             </div>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-800/50">
+              <div className="flex items-center justify-between p-3.5 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] dark:border-slate-800 dark:bg-slate-800/50">
                 <div>
                   <span className="font-extrabold text-xs text-slate-900 dark:text-white">X RPL 1</span>
                   <p className="text-[11px] text-slate-500">Pemrograman Web &amp; Perangkat Bergerak (32 Siswa)</p>
@@ -504,13 +572,13 @@ export const DashboardRouter: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setActiveNav('attendance')}
-                  className="rounded-xl bg-blue-600 px-3.5 py-1.5 text-[11px] font-bold text-white hover:bg-blue-700 shadow-xs cursor-pointer"
+                  className="rounded-xl bg-[#2563EB] px-3.5 py-1.5 text-[11px] font-bold text-white hover:bg-blue-700 shadow-xs cursor-pointer"
                 >
                   Presensi
                 </button>
               </div>
 
-              <div className="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-800/50">
+              <div className="flex items-center justify-between p-3.5 rounded-xl border border-[#EFE2BE] bg-[#FCFBF7] dark:border-slate-800 dark:bg-slate-800/50">
                 <div>
                   <span className="font-extrabold text-xs text-slate-900 dark:text-white">X RPL 2</span>
                   <p className="text-[11px] text-slate-500">Pemrograman Web &amp; Perangkat Bergerak (30 Siswa)</p>
@@ -518,44 +586,47 @@ export const DashboardRouter: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setActiveNav('attendance')}
-                  className="rounded-xl bg-blue-600 px-3.5 py-1.5 text-[11px] font-bold text-white hover:bg-blue-700 shadow-xs cursor-pointer"
+                  className="rounded-xl bg-[#2563EB] px-3.5 py-1.5 text-[11px] font-bold text-white hover:bg-blue-700 shadow-xs cursor-pointer"
                 >
                   Presensi
                 </button>
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <div className="flex items-center justify-between mb-3">
+          <OrnateCard className="p-6">
+            <div className="flex items-center justify-between mb-4 border-b border-[#EFE2BE]/70 pb-3 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <Swords className="h-4 w-4 text-indigo-600" />
-                <h2 className="font-extrabold text-sm text-slate-900 dark:text-white">
-                  Komponen Penilaian &amp; Trials Terbaru
+                <GraduationCap className="h-4 w-4 text-blue-600" />
+                <h2
+                  className="font-bold text-sm text-slate-900 dark:text-white"
+                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
+                >
+                  Komponen Penilaian Terbaru
                 </h2>
               </div>
-              <button onClick={() => setActiveNav('grading')} className="text-xs text-indigo-600 font-bold hover:underline cursor-pointer">
+              <button onClick={() => setActiveNav('grading')} className="text-xs text-blue-600 font-bold hover:underline cursor-pointer">
                 Kelola Semua &rarr;
               </button>
             </div>
             <div className="space-y-2.5">
               {assessments.slice(0, 4).map(asm => (
-                <div key={asm.id} className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/50 text-xs border border-slate-100 dark:border-slate-800">
+                <div key={asm.id} className="flex items-center justify-between p-3 rounded-xl bg-[#FCFBF7] dark:bg-slate-800/50 text-xs border border-[#EFE2BE] dark:border-slate-800">
                   <div className="truncate mr-2">
                     <p className="font-bold text-slate-900 dark:text-white truncate">{asm.title}</p>
                     <p className="text-[10px] text-slate-500">{asm.className} &bull; Bobot: {asm.weight}% &bull; KKM: {asm.kkm}</p>
                   </div>
-                  <span className={`shrink-0 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
+                  <span className={`shrink-0 px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider ${
                     asm.status === 'dipublikasikan'
-                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300/40'
-                      : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300/40'
+                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                      : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
                   }`}>
                     {asm.status}
                   </span>
                 </div>
               ))}
             </div>
-          </div>
+          </OrnateCard>
         </div>
       </div>
     );
@@ -568,30 +639,27 @@ export const DashboardRouter: React.FC = () => {
 
     return (
       <div className="space-y-6">
-        <div className="rounded-3xl bg-gradient-to-r from-amber-800 via-orange-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-amber-500/20 backdrop-blur-xl">
-          <div className="absolute right-0 top-0 bottom-0 w-96 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-500/30 via-orange-500/10 to-transparent pointer-events-none" />
-          <div className="max-w-2xl relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/25 px-3 py-1 text-xs font-bold text-amber-300 border border-amber-400/30 shadow-xs">
-              <ShieldCheck className="h-4 w-4 text-amber-300" />
-              <span>Manajemen Pembinaan Kelas X RPL 1</span>
-            </div>
-            <h1 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
-              Selamat Pagi, {currentUser.displayName}
-            </h1>
-            <p className="mt-2 text-sm text-amber-100/90 leading-relaxed">
-              Memantau perkembangan akademis, karakter siswa, ketidakhadiran, dan verifikasi permohonan koreksi absensi siswa kelas binaan <strong>X RPL 1</strong>.
-            </p>
-          </div>
-        </div>
+        <AcademyHeroBanner
+          kicker="MANAJEMEN PEMBINAAN KELAS X RPL 1"
+          title={`SELAMAT PAGI, ${currentUser.displayName.toUpperCase()}`}
+          subtitle="Memantau perkembangan akademis, karakter siswa, ketidakhadiran, dan verifikasi permohonan koreksi absensi siswa kelas binaan X RPL 1."
+          icon={ShieldCheck}
+        />
 
-        {/* Stats with JRPG HP Gauges */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Gem className="h-3.5 w-3.5 text-blue-500" /> Siswa Binaan
-            </span>
-            <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white">{homeroomStudents.length}</p>
-            <div className="mt-2 space-y-1">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <OrnateCard className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <Gem className="h-3.5 w-3.5 text-blue-500" /> Siswa Binaan
+                </span>
+                <p className="mt-2 text-3xl font-black text-slate-900 dark:text-white" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  {homeroomStudents.length}
+                </p>
+              </div>
+              <CharacterMedallion variant="cadet" />
+            </div>
+            <div className="mt-3 space-y-1">
               <div className="flex justify-between text-[10px] font-bold text-blue-600 dark:text-blue-400">
                 <span>Rombel X RPL 1</span>
                 <span>Active</span>
@@ -600,14 +668,21 @@ export const DashboardRouter: React.FC = () => {
                 <div className="h-full rounded-full bg-blue-500 w-full" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Hourglass className="h-3.5 w-3.5 text-emerald-500" /> HP Kehadiran Kelas
-            </span>
-            <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400">91.7%</p>
-            <div className="mt-2 space-y-1">
+          <OrnateCard className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <Hourglass className="h-3.5 w-3.5 text-emerald-500" /> Kehadiran Kelas
+                </span>
+                <p className="mt-2 text-3xl font-black text-emerald-600 dark:text-emerald-400" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  91.7%
+                </p>
+              </div>
+              <CharacterMedallion variant="scholar" />
+            </div>
+            <div className="mt-3 space-y-1">
               <div className="flex justify-between text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
                 <span>10 Hadir, 1 Sakit, 1 Izin</span>
                 <span>Tier A</span>
@@ -616,14 +691,21 @@ export const DashboardRouter: React.FC = () => {
                 <div className="h-full rounded-full bg-emerald-500 w-[91.7%]" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5 text-amber-500" /> Koreksi Presensi
-            </span>
-            <p className="mt-2 text-2xl font-black text-amber-600 dark:text-amber-400">{pendingCorrections.length}</p>
-            <div className="mt-2 space-y-1">
+          <OrnateCard className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 text-amber-500" /> Koreksi Presensi
+                </span>
+                <p className="mt-2 text-3xl font-black text-amber-600 dark:text-amber-400" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  {pendingCorrections.length}
+                </p>
+              </div>
+              <CharacterMedallion variant="guild" />
+            </div>
+            <div className="mt-3 space-y-1">
               <div className="flex justify-between text-[10px] font-bold text-amber-600 dark:text-amber-400">
                 <span>Menunggu Verifikasi</span>
                 <span>Pending</span>
@@ -632,14 +714,21 @@ export const DashboardRouter: React.FC = () => {
                 <div className="h-full rounded-full bg-amber-500 w-full" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Swords className="h-3.5 w-3.5 text-rose-500" /> Perhatian Khusus
-            </span>
-            <p className="mt-2 text-2xl font-black text-rose-600 dark:text-rose-400">1</p>
-            <div className="mt-2 space-y-1">
+          <OrnateCard className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <AlertCircle className="h-3.5 w-3.5 text-rose-500" /> Perhatian Khusus
+                </span>
+                <p className="mt-2 text-3xl font-black text-rose-600 dark:text-rose-400" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  1
+                </p>
+              </div>
+              <CharacterMedallion variant="aegis" />
+            </div>
+            <div className="mt-3 space-y-1">
               <div className="flex justify-between text-[10px] font-bold text-rose-600 dark:text-rose-400">
                 <span>Bagus Dwi S. (Remedial)</span>
                 <span>Tutor Sebaya</span>
@@ -648,20 +737,19 @@ export const DashboardRouter: React.FC = () => {
                 <div className="h-full rounded-full bg-rose-500 w-[60%]" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
         </div>
 
-        {/* Attention list & Pending correction requests */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2 dark:border-slate-800">
-              <h2 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+          <OrnateCard className="p-6">
+            <div className="flex items-center justify-between mb-3 border-b border-[#EFE2BE]/70 pb-3 dark:border-slate-800">
+              <h2 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                 <AlertCircle className="h-4 w-4 text-amber-500" /> Siswa Memerlukan Perhatian Khusus
               </h2>
               <span className="text-[11px] text-slate-400">Semester Ganjil</span>
             </div>
             <div className="space-y-3">
-              <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/60 dark:bg-amber-950/30 dark:border-amber-900/40">
+              <div className="p-3.5 rounded-xl bg-amber-50/70 border border-[#EFE2BE] dark:bg-amber-950/30 dark:border-amber-900/40">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-xs text-slate-900 dark:text-white">Bagus Dwi Saputra (NISN: 0072389103)</span>
                   <span className="rounded-md bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-950 dark:text-rose-300">
@@ -676,11 +764,11 @@ export const DashboardRouter: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2 dark:border-slate-800">
-              <h2 className="font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+          <OrnateCard className="p-6">
+            <div className="flex items-center justify-between mb-3 border-b border-[#EFE2BE]/70 pb-3 dark:border-slate-800">
+              <h2 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                 <Clock className="h-4 w-4 text-blue-500" /> Permohonan Koreksi Presensi
               </h2>
               <button onClick={() => setActiveNav('attendance')} className="text-xs text-blue-600 font-bold hover:underline cursor-pointer">
@@ -692,7 +780,7 @@ export const DashboardRouter: React.FC = () => {
                 <p className="text-xs text-slate-400 py-4 text-center">Tidak ada permohonan koreksi yang pending.</p>
               ) : (
                 pendingCorrections.map(c => (
-                  <div key={c.id} className="p-3 rounded-xl bg-slate-50 border border-slate-200 dark:bg-slate-800/60 dark:border-slate-700">
+                  <div key={c.id} className="p-3.5 rounded-xl bg-[#FCFBF7] border border-[#EFE2BE] dark:bg-slate-800/60 dark:border-slate-700">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-slate-900 dark:text-white">{c.studentName}</span>
                       <span className="font-semibold text-amber-600">Status: {c.currentStatus} &rarr; {c.requestedStatus}</span>
@@ -701,7 +789,7 @@ export const DashboardRouter: React.FC = () => {
                     <div className="mt-2 flex justify-end gap-2">
                       <button
                         onClick={() => setActiveNav('attendance')}
-                        className="rounded-xl bg-blue-600 px-3.5 py-1 text-[11px] font-bold text-white hover:bg-blue-700 shadow-xs cursor-pointer"
+                        className="rounded-xl bg-[#2563EB] px-3.5 py-1 text-[11px] font-bold text-white hover:bg-blue-700 shadow-xs cursor-pointer"
                       >
                         Buka &amp; Verifikasi
                       </button>
@@ -710,7 +798,7 @@ export const DashboardRouter: React.FC = () => {
                 ))
               )}
             </div>
-          </div>
+          </OrnateCard>
         </div>
       </div>
     );
@@ -720,30 +808,27 @@ export const DashboardRouter: React.FC = () => {
   if (currentRole === 'kepala_sekolah') {
     return (
       <div className="space-y-6">
-        <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-rose-500/20 backdrop-blur-xl">
-          <div className="absolute right-0 top-0 bottom-0 w-96 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-rose-500/30 via-amber-500/10 to-transparent pointer-events-none" />
-          <div className="max-w-2xl relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-full bg-rose-500/20 px-3 py-1 text-xs font-bold text-rose-300 border border-rose-400/30 shadow-xs">
-              <Trophy className="h-4 w-4 text-amber-300" />
-              <span>Pusat Pengawasan Manajerial &amp; Mutu</span>
-            </div>
-            <h1 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
-              Selamat Datang, {currentUser.displayName}
-            </h1>
-            <p className="mt-2 text-sm text-slate-200/90 leading-relaxed">
-              Ringkasan komprehensif tingkat kehadiran sekolah, rata-rata kompetensi per jurusan, kelengkapan administrasi guru, dan statistik pembelajaran vokasi.
-            </p>
-          </div>
-        </div>
+        <AcademyHeroBanner
+          kicker="PUSAT PENGAWASAN MANAJERIAL & MUTU"
+          title={`SELAMAT DATANG, ${currentUser.displayName.toUpperCase()}`}
+          subtitle="Ringkasan komprehensif tingkat kehadiran sekolah, rata-rata kompetensi per jurusan, kelengkapan administrasi guru, dan statistik pembelajaran vokasi."
+          icon={Trophy}
+        />
 
-        {/* Executive Metrics with JRPG Stat Bars */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Hourglass className="h-3.5 w-3.5 text-emerald-500" /> Kehadiran Sekolah
-            </span>
-            <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400">94.8%</p>
-            <div className="mt-2 space-y-1">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <OrnateCard className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <Hourglass className="h-3.5 w-3.5 text-emerald-500" /> Kehadiran Sekolah
+                </span>
+                <p className="mt-2 text-3xl font-black text-emerald-600 dark:text-emerald-400" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  94.8%
+                </p>
+              </div>
+              <CharacterMedallion variant="cadet" />
+            </div>
+            <div className="mt-3 space-y-1">
               <div className="flex justify-between text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
                 <span>+1.4% Bulan Lalu</span>
                 <span>Target Terpenuhi</span>
@@ -752,30 +837,44 @@ export const DashboardRouter: React.FC = () => {
                 <div className="h-full rounded-full bg-emerald-500 w-[94.8%]" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Swords className="h-3.5 w-3.5 text-blue-500" /> MP Akademik Sekolah
-            </span>
-            <p className="mt-2 text-2xl font-black text-blue-600 dark:text-blue-400">86.2</p>
-            <div className="mt-2 space-y-1">
+          <OrnateCard className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <Swords className="h-3.5 w-3.5 text-blue-500" /> Rata-Rata Akademik
+                </span>
+                <p className="mt-2 text-3xl font-black text-blue-600 dark:text-blue-400" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  86.2
+                </p>
+              </div>
+              <CharacterMedallion variant="scholar" />
+            </div>
+            <div className="mt-3 space-y-1">
               <div className="flex justify-between text-[10px] font-bold text-blue-600 dark:text-blue-400">
                 <span>Predikat: B+ (Sangat Baik)</span>
-                <span>86.2 MP</span>
+                <span>86.2 Poin</span>
               </div>
               <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div className="h-full rounded-full bg-blue-500 w-[86.2%]" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Scroll className="h-3.5 w-3.5 text-purple-500" /> Penilaian Guru
-            </span>
-            <p className="mt-2 text-2xl font-black text-purple-600 dark:text-purple-400">92%</p>
-            <div className="mt-2 space-y-1">
+          <OrnateCard className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <Scroll className="h-3.5 w-3.5 text-purple-500" /> Penilaian Guru
+                </span>
+                <p className="mt-2 text-3xl font-black text-purple-600 dark:text-purple-400" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  92%
+                </p>
+              </div>
+              <CharacterMedallion variant="guild" />
+            </div>
+            <div className="mt-3 space-y-1">
               <div className="flex justify-between text-[10px] font-bold text-purple-600 dark:text-purple-400">
                 <span>Tuntas Mid Semester</span>
                 <span>92%</span>
@@ -784,14 +883,21 @@ export const DashboardRouter: React.FC = () => {
                 <div className="h-full rounded-full bg-purple-500 w-[92%]" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <Trophy className="h-3.5 w-3.5 text-amber-500" /> Siswa Bebas Alpa
-            </span>
-            <p className="mt-2 text-2xl font-black text-amber-500">97.5%</p>
-            <div className="mt-2 space-y-1">
+          <OrnateCard className="p-5">
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <Trophy className="h-3.5 w-3.5 text-amber-500" /> Siswa Bebas Alpa
+                </span>
+                <p className="mt-2 text-3xl font-black text-amber-500" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+                  97.5%
+                </p>
+              </div>
+              <CharacterMedallion variant="aegis" />
+            </div>
+            <div className="mt-3 space-y-1">
               <div className="flex justify-between text-[10px] font-bold text-amber-600 dark:text-amber-400">
                 <span>Kedisiplinan Tertinggi</span>
                 <span>97.5%</span>
@@ -800,15 +906,14 @@ export const DashboardRouter: React.FC = () => {
                 <div className="h-full rounded-full bg-amber-500 w-[97.5%]" />
               </div>
             </div>
-          </div>
+          </OrnateCard>
         </div>
 
-        {/* Major comparisons & Download Executive Report */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85">
-            <div className="flex items-center gap-2 mb-4">
-              <Target className="h-5 w-5 text-indigo-600" />
-              <h2 className="font-extrabold text-sm text-slate-900 dark:text-white">
+          <OrnateCard className="lg:col-span-2 p-6">
+            <div className="flex items-center gap-2 mb-4 border-b border-[#EFE2BE]/70 pb-3 dark:border-slate-800">
+              <Target className="h-5 w-5 text-blue-600" />
+              <h2 className="font-bold text-sm text-slate-900 dark:text-white" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                 Capaian Rata-Rata Kompetensi Per Jurusan Vokasi
               </h2>
             </div>
@@ -831,24 +936,24 @@ export const DashboardRouter: React.FC = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </OrnateCard>
 
-          <div className="rounded-2xl border border-white/60 bg-white/85 p-5 shadow-lg backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-900/85 flex flex-col justify-between">
+          <OrnateCard className="p-6 flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Scroll className="h-5 w-5 text-indigo-600" />
-                <h2 className="font-extrabold text-sm text-slate-900 dark:text-white">
+              <div className="flex items-center gap-2 mb-2 border-b border-[#EFE2BE]/70 pb-3 dark:border-slate-800">
+                <span className="text-[#EAB308]">✦</span>
+                <h2 className="font-bold text-sm text-slate-900 dark:text-white" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
                   Laporan Manajerial Eksekutif
                 </h2>
               </div>
-              <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+              <p className="text-xs text-slate-500 mb-4 mt-3 leading-relaxed">
                 Unduh rekapitulasi data akademik &amp; kehadiran resmi untuk pelaporan Yayasan dan Cabang Dinas Pendidikan.
               </p>
-              
+
               <div className="space-y-2.5">
                 <button
                   onClick={() => setActiveNav('reports')}
-                  className="w-full flex items-center justify-between p-3 rounded-xl bg-blue-50/80 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-extrabold text-xs hover:bg-blue-100 transition-colors cursor-pointer border border-blue-200/60 dark:border-blue-800"
+                  className="w-full flex items-center justify-between p-3.5 rounded-xl bg-[#FCFBF7] text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 font-extrabold text-xs hover:bg-blue-50 transition-colors cursor-pointer border border-[#EFE2BE] dark:border-blue-800"
                 >
                   <span className="flex items-center gap-2">
                     <Scroll className="h-4 w-4" /> Laporan Eksekutif PDF
@@ -858,7 +963,7 @@ export const DashboardRouter: React.FC = () => {
 
                 <button
                   onClick={() => setActiveNav('reports')}
-                  className="w-full flex items-center justify-between p-3 rounded-xl bg-emerald-50/80 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 font-extrabold text-xs hover:bg-emerald-100 transition-colors cursor-pointer border border-emerald-200/60 dark:border-emerald-800"
+                  className="w-full flex items-center justify-between p-3.5 rounded-xl bg-[#FCFBF7] text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 font-extrabold text-xs hover:bg-emerald-50 transition-colors cursor-pointer border border-[#EFE2BE] dark:border-emerald-800"
                 >
                   <span className="flex items-center gap-2">
                     <Download className="h-4 w-4" /> Rekap Sekolah Excel (XLSX)
@@ -868,10 +973,11 @@ export const DashboardRouter: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
-              <p className="text-[11px] font-semibold text-slate-400">SMK Mardi Yuana Cikembar - Terakreditasi A (Unggul)</p>
+            <div className="mt-6 pt-4 border-t border-[#EFE2BE]/70 dark:border-slate-800 flex items-center justify-between">
+              <p className="text-[11px] font-semibold text-slate-400">MyAcademy &bull; Terakreditasi A</p>
+              <GoldCompassRose className="h-9 w-9" />
             </div>
-          </div>
+          </OrnateCard>
         </div>
       </div>
     );

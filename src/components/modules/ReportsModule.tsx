@@ -44,6 +44,7 @@ import {
   ReportCustomConfig,
 } from '../../utils/exportUtils';
 import { exportToGoogleSheets } from '../../utils/googleSheetsUtils';
+import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 
 export const ReportsModule: React.FC = () => {
   const {
@@ -680,58 +681,50 @@ export const ReportsModule: React.FC = () => {
         </div>
       )}
 
-      {/* Module Title & Tab Navigation */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-3 dark:border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-sm">
-            <Scroll className="h-5 w-5" />
+      {/* Royal Academy Banner & Tab Navigation */}
+      <AcademyHeroBanner
+        kicker="PUSAT DOKUMEN & ARSIP LAPORAN SEKOLAH"
+        title="PUSAT PELAPORAN & DOKUMEN RESMI"
+        subtitle="Ekspor dokumen resmi PDF & Excel berumus dinamis, kustomisasi kop surat & tanda tangan digital, serta sinkronisasi Google Sheets."
+        icon={Scroll}
+        rightContent={
+          <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 backdrop-blur-md">
+            <button
+              onClick={() => setActiveMainTab('export')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeMainTab === 'export'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span>Ekspor Dokumen</span>
+            </button>
+            <button
+              onClick={() => setActiveMainTab('spreadsheet')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeMainTab === 'spreadsheet'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Table className="h-3.5 w-3.5" />
+              <span>Excel Interaktif</span>
+            </button>
+            <button
+              onClick={() => setActiveMainTab('designer')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                activeMainTab === 'designer'
+                  ? 'bg-[#2563EB] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Palette className="h-3.5 w-3.5 text-[#EAB308]" />
+              <span>Desain &amp; Tata Letak PDF</span>
+            </button>
           </div>
-          <div>
-            <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
-              Pusat Pelaporan &amp; Dokumen Resmi
-            </h1>
-            <p className="text-xs text-slate-500">
-              Ekspor Dokumen Resmi, Desain Kop &amp; TTD Digital, Lembar Excel Berumus, dan Google Sheets
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100/70 p-1 dark:border-slate-800 dark:bg-slate-800/60">
-          <button
-            onClick={() => setActiveMainTab('export')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeMainTab === 'export'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span>Ekspor Dokumen</span>
-          </button>
-          <button
-            onClick={() => setActiveMainTab('spreadsheet')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeMainTab === 'spreadsheet'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            <Table className="h-3.5 w-3.5" />
-            <span>Excel Interaktif</span>
-          </button>
-          <button
-            onClick={() => setActiveMainTab('designer')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              activeMainTab === 'designer'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            <Palette className="h-3.5 w-3.5 text-indigo-500" />
-            <span>Desain &amp; Tata Letak PDF</span>
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Google Sheets Notification Banner */}
       {sheetSuccessUrl && (

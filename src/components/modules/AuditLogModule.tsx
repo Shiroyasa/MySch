@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { ShieldAlert, Search, Filter, Download, ShieldCheck } from 'lucide-react';
 import { exportToExcel, exportToCsv } from '../../utils/exportUtils';
+import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 
 export const AuditLogModule: React.FC = () => {
   const { auditLogs } = useApp();
@@ -34,26 +35,21 @@ export const AuditLogModule: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-3 dark:border-slate-800">
-        <div className="flex items-center gap-2">
-          <div className="rounded-xl bg-amber-100 p-2 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-            <ShieldAlert className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
-              Audit Log &amp; Rekam Aktivitas Keamanan
-            </h1>
-            <p className="text-xs text-slate-500">Jejak audit tidak dapat diubah (Immutable) &bull; SMK Mardi Yuana Cikembar</p>
-          </div>
-        </div>
-
-        <button
-          onClick={handleExport}
-          className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-        >
-          <Download className="h-3.5 w-3.5 text-blue-600" /> Ekspor Audit Log (XLSX)
-        </button>
-      </div>
+      <AcademyHeroBanner
+        kicker="AEGIS SECURITY • JEJAK AUDIT SISTEM"
+        title="AUDIT LOG & REKAM AKTIVITAS KEAMANAN"
+        subtitle="Catatan aktivitas sistem dan perubahan data secara real-time yang tidak dapat diubah (Immutable Audit Trail)."
+        icon={ShieldCheck}
+        rightContent={
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 rounded-xl border border-[#C8A44B]/70 bg-[#1B2A47] px-4 py-2 text-xs font-bold text-[#FDE68A] hover:bg-[#24375C] cursor-pointer transition-colors"
+          >
+            <Download className="h-4 w-4 text-[#EAB308]" />
+            <span>Ekspor Audit Log (XLSX)</span>
+          </button>
+        }
+      />
 
       {/* Filter and Search */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">

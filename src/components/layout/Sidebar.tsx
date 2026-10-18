@@ -2,23 +2,22 @@ import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
 import {
-  LayoutDashboard,
+  Home,
   CalendarCheck,
   GraduationCap,
-  Briefcase,
+  Building2,
   Database,
-  FileSpreadsheet,
+  FileBarChart2,
   Users,
   ShieldCheck,
   Settings,
   ChevronLeft,
   ChevronRight,
-  MessageSquareText,
-  Eye,
+  MessageCircle,
   LogOut,
   Award,
   UserCheck,
-  School,
+  BookOpen,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -34,11 +33,11 @@ interface NavItem {
   icon: React.ElementType;
   roles: UserRole[];
   badge?: string;
-  badgeColor?: string;
+  badgeStyle?: string;
 }
 
 interface NavGroup {
-  groupTitle: string;
+  groupTitle?: string;
   roles: UserRole[];
   items: NavItem[];
 }
@@ -53,11 +52,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const pendingCorrectionsCount = attendanceCorrections.filter(c => c.status === 'pending').length;
 
-  // Grouped Navigation to clearly separate Class & Grading Management from PKL and Master Data
   const navGroups: NavGroup[] = [
-    // GROUP 1: MANAJEMEN KELAS & NILAI
+    // GROUP 1: PRIMARY ACADEMIC NAVIGATION (No top header above Dashboard, matching image.png)
     {
-      groupTitle: currentRole === 'siswa' ? 'Akademik Siswa' : 'Manajemen Kelas & Nilai',
+      groupTitle: currentRole === 'siswa' ? 'AKADEMIK SISWA' : undefined,
       roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah', 'siswa'],
       items: [
         {
@@ -75,69 +73,54 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           id: 'dashboard',
           label: 'Dashboard',
-          icon: LayoutDashboard,
+          icon: Home,
           roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
         },
         {
           id: 'attendance',
-          label:
-            currentRole === 'admin'
-              ? 'Presensi Sekolah'
-              : currentRole === 'wali_kelas'
-              ? 'Presensi Kelas'
-              : 'Presensi & Absensi',
+          label: 'Presensi & Absensi',
           icon: CalendarCheck,
           roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
           badge:
             pendingCorrectionsCount > 0 && ['wali_kelas', 'guru', 'super_admin'].includes(currentRole)
               ? `${pendingCorrectionsCount}`
               : undefined,
-          badgeColor: 'bg-amber-500 text-white shadow-xs',
+          badgeStyle: 'border border-amber-500/60 bg-amber-950/80 text-amber-300',
         },
         {
           id: 'grading',
-          label:
-            currentRole === 'wali_kelas'
-              ? 'Leger & Draf Rapor'
-              : currentRole === 'kepala_sekolah'
-              ? 'Analisis Capaian Nilai'
-              : 'Penilaian Akademik',
+          label: 'Penilaian Akademik',
           icon: GraduationCap,
           roles: ['super_admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
         },
         {
           id: 'reports',
-          label:
-            currentRole === 'kepala_sekolah'
-              ? 'Laporan Manajerial'
-              : currentRole === 'wali_kelas'
-              ? 'Cetak Rapor Kelas'
-              : 'Laporan & Ekspor',
-          icon: FileSpreadsheet,
+          label: 'Laporan & Ekspor',
+          icon: FileBarChart2,
           roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
         },
       ],
     },
 
-    // GROUP 2: ADMINISTRASI PKL & DUDI (Kelompok tersendiri terpisah dari nilai & presensi)
+    // GROUP 2: ADMINISTRASI PKL & DUDI
     {
-      groupTitle: 'Administrasi PKL & DUDI',
+      groupTitle: 'ADMINISTRASI PKL & DUDI',
       roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah', 'siswa'],
       items: [
         {
           id: 'pkl',
           label: 'Administrasi PKL',
-          icon: Briefcase,
+          icon: Building2,
           roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah', 'siswa'],
           badge: 'DUDI',
-          badgeColor: 'bg-indigo-600 text-white shadow-xs',
+          badgeStyle: 'border border-[#C8A44B]/60 bg-[#2C2416] text-[#FBBF24]',
         },
       ],
     },
 
     // GROUP 3: DATA POKOK & MASTER
     {
-      groupTitle: 'Data Pokok & Master',
+      groupTitle: 'DATA POKOK & MASTER',
       roles: ['super_admin', 'admin', 'kepala_sekolah'],
       items: [
         {
@@ -155,10 +138,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {
           id: 'student-chat-monitor',
           label: 'Pantauan Chat',
-          icon: Eye,
+          icon: MessageCircle,
           roles: ['super_admin', 'admin'],
-          badge: 'Live',
-          badgeColor: 'bg-emerald-600 text-white shadow-xs',
+          badge: 'LIVE',
+          badgeStyle: 'border border-emerald-500/50 bg-[#0A2E26] text-emerald-400',
         },
         {
           id: 'audit-logs',
@@ -171,16 +154,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
     // GROUP 4: LAYANAN & PENGATURAN
     {
-      groupTitle: 'Layanan & Pengaturan',
+      groupTitle: 'LAYANAN & PENGATURAN',
       roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah', 'siswa'],
       items: [
         {
           id: 'student-chat',
           label: 'Obrolan Siswa',
-          icon: MessageSquareText,
+          icon: MessageCircle,
           roles: ['siswa', 'guru', 'wali_kelas', 'kepala_sekolah'],
           badge: 'DM',
-          badgeColor: 'bg-cyan-600 text-white shadow-xs',
+          badgeStyle: 'border border-cyan-500/50 bg-cyan-950/80 text-cyan-300',
         },
         {
           id: 'settings',
@@ -207,66 +190,50 @@ export const Sidebar: React.FC<SidebarProps> = ({
         />
       )}
 
-      {/* Sidebar Container with Clean Glass Backdrop */}
+      {/* Royal Midnight Navy Sidebar Container (Matches image.png) */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r border-slate-200/80 bg-white/95 backdrop-blur-xl transition-all duration-300 dark:border-slate-800/80 dark:bg-slate-900/95 lg:static ${
+        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col border-r border-[#182644] bg-[#0B162C] text-slate-300 transition-all duration-300 lg:static ${
           collapsed ? 'w-20' : 'w-64'
         } ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
-        {/* School Crest / Header in Sidebar */}
-        <div className="flex h-16 items-center justify-between border-b border-slate-200/80 px-4 dark:border-slate-800/80">
-          {!collapsed && (
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-sm">
-                <School className="h-5 w-5 text-white" />
+        {/* Top Brand Emblem Header */}
+        <div className="flex h-20 items-center justify-between border-b border-[#182644] px-4">
+          {!collapsed ? (
+            <div className="flex items-center gap-3 overflow-hidden">
+              <div className="relative flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-xl border border-[#C8A44B]/65 bg-[#122244] shadow-inner">
+                <span className="text-[7px] leading-none text-[#EAB308] mb-0.5">✦</span>
+                <BookOpen className="h-4.5 w-4.5 text-[#EAB308]" strokeWidth={1.8} />
               </div>
               <div className="overflow-hidden">
-                <p className="truncate text-sm font-black tracking-tight text-slate-900 dark:text-white leading-tight">
+                <p
+                  className="truncate text-sm font-bold tracking-[0.12em] text-white uppercase leading-tight"
+                  style={{ fontFamily: "'Cinzel', 'Playfair Display', Georgia, serif" }}
+                >
                   MY ACADEMY
                 </p>
-                <p className="truncate text-[10px] font-semibold text-slate-500 dark:text-slate-400">
+                <p className="truncate text-[11px] font-medium text-[#8DA2C0] mt-0.5">
                   Sistem Informasi Akademik
                 </p>
               </div>
             </div>
-          )}
-
-          {collapsed && (
-            <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-sm">
-              <School className="h-5 w-5 text-white" />
+          ) : (
+            <div className="mx-auto flex h-10 w-10 flex-col items-center justify-center rounded-xl border border-[#C8A44B]/65 bg-[#122244]">
+              <span className="text-[7px] leading-none text-[#EAB308] mb-0.5">✦</span>
+              <BookOpen className="h-4.5 w-4.5 text-[#EAB308]" strokeWidth={1.8} />
             </div>
           )}
 
-          {/* Desktop Collapse Toggle Button */}
           <button
             onClick={onToggleCollapse}
-            className="hidden lg:flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 cursor-pointer"
+            className="hidden lg:flex h-7 w-7 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#152648] hover:text-white cursor-pointer transition-colors"
             title={collapsed ? 'Perluas Menu' : 'Ciutkan Menu'}
           >
             {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </button>
         </div>
 
-        {/* Role Bar */}
-        <div className="px-3.5 py-2 bg-slate-50/70 dark:bg-slate-800/40 border-b border-slate-200/60 dark:border-slate-800/60">
-          {!collapsed ? (
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                Hak Akses
-              </span>
-              <span className="rounded-md bg-blue-100 dark:bg-blue-950/70 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-blue-800 dark:text-blue-300">
-                {currentRole.replace('_', ' ')}
-              </span>
-            </div>
-          ) : (
-            <div className="text-center text-[9px] font-extrabold uppercase text-blue-600">
-              {currentRole.slice(0, 3)}
-            </div>
-          )}
-        </div>
-
-        {/* Navigation Menu Items with Grouped Structure */}
-        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
+        {/* Navigation Menu Items */}
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-4">
           {navGroups
             .filter(group => group.roles.includes(currentRole))
             .map((group, groupIdx) => {
@@ -275,13 +242,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
               return (
                 <div key={groupIdx} className="space-y-1">
-                  {/* Category Header */}
-                  {!collapsed ? (
-                    <div className="px-3 pt-1 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  {group.groupTitle && !collapsed && (
+                    <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-[0.11em] text-[#7A8FA8]">
                       {group.groupTitle}
                     </div>
-                  ) : (
-                    groupIdx > 0 && <div className="my-1.5 border-t border-slate-200/60 dark:border-slate-800/60" />
+                  )}
+                  {group.groupTitle && collapsed && groupIdx > 0 && (
+                    <div className="my-2 border-t border-[#182644]" />
                   )}
 
                   {visibleGroupItems.map(item => {
@@ -292,27 +259,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <button
                         key={item.id}
                         onClick={() => handleSelectNav(item.id)}
-                        className={`group flex w-full items-center rounded-xl transition-all duration-150 cursor-pointer ${
-                          collapsed ? 'justify-center px-2 py-2' : 'justify-between px-3 py-2'
+                        className={`group relative flex w-full items-center rounded-xl transition-all duration-150 cursor-pointer ${
+                          collapsed ? 'justify-center px-2 py-2.5' : 'justify-between px-3.5 py-2.5'
                         } ${
                           isActive
-                            ? 'bg-blue-600 text-white font-bold shadow-xs'
-                            : 'text-slate-700 hover:bg-slate-100/90 dark:text-slate-300 dark:hover:bg-slate-800/60 font-semibold'
+                            ? 'bg-[#2563EB] text-white font-bold shadow-[0_4px_14px_rgba(37,99,235,0.35)]'
+                            : 'text-[#CBD5E1] hover:bg-[#132342] hover:text-white font-medium'
                         }`}
                         title={collapsed ? item.label : undefined}
                       >
-                        <div className={`flex items-center gap-2.5 ${collapsed ? 'justify-center' : ''}`}>
-                          <div
-                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-105 ${
-                              isActive
-                                ? 'bg-white/20 text-white'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:text-blue-600'
+                        {/* Golden Vertical Accent Bar on Active Item Left Edge (Matches image.png) */}
+                        {isActive && (
+                          <span
+                            className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-[#F59E0B]"
+                            aria-hidden="true"
+                          />
+                        )}
+
+                        <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
+                          <Icon
+                            className={`h-4 w-4 shrink-0 transition-colors ${
+                              isActive ? 'text-white' : 'text-[#8DA2C0] group-hover:text-white'
                             }`}
-                          >
-                            <Icon className="h-3.5 w-3.5" />
-                          </div>
+                            strokeWidth={isActive ? 2.2 : 1.8}
+                          />
                           {!collapsed && (
-                            <span className="truncate text-xs tracking-tight text-left">
+                            <span className="truncate text-xs tracking-wide text-left">
                               {item.label}
                             </span>
                           )}
@@ -320,8 +292,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                         {!collapsed && item.badge && (
                           <span
-                            className={`ml-2 shrink-0 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
-                              item.badgeColor || 'bg-blue-500 text-white'
+                            className={`ml-2 shrink-0 rounded-md px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${
+                              item.badgeStyle || 'bg-blue-600 text-white'
                             }`}
                           >
                             {item.badge}
@@ -335,20 +307,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
             })}
         </div>
 
-        {/* The SINGLE Official Keluar Sistem (Log Out) Button */}
-        <div className="px-3 py-2.5 border-t border-slate-200/80 dark:border-slate-800/80">
-          <button
-            onClick={() => setShowLogoutModal(true)}
-            className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50/80 dark:text-rose-400 dark:hover:bg-rose-950/40 transition-colors cursor-pointer ${
-              collapsed ? 'justify-center px-2' : ''
-            }`}
-            title="Keluar dari Sistem (Log Out)"
-          >
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 shrink-0">
-              <LogOut className="h-4 w-4" />
+        {/* Bottom Academy Crest Footer & Logout Trigger (Matches image.png) */}
+        <div className="border-t border-[#182644] p-4">
+          {!collapsed ? (
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#C8A44B]/60 bg-[#122244]">
+                  <BookOpen className="h-4 w-4 text-[#EAB308]" strokeWidth={1.8} />
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-bold text-white">My Academy</p>
+                  <p className="line-clamp-2 text-[10px] leading-tight text-[#8DA2C0] mt-0.5">
+                    Bersama Membangun Pendidikan yang Lebih Baik
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowLogoutModal(true)}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[#8DA2C0] hover:bg-rose-950/60 hover:text-rose-400 transition-colors cursor-pointer"
+                title="Keluar Akun (Log Out)"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
             </div>
-            {!collapsed && <span className="truncate">Keluar Akun</span>}
-          </button>
+          ) : (
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="mx-auto flex h-9 w-9 items-center justify-center rounded-full border border-[#C8A44B]/60 bg-[#122244] text-[#EAB308] hover:border-rose-500/60 hover:text-rose-400 transition-colors cursor-pointer"
+              title="Keluar Akun (Log Out)"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </aside>
     </>

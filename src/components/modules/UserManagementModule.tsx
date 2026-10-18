@@ -26,6 +26,7 @@ import {
   Scroll,
 } from 'lucide-react';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
+import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 
 // Role definitions with default tailored permissions
 interface RolePreset {
@@ -262,41 +263,28 @@ export const UserManagementModule: React.FC = () => {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-3 dark:border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <div className="relative rounded-xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-600 p-2.5 text-white shadow-md shadow-purple-500/25 ring-1 ring-amber-400/50">
-            <Crown className="h-5 w-5 text-amber-300 animate-pulse" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
-                Manajemen Pengguna &amp; Hak Akses (RBAC)
-              </h1>
-              <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-black text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                PARTY ROSTER
-              </span>
-            </div>
-            <p className="text-xs text-slate-500">
-              Konfigurasi 6 Peran Pengguna dengan Hak Akses &amp; Fitur Terspesialisasi &bull; SMK Mardi Yuana
-            </p>
-          </div>
-        </div>
-
-        {canManageUsers && (
-          <button
-            onClick={() => {
-              setNewRole('guru');
-              setSelectedPermissions(rolePresets.guru.defaultPermissions);
-              setShowAddModal(true);
-            }}
-            className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-colors"
-          >
-            <UserPlus className="h-4 w-4" />
-            <span>Tambah Data Pengguna &amp; Hak Akses</span>
-          </button>
-        )}
-      </div>
+      {/* Royal Academy Header */}
+      <AcademyHeroBanner
+        kicker="OTORISASI SISTEM & KONTROL PERAN (RBAC)"
+        title="MANAJEMEN PENGGUNA & HAK AKSES"
+        subtitle="Konfigurasi 6 peran pengguna dengan hak akses terstruktur untuk Super Admin, Admin TU, Kepala Sekolah, Wali Kelas, Guru Mapel, dan Siswa."
+        icon={Crown}
+        rightContent={
+          canManageUsers ? (
+            <button
+              onClick={() => {
+                setNewRole('guru');
+                setSelectedPermissions(rolePresets.guru.defaultPermissions);
+                setShowAddModal(true);
+              }}
+              className="flex items-center gap-2 rounded-xl border border-[#C8A44B]/80 bg-[#2563EB] px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer"
+            >
+              <UserPlus className="h-4 w-4 text-[#FDE68A]" />
+              <span>Tambah Data Pengguna &amp; Hak Akses</span>
+            </button>
+          ) : undefined
+        }
+      />
 
       {/* Role Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

@@ -92,19 +92,59 @@
   will-change: transform;
 }
 
-/* JRPG Glass & Rank Styling */
+/* JRPG Glass & Royal Academy Card Ornament Styling */
 .jrpg-glass {
-  background-color: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  background-color: #ffffff;
+  border: 1px solid #EFE2BE;
+  box-shadow: 0 2px 16px rgba(15, 23, 42, 0.03);
 }
 
 html.dark .jrpg-glass {
-  background-color: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(30, 41, 59, 0.8);
+  background-color: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+/* Universal Royal Academy Card Ornaments across all modules */
+main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament),
+main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament),
+main .jrpg-glass:not(.academy-ornate-card) {
+  position: relative;
+  border-color: #EFE2BE;
+}
+
+html.dark main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament),
+html.dark main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament) {
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament)::before,
+main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament)::before,
+main .jrpg-glass:not(.academy-ornate-card)::before {
+  content: '✦';
+  position: absolute;
+  top: 7px;
+  left: 9px;
+  font-size: 9px;
+  line-height: 1;
+  color: #DFB858;
+  pointer-events: none;
+  user-select: none;
+  z-index: 2;
+}
+
+main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament)::after,
+main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament)::after,
+main .jrpg-glass:not(.academy-ornate-card)::after {
+  content: '✦';
+  position: absolute;
+  bottom: 7px;
+  right: 9px;
+  font-size: 9px;
+  line-height: 1;
+  color: #DFB858;
+  pointer-events: none;
+  user-select: none;
+  z-index: 2;
 }
 
 .jrpg-rank-s {

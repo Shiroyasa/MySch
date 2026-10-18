@@ -28,6 +28,7 @@ import {
   Castle,
 } from 'lucide-react';
 import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
+import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 
 interface StudentModuleProps {
   initialTab?: 'profile' | 'grades';
@@ -182,56 +183,39 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
         </div>
       )}
 
-      {/* Header Banner - JRPG Cadet Status Card */}
-      <div className="rounded-3xl bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-blue-500/20 backdrop-blur-xl">
-        <div className="absolute right-0 top-0 bottom-0 w-96 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-500/30 via-cyan-500/10 to-transparent pointer-events-none" />
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
-          <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white font-black text-2xl border-2 border-amber-400 shadow-lg ring-4 ring-indigo-500/30">
-              {student.fullName.charAt(0)}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-3 py-0.5 text-[11px] font-extrabold text-cyan-300 border border-cyan-400/30 shadow-xs">
-                  <ShieldCheck className="h-3 w-3 text-cyan-300" />
-                  <span>Status: Siswa Aktif</span>
-                </span>
-              </div>
-              <h1 className="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
-                {student.fullName}
-              </h1>
-              <p className="mt-1 text-xs sm:text-sm text-blue-100 font-medium">
-                NISN: <span className="font-mono font-bold text-amber-300">{student.nisn}</span> &bull; NIS: <span className="font-mono font-bold">{student.nis}</span> &bull; Kelas: <span className="font-extrabold text-cyan-300">{student.className}</span> ({student.majorCode})
-              </p>
-            </div>
-          </div>
-
+      {/* Royal Academy Cadet Status Banner */}
+      <AcademyHeroBanner
+        kicker={`STATUS: SISWA AKTIF • KELAS ${student.className} (${student.majorCode})`}
+        title={student.fullName.toUpperCase()}
+        subtitle={`NISN: ${student.nisn} • NIS: ${student.nis} • Portal Akademik Peserta Didik MyAcademy`}
+        icon={GraduationCap}
+        rightContent={
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setActiveTab('profile')}
               className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer ${
                 activeTab === 'profile'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white ring-2 ring-white/60'
-                  : 'bg-white/15 text-white border border-white/30 hover:bg-white/25'
+                  ? 'bg-[#2563EB] text-white border border-[#C8A44B]/60'
+                  : 'bg-[#1B2A47] text-slate-200 border border-[#C8A44B]/40 hover:bg-[#24375C]'
               }`}
             >
-              <ShieldCheck className="h-4 w-4 text-cyan-300" />
+              <ShieldCheck className="h-4 w-4 text-[#EAB308]" />
               <span>1. Profil Siswa</span>
             </button>
             <button
               onClick={() => setActiveTab('grades')}
               className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer ${
                 activeTab === 'grades'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white ring-2 ring-white/60'
-                  : 'bg-white/15 text-white border border-white/30 hover:bg-white/25'
+                  ? 'bg-[#2563EB] text-white border border-[#C8A44B]/60'
+                  : 'bg-[#1B2A47] text-slate-200 border border-[#C8A44B]/40 hover:bg-[#24375C]'
               }`}
             >
-              <Swords className="h-4 w-4 text-amber-300" />
-              <span>2. Nilai Siswa (Trials)</span>
+              <Award className="h-4 w-4 text-[#EAB308]" />
+              <span>2. Nilai Siswa</span>
             </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Tabs Navigation (Hanya Profil Siswa & Nilai Siswa) */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-2 dark:border-slate-800/80">
