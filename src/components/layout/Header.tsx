@@ -45,6 +45,9 @@ export const Header: React.FC<{ onToggleMobileSidebar: () => void }> = ({ onTogg
     isSyncing,
     lastSyncTime,
     forceCloudResync,
+    visualSettings,
+    schoolSettings,
+    setActiveNav,
   } = useApp();
 
   const [showNotifMenu, setShowNotifMenu] = useState(false);
@@ -53,6 +56,8 @@ export const Header: React.FC<{ onToggleMobileSidebar: () => void }> = ({ onTogg
   const [adminNotifTab, setAdminNotifTab] = useState<'all' | 'mine' | 'broadcast'>('all');
 
   const isAdmin = currentRole === 'admin' || currentRole === 'super_admin';
+  const activeLogoUrl = visualSettings?.appLogoUrl || schoolSettings?.logoUrl || null;
+  const logoFitClass = visualSettings?.appLogoFit === 'cover' ? 'object-cover' : 'object-contain p-0.5';
 
   // Per-profile notification filtering:
   // Admin can view ALL notifications ("dia bisa melihat keseluruhan").
@@ -96,8 +101,24 @@ export const Header: React.FC<{ onToggleMobileSidebar: () => void }> = ({ onTogg
           </button>
 
           <div className="flex items-center gap-2.5">
-            <div className="lg:hidden flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-sm">
-              <GraduationCap className="h-4.5 w-4.5 text-white" />
+            <div
+              onClick={() => {
+                if (isAdmin) setActiveNav('settings');
+              }}
+              title={isAdmin ? 'Klik untuk mengatur Logo Aplikasi & Favicon di Pengaturan Sistem' : schoolSettings?.schoolName || 'ORBITA'}
+              className={`flex h-9 w-9 items-center justify-center rounded-xl border border-[#D4AF37]/60 bg-gradient-to-br from-[#132852] to-[#1E3A8A] text-white shadow-sm overflow-hidden shrink-0 ${
+                isAdmin ? 'cursor-pointer hover:ring-2 hover:ring-amber-400/60 transition-all' : ''
+              }`}
+            >
+              {activeLogoUrl ? (
+                <img
+                  src={activeLogoUrl}
+                  alt="Logo Aplikasi"
+                  className={`h-full w-full ${logoFitClass}`}
+                />
+              ) : (
+                <GraduationCap className="h-4.5 w-4.5 text-[#FDE047]" />
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2">

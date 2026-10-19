@@ -17,6 +17,7 @@ import {
   Award,
   UserCheck,
   BookOpen,
+  Camera,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -47,12 +48,79 @@ export const Sidebar: React.FC<SidebarProps> = ({
   mobileOpen,
   onCloseMobile,
 }) => {
-  const { currentRole, activeNav, setActiveNav, attendanceCorrections, setShowLogoutModal, visualSettings } = useApp();
+  const {
+    currentRole,
+    activeNav,
+    setActiveNav,
+    attendanceCorrections,
+    setShowLogoutModal,
+    visualSettings,
+    schoolSettings,
+    updateVisualSettings,
+    addToast,
+  } = useApp();
   const [mousePos, setMousePos] = React.useState<{ x: number; y: number; active: boolean }>({
     x: 120,
     y: 220,
     active: false,
   });
+  const quickLogoInputRef = React.useRef<HTMLInputElement | null>(null);
+  const isAdmin = currentRole === 'admin' || currentRole === 'super_admin';
+  const activeLogoUrl = visualSettings?.appLogoUrl || schoolSettings?.logoUrl || null;
+  const logoFitClass =
+    visualSettings?.appLogoFit === 'cover'
+      ? 'h-full w-full object-cover rounded-lg'
+      : 'max-h-full max-w-full object-contain';
+
+  const handleQuickLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type === 'image/svg+xml' && file.size < 400_000) {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const res = ev.target?.result as string;
+        if (res) {
+          updateVisualSettings({ appLogoUrl: res });
+          addToast('Logo aplikasi (SVG) berhasil diperbarui!', 'success');
+        }
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 320;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w >= h) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.clearRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/png');
+          updateVisualSettings({ appLogoUrl: dataUrl });
+          addToast('Logo aplikasi berhasil diperbarui & disimpan!', 'success');
+        }
+      };
+      img.src = ev.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   const pendingCorrectionsCount = attendanceCorrections.filter(c => c.status === 'pending').length;
 
@@ -248,21 +316,43 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </span>
         </div>
 
-        {/* Top Brand Emblem Header (Supports Proportional Custom App Logo) */}
+        {/* Top Brand Emblem Header (Supports Proportional Custom App Logo + Quick Upload for Admin) */}
         <div className="relative z-10 flex h-20 items-center justify-between border-b border-[#182644] px-4">
+          {isAdmin && (
+            <input
+              ref={quickLogoInputRef}
+              type="file"
+              accept="image/png,image/svg+xml,image/webp,image/jpeg,image/x-icon"
+              onChange={handleQuickLogoUpload}
+              className="hidden"
+            />
+          )}
           {!collapsed ? (
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="group/logo relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#C8A44B]/75 bg-gradient-to-b from-[#15284E] to-[#0D1A36] p-1.5 shadow-[0_0_15px_rgba(200,164,75,0.22),inset_0_0_8px_rgba(250,204,21,0.12)]">
-                {visualSettings?.appLogoUrl ? (
+              <div
+                onClick={() => {
+                  if (isAdmin) quickLogoInputRef.current?.click();
+                }}
+                title={isAdmin ? 'Klik untuk mengganti Logo Aplikasi secara langsung' : 'Logo Aplikasi ORBITA'}
+                className={`group/logo relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#C8A44B]/75 bg-gradient-to-b from-[#15284E] to-[#0D1A36] p-1 shadow-[0_0_15px_rgba(200,164,75,0.22),inset_0_0_8px_rgba(250,204,21,0.12)] overflow-hidden ${
+                  isAdmin ? 'cursor-pointer hover:border-[#FDE047]' : ''
+                }`}
+              >
+                {activeLogoUrl ? (
                   <img
-                    src={visualSettings.appLogoUrl}
+                    src={activeLogoUrl}
                     alt="Logo Aplikasi"
-                    className="max-h-full max-w-full object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover/logo:scale-105"
+                    className={`${logoFitClass} drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover/logo:scale-105`}
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center">
                     <span className="text-[7px] leading-none text-[#EAB308] mb-0.5">✦</span>
                     <BookOpen className="h-4.5 w-4.5 text-[#EAB308]" strokeWidth={1.8} />
+                  </div>
+                )}
+                {isAdmin && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-950/70 opacity-0 group-hover/logo:opacity-100 transition-opacity">
+                    <Camera className="h-4 w-4 text-[#FDE047]" />
                   </div>
                 )}
               </div>
@@ -279,17 +369,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             </div>
           ) : (
-            <div className="mx-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#C8A44B]/75 bg-gradient-to-b from-[#15284E] to-[#0D1A36] p-1.5 shadow-[0_0_14px_rgba(200,164,75,0.2)]">
-              {visualSettings?.appLogoUrl ? (
+            <div
+              onClick={() => {
+                if (isAdmin) quickLogoInputRef.current?.click();
+              }}
+              title={isAdmin ? 'Klik untuk mengganti Logo Aplikasi' : 'Logo Aplikasi ORBITA'}
+              className={`group/logo relative mx-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#C8A44B]/75 bg-gradient-to-b from-[#15284E] to-[#0D1A36] p-1 shadow-[0_0_14px_rgba(200,164,75,0.2)] overflow-hidden ${
+                isAdmin ? 'cursor-pointer hover:border-[#FDE047]' : ''
+              }`}
+            >
+              {activeLogoUrl ? (
                 <img
-                  src={visualSettings.appLogoUrl}
+                  src={activeLogoUrl}
                   alt="Logo Aplikasi"
-                  className="max-h-full max-w-full object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]"
+                  className={`${logoFitClass} drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]`}
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center">
                   <span className="text-[7px] leading-none text-[#EAB308] mb-0.5">✦</span>
                   <BookOpen className="h-4.5 w-4.5 text-[#EAB308]" strokeWidth={1.8} />
+                </div>
+              )}
+              {isAdmin && (
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/70 opacity-0 group-hover/logo:opacity-100 transition-opacity">
+                  <Camera className="h-4 w-4 text-[#FDE047]" />
                 </div>
               )}
             </div>

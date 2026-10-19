@@ -104,11 +104,14 @@ import {
   firestoreDeleteAssessmentAndScores,
   firestoreSaveCustomStudentReports,
   forceReseedFirestore,
+  sanitizeForFirestore,
 } from '../services/firestoreSync';
 import { ReportCustomConfig, defaultReportConfig } from '../utils/exportUtils';
 
 export const defaultVisualSettings: VisualSettings = {
   appLogoUrl: null,
+  appLogoFit: 'contain',
+  faviconUrl: null,
   loginBgUrl: null,
   loginBgType: 'default',
   loginLivePreset: 'starlight_castle',
@@ -400,7 +403,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
           // Sync to Firestore
           try {
-            setDoc(doc(db, 'users', fbUser.uid), newUser).catch(() => {});
+            setDoc(doc(db, 'users', fbUser.uid), sanitizeForFirestore(newUser)).catch(() => {});
           } catch (e) {
             // Non blocking
           }
@@ -605,6 +608,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const saved = localStorage.getItem('myschool_visual_settings');
       const legacyLoginBg = localStorage.getItem('myacademy_login_custom_bg');
+      const dedicatedLogo = localStorage.getItem('myschool_app_logo');
+      const dedicatedLogoFit = localStorage.getItem('myschool_app_logo_fit') as 'contain' | 'cover' | null;
+      const dedicatedFavicon = localStorage.getItem('myschool_app_favicon');
       if (saved) {
         const parsed = JSON.parse(saved);
         const mergedModuleBgs = {
@@ -614,17 +620,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return {
           ...defaultVisualSettings,
           ...parsed,
+          appLogoUrl: dedicatedLogo !== null ? (dedicatedLogo || null) : (parsed.appLogoUrl ?? null),
+          appLogoFit: dedicatedLogoFit || parsed.appLogoFit || 'contain',
+          faviconUrl: dedicatedFavicon !== null ? (dedicatedFavicon || null) : (parsed.faviconUrl ?? null),
           loginBgUrl: parsed.loginBgUrl ?? legacyLoginBg ?? null,
           moduleBannerBgs: mergedModuleBgs,
           perModuleBannerBgs: mergedModuleBgs,
           boxBgs: parsed.boxBgs || {},
         };
       }
-      if (legacyLoginBg) {
+      if (legacyLoginBg || dedicatedLogo || dedicatedFavicon) {
         return {
           ...defaultVisualSettings,
-          loginBgUrl: legacyLoginBg,
-          globalBannerBgUrl: legacyLoginBg,
+          appLogoUrl: dedicatedLogo || null,
+          appLogoFit: dedicatedLogoFit || 'contain',
+          faviconUrl: dedicatedFavicon || null,
+          loginBgUrl: legacyLoginBg || null,
+          globalBannerBgUrl: legacyLoginBg || null,
         };
       }
     } catch (e) {}
@@ -663,6 +675,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     assessmentsRef.current = assessments;
   }, [assessments]);
+
+  // Dynamic Browser Favicon & Document Title Synchronizer
+  useEffect(() => {
+    const defaultFaviconSvg =
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect width='32' height='32' rx='8' fill='%232563EB'/%3E%3Cpath d='M16 6L5 12L16 18L27 12L16 6Z' fill='white'/%3E%3Cpath d='M9 14.5V20.5C9 23.5 12.1 26 16 26C19.9 26 23 23.5 23 20.5V14.5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M27 12V21' stroke='%2393C5FD' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E";
+    const activeFavicon =
+      visualSettings?.faviconUrl ||
+      visualSettings?.appLogoUrl ||
+      schoolSettings?.logoUrl ||
+      defaultFaviconSvg;
+
+    try {
+      let iconLink = document.getElementById('dynamic-favicon') as HTMLLinkElement | null;
+      if (!iconLink) {
+        iconLink = document.querySelector("link[rel*='icon']") as HTMLLinkElement | null;
+      }
+      if (!iconLink) {
+        iconLink = document.createElement('link');
+        iconLink.id = 'dynamic-favicon';
+        iconLink.rel = 'icon';
+        document.head.appendChild(iconLink);
+      }
+      iconLink.href = activeFavicon;
+      if (activeFavicon.startsWith('data:image/png')) {
+        iconLink.type = 'image/png';
+      } else if (activeFavicon.startsWith('data:image/svg')) {
+        iconLink.type = 'image/svg+xml';
+      } else {
+        iconLink.removeAttribute('type');
+      }
+
+      const appleLink = document.getElementById('dynamic-apple-icon') as HTMLLinkElement | null;
+      if (appleLink) {
+        appleLink.href = activeFavicon;
+      }
+
+      if (schoolSettings?.schoolName) {
+        document.title = `ORBITA — Sistem Informasi Akademik | ${schoolSettings.schoolName}`;
+      }
+    } catch (e) {
+      console.warn('Error updating dynamic favicon:', e);
+    }
+  }, [visualSettings?.faviconUrl, visualSettings?.appLogoUrl, schoolSettings?.logoUrl, schoolSettings?.schoolName]);
 
   // Lesson Schedules State (Jadwal Pelajaran)
   const [lessonSchedules, setLessonSchedules] = useState<LessonSchedule[]>(() => {
@@ -745,6 +800,60 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         semester: 'ganjil',
         academicYear: '2026/2027',
         createdAt: '2026-07-17',
+      },
+      {
+        id: 'sch-005',
+        day: 'Kamis',
+        startTime: '07:30',
+        endTime: '09:45',
+        classId: 'cls-xitkj1',
+        className: 'XI TKJ 1',
+        subjectId: 'sub-asj',
+        subjectName: 'Administrasi Sistem Jaringan',
+        subjectCode: 'ASJ',
+        teacherId: 'tch-002',
+        teacherName: 'Siti Aminah, S.Pd., M.Kom.',
+        teacherNip: '198709212012122003',
+        room: 'Lab Server & Cloud',
+        semester: 'ganjil',
+        academicYear: '2026/2027',
+        createdAt: '2026-07-18',
+      },
+      {
+        id: 'sch-006',
+        day: 'Jumat',
+        startTime: '07:30',
+        endTime: '09:30',
+        classId: 'cls-xiiakl1',
+        className: 'XII AKL 1',
+        subjectId: 'sub-akkeu',
+        subjectName: 'Akuntansi Keuangan & Komputer Akuntansi',
+        subjectCode: 'AKK',
+        teacherId: 'tch-003',
+        teacherName: 'Drs. Hendra Wijaya, M.Ak.',
+        teacherNip: '197911042008011004',
+        room: 'Lab Akuntansi Terpadu',
+        semester: 'ganjil',
+        academicYear: '2026/2027',
+        createdAt: '2026-07-19',
+      },
+      {
+        id: 'sch-007',
+        day: 'Sabtu',
+        startTime: '08:00',
+        endTime: '10:00',
+        classId: 'cls-xrpl1',
+        className: 'X RPL 1',
+        subjectId: 'sub-pkk',
+        subjectName: 'Produk Kreatif & Kewirausahaan',
+        subjectCode: 'PKK',
+        teacherId: 'tch-004',
+        teacherName: 'Rina Marlina, S.Pd., M.M.',
+        teacherNip: '198903152015032006',
+        room: 'Ruang Inovasi & Technopark',
+        semester: 'ganjil',
+        academicYear: '2026/2027',
+        createdAt: '2026-07-20',
       },
     ];
   });
@@ -841,6 +950,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       },
       onVisualSettingsChange: data => {
         setVisualSettings(prev => {
+          // Do not overwrite newer local updates with an older Firestore snapshot
+          if (prev.updatedAt && data.updatedAt && prev.updatedAt > data.updatedAt) {
+            return prev;
+          }
           const mergedModuleBgs = {
             ...(prev.perModuleBannerBgs || {}),
             ...(prev.moduleBannerBgs || {}),
@@ -850,6 +963,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const next: VisualSettings = {
             ...prev,
             ...data,
+            appLogoUrl: data.appLogoUrl !== undefined ? data.appLogoUrl : prev.appLogoUrl,
+            appLogoFit: data.appLogoFit || prev.appLogoFit || 'contain',
+            faviconUrl: data.faviconUrl !== undefined ? data.faviconUrl : prev.faviconUrl,
             // Preserve local oversized video dataURL if Firestore omitted it
             loginBgUrl:
               data.loginBgUrl !== undefined && data.loginBgUrl !== null
@@ -871,6 +987,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             },
           };
           try {
+            if (next.appLogoUrl) {
+              localStorage.setItem('myschool_app_logo', next.appLogoUrl);
+            } else if (next.appLogoUrl === null) {
+              localStorage.removeItem('myschool_app_logo');
+            }
+            if (next.appLogoFit) {
+              localStorage.setItem('myschool_app_logo_fit', next.appLogoFit);
+            }
+            if (next.faviconUrl) {
+              localStorage.setItem('myschool_app_favicon', next.faviconUrl);
+            } else if (next.faviconUrl === null) {
+              localStorage.removeItem('myschool_app_favicon');
+            }
             localStorage.setItem('myschool_visual_settings', JSON.stringify(next));
           } catch {}
           return next;
@@ -1079,6 +1208,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     category: 'akademik' | 'presensi' | 'pengumuman' | 'keamanan' | 'profil' | 'umum' = 'umum',
     urgency: 'normal' | 'penting' | 'mendesak' = 'normal'
   ) => {
+    const recId = recipientId || (isBroadcast ? undefined : currentUser?.id);
+    const recName = recipientId
+      ? users.find(u => u.id === recipientId)?.displayName
+      : (!isBroadcast && currentUser ? currentUser.displayName : undefined);
+    const roleTarget = targetRole || (isBroadcast ? 'all' : undefined);
+
     const newNotif: NotificationItem = {
       id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       title,
@@ -1086,14 +1221,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       type,
       isRead: false,
       createdAt: new Date().toISOString(),
-      recipientId: recipientId || (isBroadcast ? undefined : currentUser.id),
-      recipientName: recipientId ? users.find(u => u.id === recipientId)?.displayName : (!isBroadcast ? currentUser.displayName : undefined),
-      targetRole: targetRole || (isBroadcast ? 'all' : undefined),
-      senderName: senderName || currentUser.displayName,
-      senderRole: senderRole || currentUser.role,
       isBroadcast,
       category,
       urgency,
+      senderName: senderName || currentUser?.displayName || 'Sistem',
+      senderRole: senderRole || currentUser?.role || 'admin',
+      ...(recId ? { recipientId: recId } : {}),
+      ...(recName ? { recipientName: recName } : {}),
+      ...(roleTarget ? { targetRole: roleTarget } : {}),
     };
     setNotifications(prev => [newNotif, ...prev]);
     firestorePushNotification(newNotif).catch(() => {});
@@ -2177,7 +2312,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAttendanceCorrections(prev => [newCorrection, ...prev]);
     addAuditLog('REQUEST_CORRECTION', 'Koreksi Absensi', `Siswa ${req.studentName} mengajukan koreksi status ${req.currentStatus} -> ${req.requestedStatus} pada tgl ${req.date}`);
     pushNotification('Permohonan Koreksi Presensi', `${req.studentName} (${req.className}) mengajukan koreksi absensi tanggal ${req.date}.`, 'warning');
-    setDoc(doc(db, 'attendanceCorrections', newCorrection.id), newCorrection).catch(() => {});
+    setDoc(doc(db, 'attendanceCorrections', newCorrection.id), sanitizeForFirestore(newCorrection)).catch(() => {});
   };
 
   const reviewAttendanceCorrection = (id: string, status: 'approved' | 'rejected', reviewerNote?: string) => {
@@ -2237,12 +2372,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     setDoc(
       doc(db, 'attendanceCorrections', id),
-      {
+      sanitizeForFirestore({
         status,
         reviewerNote: reviewerNote || (status === 'approved' ? 'Disetujui oleh Wali Kelas / Guru' : 'Ditolak'),
         reviewedBy: currentUser.displayName,
         reviewedAt: new Date().toISOString(),
-      },
+      }),
       { merge: true }
     ).catch(() => {});
   };
@@ -3059,6 +3194,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         boxBgs: updates.boxBgs !== undefined ? updates.boxBgs : prev.boxBgs || {},
         updatedAt: new Date().toISOString(),
       };
+      // Always save dedicated logo & favicon keys first so they never fail even if backgrounds are large
+      try {
+        if (next.appLogoUrl) {
+          localStorage.setItem('myschool_app_logo', next.appLogoUrl);
+        } else {
+          localStorage.removeItem('myschool_app_logo');
+        }
+        if (next.appLogoFit) {
+          localStorage.setItem('myschool_app_logo_fit', next.appLogoFit);
+        }
+        if (next.faviconUrl) {
+          localStorage.setItem('myschool_app_favicon', next.faviconUrl);
+        } else {
+          localStorage.removeItem('myschool_app_favicon');
+        }
+      } catch (err) {
+        console.warn('localStorage notice for dedicated logo/favicon:', err);
+      }
+
       try {
         localStorage.setItem('myschool_visual_settings', JSON.stringify(next));
         if (next.loginBgUrl && next.loginBgUrl.length < 500_000) {
@@ -3072,18 +3226,45 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       firestoreSaveVisualSettings(next).catch(() => {});
       return next;
     });
-    addAuditLog('UPDATE_VISUAL_THEME', 'Pengaturan Sistem', 'Memperbarui tema visual, logo aplikasi, atau wallpaper sistem.');
+
+    // Keep schoolSettings.logoUrl synchronized when appLogoUrl is updated
+    if (updates.appLogoUrl !== undefined) {
+      setSchoolSettings(prev => {
+        const nextSchool = {
+          ...prev,
+          logoUrl: updates.appLogoUrl || undefined,
+          updatedAt: new Date().toISOString(),
+        };
+        try {
+          localStorage.setItem('myschool_school_settings', JSON.stringify(nextSchool));
+        } catch {}
+        firestoreSaveSchoolSettings(nextSchool).catch(() => {});
+        return nextSchool;
+      });
+    }
+
+    addAuditLog('UPDATE_VISUAL_THEME', 'Pengaturan Sistem', 'Memperbarui tema visual, logo aplikasi, favicon, atau wallpaper sistem.');
   };
 
   const saveVisualSettingsToCloud = async () => {
     setIsSyncing(true);
     try {
       try {
+        if (visualSettings.appLogoUrl) {
+          localStorage.setItem('myschool_app_logo', visualSettings.appLogoUrl);
+        } else {
+          localStorage.removeItem('myschool_app_logo');
+        }
+        if (visualSettings.faviconUrl) {
+          localStorage.setItem('myschool_app_favicon', visualSettings.faviconUrl);
+        } else {
+          localStorage.removeItem('myschool_app_favicon');
+        }
         localStorage.setItem('myschool_visual_settings', JSON.stringify(visualSettings));
       } catch {}
       await firestoreSaveVisualSettings(visualSettings);
       setLastSyncTime(new Date());
-      addToast('Seluruh pengaturan visual, logo & background berhasil disimpan ke database!', 'success');
+      addToast('Seluruh pengaturan visual, logo, favicon & background berhasil disimpan ke database!', 'success');
     } catch {
       addToast('Pengaturan visual disimpan secara lokal.', 'info');
     } finally {
@@ -3104,6 +3285,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       firestoreSaveSchoolSettings(next).catch(() => {});
       return next;
     });
+    if (updates.logoUrl !== undefined) {
+      updateVisualSettings({ appLogoUrl: updates.logoUrl || null });
+    }
     addAuditLog('UPDATE_SCHOOL_SETTINGS', 'Pengaturan Sistem', 'Memperbarui konfigurasi identitas sekolah & aturan akademik.');
   };
 

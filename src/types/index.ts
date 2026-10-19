@@ -381,6 +381,8 @@ export type LiveWallpaperPreset =
 
 export interface VisualSettings {
   appLogoUrl?: string | null;
+  appLogoFit?: 'contain' | 'cover';
+  faviconUrl?: string | null;
   loginBgUrl: string | null;
   loginBgType?: 'default' | 'image' | 'video' | 'live_preset';
   loginLivePreset?: LiveWallpaperPreset;

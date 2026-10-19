@@ -97,59 +97,59 @@ export async function ensureFirestorePopulated(): Promise<void> {
     const batch = writeBatch(db);
 
     initialStudents.forEach(item => {
-      batch.set(doc(db, 'students', item.id), item);
+      batch.set(doc(db, 'students', item.id), sanitizeForFirestore(item));
     });
 
     initialTeachers.forEach(item => {
-      batch.set(doc(db, 'teachers', item.id), item);
+      batch.set(doc(db, 'teachers', item.id), sanitizeForFirestore(item));
     });
 
     initialClasses.forEach(item => {
-      batch.set(doc(db, 'classes', item.id), item);
+      batch.set(doc(db, 'classes', item.id), sanitizeForFirestore(item));
     });
 
     initialMajors.forEach(item => {
-      batch.set(doc(db, 'majors', item.id), item);
+      batch.set(doc(db, 'majors', item.id), sanitizeForFirestore(item));
     });
 
     initialSubjects.forEach(item => {
-      batch.set(doc(db, 'subjects', item.id), item);
+      batch.set(doc(db, 'subjects', item.id), sanitizeForFirestore(item));
     });
 
     initialAcademicYears.forEach(item => {
-      batch.set(doc(db, 'academicYears', item.id), item);
+      batch.set(doc(db, 'academicYears', item.id), sanitizeForFirestore(item));
     });
 
     initialUsers.forEach(item => {
-      batch.set(doc(db, 'users', item.id), item);
+      batch.set(doc(db, 'users', item.id), sanitizeForFirestore(item));
     });
 
     initialAttendanceSessions.forEach(item => {
-      batch.set(doc(db, 'attendanceSessions', item.id), item);
+      batch.set(doc(db, 'attendanceSessions', item.id), sanitizeForFirestore(item));
     });
 
     initialAttendanceRecords.forEach(item => {
-      batch.set(doc(db, 'attendanceRecords', item.id), item);
+      batch.set(doc(db, 'attendanceRecords', item.id), sanitizeForFirestore(item));
     });
 
     initialAssessments.forEach(item => {
-      batch.set(doc(db, 'assessments', item.id), item);
+      batch.set(doc(db, 'assessments', item.id), sanitizeForFirestore(item));
     });
 
     initialAssessmentScores.forEach(item => {
-      batch.set(doc(db, 'assessmentScores', item.id), item);
+      batch.set(doc(db, 'assessmentScores', item.id), sanitizeForFirestore(item));
     });
 
     initialNotifications.forEach(item => {
-      batch.set(doc(db, 'notifications', item.id), item);
+      batch.set(doc(db, 'notifications', item.id), sanitizeForFirestore(item));
     });
 
     initialChatMessages.forEach(item => {
-      batch.set(doc(db, 'chatMessages', item.id), item);
+      batch.set(doc(db, 'chatMessages', item.id), sanitizeForFirestore(item));
     });
 
     initialAuditLogs.forEach(item => {
-      batch.set(doc(db, 'auditLogs', item.id), item);
+      batch.set(doc(db, 'auditLogs', item.id), sanitizeForFirestore(item));
     });
 
     await batch.commit();
@@ -906,7 +906,7 @@ export async function firestoreDeleteUser(userId: string): Promise<void> {
 
 export async function firestoreSendChat(message: ChatMessage): Promise<void> {
   try {
-    await setDoc(doc(db, 'chatMessages', message.id), message);
+    await setDoc(doc(db, 'chatMessages', message.id), sanitizeForFirestore(message));
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `chatMessages/${message.id}`);
   }
@@ -922,7 +922,7 @@ export async function firestoreDeleteChat(messageId: string): Promise<void> {
 
 export async function firestorePushNotification(item: NotificationItem): Promise<void> {
   try {
-    await setDoc(doc(db, 'notifications', item.id), item);
+    await setDoc(doc(db, 'notifications', item.id), sanitizeForFirestore(item));
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `notifications/${item.id}`);
   }
@@ -958,7 +958,7 @@ export async function firestoreClearNotifications(items: NotificationItem[]): Pr
 
 export async function firestoreAddAuditLog(log: AuditLog): Promise<void> {
   try {
-    await setDoc(doc(db, 'auditLogs', log.id), log);
+    await setDoc(doc(db, 'auditLogs', log.id), sanitizeForFirestore(log));
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `auditLogs/${log.id}`);
   }
@@ -966,7 +966,7 @@ export async function firestoreAddAuditLog(log: AuditLog): Promise<void> {
 
 export async function firestoreSendDirectMessage(message: ChatMessage): Promise<void> {
   try {
-    await setDoc(doc(db, 'directMessages', message.id), message);
+    await setDoc(doc(db, 'directMessages', message.id), sanitizeForFirestore(message));
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `directMessages/${message.id}`);
   }
@@ -982,10 +982,10 @@ export async function firestoreDeleteDirectMessage(messageId: string): Promise<v
 
 export async function firestoreSaveReportTemplate(template: any): Promise<void> {
   try {
-    await setDoc(doc(db, 'reportTemplates', 'default_template'), {
+    await setDoc(doc(db, 'reportTemplates', 'default_template'), sanitizeForFirestore({
       ...template,
       updatedAt: new Date().toISOString(),
-    });
+    }));
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, 'reportTemplates/default_template');
   }
@@ -996,20 +996,20 @@ export async function forceReseedFirestore(): Promise<{ success: boolean; count:
   try {
     const batch = writeBatch(db);
 
-    initialStudents.forEach(item => batch.set(doc(db, 'students', item.id), item));
-    initialTeachers.forEach(item => batch.set(doc(db, 'teachers', item.id), item));
-    initialClasses.forEach(item => batch.set(doc(db, 'classes', item.id), item));
-    initialMajors.forEach(item => batch.set(doc(db, 'majors', item.id), item));
-    initialSubjects.forEach(item => batch.set(doc(db, 'subjects', item.id), item));
-    initialAcademicYears.forEach(item => batch.set(doc(db, 'academicYears', item.id), item));
-    initialUsers.forEach(item => batch.set(doc(db, 'users', item.id), item));
-    initialAttendanceSessions.forEach(item => batch.set(doc(db, 'attendanceSessions', item.id), item));
-    initialAttendanceRecords.forEach(item => batch.set(doc(db, 'attendanceRecords', item.id), item));
-    initialAssessments.forEach(item => batch.set(doc(db, 'assessments', item.id), item));
-    initialAssessmentScores.forEach(item => batch.set(doc(db, 'assessmentScores', item.id), item));
-    initialNotifications.forEach(item => batch.set(doc(db, 'notifications', item.id), item));
-    initialChatMessages.forEach(item => batch.set(doc(db, 'chatMessages', item.id), item));
-    initialAuditLogs.forEach(item => batch.set(doc(db, 'auditLogs', item.id), item));
+    initialStudents.forEach(item => batch.set(doc(db, 'students', item.id), sanitizeForFirestore(item)));
+    initialTeachers.forEach(item => batch.set(doc(db, 'teachers', item.id), sanitizeForFirestore(item)));
+    initialClasses.forEach(item => batch.set(doc(db, 'classes', item.id), sanitizeForFirestore(item)));
+    initialMajors.forEach(item => batch.set(doc(db, 'majors', item.id), sanitizeForFirestore(item)));
+    initialSubjects.forEach(item => batch.set(doc(db, 'subjects', item.id), sanitizeForFirestore(item)));
+    initialAcademicYears.forEach(item => batch.set(doc(db, 'academicYears', item.id), sanitizeForFirestore(item)));
+    initialUsers.forEach(item => batch.set(doc(db, 'users', item.id), sanitizeForFirestore(item)));
+    initialAttendanceSessions.forEach(item => batch.set(doc(db, 'attendanceSessions', item.id), sanitizeForFirestore(item)));
+    initialAttendanceRecords.forEach(item => batch.set(doc(db, 'attendanceRecords', item.id), sanitizeForFirestore(item)));
+    initialAssessments.forEach(item => batch.set(doc(db, 'assessments', item.id), sanitizeForFirestore(item)));
+    initialAssessmentScores.forEach(item => batch.set(doc(db, 'assessmentScores', item.id), sanitizeForFirestore(item)));
+    initialNotifications.forEach(item => batch.set(doc(db, 'notifications', item.id), sanitizeForFirestore(item)));
+    initialChatMessages.forEach(item => batch.set(doc(db, 'chatMessages', item.id), sanitizeForFirestore(item)));
+    initialAuditLogs.forEach(item => batch.set(doc(db, 'auditLogs', item.id), sanitizeForFirestore(item)));
 
     await batch.commit();
     return { success: true, count: 14 };
@@ -1018,10 +1018,28 @@ export async function forceReseedFirestore(): Promise<{ success: boolean; count:
   }
 }
 
-function sanitizeForFirestore<T>(obj: T): T {
-  return JSON.parse(
-    JSON.stringify(obj, (_key, value) => (value === undefined ? null : value))
-  );
+export function sanitizeForFirestore<T>(data: T): T {
+  if (data === null || data === undefined) {
+    return null as any;
+  }
+  if (Array.isArray(data)) {
+    return data
+      .filter(item => item !== undefined)
+      .map(item => sanitizeForFirestore(item)) as any;
+  }
+  if (typeof data === 'object') {
+    if (data instanceof Date) {
+      return data.toISOString() as any;
+    }
+    const cleanObj: Record<string, any> = {};
+    for (const [key, val] of Object.entries(data as Record<string, any>)) {
+      if (val !== undefined) {
+        cleanObj[key] = sanitizeForFirestore(val);
+      }
+    }
+    return cleanObj as T;
+  }
+  return data;
 }
 
 // Attendance Cascade Delete & Full Recap Sync
@@ -1148,9 +1166,21 @@ export async function firestoreClearAllPklData(
 
 export async function firestoreSaveVisualSettings(settings: VisualSettings): Promise<void> {
   try {
-    const MAX_FIELD_LEN = 700_000;
+    const MAX_FIELD_LEN = 550_000;
     const safeSettings: VisualSettings = {
       ...settings,
+      appLogoUrl:
+        settings.appLogoUrl && settings.appLogoUrl.length <= MAX_FIELD_LEN
+          ? settings.appLogoUrl
+          : settings.appLogoUrl === null
+          ? null
+          : undefined,
+      faviconUrl:
+        settings.faviconUrl && settings.faviconUrl.length <= MAX_FIELD_LEN
+          ? settings.faviconUrl
+          : settings.faviconUrl === null
+          ? null
+          : undefined,
       loginBgUrl:
         settings.loginBgUrl && settings.loginBgUrl.length > MAX_FIELD_LEN
           ? null
@@ -1163,7 +1193,21 @@ export async function firestoreSaveVisualSettings(settings: VisualSettings): Pro
         settings.globalBannerBgUrl && settings.globalBannerBgUrl.length > MAX_FIELD_LEN
           ? null
           : settings.globalBannerBgUrl,
+      // Avoid storing duplicate map in Firestore document
+      perModuleBannerBgs: {},
     };
+
+    let serialized = JSON.stringify(safeSettings);
+    if (serialized.length > 850_000) {
+      // Trim heavy background maps if combined payload approaches Firestore 1MB limit, while always keeping logo & favicon
+      safeSettings.moduleBannerBgs = {};
+      serialized = JSON.stringify(safeSettings);
+    }
+    if (serialized.length > 850_000) {
+      safeSettings.boxBgs = {};
+      safeSettings.menuBgUrl = null;
+    }
+
     await setDoc(doc(db, 'settings', 'visual_theme'), sanitizeForFirestore(safeSettings));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, 'settings/visual_theme');

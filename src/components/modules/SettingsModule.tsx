@@ -28,6 +28,14 @@ import {
   Moon,
   Sun,
   BookOpen,
+  Bookmark,
+  ExternalLink,
+  Link2,
+  Sliders,
+  Check,
+  Upload,
+  Wand2,
+  ChevronRight,
 } from 'lucide-react';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 import { SkyborneCastleBackground, LiveWallpaperPresetLayer } from '../common/SkyborneCastleBackground';
@@ -63,6 +71,111 @@ const compressUploadedImage = (file: File, maxWidth = 1800, quality = 0.82, keep
     reader.readAsDataURL(file);
   });
 };
+
+const compressUploadedFavicon = (file: File, size = 64): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    if (file.type === 'image/svg+xml') {
+      const reader = new FileReader();
+      reader.onload = ev => resolve(ev.target?.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(ev.target?.result as string);
+          return;
+        }
+        ctx.clearRect(0, 0, size, size);
+        const scale = Math.min(size / img.width, size / img.height);
+        const w = img.width * scale;
+        const h = img.height * scale;
+        const x = (size - w) / 2;
+        const y = (size - h) / 2;
+        ctx.drawImage(img, x, y, w, h);
+        resolve(canvas.toDataURL('image/png', 0.95));
+      };
+      img.onerror = reject;
+      img.src = ev.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+const FAVICON_PRESETS = [
+  {
+    id: 'royal_crest',
+    name: 'Mahkota Biru Royal',
+    desc: 'Lambang mahkota resmi akademi biru kobalt',
+    url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect width='32' height='32' rx='8' fill='%232563EB'/%3E%3Cpath d='M16 6L5 12L16 18L27 12L16 6Z' fill='white'/%3E%3Cpath d='M9 14.5V20.5C9 23.5 12.1 26 16 26C19.9 26 23 23.5 23 20.5V14.5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M27 12V21' stroke='%2393C5FD' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E",
+  },
+  {
+    id: 'golden_star',
+    name: 'Bintang Falak Emas',
+    desc: 'Bintang falak emas 8 sudut dengan latar midnight',
+    url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect width='32' height='32' rx='8' fill='%230B1736' stroke='%23D4AF37' stroke-width='2'/%3E%3Cpath d='M16 4L18.8 13.2L28 16L18.8 18.8L16 28L13.2 18.8L4 16L13.2 13.2L16 4Z' fill='%23FDE047'/%3E%3Ccircle cx='16' cy='16' r='3.5' fill='%23D97706'/%3E%3C/svg%3E",
+  },
+  {
+    id: 'academic_toga',
+    name: 'Topi Toga Akademik',
+    desc: 'Simbol kelulusan & prestasi akademik sarjana/kejuruan',
+    url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect width='32' height='32' rx='8' fill='%231E1B4B'/%3E%3Cpath d='M16 7L4 13L16 19L28 13L16 7Z' fill='%23F59E0B'/%3E%3Cpath d='M9 15.5V22C9 24.5 12.1 27 16 27C19.9 27 23 24.5 23 22V15.5' stroke='%23FDE047' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='28' cy='13' r='2' fill='%23FDE047'/%3E%3Cline x1='28' y1='15' x2='28' y2='22' stroke='%23FDE047' stroke-width='2'/%3E%3C/svg%3E",
+  },
+  {
+    id: 'emerald_book',
+    name: 'Buku Terbuka Zamrud',
+    desc: 'Simbol ilmu pengetahuan & literasi digital',
+    url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect width='32' height='32' rx='8' fill='%23064E3B'/%3E%3Cpath d='M7 9C10.5 7.5 13.5 9 16 11C18.5 9 21.5 7.5 25 9V23C21.5 21.5 18.5 23 16 25C13.5 23 10.5 21.5 7 23V9Z' fill='%2310B981' stroke='%23A7F3D0' stroke-width='1.5'/%3E%3Cline x1='16' y1='11' x2='16' y2='25' stroke='%23ECFDF5' stroke-width='2'/%3E%3C/svg%3E",
+  },
+];
+
+const LOGO_PRESETS = [
+  {
+    id: 'crest_royal',
+    name: 'Perisai Mahkota Royal',
+    desc: 'Emblem klasik kerajaan biru safir & emas',
+    url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'%3E%3Ccircle cx='50' cy='50' r='46' fill='%230B1736' stroke='%23D4AF37' stroke-width='3'/%3E%3Cpath d='M25 35 Q50 25 75 35 C75 65 60 82 50 88 C40 82 25 65 25 35 Z' fill='%231E3A8A' stroke='%23FDE047' stroke-width='2.5'/%3E%3Cpath d='M35 52 L50 40 L65 52 L50 62 Z' fill='%23FDE047'/%3E%3Ccircle cx='50' cy='50' r='5' fill='%23D97706'/%3E%3C/svg%3E",
+  },
+  {
+    id: 'phoenix_gold',
+    name: 'Garuda Falak Emas',
+    desc: 'Sayap kejayaan & bintang pencerahan',
+    url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'%3E%3Ccircle cx='50' cy='50' r='46' fill='%231C1208' stroke='%23F59E0B' stroke-width='3'/%3E%3Cpath d='M50 18 L55 35 L72 35 L58 46 L63 63 L50 52 L37 63 L42 46 L28 35 L45 35 Z' fill='%23FDE047' stroke='%23B45309' stroke-width='1.5'/%3E%3Cpath d='M20 70 Q50 55 80 70 C70 82 50 85 20 70 Z' fill='%23D97706'/%3E%3C/svg%3E",
+  },
+  {
+    id: 'academic_book',
+    name: 'Kitab Grimoire Ilmu',
+    desc: 'Buku terbuka bercahaya bintang suci',
+    url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'%3E%3Ccircle cx='50' cy='50' r='46' fill='%230A192F' stroke='%2338BDF8' stroke-width='3'/%3E%3Cpath d='M24 38 Q50 30 50 72 Q24 64 24 38 Z' fill='%230284C7' stroke='%23BAE6FD' stroke-width='2'/%3E%3Cpath d='M76 38 Q50 30 50 72 Q76 64 76 38 Z' fill='%230284C7' stroke='%23BAE6FD' stroke-width='2'/%3E%3Ccircle cx='50' cy='28' r='4' fill='%23FDE047'/%3E%3C/svg%3E",
+  },
+  {
+    id: 'celestial_crown',
+    name: 'Mahkota Keagungan',
+    desc: 'Simbol kedaulatan moral & intelektual',
+    url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'%3E%3Ccircle cx='50' cy='50' r='46' fill='%230F172A' stroke='%23D4AF37' stroke-width='3'/%3E%3Cpath d='M28 65 L24 40 L38 52 L50 32 L62 52 L76 40 L72 65 Z' fill='%23F59E0B' stroke='%23FEF08A' stroke-width='2'/%3E%3Ccircle cx='24' cy='38' r='3' fill='%23FEF08A'/%3E%3Ccircle cx='50' cy='30' r='3.5' fill='%23FFFBEB'/%3E%3Ccircle cx='76' cy='38' r='3' fill='%23FEF08A'/%3E%3C/svg%3E",
+  },
+  {
+    id: 'emerald_laurel',
+    name: 'Karangan Daun Laurel',
+    desc: 'Kemenangan karakter, integritas & budi pekerti',
+    url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23064E3B' stroke='%2334D399' stroke-width='3'/%3E%3Ccircle cx='50' cy='50' r='24' fill='%23022C22' stroke='%23A7F3D0' stroke-width='1.5'/%3E%3Cpath d='M30 50 Q30 28 50 28 Q70 28 70 50 Q70 72 50 72 Q30 72 30 50' stroke='%2334D399' stroke-width='3' stroke-dasharray='5 4' fill='none'/%3E%3Cpath d='M44 50 L48 55 L58 44' stroke='%23FDE047' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E",
+  },
+  {
+    id: 'tech_compass',
+    name: 'Kompas Navigasi Modern',
+    desc: 'Ketepatan arah teknologi & masa depan kejuruan',
+    url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23030712' stroke='%236366F1' stroke-width='3'/%3E%3Ccircle cx='50' cy='50' r='36' stroke='%23818CF8' stroke-width='1.5' stroke-dasharray='4 3'/%3E%3Cpath d='M50 20 L58 45 L50 42 L42 45 Z' fill='%23EF4444'/%3E%3Cpath d='M50 80 L58 55 L50 58 L42 55 Z' fill='%2338BDF8'/%3E%3Ccircle cx='50' cy='50' r='4' fill='%23FDE047'/%3E%3C/svg%3E",
+  },
+];
 
 const readMediaFileAsDataUrl = async (file: File, maxWidth = 1440, keepAlpha = false): Promise<{ url: string; isVideo: boolean }> => {
   if (file.type.startsWith('video/')) {
@@ -136,10 +249,16 @@ export const SettingsModule: React.FC = () => {
   const [isSavingVisuals, setIsSavingVisuals] = useState(false);
 
   const appLogoInputRef = useRef<HTMLInputElement>(null);
+  const faviconInputRef = useRef<HTMLInputElement>(null);
   const loginBgInputRef = useRef<HTMLInputElement>(null);
   const menuBgInputRef = useRef<HTMLInputElement>(null);
   const globalBannerBgInputRef = useRef<HTMLInputElement>(null);
   const perModuleInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const [showLogoUrlModal, setShowLogoUrlModal] = useState(false);
+  const [inputLogoUrl, setInputLogoUrl] = useState('');
+  const [showFaviconUrlModal, setShowFaviconUrlModal] = useState(false);
+  const [inputFaviconUrl, setInputFaviconUrl] = useState('');
 
   const showBgToast = (msg: string) => {
     setBgToast(msg);
@@ -150,14 +269,74 @@ export const SettingsModule: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const dataUrl = await compressUploadedImage(file, 512, 0.92, true);
-      updateVisualSettings({ appLogoUrl: dataUrl });
-      showBgToast('Logo Aplikasi berhasil diperbarui untuk Halaman Login & seluruh Sidebar!');
+      if (file.type === 'image/svg+xml') {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const dataUrl = ev.target?.result as string;
+          if (dataUrl) {
+            updateVisualSettings({ appLogoUrl: dataUrl });
+            showBgToast('Logo Aplikasi (Format Vektor SVG) berhasil diperbarui untuk Login & Seluruh Sidebar!');
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        const dataUrl = await compressUploadedImage(file, 512, 0.92, true);
+        updateVisualSettings({ appLogoUrl: dataUrl });
+        showBgToast('Logo Aplikasi berhasil diperbarui untuk Halaman Login & seluruh Sidebar!');
+      }
     } catch (err) {
       console.error(err);
+      showBgToast('Gagal memproses gambar logo. Coba file format lain.');
     } finally {
       e.target.value = '';
     }
+  };
+
+  const handleUploadFavicon = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      let dataUrl: string;
+      if (file.type === 'image/svg+xml') {
+        dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = ev => resolve(ev.target?.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      } else {
+        dataUrl = await compressUploadedFavicon(file, 128);
+      }
+
+      updateVisualSettings({ faviconUrl: dataUrl });
+
+      // Immediate DOM sync for instant user feedback
+      try {
+        let favEl = document.getElementById('dynamic-favicon') as HTMLLinkElement | null;
+        if (!favEl) favEl = document.querySelector("link[rel*='icon']") as HTMLLinkElement | null;
+        if (favEl) favEl.href = dataUrl;
+        const appleEl = document.getElementById('dynamic-apple-icon') as HTMLLinkElement | null;
+        if (appleEl) appleEl.href = dataUrl;
+      } catch (domErr) {
+        console.warn('DOM icon sync warning:', domErr);
+      }
+
+      showBgToast('Favicon browser tab berhasil diperbarui secara dinamis!');
+    } catch (err) {
+      console.error(err);
+      showBgToast('Gagal memproses file favicon. Coba file PNG atau SVG.');
+    } finally {
+      e.target.value = '';
+    }
+  };
+
+  const handleSetLogoAsFavicon = () => {
+    if (!visualSettings?.appLogoUrl) {
+      showBgToast('Belum ada logo kustom yang diunggah.');
+      return;
+    }
+    updateVisualSettings({ faviconUrl: visualSettings.appLogoUrl });
+    showBgToast('Logo aplikasi berhasil disalin dan diterapkan sebagai Favicon Browser Tab!');
   };
 
   const handleUploadLoginBg = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -503,7 +682,7 @@ export const SettingsModule: React.FC = () => {
       {/* SECTION 0: KUSTOMISASI LOGO APLIKASI, LIVE WALLPAPER LOGIN, BG MENU & AMBIENCE DARK MODE */}
       {activeSection === 'backgrounds' && (
         <div className="space-y-6">
-          {/* CARD 0: GANTI LOGO APLIKASI (HALAMAN LOGIN & SIDEBAR SEMUA MENU) */}
+          {/* CARD 1: GANTI LOGO APLIKASI (HALAMAN LOGIN & SIDEBAR SEMUA MENU) */}
           <div className="rounded-2xl border border-[#EFE2BE] bg-white/95 p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900/90 space-y-4">
             <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-3 dark:border-slate-800">
               <div>
@@ -511,15 +690,17 @@ export const SettingsModule: React.FC = () => {
                   ✦ IDENTITAS RESMI LEMBAGA &amp; EMBLEM UTAMA
                 </span>
                 <h2 className="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">
-                  1. Ganti Logo Aplikasi (Halaman Login &amp; Sidebar Semua Halaman)
+                  1. Ganti Logo Aplikasi (Halaman Login, Sidebar &amp; Laporan Rapor)
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Logo yang diunggah akan langsung diterapkan secara proporsional dan estetik pada lambang utama Halaman Login serta bagian atas Sidebar di seluruh halaman.
+                  Logo yang diunggah akan langsung diterapkan secara proporsional dan estetik pada lambang utama Halaman Login, bagian atas Sidebar di seluruh menu, serta tersinkron ke dokumen laporan sekolah.
                 </p>
               </div>
-              <span className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-1 text-[10px] font-bold text-amber-800 dark:bg-amber-950/50 dark:border-amber-800 dark:text-amber-300">
-                {visualSettings?.appLogoUrl ? 'Logo Kustom Aktif' : 'Lambang Crest Default'}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-1 text-[10px] font-bold text-amber-800 dark:bg-amber-950/50 dark:border-amber-800 dark:text-amber-300">
+                  {visualSettings?.appLogoUrl ? 'Logo Kustom Aktif' : 'Lambang Crest Default'}
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
@@ -530,7 +711,9 @@ export const SettingsModule: React.FC = () => {
                     <img
                       src={visualSettings.appLogoUrl}
                       alt="Preview Logo Login"
-                      className="max-h-full max-w-full object-contain drop-shadow"
+                      className={`max-h-full max-w-full drop-shadow ${
+                        visualSettings.appLogoFit === 'cover' ? 'object-cover rounded-xl' : 'object-contain'
+                      }`}
                     />
                   ) : (
                     <BookOpen className="h-9 w-9 text-[#FDE047]" />
@@ -542,7 +725,10 @@ export const SettingsModule: React.FC = () => {
                   </span>
                   <p className="text-sm font-bold text-white mt-0.5">Emblem Gerbang Login</p>
                   <p className="text-[11px] text-slate-300 mt-0.5">
-                    Ukuran proporsional otomatis di tengah bingkai emas.
+                    Mode:{' '}
+                    <span className="font-semibold text-amber-300 uppercase">
+                      {visualSettings?.appLogoFit === 'cover' ? 'Isi Penuh (Cover)' : 'Proporsional (Contain)'}
+                    </span>
                   </p>
                 </div>
               </div>
@@ -554,7 +740,9 @@ export const SettingsModule: React.FC = () => {
                     <img
                       src={visualSettings.appLogoUrl}
                       alt="Preview Logo Sidebar"
-                      className="max-h-full max-w-full object-contain"
+                      className={`max-h-full max-w-full ${
+                        visualSettings.appLogoFit === 'cover' ? 'object-cover rounded-md' : 'object-contain'
+                      }`}
                     />
                   ) : (
                     <BookOpen className="h-5 w-5 text-[#EAB308]" />
@@ -574,7 +762,7 @@ export const SettingsModule: React.FC = () => {
                 </div>
               </div>
 
-              {/* Upload Controls */}
+              {/* Upload Controls & Settings */}
               <div className="flex flex-col gap-2.5">
                 <input
                   ref={appLogoInputRef}
@@ -583,14 +771,64 @@ export const SettingsModule: React.FC = () => {
                   onChange={handleUploadAppLogo}
                   className="hidden"
                 />
-                <button
-                  type="button"
-                  onClick={() => appLogoInputRef.current?.click()}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-3 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition-colors cursor-pointer"
-                >
-                  <ImagePlus className="h-4 w-4 text-[#FEF08A]" />
-                  <span>Upload Logo Aplikasi (PNG / SVG / JPG)</span>
-                </button>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => appLogoInputRef.current?.click()}
+                    className="flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 px-3 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition-colors cursor-pointer"
+                  >
+                    <ImagePlus className="h-4 w-4 text-[#FEF08A]" />
+                    <span>Upload Logo File</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowLogoUrlModal(!showLogoUrlModal)}
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs font-bold text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200 transition-colors cursor-pointer"
+                  >
+                    <Link2 className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    <span>Input URL Logo</span>
+                  </button>
+                </div>
+
+                {/* Logo Fit Toggle */}
+                <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/60">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                    Kerapian Bingkai (Fit):
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateVisualSettings({ appLogoFit: 'contain' });
+                        showBgToast('Mode tampilan logo: Proporsional Utuh (Contain)');
+                      }}
+                      className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all cursor-pointer ${
+                        visualSettings?.appLogoFit !== 'cover'
+                          ? 'bg-[#2563EB] text-white shadow-xs'
+                          : 'text-slate-500 hover:text-slate-800 dark:text-slate-400'
+                      }`}
+                    >
+                      Contain
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        updateVisualSettings({ appLogoFit: 'cover' });
+                        showBgToast('Mode tampilan logo: Penuh Bingkai (Cover)');
+                      }}
+                      className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all cursor-pointer ${
+                        visualSettings?.appLogoFit === 'cover'
+                          ? 'bg-[#2563EB] text-white shadow-xs'
+                          : 'text-slate-500 hover:text-slate-800 dark:text-slate-400'
+                      }`}
+                    >
+                      Cover
+                    </button>
+                  </div>
+                </div>
+
                 {visualSettings?.appLogoUrl && (
                   <button
                     type="button"
@@ -601,9 +839,251 @@ export const SettingsModule: React.FC = () => {
                     className="flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 transition-colors cursor-pointer"
                   >
                     <RotateCcw className="h-3.5 w-3.5" />
-                    <span>Reset Logo Default</span>
+                    <span>Reset Logo ke Default</span>
                   </button>
                 )}
+              </div>
+            </div>
+
+            {/* URL Input Form if toggled */}
+            {showLogoUrlModal && (
+              <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 animate-in fade-in">
+                <input
+                  type="url"
+                  value={inputLogoUrl}
+                  onChange={e => setInputLogoUrl(e.target.value)}
+                  placeholder="https://contoh-domain.sch.id/assets/logo-sekolah.png"
+                  className="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs text-slate-900 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (inputLogoUrl.trim()) {
+                      updateVisualSettings({ appLogoUrl: inputLogoUrl.trim() });
+                      showBgToast('Logo dari URL berhasil diterapkan!');
+                      setShowLogoUrlModal(false);
+                      setInputLogoUrl('');
+                    }
+                  }}
+                  className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer"
+                >
+                  Terapkan URL
+                </button>
+              </div>
+            )}
+
+            {/* Curated Logo Presets Gallery */}
+            <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                <span>Pilih Emblem Preset Lembaga (1-Klik Terapkan Langsung):</span>
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+                {LOGO_PRESETS.map(preset => {
+                  const isSelected = visualSettings?.appLogoUrl === preset.url;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => {
+                        updateVisualSettings({ appLogoUrl: preset.url });
+                        showBgToast(`Emblem "${preset.name}" berhasil diterapkan sebagai Logo Aplikasi!`);
+                      }}
+                      className={`flex flex-col items-center p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                        isSelected
+                          ? 'border-amber-500 bg-amber-50/80 dark:border-amber-500 dark:bg-amber-950/40 shadow-sm ring-1 ring-amber-500'
+                          : 'border-slate-200 bg-slate-50/70 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-800/40'
+                      }`}
+                    >
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0B162C] p-1 border border-amber-400/50 shadow-inner mb-1.5">
+                        <img src={preset.url} alt={preset.name} className="h-9 w-9 object-contain drop-shadow" />
+                      </div>
+                      <p className="text-[11px] font-bold text-slate-900 dark:text-white line-clamp-1">
+                        {preset.name}
+                      </p>
+                      <p className="text-[9px] text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                        {preset.desc}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* CARD 1b: GANTI FAVICON BROWSER TAB & BOOKMARK (FITUR BARU) */}
+          <div className="rounded-2xl border border-[#EFE2BE] bg-white/95 p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900/90 space-y-4">
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-3 dark:border-slate-800">
+              <div>
+                <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                  ✦ IKON TAB BROWSER &amp; BOOKMARK RESMI
+                </span>
+                <h2 className="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">
+                  1b. Ganti Favicon Browser Tab (Icon Tab &amp; Bookmark Web)
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Ubah ikon favicon yang tampil pada tab peramban web (browser tab), riwayat penelusuran, dan bookmark secara dinamis tanpa perlu deploy ulang.
+                </p>
+              </div>
+              <span className="rounded-xl bg-blue-50 border border-blue-200 px-3 py-1 text-[10px] font-bold text-blue-800 dark:bg-blue-950/50 dark:border-blue-800 dark:text-blue-300">
+                {visualSettings?.faviconUrl ? 'Favicon Kustom Aktif' : 'Favicon Default'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              {/* Left (7 cols): Realistic Browser Window Tab Mockup */}
+              <div className="lg:col-span-7 flex flex-col gap-3">
+                <p className="text-xs font-extrabold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <Laptop className="h-4 w-4 text-blue-500" />
+                  <span>Pratinjau Nyata Tab Browser (Live Browser Tab Mockup):</span>
+                </p>
+
+                {/* Browser Window Frame */}
+                <div className="rounded-2xl border-2 border-slate-300 bg-slate-200 p-2 shadow-md dark:border-slate-700 dark:bg-slate-800">
+                  {/* Window Controls & Active Tab */}
+                  <div className="flex items-center gap-2 px-1">
+                    <div className="flex items-center gap-1.5 mr-2">
+                      <span className="h-3 w-3 rounded-full bg-rose-500/80" />
+                      <span className="h-3 w-3 rounded-full bg-amber-500/80" />
+                      <span className="h-3 w-3 rounded-full bg-emerald-500/80" />
+                    </div>
+
+                    {/* Active Browser Tab */}
+                    <div className="flex items-center gap-2 rounded-t-xl bg-white px-3.5 py-2 text-xs font-bold text-slate-900 shadow-xs dark:bg-slate-900 dark:text-white max-w-xs border-t border-x border-slate-300 dark:border-slate-700">
+                      <div className="flex h-5 w-5 shrink-0 items-center justify-center overflow-hidden rounded">
+                        <img
+                          src={
+                            visualSettings?.faviconUrl ||
+                            visualSettings?.appLogoUrl ||
+                            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Crect width='32' height='32' rx='8' fill='%232563EB'/%3E%3Cpath d='M16 6L5 12L16 18L27 12L16 6Z' fill='white'/%3E%3Cpath d='M9 14.5V20.5C9 23.5 12.1 26 16 26C19.9 26 23 23.5 23 20.5V14.5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M27 12V21' stroke='%2393C5FD' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"
+                          }
+                          alt="Live Favicon Tab"
+                          className="h-4 w-4 object-contain"
+                        />
+                      </div>
+                      <span className="truncate text-[11px]">
+                        ORBITA — {schoolSettings?.schoolName || 'Sistem Informasi Akademik'}
+                      </span>
+                      <span className="text-slate-400 hover:text-slate-700 ml-1">×</span>
+                    </div>
+
+                    {/* Inactive Tab hint */}
+                    <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-[11px] text-slate-500">
+                      <Bookmark className="h-3.5 w-3.5" />
+                      <span>Google Drive</span>
+                    </div>
+                  </div>
+
+                  {/* Browser URL Bar */}
+                  <div className="mt-1 rounded-xl bg-white px-3 py-1.5 text-[11px] font-mono text-slate-600 dark:bg-slate-900 dark:text-slate-300 flex items-center justify-between border border-slate-300 dark:border-slate-700">
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="text-emerald-600 font-bold">🔒 https://</span>
+                      <span className="truncate">orbita.smk-ac.id/login</span>
+                    </div>
+                    <span className="text-[10px] text-slate-400">100%</span>
+                  </div>
+                </div>
+
+                {/* Curated Favicon Presets */}
+                <div className="space-y-1.5 mt-1">
+                  <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                    <Sparkles className="h-3 w-3 text-amber-500" />
+                    <span>Pilih Preset Favicon Cepat:</span>
+                  </span>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {FAVICON_PRESETS.map(preset => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => {
+                          updateVisualSettings({ faviconUrl: preset.url });
+                          showBgToast(`Favicon preset "${preset.name}" diterapkan!`);
+                        }}
+                        className={`flex items-center gap-2 rounded-xl border p-2 text-left transition-all cursor-pointer ${
+                          visualSettings?.faviconUrl === preset.url
+                            ? 'border-blue-500 bg-blue-50/80 dark:border-blue-500 dark:bg-blue-950/40 shadow-xs ring-1 ring-blue-500'
+                            : 'border-slate-200 bg-slate-50/70 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-800/40'
+                        }`}
+                      >
+                        <img src={preset.url} alt={preset.name} className="h-6 w-6 shrink-0 object-contain rounded" />
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-bold text-slate-900 dark:text-white truncate">
+                            {preset.name}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right (5 cols): Upload Favicon & 1-Click Sync */}
+              <div className="lg:col-span-5 flex flex-col gap-3">
+                <input
+                  ref={faviconInputRef}
+                  type="file"
+                  accept=".ico,.png,.svg,.webp,.jpg,.jpeg"
+                  onChange={handleUploadFavicon}
+                  className="hidden"
+                />
+
+                {/* 1-Click: Gunakan Logo Aplikasi Sebagai Favicon */}
+                <button
+                  type="button"
+                  onClick={handleSetLogoAsFavicon}
+                  disabled={!visualSettings?.appLogoUrl}
+                  className="group flex items-center justify-between gap-3 rounded-2xl border-2 border-[#D4AF37] bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 p-3.5 text-white shadow-md hover:from-amber-600 hover:to-amber-800 disabled:opacity-50 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 shadow-inner">
+                      <Wand2 className="h-5 w-5 text-amber-200 group-hover:rotate-12 transition-transform" />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-black uppercase tracking-wide">
+                        Gunakan Logo Aplikasi Saat Ini
+                      </p>
+                      <p className="text-[11px] text-amber-100">
+                        Sinkronkan logo institusi langsung sebagai favicon browser tab
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-amber-200" />
+                </button>
+
+                {/* Custom Favicon Upload Button */}
+                <button
+                  type="button"
+                  onClick={() => faviconInputRef.current?.click()}
+                  className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                >
+                  <Upload className="h-4 w-4 text-blue-200" />
+                  <span>Upload Favicon Kustom (.ICO / .PNG / .SVG)</span>
+                </button>
+
+                {/* Reset Favicon Button */}
+                {visualSettings?.faviconUrl && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateVisualSettings({ faviconUrl: null });
+                      showBgToast('Favicon browser dikembalikan ke ikon mahkota default.');
+                    }}
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 transition-colors cursor-pointer"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    <span>Reset Favicon ke Default</span>
+                  </button>
+                )}
+
+                <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-3 text-[11px] text-blue-800 dark:border-blue-900/40 dark:bg-blue-950/30 dark:text-blue-300">
+                  <p className="font-bold flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                    <span>Update Real-Time Tanpa Cache:</span>
+                  </p>
+                  <p className="mt-0.5 text-slate-600 dark:text-slate-300">
+                    Elemen &lt;link rel="icon"&gt; dan shortcut icon diperbarui seketika di tab peramban Anda.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
