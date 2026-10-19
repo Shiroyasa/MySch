@@ -91,81 +91,123 @@ export const LoginPage: React.FC = () => {
         livePreset={visualSettings?.loginLivePreset}
       />
 
-      {/* Royal Ornamental Outer Viewport Frame (Gold & Navy Filigree) */}
+      {/* ==================================================================== */}
+      {/* MAGICAL AMBIENT STARDUST MOTES & CELESTIAL RUNES                     */}
+      {/* ==================================================================== */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+        {[
+          { top: '8%', left: '12%', size: 'text-amber-300', rune: '✦', anim: 'animate-rune-twinkle', delay: '0s' },
+          { top: '18%', right: '15%', size: 'text-cyan-300', rune: '✧', anim: 'animate-rune-twinkle', delay: '1.2s' },
+          { top: '72%', left: '8%', size: 'text-amber-400', rune: '⋆', anim: 'animate-rune-twinkle', delay: '2.4s' },
+          { top: '84%', right: '12%', size: 'text-purple-300', rune: '✦', anim: 'animate-rune-twinkle', delay: '0.8s' },
+          { top: '42%', left: '5%', size: 'text-yellow-200', rune: '✵', anim: 'animate-rune-twinkle', delay: '1.8s' },
+          { top: '60%', right: '7%', size: 'text-blue-300', rune: '✧', anim: 'animate-rune-twinkle', delay: '2.1s' },
+          { top: '28%', left: '22%', size: 'text-emerald-300', rune: '⚝', anim: 'animate-rune-twinkle', delay: '3.1s' },
+          { top: '35%', right: '25%', size: 'text-amber-200', rune: '☾', anim: 'animate-rune-twinkle', delay: '1.5s' },
+          { top: '88%', left: '30%', size: 'text-cyan-200', rune: '☼', anim: 'animate-rune-twinkle', delay: '2.7s' },
+          { top: '15%', right: '35%', size: 'text-yellow-300', rune: '✦', anim: 'animate-rune-twinkle', delay: '0.4s' },
+        ].map((mote, i) => (
+          <span
+            key={i}
+            className={`absolute ${mote.size} drop-shadow-[0_0_10px_currentColor] ${mote.anim}`}
+            style={{
+              top: mote.top,
+              left: (mote as any).left,
+              right: (mote as any).right,
+              animationDelay: mote.delay,
+            }}
+          >
+            {mote.rune}
+          </span>
+        ))}
+      </div>
+
+      {/* Royal Ornamental Outer Viewport Frame (Gold & Navy Filigree with Magical Glint & Mana Sweep) */}
       <div
-        className="pointer-events-none fixed inset-2 sm:inset-3.5 z-10 rounded-2xl border-2 border-[#D4AF37]/75 shadow-[inset_0_0_0_2px_rgba(15,23,42,0.75),0_0_25px_rgba(0,0,0,0.45)]"
+        className="pointer-events-none fixed inset-2 sm:inset-3.5 z-10 rounded-2xl border-2 border-[#D4AF37]/85 shadow-[inset_0_0_0_2px_rgba(15,23,42,0.85),0_0_35px_rgba(212,175,55,0.45)] transition-all duration-700 overflow-hidden"
         aria-hidden="true"
       >
-        <div className="absolute inset-1 rounded-xl border border-[#FDE68A]/35" />
+        {/* Subtle Inner Concentric Glow Border */}
+        <div className="absolute inset-1 rounded-xl border border-[#FDE68A]/45 animate-pulse-glow" />
 
-        {/* Top Center Diamond Finial */}
-        <div className="absolute -top-2 left-1/2 -translate-x-1/2 flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rotate-45 bg-[#FBBF24]" />
-          <span className="h-3 w-3 rotate-45 border border-[#FFFBEB] bg-[#D4AF37] shadow-sm" />
-          <span className="h-1.5 w-1.5 rotate-45 bg-[#FBBF24]" />
+        {/* Sweeping Light Gleam along the viewport frame */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="h-full w-2/5 bg-gradient-to-r from-transparent via-amber-300/15 to-transparent animate-glint-sweep" />
         </div>
 
-        {/* Bottom Center Diamond Finial */}
-        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rotate-45 bg-[#FBBF24]" />
-          <span className="h-3 w-3 rotate-45 border border-[#FFFBEB] bg-[#D4AF37] shadow-sm" />
-          <span className="h-1.5 w-1.5 rotate-45 bg-[#FBBF24]" />
+        {/* Top Center Diamond Finial with Magical Shimmer & Multi-Tiered Twinkle */}
+        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 animate-astral-float">
+          <span className="h-1.5 w-1.5 rotate-45 bg-[#FBBF24] shadow-[0_0_8px_#fde047] animate-rune-twinkle" />
+          <span className="h-4 w-4 rotate-45 border-2 border-[#FFFBEB] bg-gradient-to-tr from-[#D4AF37] via-[#FDE047] to-[#FFFBEB] shadow-[0_0_16px_rgba(253,224,71,0.9)] animate-comet-pulse" />
+          <span className="h-1.5 w-1.5 rotate-45 bg-[#FBBF24] shadow-[0_0_8px_#fde047] animate-rune-twinkle" style={{ animationDelay: '1.5s' }} />
         </div>
 
-        {/* 4 Baroque Corner Ornaments */}
-        <div className="absolute -top-1 -left-1 h-6 w-6 border-t-2 border-l-2 border-[#FDE047] rounded-tl-md" />
-        <div className="absolute -top-1 -right-1 h-6 w-6 border-t-2 border-r-2 border-[#FDE047] rounded-tr-md" />
-        <div className="absolute -bottom-1 -left-1 h-6 w-6 border-b-2 border-l-2 border-[#FDE047] rounded-bl-md" />
-        <div className="absolute -bottom-1 -right-1 h-6 w-6 border-b-2 border-r-2 border-[#FDE047] rounded-br-md" />
+        {/* Bottom Center Diamond Finial with Magical Shimmer */}
+        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 animate-astral-float" style={{ animationDelay: '2.5s' }}>
+          <span className="h-1.5 w-1.5 rotate-45 bg-[#FBBF24] shadow-[0_0_8px_#fde047] animate-rune-twinkle" />
+          <span className="h-4 w-4 rotate-45 border-2 border-[#FFFBEB] bg-gradient-to-tr from-[#D4AF37] via-[#FDE047] to-[#FFFBEB] shadow-[0_0_16px_rgba(253,224,71,0.9)] animate-comet-pulse" />
+          <span className="h-1.5 w-1.5 rotate-45 bg-[#FBBF24] shadow-[0_0_8px_#fde047] animate-rune-twinkle" style={{ animationDelay: '1.5s' }} />
+        </div>
+
+        {/* 4 Baroque Corner Ornaments with Radiant Corner Starbursts & Glowing Runes */}
+        <div className="absolute -top-1.5 -left-1.5 h-8 w-8 border-t-2 border-l-2 border-[#FDE047] rounded-tl-md shadow-[0_0_14px_rgba(253,224,71,0.9)]">
+          <span className="absolute -top-1.5 -left-1.5 text-[11px] text-[#FDE047] drop-shadow-[0_0_8px_#fde047] animate-rune-twinkle">✦</span>
+          <span className="absolute top-1 left-1 h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_6px_#fde047] animate-ping" />
+        </div>
+        <div className="absolute -top-1.5 -right-1.5 h-8 w-8 border-t-2 border-r-2 border-[#FDE047] rounded-tr-md shadow-[0_0_14px_rgba(253,224,71,0.9)]">
+          <span className="absolute -top-1.5 -right-1.5 text-[11px] text-[#FDE047] drop-shadow-[0_0_8px_#fde047] animate-rune-twinkle" style={{ animationDelay: '0.8s' }}>✦</span>
+          <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_6px_#fde047] animate-ping" />
+        </div>
+        <div className="absolute -bottom-1.5 -left-1.5 h-8 w-8 border-b-2 border-l-2 border-[#FDE047] rounded-bl-md shadow-[0_0_14px_rgba(253,224,71,0.9)]">
+          <span className="absolute -bottom-1.5 -left-1.5 text-[11px] text-[#FDE047] drop-shadow-[0_0_8px_#fde047] animate-rune-twinkle" style={{ animationDelay: '1.6s' }}>✦</span>
+          <span className="absolute bottom-1 left-1 h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_6px_#fde047] animate-ping" />
+        </div>
+        <div className="absolute -bottom-1.5 -right-1.5 h-8 w-8 border-b-2 border-r-2 border-[#FDE047] rounded-br-md shadow-[0_0_14px_rgba(253,224,71,0.9)]">
+          <span className="absolute -bottom-1.5 -right-1.5 text-[11px] text-[#FDE047] drop-shadow-[0_0_8px_#fde047] animate-rune-twinkle" style={{ animationDelay: '2.4s' }}>✦</span>
+          <span className="absolute bottom-1 right-1 h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_6px_#fde047] animate-ping" />
+        </div>
       </div>
 
       {/* ==================================================================== */}
-      {/* MOBILE / TABLET TOP TAB SWITCHER (Keeps UI Proportional & Clean)    */}
+      {/* MOBILE / TABLET FLOATING UNBOXED CHRONOMETER (Outside the Login Box) */}
       {/* ==================================================================== */}
-      <div className="relative z-30 mb-3 flex items-center gap-1 rounded-2xl border border-[#D4AF37]/60 bg-[#0B1528]/90 p-1.5 backdrop-blur-md shadow-xl lg:hidden">
+      <div className="relative z-20 mb-2 w-full max-w-[360px] lg:hidden flex flex-col items-center">
+        {/* Unboxed Full Celestial Chronometer hovering outside the card */}
+        <div className="scale-[0.80] sm:scale-90 origin-center -my-4 sm:-my-2">
+          <CelestialChronometer />
+        </div>
+
+        {/* Sleek Unboxed Toggle Pill for Schedule Board */}
         <button
           type="button"
-          onClick={() => setMobileTab('login')}
-          className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
-            mobileTab === 'login'
-              ? 'border border-[#D4AF37] bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow-md'
-              : 'text-slate-300 hover:text-white'
-          }`}
+          onClick={() => setMobileTab(mobileTab === 'login' ? 'schedule' : 'login')}
+          className="mt-1 flex items-center gap-2 rounded-full border border-[#D4AF37]/75 bg-[#0B1528]/90 px-4 py-1.5 text-xs font-bold text-amber-300 shadow-[0_0_18px_rgba(212,175,55,0.35)] backdrop-blur-md cursor-pointer hover:bg-amber-500/20 active:scale-95 transition-all"
         >
-          <BookOpen className="h-3.5 w-3.5" />
-          <span>Gerbang Masuk</span>
+          {mobileTab === 'login' ? (
+            <>
+              <Calendar className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
+              <span>Lihat Jadwal Pelajaran Akademi</span>
+              <span className="rounded-full bg-amber-400/20 px-1.5 py-0.2 text-[9px] font-mono text-amber-300 font-black">
+                {(lessonSchedules || []).length}
+              </span>
+            </>
+          ) : (
+            <>
+              <BookOpen className="h-3.5 w-3.5 text-amber-400" />
+              <span>Kembali ke Gerbang Masuk</span>
+            </>
+          )}
         </button>
-
-        <button
-          type="button"
-          onClick={() => setMobileTab('schedule')}
-          className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
-            mobileTab === 'schedule'
-              ? 'border border-[#D4AF37] bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black shadow-md'
-              : 'text-slate-300 hover:text-white'
-          }`}
-        >
-          <Calendar className="h-3.5 w-3.5 text-amber-300" />
-          <span>Jadwal &amp; Jam</span>
-          <span className="rounded-full bg-amber-400/20 px-1.5 py-0.2 text-[9px] font-mono text-amber-300">
-            {(lessonSchedules || []).length}
-          </span>
-        </button>
-      </div>
-
-      {/* Mobile Compact Clock Badge when on Login Tab */}
-      <div className="relative z-20 mb-3 w-full max-w-[430px] lg:hidden block">
-        {mobileTab === 'login' && <CelestialChronometer compact className="mx-auto" />}
       </div>
 
       {/* ==================================================================== */}
       {/* DUAL-WING BALANCED LAYOUT (Aesthetic & Proportional)                 */}
-      {/* Left Wing: Observatory (Real-Time Clock + Live Schedule Board)      */}
+      {/* Left Wing: Observatory (Unboxed Clock + Live Schedule Board)        */}
       {/* Right Wing: Sacred Gate (Heraldic Crest + Parchment Login Card)     */}
       {/* ==================================================================== */}
       <div className="relative z-20 w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-8 my-auto">
         {/* ================================================================== */}
-        {/* WING 1: CHRONOMETER & LIVE LESSON SCHEDULE BOARD                   */}
+        {/* WING 1: UNBOXED CHRONOMETER & LIVE LESSON SCHEDULE BOARD           */}
         {/* Visible on Desktop, or when Mobile Tab === 'schedule'             */}
         {/* ================================================================== */}
         <div
@@ -173,8 +215,10 @@ export const LoginPage: React.FC = () => {
             mobileTab === 'schedule' ? 'flex' : 'hidden lg:flex'
           }`}
         >
-          {/* 1. Real-time Celestial Chronometer with Aesthetic Font & Effects */}
-          <CelestialChronometer />
+          {/* 1. Real-time Celestial Chronometer: Completely Unboxed, Outside any container */}
+          <div className="hidden lg:block">
+            <CelestialChronometer />
+          </div>
 
           {/* 2. Interactive Academic Lesson Schedule Board */}
           <AcademyScheduleBoard maxHeightClass="max-h-[350px]" />
@@ -189,17 +233,69 @@ export const LoginPage: React.FC = () => {
             mobileTab === 'login' ? 'flex' : 'hidden lg:flex'
           }`}
         >
-          {/* 1. HERALDIC ACADEMY CREST EMBLEM (Supports Custom App Logo Proportionally) */}
-          <div className="relative flex flex-col items-center text-center mb-3">
-            <div className="relative h-24 w-24 sm:h-28 sm:w-28 flex items-center justify-center">
-              {/* Ambient Dark & Gold Glow Behind Crest for Contrast Over Bright Sky */}
-              <div className="absolute inset-1 rounded-full bg-[#0B1938]/60 blur-xl" />
-              <div className="absolute inset-3 rounded-full bg-amber-400/25 blur-lg" />
+          {/* 1. HERALDIC ACADEMY CREST EMBLEM (With Magical Astrolabe Rings & Radiant Rays) */}
+          <div className="relative flex flex-col items-center text-center mb-3 animate-astral-float">
+            <div className="relative h-28 w-28 sm:h-32 sm:w-32 flex items-center justify-center">
+              {/* Magical Concentric Rotating Astrolabe Rings Behind Crest */}
+              <div className="pointer-events-none absolute -inset-5 flex items-center justify-center animate-celestial-spin">
+                <svg viewBox="0 0 160 160" className="h-full w-full drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="72"
+                    fill="none"
+                    stroke="#FDE047"
+                    strokeWidth="1.2"
+                    strokeDasharray="8 6"
+                    opacity="0.75"
+                  />
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="64"
+                    fill="none"
+                    stroke="#D4AF37"
+                    strokeWidth="0.8"
+                    opacity="0.45"
+                  />
+                  {/* 4 Cardinal Runes on Orbit */}
+                  {[0, 90, 180, 270].map((deg, i) => {
+                    const rad = (deg * Math.PI) / 180;
+                    return (
+                      <circle
+                        key={i}
+                        cx={80 + 72 * Math.cos(rad)}
+                        cy={80 + 72 * Math.sin(rad)}
+                        r="2.5"
+                        fill="#FFFBEB"
+                      />
+                    );
+                  })}
+                </svg>
+              </div>
+
+              {/* Counter-rotating Inner Magic Seal */}
+              <div className="pointer-events-none absolute -inset-2 flex items-center justify-center animate-celestial-spin-reverse">
+                <svg viewBox="0 0 140 140" className="h-full w-full opacity-60">
+                  <polygon
+                    points="70,12 85,55 128,70 85,85 70,128 55,85 12,70 55,55"
+                    fill="none"
+                    stroke="#FBBF24"
+                    strokeWidth="0.7"
+                    strokeDasharray="4 4"
+                  />
+                  <circle cx="70" cy="70" r="50" fill="none" stroke="#D97706" strokeWidth="0.8" />
+                </svg>
+              </div>
+
+              {/* Radiating Sunburst Rays Breathing */}
+              <div className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/20 via-yellow-300/30 to-blue-400/20 blur-xl animate-golden-rays" />
+              <div className="absolute inset-1 rounded-full bg-[#0B1938]/70 blur-md" />
 
               {activeLogo ? (
-                <div className="relative flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-2xl border-2 border-[#D4AF37] bg-gradient-to-b from-[#0F1E3A]/95 to-[#091224]/95 p-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.65),inset_0_0_12px_rgba(250,204,21,0.2)]">
+                <div className="relative flex h-24 w-24 sm:h-28 sm:w-28 items-center justify-center rounded-2xl border-2 border-[#D4AF37] bg-gradient-to-b from-[#0F1E3A]/95 to-[#091224]/95 p-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.65),0_0_20px_rgba(250,204,21,0.35)] animate-magical-glow">
                   <div className="pointer-events-none absolute inset-1 rounded-xl border border-[#FDE68A]/35" />
-                  <span className="pointer-events-none absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs text-[#FDE047] drop-shadow">
+                  <span className="pointer-events-none absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs text-[#FDE047] drop-shadow animate-rune-twinkle">
                     ✦
                   </span>
                   <img
@@ -207,13 +303,13 @@ export const LoginPage: React.FC = () => {
                     alt="Logo Aplikasi"
                     className={`${logoFitClass} drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]`}
                   />
-                  <span className="pointer-events-none absolute -bottom-2.5 left-1/2 -translate-x-1/2 text-xs text-[#FDE047] drop-shadow">
+                  <span className="pointer-events-none absolute -bottom-2.5 left-1/2 -translate-x-1/2 text-xs text-[#FDE047] drop-shadow animate-rune-twinkle">
                     ✦
                   </span>
                 </div>
               ) : (
-                /* Custom Heraldic Crest SVG: 4-Point Star + Laurel Wreath + Shield + Open Book */
-                <svg viewBox="0 0 140 150" className="relative h-full w-full drop-shadow-[0_6px_16px_rgba(0,0,0,0.65)]">
+                /* Custom Heraldic Crest SVG: 4-Point Star + Laurel Wreath + Shield + Open Book with Magic Glow */
+                <svg viewBox="0 0 140 150" className="relative h-full w-full drop-shadow-[0_6px_20px_rgba(0,0,0,0.7)] animate-magical-glow">
                   <defs>
                     <linearGradient id="crestGold" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#FFFBEB" />
@@ -249,11 +345,12 @@ export const LoginPage: React.FC = () => {
                     opacity="0.5"
                   />
 
-                  {/* Top 4-Point Star of Wisdom */}
+                  {/* Top 4-Point Star of Wisdom with Radiant Pulse */}
                   <g transform="translate(70, 22)">
                     <path
                       d="M 0 -14 L 3.5 -3.5 L 14 0 L 3.5 3.5 L 0 14 L -3.5 3.5 L -14 0 L -3.5 -3.5 Z"
                       fill="url(#crestGold)"
+                      className="drop-shadow-[0_0_8px_rgba(253,224,71,0.9)]"
                     />
                     <circle cx="0" cy="0" r="2.2" fill="#FFFBEB" />
                   </g>
@@ -309,41 +406,49 @@ export const LoginPage: React.FC = () => {
           </div>
 
           {/* ================================================================== */}
-          {/* 2. ORNATE PARCHMENT LOGIN CARD                                     */}
+          {/* 2. ORNATE PARCHMENT LOGIN CARD WITH MAGICAL SHIMMER                */}
           {/* ================================================================== */}
           <div
-            className="relative w-full rounded-[26px] p-1 shadow-[0_22px_55px_rgba(8,20,48,0.65),0_0_0_1px_rgba(253,230,138,0.55)]"
+            className="relative w-full rounded-[26px] p-[2.5px] shadow-[0_22px_55px_rgba(8,20,48,0.7),0_0_35px_rgba(212,175,55,0.4)] magical-shimmer-border"
             style={{
-              background:
-                'linear-gradient(180deg, rgba(254,243,199,0.92) 0%, rgba(217,179,110,0.88) 50%, rgba(254,243,199,0.92) 100%)',
+              backgroundImage:
+                'linear-gradient(135deg, #FDE047 0%, #D97706 20%, #3B82F6 40%, #A855F7 60%, #F59E0B 80%, #FDE047 100%)',
             }}
           >
-            {/* Top & Bottom Ornamental Gold Crest Accents on Card Edge */}
-            <div className="pointer-events-none absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rotate-45 bg-[#FDE047] shadow-xs" />
-              <span className="h-3.5 w-3.5 rotate-45 rounded-[2px] border border-[#FFFBEB] bg-gradient-to-br from-[#FDE047] to-[#D97706] shadow" />
-              <span className="h-1.5 w-1.5 rotate-45 bg-[#FDE047] shadow-xs" />
+            {/* Top & Bottom Ornamental Gold Crest Accents on Card Edge with Magical Pulse */}
+            <div className="pointer-events-none absolute -top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 animate-astral-float">
+              <span className="h-1.5 w-1.5 rotate-45 bg-[#FDE047] shadow-[0_0_6px_#fde047] animate-rune-twinkle" />
+              <span className="h-4 w-4 rotate-45 rounded-[2px] border border-[#FFFBEB] bg-gradient-to-br from-[#FFFBEB] via-[#FDE047] to-[#D97706] shadow-[0_0_14px_rgba(250,204,21,0.9)]" />
+              <span className="h-1.5 w-1.5 rotate-45 bg-[#FDE047] shadow-[0_0_6px_#fde047] animate-rune-twinkle" />
             </div>
-            <div className="pointer-events-none absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rotate-45 bg-[#FDE047] shadow-xs" />
-              <span className="h-3.5 w-3.5 rotate-45 rounded-[2px] border border-[#FFFBEB] bg-gradient-to-br from-[#FDE047] to-[#D97706] shadow" />
-              <span className="h-1.5 w-1.5 rotate-45 bg-[#FDE047] shadow-xs" />
+            <div className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 animate-astral-float">
+              <span className="h-1.5 w-1.5 rotate-45 bg-[#FDE047] shadow-[0_0_6px_#fde047] animate-rune-twinkle" />
+              <span className="h-4 w-4 rotate-45 rounded-[2px] border border-[#FFFBEB] bg-gradient-to-br from-[#FFFBEB] via-[#FDE047] to-[#D97706] shadow-[0_0_14px_rgba(250,204,21,0.9)]" />
+              <span className="h-1.5 w-1.5 rotate-45 bg-[#FDE047] shadow-[0_0_6px_#fde047] animate-rune-twinkle" />
             </div>
 
             {/* Inner Parchment Surface */}
             <div
-              className="relative rounded-[22px] px-5 py-5 sm:px-6 sm:py-6 border border-[#E5D3B3]"
+              className="relative rounded-[23px] px-5 py-5 sm:px-6 sm:py-6 border border-[#E5D3B3]"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(255,253,249,0.97) 0%, rgba(250,246,238,0.97) 55%, rgba(245,239,226,0.97) 100%)',
-                backdropFilter: 'blur(12px)',
+                  'linear-gradient(180deg, rgba(255,253,249,0.98) 0%, rgba(250,246,238,0.97) 55%, rgba(245,239,226,0.98) 100%)',
+                backdropFilter: 'blur(16px)',
               }}
             >
-              {/* Inner Gold Filigree Corner Brackets */}
-              <div className="pointer-events-none absolute top-2.5 left-2.5 h-4 w-4 border-t-2 border-l-2 border-[#D4AF37]/70 rounded-tl-md" />
-              <div className="pointer-events-none absolute top-2.5 right-2.5 h-4 w-4 border-t-2 border-r-2 border-[#D4AF37]/70 rounded-tr-md" />
-              <div className="pointer-events-none absolute bottom-2.5 left-2.5 h-4 w-4 border-b-2 border-l-2 border-[#D4AF37]/70 rounded-bl-md" />
-              <div className="pointer-events-none absolute bottom-2.5 right-2.5 h-4 w-4 border-b-2 border-r-2 border-[#D4AF37]/70 rounded-br-md" />
+              {/* Inner Gold Filigree Corner Brackets with Magical Glow & Corner Rune Stars */}
+              <div className="pointer-events-none absolute top-2.5 left-2.5 h-5 w-5 border-t-2 border-l-2 border-[#D4AF37] rounded-tl-md shadow-[0_0_10px_rgba(250,204,21,0.7)]">
+                <span className="absolute -top-2 -left-2 text-[10px] text-[#FDE047] drop-shadow-[0_0_6px_#fde047] animate-rune-twinkle">✦</span>
+              </div>
+              <div className="pointer-events-none absolute top-2.5 right-2.5 h-5 w-5 border-t-2 border-r-2 border-[#D4AF37] rounded-tr-md shadow-[0_0_10px_rgba(250,204,21,0.7)]">
+                <span className="absolute -top-2 -right-2 text-[10px] text-[#FDE047] drop-shadow-[0_0_6px_#fde047] animate-rune-twinkle" style={{ animationDelay: '0.9s' }}>✦</span>
+              </div>
+              <div className="pointer-events-none absolute bottom-2.5 left-2.5 h-5 w-5 border-b-2 border-l-2 border-[#D4AF37] rounded-bl-md shadow-[0_0_10px_rgba(250,204,21,0.7)]">
+                <span className="absolute -bottom-2 -left-2 text-[10px] text-[#FDE047] drop-shadow-[0_0_6px_#fde047] animate-rune-twinkle" style={{ animationDelay: '1.8s' }}>✦</span>
+              </div>
+              <div className="pointer-events-none absolute bottom-2.5 right-2.5 h-5 w-5 border-b-2 border-r-2 border-[#D4AF37] rounded-br-md shadow-[0_0_10px_rgba(250,204,21,0.7)]">
+                <span className="absolute -bottom-2 -right-2 text-[10px] text-[#FDE047] drop-shadow-[0_0_6px_#fde047] animate-rune-twinkle" style={{ animationDelay: '2.7s' }}>✦</span>
+              </div>
 
               {/* Error Banner */}
               {errorMessage && (
@@ -414,9 +519,10 @@ export const LoginPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowHelpModal(true)}
-                    className="text-xs font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline cursor-pointer"
+                    className="text-xs font-bold text-[#2563EB] hover:text-[#1D4ED8] hover:underline cursor-pointer flex items-center gap-1"
                   >
-                    Bantuan Akun
+                    <KeyRound className="h-3 w-3 text-amber-500 animate-pulse" />
+                    <span>Bantuan Akun</span>
                   </button>
                 </div>
 
@@ -425,10 +531,10 @@ export const LoginPage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="group relative w-full rounded-2xl p-[2px] shadow-[0_6px_20px_rgba(37,99,235,0.38)] transition-all duration-200 hover:scale-[1.01] hover:shadow-[0_8px_25px_rgba(59,130,246,0.5)] active:scale-[0.99] disabled:opacity-60 cursor-pointer"
+                    className="group relative w-full rounded-2xl p-[2.5px] shadow-[0_6px_25px_rgba(37,99,235,0.45)] transition-all duration-300 hover:scale-[1.015] hover:shadow-[0_8px_32px_rgba(250,204,21,0.6)] active:scale-[0.99] disabled:opacity-60 cursor-pointer magical-shimmer-border overflow-hidden"
                     style={{
-                      background:
-                        'linear-gradient(90deg, #D97706 0%, #FDE047 25%, #F59E0B 50%, #FDE047 75%, #D97706 100%)',
+                      backgroundImage:
+                        'linear-gradient(90deg, #D97706 0%, #FDE047 25%, #3B82F6 50%, #FDE047 75%, #D97706 100%)',
                     }}
                   >
                     <div
@@ -438,6 +544,11 @@ export const LoginPage: React.FC = () => {
                           'linear-gradient(90deg, #1D4ED8 0%, #2563EB 30%, #4338CA 70%, #5B21B6 100%)',
                       }}
                     >
+                      {/* Sweeping Light Glint Highlight across button */}
+                      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                        <div className="h-full w-2/5 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-glint-sweep" />
+                      </div>
+
                       {/* Subtle Top Gloss Highlight */}
                       <div
                         className="pointer-events-none absolute inset-x-0 top-0 h-1/2 opacity-25"
@@ -446,23 +557,23 @@ export const LoginPage: React.FC = () => {
                         }}
                       />
 
-                      {/* Left & Right Ornamental Gold Dots */}
-                      <span className="h-1.5 w-1.5 rotate-45 bg-[#FDE047] opacity-80" />
+                      {/* Left & Right Ornamental Gold Dots with Pulse */}
+                      <span className="h-1.5 w-1.5 rotate-45 bg-[#FDE047] shadow-[0_0_6px_#fde047] opacity-90 animate-rune-twinkle" />
 
-                      {/* Golden 8-Point Starburst Compass Icon */}
+                      {/* Golden 8-Point Starburst Compass Icon with Spin Animation */}
                       <svg
-                        className="h-4 w-4 text-[#FDE047] shrink-0 transition-transform duration-300 group-hover:rotate-45"
+                        className="h-4 w-4 text-[#FDE047] shrink-0 transition-transform duration-700 group-hover:rotate-180 animate-celestial-spin-slow drop-shadow-[0_0_10px_rgba(253,224,71,1)]"
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >
                         <path d="M12 1L14.2 8.2L21.5 6.5L16.5 12L21.5 17.5L14.2 15.8L12 23L9.8 15.8L2.5 17.5L7.5 12L2.5 6.5L9.8 8.2L12 1Z" />
                       </svg>
 
-                      <span className="text-xs sm:text-[13px] font-extrabold uppercase tracking-[0.09em] text-white drop-shadow-xs">
+                      <span className="text-xs sm:text-[13px] font-extrabold uppercase tracking-[0.09em] text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
                         {isSubmitting ? 'MEMBUKA GERBANG AKADEMI...' : 'MASUK GERBANG AKADEMI'}
                       </span>
 
-                      <span className="h-1.5 w-1.5 rotate-45 bg-[#FDE047] opacity-80" />
+                      <span className="h-1.5 w-1.5 rotate-45 bg-[#FDE047] shadow-[0_0_6px_#fde047] opacity-90 animate-rune-twinkle" style={{ animationDelay: '1.2s' }} />
                     </div>
                   </button>
                 </div>
@@ -477,14 +588,14 @@ export const LoginPage: React.FC = () => {
                 <div className="h-[1px] flex-1 bg-gradient-to-l from-transparent via-[#D6C7B2] to-[#D6C7B2]" />
               </div>
 
-              {/* Google Workspace Sign-In Button */}
+              {/* Google Workspace Sign-In Button with Magical Border Glow */}
               <button
                 onClick={handleGoogleSignIn}
                 disabled={isSubmitting}
                 type="button"
-                className="group relative w-full flex items-center justify-between rounded-xl border border-[#DFD2BC] bg-gradient-to-b from-white to-[#F7F3E8] px-3.5 py-2 text-xs font-bold text-[#1E293B] shadow-xs hover:border-[#C8B493] hover:from-[#FFFDF9] hover:to-[#F1E9D8] transition-all cursor-pointer"
+                className="group relative w-full flex items-center justify-between rounded-xl border border-[#DFD2BC] bg-gradient-to-b from-white to-[#F7F3E8] px-3.5 py-2.5 text-xs font-bold text-[#1E293B] shadow-xs hover:border-[#D4AF37] hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:from-[#FFFDF9] hover:to-[#F1E9D8] transition-all cursor-pointer"
               >
-                <span className="h-1.5 w-1.5 rotate-45 bg-[#D4AF37]/60" />
+                <span className="h-1.5 w-1.5 rotate-45 bg-[#D4AF37] shadow-[0_0_6px_#d4af37] animate-rune-twinkle" />
                 <div className="flex items-center justify-center gap-2">
                   <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24">
                     <path
@@ -506,17 +617,17 @@ export const LoginPage: React.FC = () => {
                   </svg>
                   <span>Login dengan Google Workspace</span>
                 </div>
-                <span className="h-1.5 w-1.5 rotate-45 bg-[#D4AF37]/60" />
+                <span className="h-1.5 w-1.5 rotate-45 bg-[#D4AF37] shadow-[0_0_6px_#d4af37] animate-rune-twinkle" style={{ animationDelay: '1.5s' }} />
               </button>
 
-              {/* Philosophical Quote Footer Inside Card */}
+              {/* Philosophical Quote Footer Inside Card with Golden Twinkling Rune */}
               <div className="mt-4 pt-2.5 border-t border-[#E6DEC8]/70 text-center space-y-0.5">
                 <p className="text-[11px] font-medium text-[#475569] leading-relaxed">
                   Ilmu adalah cahaya, yang akan selalu menuntun langkahmu.
                 </p>
                 <div className="flex items-center justify-center gap-1.5 pt-0.5 text-[#D4AF37]">
                   <span className="h-[1px] w-6 bg-gradient-to-r from-transparent to-[#D4AF37]/60" />
-                  <span className="text-[9px]">✦</span>
+                  <span className="text-[10px] text-[#FDE047] drop-shadow-[0_0_6px_#fde047] animate-rune-twinkle">✦</span>
                   <span className="h-[1px] w-6 bg-gradient-to-l from-transparent to-[#D4AF37]/60" />
                 </div>
               </div>

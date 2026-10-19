@@ -103,6 +103,137 @@
 }
 
 /* ========================================================================== */
+/* MAGICAL ACADEMY & CELESTIAL ASTROLABE ANIMATIONS                          */
+/* ========================================================================== */
+
+@keyframes celestialSpinClockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes celestialSpinCounter {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes magicalPulseGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.45)) drop-shadow(0 0 25px rgba(59, 130, 246, 0.35));
+    opacity: 0.9;
+  }
+  50% {
+    filter: drop-shadow(0 0 24px rgba(250, 204, 21, 0.85)) drop-shadow(0 0 45px rgba(168, 85, 247, 0.6));
+    opacity: 1;
+  }
+}
+
+@keyframes astralFloat {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-6px) rotate(0.4deg); }
+}
+
+@keyframes magicalShimmerBorder {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes runeTwinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.15) rotate(45deg); filter: drop-shadow(0 0 8px rgba(253, 224, 71, 0.8)); }
+}
+
+@keyframes goldenRayPulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.96) rotate(0deg); }
+  50% { opacity: 0.85; transform: scale(1.05) rotate(15deg); }
+}
+
+.animate-astral-float {
+  animation: astralFloat 5s ease-in-out infinite;
+}
+
+.animate-celestial-spin {
+  animation: celestialSpinClockwise 40s linear infinite;
+}
+
+.animate-celestial-spin-reverse {
+  animation: celestialSpinCounter 30s linear infinite;
+}
+
+.animate-celestial-spin-slow {
+  animation: celestialSpinClockwise 90s linear infinite;
+}
+
+.animate-magical-glow {
+  animation: magicalPulseGlow 3s ease-in-out infinite;
+}
+
+.animate-rune-twinkle {
+  animation: runeTwinkle 3.5s ease-in-out infinite;
+}
+
+.animate-golden-rays {
+  animation: goldenRayPulse 4s ease-in-out infinite;
+}
+
+.magical-shimmer-border {
+  background-size: 300% 300%;
+  animation: magicalShimmerBorder 6s ease infinite;
+}
+
+@keyframes manaRipple {
+  0% { transform: scale(0.85); opacity: 0.9; }
+  50% { opacity: 0.4; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+@keyframes cometPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px #fde047) drop-shadow(0 0 20px #38bdf8); }
+  50% { transform: scale(1.25); filter: drop-shadow(0 0 18px #fff) drop-shadow(0 0 30px #f59e0b); }
+}
+
+@keyframes manaFlicker {
+  0%, 100% {
+    text-shadow: 0 0 12px rgba(253, 224, 71, 0.8), 0 0 24px rgba(56, 189, 248, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 22px rgba(255, 255, 255, 1), 0 0 36px rgba(250, 204, 21, 0.95), 0 0 50px rgba(168, 85, 247, 0.6);
+  }
+}
+
+@keyframes celestialOrbPulse {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+@keyframes glintSweep {
+  0% { transform: translateX(-150%) skewX(-20deg); opacity: 0; }
+  25% { opacity: 0.75; }
+  75% { opacity: 0.75; }
+  100% { transform: translateX(250%) skewX(-20deg); opacity: 0; }
+}
+
+.animate-mana-ripple {
+  animation: manaRipple 3s cubic-bezier(0.1, 0.6, 0.3, 1) infinite;
+}
+
+.animate-comet-pulse {
+  animation: cometPulse 2s ease-in-out infinite;
+}
+
+.animate-mana-flicker {
+  animation: manaFlicker 3s ease-in-out infinite;
+}
+
+.animate-celestial-orb {
+  animation: celestialOrbPulse 4s ease-in-out infinite;
+}
+
+.animate-glint-sweep {
+  animation: glintSweep 4.5s ease-in-out infinite;
+}
+
+/* ========================================================================== */
 /* JRPG DIALOGUE BOX, CARD & TABLE SYSTEM + INTERACTIVE HOVER ANIMATIONS       */
 /* ========================================================================== */
 
