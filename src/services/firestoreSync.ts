@@ -84,9 +84,11 @@ let isInitialized = false;
 
 // Auto-seed Firestore if collections are empty so all devices get real synchronized data
 export async function ensureFirestorePopulated(): Promise<void> {
+  if (isInitialized) return;
   try {
     const studentsSnap = await getDocs(collection(db, 'students'));
     if (!studentsSnap.empty) {
+      isInitialized = true;
       console.log(`Firestore already contains ${studentsSnap.size} students. Skipping initial seed.`);
       return;
     }
@@ -153,8 +155,10 @@ export async function ensureFirestorePopulated(): Promise<void> {
     });
 
     await batch.commit();
+    isInitialized = true;
     console.log('Cloud Firestore successfully seeded and synchronized!');
   } catch (err) {
+    isInitialized = true;
     console.warn('Initial seeding encountered notice (may already have records):', err);
   }
 }

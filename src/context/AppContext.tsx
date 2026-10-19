@@ -318,6 +318,21 @@ interface AppContextType {
   forceCloudResync: () => Promise<void>;
 }
 
+function safeGetLocalStorage<T>(key: string, fallback: T, validator?: (val: any) => boolean): T {
+  try {
+    const cached = localStorage.getItem(key);
+    if (!cached || cached === 'undefined' || cached === 'null' || cached === '') return fallback;
+    const parsed = JSON.parse(cached);
+    if (validator) {
+      return validator(parsed) ? (parsed as T) : fallback;
+    }
+    return (parsed as T) ?? fallback;
+  } catch (e) {
+    console.warn(`Safe localStorage fallback for "${key}":`, e);
+    return fallback;
+  }
+}
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -347,26 +362,54 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [darkMode]);
 
-  // Active navigation tab
-  const [activeNav, setActiveNav] = useState<string>('dashboard');
+  // Active navigation tab with URL hash & localStorage persistence on refresh
+  const getInitialNav = (): string => {
+    try {
+      if (typeof window !== 'undefined' && window.location.hash) {
+        const hash = window.location.hash.replace(/^#\/?/, '').trim();
+        if (hash) return hash;
+      }
+      const cached = localStorage.getItem('myschool_active_nav');
+      if (cached && typeof cached === 'string') return cached;
+    } catch (e) {}
+    const cachedUser = safeGetLocalStorage<User>(
+      'myschool_current_user',
+      initialUsers[0],
+      u => Boolean(u && typeof u === 'object' && u.id && u.role)
+    );
+    return cachedUser?.role === 'siswa' ? 'student-profile' : 'dashboard';
+  };
+
+  const [activeNav, setActiveNavState] = useState<string>(getInitialNav);
+
+  const setActiveNav = (nav: string) => {
+    setActiveNavState(nav);
+    try {
+      localStorage.setItem('myschool_active_nav', nav);
+      if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', `#${nav}`);
+      }
+    } catch (e) {}
+  };
+
+  // Sync hash changes (e.g. browser back/forward buttons or manual URL change)
+  useEffect(() => {
+    const handleHashChange = () => {
+      try {
+        const hash = window.location.hash.replace(/^#\/?/, '').trim();
+        if (hash && hash !== activeNav) {
+          setActiveNavState(hash);
+          localStorage.setItem('myschool_active_nav', hash);
+        }
+      } catch (e) {}
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [activeNav]);
 
   // Logout confirmation modal state
   const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
-
-function safeGetLocalStorage<T>(key: string, fallback: T, validator?: (val: any) => boolean): T {
-  try {
-    const cached = localStorage.getItem(key);
-    if (!cached || cached === 'undefined' || cached === 'null' || cached === '') return fallback;
-    const parsed = JSON.parse(cached);
-    if (validator) {
-      return validator(parsed) ? (parsed as T) : fallback;
-    }
-    return (parsed as T) ?? fallback;
-  } catch (e) {
-    console.warn(`Safe localStorage fallback for "${key}":`, e);
-    return fallback;
-  }
-}
 
   // Page Routing State (login, app)
   const [pageView, setPageView] = useState<'landing' | 'login' | 'app'>(() => {
@@ -409,6 +452,11 @@ function safeGetLocalStorage<T>(key: string, fallback: T, validator?: (val: any)
         const existing = users.find(u => u.email === fbUser.email);
         if (existing) {
           setCurrentUser(existing);
+          try {
+            localStorage.setItem('myschool_current_user', JSON.stringify(existing));
+            localStorage.setItem('myschool_page_view', 'app');
+          } catch (e) {}
+          setPageView('app');
         } else {
           // If it matches the authorized email kkaito447@gmail.com, make super_admin
           const isOwner = fbUser.email === 'kkaito447@gmail.com';
@@ -423,6 +471,11 @@ function safeGetLocalStorage<T>(key: string, fallback: T, validator?: (val: any)
           };
           setUsers(prev => [newUser, ...prev]);
           setCurrentUser(newUser);
+          try {
+            localStorage.setItem('myschool_current_user', JSON.stringify(newUser));
+            localStorage.setItem('myschool_page_view', 'app');
+          } catch (e) {}
+          setPageView('app');
 
           // Sync to Firestore
           try {
@@ -507,6 +560,12 @@ function safeGetLocalStorage<T>(key: string, fallback: T, validator?: (val: any)
       // ignore
     }
     handleSetPageView('login');
+    try {
+      localStorage.removeItem('myschool_active_nav');
+      if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', window.location.pathname);
+      }
+    } catch (e) {}
     pushNotification('Sesi Berakhir', 'Anda telah berhasil keluar dari sistem.', 'info');
   };
 
