@@ -148,7 +148,7 @@ export const LoginPage: React.FC = () => {
           <Calendar className="h-3.5 w-3.5 text-amber-300" />
           <span>Jadwal &amp; Jam</span>
           <span className="rounded-full bg-amber-400/20 px-1.5 py-0.2 text-[9px] font-mono text-amber-300">
-            {lessonSchedules.length}
+            {(lessonSchedules || []).length}
           </span>
         </button>
       </div>

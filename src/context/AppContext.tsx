@@ -353,30 +353,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Logout confirmation modal state
   const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
 
+function safeGetLocalStorage<T>(key: string, fallback: T, validator?: (val: any) => boolean): T {
+  try {
+    const cached = localStorage.getItem(key);
+    if (!cached || cached === 'undefined' || cached === 'null' || cached === '') return fallback;
+    const parsed = JSON.parse(cached);
+    if (validator) {
+      return validator(parsed) ? (parsed as T) : fallback;
+    }
+    return (parsed as T) ?? fallback;
+  } catch (e) {
+    console.warn(`Safe localStorage fallback for "${key}":`, e);
+    return fallback;
+  }
+}
+
   // Page Routing State (login, app)
   const [pageView, setPageView] = useState<'landing' | 'login' | 'app'>(() => {
-    const cached = localStorage.getItem('myschool_page_view');
-    return cached === 'app' ? 'app' : 'login';
+    try {
+      const cached = localStorage.getItem('myschool_page_view');
+      return cached === 'app' ? 'app' : 'login';
+    } catch (e) {
+      return 'login';
+    }
   });
 
   const handleSetPageView = (view: 'landing' | 'login' | 'app') => {
     const nextView = view === 'landing' ? 'login' : view;
     setPageView(nextView);
-    localStorage.setItem('myschool_page_view', nextView);
+    try {
+      localStorage.setItem('myschool_page_view', nextView);
+    } catch (e) {}
   };
 
   // Users & Role state
   const [users, setUsers] = useState<User[]>(() => {
-    const cached = localStorage.getItem('myschool_users');
-    return cached ? JSON.parse(cached) : initialUsers;
+    return safeGetLocalStorage<User[]>('myschool_users', initialUsers, Array.isArray);
   });
 
   const [currentUser, setCurrentUser] = useState<User>(() => {
-    const cached = localStorage.getItem('myschool_current_user');
-    return cached ? JSON.parse(cached) : initialUsers[0]; // Super Admin default
+    return safeGetLocalStorage<User>(
+      'myschool_current_user',
+      initialUsers[0],
+      u => Boolean(u && typeof u === 'object' && u.id && u.role)
+    );
   });
 
-  const currentRole = currentUser.role;
+  const currentRole = currentUser?.role || 'super_admin';
 
   // Sync Firebase Auth if signed in via Google
   useEffect(() => {
@@ -489,93 +512,85 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Master Data States
   const [students, setStudents] = useState<Student[]>(() => {
-    const cached = localStorage.getItem('myschool_students');
-    return cached ? JSON.parse(cached) : initialStudents;
+    return safeGetLocalStorage<Student[]>('myschool_students', initialStudents, Array.isArray);
   });
 
   const [teachers, setTeachers] = useState<Teacher[]>(() => {
-    const cached = localStorage.getItem('myschool_teachers');
-    return cached ? JSON.parse(cached) : initialTeachers;
+    return safeGetLocalStorage<Teacher[]>('myschool_teachers', initialTeachers, Array.isArray);
   });
 
   const [classes, setClasses] = useState<ClassRoom[]>(() => {
-    const cached = localStorage.getItem('myschool_classes');
-    return cached ? JSON.parse(cached) : initialClasses;
+    return safeGetLocalStorage<ClassRoom[]>('myschool_classes', initialClasses, Array.isArray);
   });
 
   const [majors, setMajors] = useState<Major[]>(() => {
-    const cached = localStorage.getItem('myschool_majors');
-    return cached ? JSON.parse(cached) : initialMajors;
+    return safeGetLocalStorage<Major[]>('myschool_majors', initialMajors, Array.isArray);
   });
 
   const [subjects, setSubjects] = useState<Subject[]>(() => {
-    const cached = localStorage.getItem('myschool_subjects');
-    return cached ? JSON.parse(cached) : initialSubjects;
+    return safeGetLocalStorage<Subject[]>('myschool_subjects', initialSubjects, Array.isArray);
   });
 
   const [academicYears, setAcademicYears] = useState<AcademicYear[]>(() => {
-    const cached = localStorage.getItem('myschool_academic_years');
-    return cached ? JSON.parse(cached) : initialAcademicYears;
+    return safeGetLocalStorage<AcademicYear[]>('myschool_academic_years', initialAcademicYears, Array.isArray);
   });
 
-  const activeAcademicYear = academicYears.find(y => y.isActive) || academicYears[0];
+  const activeAcademicYear =
+    (Array.isArray(academicYears) && academicYears.find(y => y.isActive)) ||
+    (Array.isArray(academicYears) && academicYears[0]) ||
+    initialAcademicYears[0];
 
   // Attendance states
   const [attendanceSessions, setAttendanceSessions] = useState<AttendanceSession[]>(() => {
-    const cached = localStorage.getItem('myschool_attendance_sessions');
-    return cached ? JSON.parse(cached) : initialAttendanceSessions;
+    return safeGetLocalStorage<AttendanceSession[]>('myschool_attendance_sessions', initialAttendanceSessions, Array.isArray);
   });
 
   const [attendanceRecords, setAttendanceRecords] = useState<AttendanceRecord[]>(() => {
-    const cached = localStorage.getItem('myschool_attendance_records');
-    return cached ? JSON.parse(cached) : initialAttendanceRecords;
+    return safeGetLocalStorage<AttendanceRecord[]>('myschool_attendance_records', initialAttendanceRecords, Array.isArray);
   });
 
   const [attendanceCorrections, setAttendanceCorrections] = useState<AttendanceCorrection[]>(() => {
-    const cached = localStorage.getItem('myschool_attendance_corrections');
-    return cached ? JSON.parse(cached) : initialAttendanceCorrections;
+    return safeGetLocalStorage<AttendanceCorrection[]>('myschool_attendance_corrections', initialAttendanceCorrections, Array.isArray);
   });
 
   // Assessments states
   const [assessments, setAssessments] = useState<Assessment[]>(() => {
-    const cached = localStorage.getItem('myschool_assessments');
-    return cached ? JSON.parse(cached) : initialAssessments;
+    return safeGetLocalStorage<Assessment[]>('myschool_assessments', initialAssessments, Array.isArray);
   });
 
   const [assessmentScores, setAssessmentScores] = useState<AssessmentScore[]>(() => {
-    const cached = localStorage.getItem('myschool_assessment_scores');
-    return cached ? JSON.parse(cached) : initialAssessmentScores;
+    return safeGetLocalStorage<AssessmentScore[]>('myschool_assessment_scores', initialAssessmentScores, Array.isArray);
   });
 
   const [customStudentReports, setCustomStudentReports] = useState<Record<string, any>>(() => {
-    try {
-      const saved = localStorage.getItem('myschool_student_reports_custom');
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return {};
+    return safeGetLocalStorage<Record<string, any>>(
+      'myschool_student_reports_custom',
+      {},
+      val => Boolean(val && typeof val === 'object' && !Array.isArray(val))
+    );
   });
 
   // Logs & Notifications
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => {
-    const cached = localStorage.getItem('myschool_audit_logs');
-    return cached ? JSON.parse(cached) : initialAuditLogs;
+    return safeGetLocalStorage<AuditLog[]>('myschool_audit_logs', initialAuditLogs, Array.isArray);
   });
 
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
-    const cached = localStorage.getItem('myschool_notifications');
-    return cached ? JSON.parse(cached) : initialNotifications;
+    return safeGetLocalStorage<NotificationItem[]>('myschool_notifications', initialNotifications, Array.isArray);
   });
 
   // Direct Messages state (1-on-1 DM synced to Firestore)
   const [directMessages, setDirectMessages] = useState<ChatMessage[]>(() => {
-    const cached = localStorage.getItem('myschool_direct_messages');
-    return cached ? JSON.parse(cached) : [];
+    return safeGetLocalStorage<ChatMessage[]>('myschool_direct_messages', [], Array.isArray);
   });
 
   // Custom Report Template state (PDF Kop, Logo, TTD synced to Firestore)
   const [reportTemplate, setReportTemplate] = useState<ReportCustomConfig>(() => {
-    const cached = localStorage.getItem('myschool_report_template');
-    return cached ? JSON.parse(cached) : defaultReportConfig;
+    return safeGetLocalStorage<ReportCustomConfig>(
+      'myschool_report_template',
+      defaultReportConfig,
+      val => Boolean(val && typeof val === 'object')
+    );
   });
 
   // PKL & DUDI States (Synced to Firestore)

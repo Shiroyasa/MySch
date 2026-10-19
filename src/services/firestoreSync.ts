@@ -163,6 +163,20 @@ export async function ensureFirestorePopulated(): Promise<void> {
 export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
   const unsubscribers: (() => void)[] = [];
 
+  const safeHandleListenerError = (error: unknown, path: string) => {
+    try {
+      handleFirestoreError(error, OperationType.GET, path);
+    } catch (err) {
+      console.warn(`Firestore listener notice (${path}):`, err);
+      callbacks.onSyncStatusChange?.({
+        isConnected: false,
+        isSyncing: false,
+        lastSync: new Date(),
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  };
+
   const handleUpdate = () => {
     callbacks.onSyncStatusChange?.({
       isConnected: true,
@@ -184,7 +198,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'students');
+        safeHandleListenerError(error, 'students');
       }
     );
     unsubscribers.push(unsubStudents);
@@ -205,7 +219,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'teachers');
+        safeHandleListenerError(error, 'teachers');
       }
     );
     unsubscribers.push(unsubTeachers);
@@ -226,7 +240,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'classes');
+        safeHandleListenerError(error, 'classes');
       }
     );
     unsubscribers.push(unsubClasses);
@@ -247,7 +261,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'majors');
+        safeHandleListenerError(error, 'majors');
       }
     );
     unsubscribers.push(unsubMajors);
@@ -268,7 +282,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'subjects');
+        safeHandleListenerError(error, 'subjects');
       }
     );
     unsubscribers.push(unsubSubjects);
@@ -289,7 +303,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'academicYears');
+        safeHandleListenerError(error, 'academicYears');
       }
     );
     unsubscribers.push(unsubAcademicYears);
@@ -310,7 +324,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         handleUpdate();
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'attendanceSessions');
+        safeHandleListenerError(error, 'attendanceSessions');
       }
     );
     unsubscribers.push(unsubSessions);
@@ -329,7 +343,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         handleUpdate();
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'attendanceRecords');
+        safeHandleListenerError(error, 'attendanceRecords');
       }
     );
     unsubscribers.push(unsubRecords);
@@ -348,7 +362,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         handleUpdate();
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'attendanceCorrections');
+        safeHandleListenerError(error, 'attendanceCorrections');
       }
     );
     unsubscribers.push(unsubCorrections);
@@ -369,7 +383,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'assessments');
+        safeHandleListenerError(error, 'assessments');
       }
     );
     unsubscribers.push(unsubAssessments);
@@ -390,7 +404,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'assessmentScores');
+        safeHandleListenerError(error, 'assessmentScores');
       }
     );
     unsubscribers.push(unsubScores);
@@ -412,7 +426,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'auditLogs');
+        safeHandleListenerError(error, 'auditLogs');
       }
     );
     unsubscribers.push(unsubLogs);
@@ -434,7 +448,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'notifications');
+        safeHandleListenerError(error, 'notifications');
       }
     );
     unsubscribers.push(unsubNotifs);
@@ -456,7 +470,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'chatMessages');
+        safeHandleListenerError(error, 'chatMessages');
       }
     );
     unsubscribers.push(unsubChat);
@@ -477,7 +491,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'users');
+        safeHandleListenerError(error, 'users');
       }
     );
     unsubscribers.push(unsubUsers);
@@ -497,7 +511,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         handleUpdate();
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'directMessages');
+        safeHandleListenerError(error, 'directMessages');
       }
     );
     unsubscribers.push(unsubDM);
@@ -517,7 +531,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
         }
       },
       error => {
-        handleFirestoreError(error, OperationType.GET, 'reportTemplates');
+        safeHandleListenerError(error, 'reportTemplates');
       }
     );
     unsubscribers.push(unsubTemplates);
@@ -537,7 +551,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
           handleUpdate();
         },
         error => {
-          handleFirestoreError(error, OperationType.GET, 'pklPartners');
+          safeHandleListenerError(error, 'pklPartners');
         }
       );
       unsubscribers.push(unsubPklPartners);
@@ -558,7 +572,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
           handleUpdate();
         },
         error => {
-          handleFirestoreError(error, OperationType.GET, 'pklVisits');
+          safeHandleListenerError(error, 'pklVisits');
         }
       );
       unsubscribers.push(unsubPklVisits);
@@ -579,7 +593,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
           handleUpdate();
         },
         error => {
-          handleFirestoreError(error, OperationType.GET, 'pklReports');
+          safeHandleListenerError(error, 'pklReports');
         }
       );
       unsubscribers.push(unsubPklReports);
@@ -600,7 +614,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
           }
         },
         error => {
-          handleFirestoreError(error, OperationType.GET, 'settings/visual_theme');
+          safeHandleListenerError(error, 'settings/visual_theme');
         }
       );
       unsubscribers.push(unsubVisualSettings);
@@ -621,7 +635,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
           handleUpdate();
         },
         error => {
-          handleFirestoreError(error, OperationType.GET, 'lessonSchedules');
+          safeHandleListenerError(error, 'lessonSchedules');
         }
       );
       unsubscribers.push(unsubSchedules);
@@ -645,7 +659,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
           }
         },
         error => {
-          handleFirestoreError(error, OperationType.GET, 'settings/student_reports');
+          safeHandleListenerError(error, 'settings/student_reports');
         }
       );
       unsubscribers.push(unsubStudentReports);
@@ -666,7 +680,7 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
           }
         },
         error => {
-          handleFirestoreError(error, OperationType.GET, 'settings/school_identity');
+          safeHandleListenerError(error, 'settings/school_identity');
         }
       );
       unsubscribers.push(unsubSchoolSettings);

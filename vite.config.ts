@@ -124,11 +124,16 @@ function apiProxyPlugin(): Plugin {
 
 export default defineConfig(() => {
   return {
+    base: '/',
     plugins: [react(), tailwindcss(), apiProxyPlugin()],
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, '.'),
+        '@': path.resolve('.'),
       },
+    },
+    build: {
+      outDir: 'dist',
+      sourcemap: false,
     },
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
