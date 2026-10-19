@@ -40,7 +40,7 @@ import {
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 import { SkyborneCastleBackground, LiveWallpaperPresetLayer } from '../common/SkyborneCastleBackground';
 
-const compressUploadedImage = (file: File, maxWidth = 1800, quality = 0.82, keepAlpha = false): Promise<string> => {
+const compressUploadedImage = (file: File, maxWidth = 1440, quality = 0.8, keepAlpha = false): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = ev => {
@@ -61,8 +61,20 @@ const compressUploadedImage = (file: File, maxWidth = 1800, quality = 0.82, keep
           return;
         }
         ctx.drawImage(img, 0, 0, width, height);
-        const mime = keepAlpha || file.type === 'image/png' || file.type === 'image/webp' ? 'image/png' : 'image/jpeg';
-        resolve(canvas.toDataURL(mime, quality));
+        if (keepAlpha && (file.type === 'image/png' || file.type === 'image/webp')) {
+          const pngResult = canvas.toDataURL('image/png', quality);
+          if (pngResult.length <= 380_000) {
+            resolve(pngResult);
+            return;
+          }
+        }
+        let q = quality;
+        let compressed = canvas.toDataURL('image/jpeg', q);
+        while (compressed.length > 420_000 && q > 0.35) {
+          q -= 0.1;
+          compressed = canvas.toDataURL('image/jpeg', q);
+        }
+        resolve(compressed);
       };
       img.onerror = reject;
       img.src = ev.target?.result as string;
@@ -179,8 +191,8 @@ const LOGO_PRESETS = [
 
 const readMediaFileAsDataUrl = async (file: File, maxWidth = 1440, keepAlpha = false): Promise<{ url: string; isVideo: boolean }> => {
   if (file.type.startsWith('video/')) {
-    // If video file is over 650KB, use fast ObjectURL for instant smooth playback without QuotaExceededError
-    if (file.size > 650 * 1024) {
+    // Store videos up to 25MB as persistent DataURL in IndexedDB so they survive browser refreshes
+    if (file.size > 25 * 1024 * 1024) {
       return { url: URL.createObjectURL(file), isVideo: true };
     }
     return new Promise((resolve, reject) => {

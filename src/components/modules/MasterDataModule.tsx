@@ -597,24 +597,34 @@ export const MasterDataModule: React.FC = () => {
     const subObj = subjects.find(s => s.id === schSubjectId) || subjects[0];
     const tchObj = teachers.find(t => t.id === schTeacherId) || teachers[0];
 
-    saveLessonSchedule({
-      id: editingSchedule?.id || `sch-${Date.now()}`,
-      day: schDay,
-      startTime: schStartTime,
-      endTime: schEndTime,
-      classId: clsObj?.id || 'cls-xrpl1',
-      className: clsObj?.name || 'X RPL 1',
-      subjectId: subObj?.id || 'sub-pwpb',
-      subjectName: subObj?.name || 'Pemrograman Web',
-      teacherId: tchObj?.id || 'tch-1',
-      teacherName: tchObj?.fullName || 'Guru Pengampu',
-      room: schRoom.trim() || 'Ruang Teori 1',
-    });
+    saveLessonSchedule(
+      {
+        id: editingSchedule?.id || `sch-${Date.now()}`,
+        day: schDay,
+        startTime: schStartTime,
+        endTime: schEndTime,
+        classId: clsObj?.id || 'cls-xrpl1',
+        className: clsObj?.name || 'X RPL 1',
+        subjectId: subObj?.id || 'sub-pwpb',
+        subjectName: subObj?.name || 'Pemrograman Web',
+        teacherId: tchObj?.id || 'tch-1',
+        teacherName: tchObj?.fullName || 'Guru Pengampu',
+        room: schRoom.trim() || 'Ruang Teori 1',
+      },
+      !editingSchedule
+    );
+
+    if (filterScheduleDay !== 'ALL' && filterScheduleDay !== schDay) {
+      setFilterScheduleDay('ALL');
+    }
+    if (filterScheduleClass !== 'ALL' && filterScheduleClass !== (clsObj?.name || '')) {
+      setFilterScheduleClass('ALL');
+    }
 
     showToast(
       editingSchedule
-        ? `Jadwal pelajaran ${subObj?.name} (${clsObj?.name}) berhasil diperbarui.`
-        : `Jadwal pelajaran baru ${subObj?.name} (${clsObj?.name}) berhasil ditambahkan ke Data Pokok.`
+        ? `Jadwal pelajaran ${subObj?.name} (${clsObj?.name}) berhasil diperbarui secara permanen.`
+        : `Jadwal pelajaran baru ${subObj?.name} (${clsObj?.name}) berhasil disimpan permanen ke Data Pokok & Cloud.`
     );
     setShowScheduleModal(false);
   };

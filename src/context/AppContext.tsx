@@ -40,6 +40,7 @@ import {
   initialAuditLogs,
   initialNotifications,
   initialChatMessages,
+  initialLessonSchedules,
 } from '../data/seedData';
 import {
   sampleIndustryPartners,
@@ -99,6 +100,7 @@ import {
   firestoreSaveVisualSettings,
   firestoreSaveSchoolSettings,
   firestoreSaveLessonSchedule,
+  firestoreSaveAllLessonSchedules,
   firestoreDeleteLessonSchedule,
   firestoreResetAssessmentScoresToZero,
   firestoreDeleteAssessmentAndScores,
@@ -107,6 +109,11 @@ import {
   sanitizeForFirestore,
 } from '../services/firestoreSync';
 import { ReportCustomConfig, defaultReportConfig } from '../utils/exportUtils';
+import {
+  idbGet,
+  saveVisualSettingsLocally,
+  saveLessonSchedulesLocally,
+} from '../utils/persistentStorage';
 
 export const defaultVisualSettings: VisualSettings = {
   appLogoUrl: null,
@@ -682,6 +689,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const saved = localStorage.getItem('myschool_visual_settings');
       const legacyLoginBg = localStorage.getItem('myacademy_login_custom_bg');
+      const dedicatedMenuBg = localStorage.getItem('myacademy_menu_custom_bg');
+      const dedicatedBannerBg = localStorage.getItem('myacademy_global_banner_bg');
       const dedicatedLogo = localStorage.getItem('myschool_app_logo');
       const dedicatedLogoFit = localStorage.getItem('myschool_app_logo_fit') as 'contain' | 'cover' | null;
       const dedicatedFavicon = localStorage.getItem('myschool_app_favicon');
@@ -691,26 +700,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ...(parsed.perModuleBannerBgs || {}),
           ...(parsed.moduleBannerBgs || {}),
         };
+        const resolvedLoginUrl = parsed.loginBgUrl || legacyLoginBg || null;
+        const resolvedMenuUrl = parsed.menuBgUrl || dedicatedMenuBg || null;
+        const resolvedBannerUrl =
+          parsed.globalBannerBgUrl || parsed.moduleBannerBgUrl || dedicatedBannerBg || null;
         return {
           ...defaultVisualSettings,
           ...parsed,
           appLogoUrl: dedicatedLogo !== null ? (dedicatedLogo || null) : (parsed.appLogoUrl ?? null),
           appLogoFit: dedicatedLogoFit || parsed.appLogoFit || 'contain',
           faviconUrl: dedicatedFavicon !== null ? (dedicatedFavicon || null) : (parsed.faviconUrl ?? null),
-          loginBgUrl: parsed.loginBgUrl ?? legacyLoginBg ?? null,
+          loginBgUrl:
+            parsed.loginBgType === 'default' || parsed.loginBgType === 'live_preset'
+              ? null
+              : resolvedLoginUrl,
+          loginBgType:
+            parsed.loginBgType || (resolvedLoginUrl ? 'image' : 'default'),
+          menuBgUrl:
+            parsed.menuBgType === 'default' || parsed.menuBgType === 'live_preset'
+              ? null
+              : resolvedMenuUrl,
+          menuBgType:
+            parsed.menuBgType || (resolvedMenuUrl ? 'image' : 'default'),
+          globalBannerBgUrl: resolvedBannerUrl,
+          moduleBannerBgUrl: resolvedBannerUrl,
           moduleBannerBgs: mergedModuleBgs,
           perModuleBannerBgs: mergedModuleBgs,
           boxBgs: parsed.boxBgs || {},
         };
       }
-      if (legacyLoginBg || dedicatedLogo || dedicatedFavicon) {
+      if (legacyLoginBg || dedicatedMenuBg || dedicatedBannerBg || dedicatedLogo || dedicatedFavicon) {
         return {
           ...defaultVisualSettings,
           appLogoUrl: dedicatedLogo || null,
           appLogoFit: dedicatedLogoFit || 'contain',
           faviconUrl: dedicatedFavicon || null,
           loginBgUrl: legacyLoginBg || null,
-          globalBannerBgUrl: legacyLoginBg || null,
+          loginBgType: legacyLoginBg ? 'image' : 'default',
+          menuBgUrl: dedicatedMenuBg || null,
+          menuBgType: dedicatedMenuBg ? 'image' : 'default',
+          globalBannerBgUrl: dedicatedBannerBg || legacyLoginBg || null,
+          moduleBannerBgUrl: dedicatedBannerBg || legacyLoginBg || null,
         };
       }
     } catch (e) {}
@@ -802,135 +832,75 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (e) {}
-    return [
-      {
-        id: 'sch-001',
-        day: 'Senin',
-        startTime: '07:30',
-        endTime: '09:45',
-        classId: 'cls-xrpl1',
-        className: 'X RPL 1',
-        subjectId: 'sub-pwpb',
-        subjectName: 'Pemrograman Web & Perangkat Bergerak',
-        subjectCode: 'PWPB',
-        teacherId: 'tch-001',
-        teacherName: 'Budi Santoso, S.Kom., M.T.',
-        teacherNip: '198405122010011008',
-        room: 'Lab RPL 1',
-        semester: 'ganjil',
-        academicYear: '2026/2027',
-        createdAt: '2026-07-15',
-      },
-      {
-        id: 'sch-002',
-        day: 'Senin',
-        startTime: '10:00',
-        endTime: '12:00',
-        classId: 'cls-xrpl1',
-        className: 'X RPL 1',
-        subjectId: 'sub-bd',
-        subjectName: 'Basis Data',
-        subjectCode: 'BD',
-        teacherId: 'tch-001',
-        teacherName: 'Budi Santoso, S.Kom., M.T.',
-        teacherNip: '198405122010011008',
-        room: 'Lab RPL 2',
-        semester: 'ganjil',
-        academicYear: '2026/2027',
-        createdAt: '2026-07-15',
-      },
-      {
-        id: 'sch-003',
-        day: 'Selasa',
-        startTime: '07:30',
-        endTime: '09:30',
-        classId: 'cls-xrpl2',
-        className: 'X RPL 2',
-        subjectId: 'sub-pwpb',
-        subjectName: 'Pemrograman Web & Perangkat Bergerak',
-        subjectCode: 'PWPB',
-        teacherId: 'tch-001',
-        teacherName: 'Budi Santoso, S.Kom., M.T.',
-        teacherNip: '198405122010011008',
-        room: 'Lab RPL 1',
-        semester: 'ganjil',
-        academicYear: '2026/2027',
-        createdAt: '2026-07-16',
-      },
-      {
-        id: 'sch-004',
-        day: 'Rabu',
-        startTime: '08:00',
-        endTime: '10:30',
-        classId: 'cls-xtkj1',
-        className: 'X TKJ 1',
-        subjectId: 'sub-aij',
-        subjectName: 'Administrasi Infrastruktur Jaringan',
-        subjectCode: 'AIJ',
-        teacherId: 'tch-002',
-        teacherName: 'Siti Aminah, S.Pd., M.Kom.',
-        teacherNip: '198709212012122003',
-        room: 'Lab Jaringan Cisco',
-        semester: 'ganjil',
-        academicYear: '2026/2027',
-        createdAt: '2026-07-17',
-      },
-      {
-        id: 'sch-005',
-        day: 'Kamis',
-        startTime: '07:30',
-        endTime: '09:45',
-        classId: 'cls-xitkj1',
-        className: 'XI TKJ 1',
-        subjectId: 'sub-asj',
-        subjectName: 'Administrasi Sistem Jaringan',
-        subjectCode: 'ASJ',
-        teacherId: 'tch-002',
-        teacherName: 'Siti Aminah, S.Pd., M.Kom.',
-        teacherNip: '198709212012122003',
-        room: 'Lab Server & Cloud',
-        semester: 'ganjil',
-        academicYear: '2026/2027',
-        createdAt: '2026-07-18',
-      },
-      {
-        id: 'sch-006',
-        day: 'Jumat',
-        startTime: '07:30',
-        endTime: '09:30',
-        classId: 'cls-xiiakl1',
-        className: 'XII AKL 1',
-        subjectId: 'sub-akkeu',
-        subjectName: 'Akuntansi Keuangan & Komputer Akuntansi',
-        subjectCode: 'AKK',
-        teacherId: 'tch-003',
-        teacherName: 'Drs. Hendra Wijaya, M.Ak.',
-        teacherNip: '197911042008011004',
-        room: 'Lab Akuntansi Terpadu',
-        semester: 'ganjil',
-        academicYear: '2026/2027',
-        createdAt: '2026-07-19',
-      },
-      {
-        id: 'sch-007',
-        day: 'Sabtu',
-        startTime: '08:00',
-        endTime: '10:00',
-        classId: 'cls-xrpl1',
-        className: 'X RPL 1',
-        subjectId: 'sub-pkk',
-        subjectName: 'Produk Kreatif & Kewirausahaan',
-        subjectCode: 'PKK',
-        teacherId: 'tch-004',
-        teacherName: 'Rina Marlina, S.Pd., M.M.',
-        teacherNip: '198903152015032006',
-        room: 'Ruang Inovasi & Technopark',
-        semester: 'ganjil',
-        academicYear: '2026/2027',
-        createdAt: '2026-07-20',
-      },
-    ];
+    return initialLessonSchedules;
   });
+
+  // Track local mutation timestamps so in-flight Firestore snapshots never revert recent local edits
+  const lastVisualUpdateRef = React.useRef<number>(0);
+  const lastScheduleUpdateRef = React.useRef<number>(0);
+
+  // Hydrate full-fidelity VisualSettings & LessonSchedules from IndexedDB on mount
+  useEffect(() => {
+    idbGet<VisualSettings>('myschool_visual_settings_full')
+      .then(idbVisuals => {
+        if (idbVisuals) {
+          setVisualSettings(prev => {
+            const isIdbNewer =
+              !prev.updatedAt ||
+              !idbVisuals.updatedAt ||
+              idbVisuals.updatedAt >= prev.updatedAt;
+            const base = isIdbNewer ? { ...prev, ...idbVisuals } : { ...idbVisuals, ...prev };
+            const mergedMod = {
+              ...(idbVisuals.perModuleBannerBgs || {}),
+              ...(idbVisuals.moduleBannerBgs || {}),
+              ...(prev.moduleBannerBgs || {}),
+            };
+            const resolvedLoginType = base.loginBgType || 'default';
+            const resolvedMenuType = base.menuBgType || 'default';
+            const resolvedLoginUrl =
+              resolvedLoginType === 'default' || resolvedLoginType === 'live_preset'
+                ? null
+                : (isIdbNewer ? idbVisuals.loginBgUrl || prev.loginBgUrl : prev.loginBgUrl || idbVisuals.loginBgUrl) || null;
+            const resolvedMenuUrl =
+              resolvedMenuType === 'default' || resolvedMenuType === 'live_preset'
+                ? null
+                : (isIdbNewer ? idbVisuals.menuBgUrl || prev.menuBgUrl : prev.menuBgUrl || idbVisuals.menuBgUrl) || null;
+            const resolvedBannerUrl =
+              (isIdbNewer
+                ? idbVisuals.globalBannerBgUrl ?? prev.globalBannerBgUrl
+                : prev.globalBannerBgUrl ?? idbVisuals.globalBannerBgUrl) || null;
+
+            const hydrated: VisualSettings = {
+              ...base,
+              loginBgUrl: resolvedLoginUrl,
+              menuBgUrl: resolvedMenuUrl,
+              globalBannerBgUrl: resolvedBannerUrl,
+              moduleBannerBgUrl: resolvedBannerUrl,
+              moduleBannerBgs: mergedMod,
+              perModuleBannerBgs: mergedMod,
+              boxBgs: {
+                ...(idbVisuals.boxBgs || {}),
+                ...(prev.boxBgs || {}),
+              },
+            };
+            saveVisualSettingsLocally(hydrated);
+            return hydrated;
+          });
+        }
+      })
+      .catch(() => {});
+
+    idbGet<LessonSchedule[]>('myschool_lesson_schedules_full')
+      .then(idbSchedules => {
+        if (Array.isArray(idbSchedules) && idbSchedules.length > 0) {
+          setLessonSchedules(idbSchedules);
+          try {
+            localStorage.setItem('myschool_lesson_schedules', JSON.stringify(idbSchedules));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Realtime Cloud Sync State (Firestore)
   const [isFirestoreConnected, setIsFirestoreConnected] = useState<boolean>(true);
@@ -1023,59 +993,60 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(data));
       },
       onVisualSettingsChange: data => {
+        // Ignore stale pre-write snapshots right after a local background update
+        if (Date.now() - lastVisualUpdateRef.current < 3000) {
+          return;
+        }
         setVisualSettings(prev => {
-          // Do not overwrite newer local updates with an older Firestore snapshot
           if (prev.updatedAt && data.updatedAt && prev.updatedAt > data.updatedAt) {
             return prev;
           }
-          const mergedModuleBgs = {
-            ...(prev.perModuleBannerBgs || {}),
-            ...(prev.moduleBannerBgs || {}),
-            ...(data.perModuleBannerBgs || {}),
-            ...(data.moduleBannerBgs || {}),
-          };
+          const incomingMod = data.moduleBannerBgs || data.perModuleBannerBgs;
+          const resolvedModuleBgs =
+            incomingMod && Object.keys(incomingMod).length > 0
+              ? { ...(prev.moduleBannerBgs || {}), ...incomingMod }
+              : prev.moduleBannerBgs || prev.perModuleBannerBgs || {};
+
+          const resolvedBoxBgs =
+            data.boxBgs && Object.keys(data.boxBgs).length > 0
+              ? { ...(prev.boxBgs || {}), ...data.boxBgs }
+              : prev.boxBgs || {};
+
+          const nextLoginType = data.loginBgType || prev.loginBgType || 'default';
+          const nextMenuType = data.menuBgType || prev.menuBgType || 'default';
+
+          const resolvedLoginBgUrl =
+            nextLoginType === 'live_preset' || nextLoginType === 'default'
+              ? null
+              : data.loginBgUrl || prev.loginBgUrl || null;
+
+          const resolvedMenuBgUrl =
+            nextMenuType === 'live_preset' || nextMenuType === 'default'
+              ? null
+              : data.menuBgUrl || prev.menuBgUrl || null;
+
+          const resolvedGlobalBanner =
+            data.globalBannerBgUrl !== undefined && data.globalBannerBgUrl !== null
+              ? data.globalBannerBgUrl
+              : prev.globalBannerBgUrl;
+
           const next: VisualSettings = {
             ...prev,
             ...data,
-            appLogoUrl: data.appLogoUrl !== undefined ? data.appLogoUrl : prev.appLogoUrl,
+            appLogoUrl: data.appLogoUrl || prev.appLogoUrl || null,
             appLogoFit: data.appLogoFit || prev.appLogoFit || 'contain',
-            faviconUrl: data.faviconUrl !== undefined ? data.faviconUrl : prev.faviconUrl,
-            // Preserve local oversized video dataURL if Firestore omitted it
-            loginBgUrl:
-              data.loginBgUrl !== undefined && data.loginBgUrl !== null
-                ? data.loginBgUrl
-                : data.loginBgType === 'live_preset' || data.loginBgType === 'default'
-                ? null
-                : prev.loginBgUrl,
-            menuBgUrl:
-              data.menuBgUrl !== undefined && data.menuBgUrl !== null
-                ? data.menuBgUrl
-                : data.menuBgType === 'live_preset' || data.menuBgType === 'default'
-                ? null
-                : prev.menuBgUrl,
-            moduleBannerBgs: mergedModuleBgs,
-            perModuleBannerBgs: mergedModuleBgs,
-            boxBgs: {
-              ...(prev.boxBgs || {}),
-              ...(data.boxBgs || {}),
-            },
+            faviconUrl: data.faviconUrl || prev.faviconUrl || null,
+            loginBgType: nextLoginType,
+            loginBgUrl: resolvedLoginBgUrl,
+            menuBgType: nextMenuType,
+            menuBgUrl: resolvedMenuBgUrl,
+            globalBannerBgUrl: resolvedGlobalBanner,
+            moduleBannerBgUrl: resolvedGlobalBanner,
+            moduleBannerBgs: resolvedModuleBgs,
+            perModuleBannerBgs: resolvedModuleBgs,
+            boxBgs: resolvedBoxBgs,
           };
-          try {
-            if (next.appLogoUrl) {
-              localStorage.setItem('myschool_app_logo', next.appLogoUrl);
-            } else if (next.appLogoUrl === null) {
-              localStorage.removeItem('myschool_app_logo');
-            }
-            if (next.appLogoFit) {
-              localStorage.setItem('myschool_app_logo_fit', next.appLogoFit);
-            }
-            if (next.faviconUrl) {
-              localStorage.setItem('myschool_app_favicon', next.faviconUrl);
-            } else if (next.faviconUrl === null) {
-              localStorage.removeItem('myschool_app_favicon');
-            }
-            localStorage.setItem('myschool_visual_settings', JSON.stringify(next));
-          } catch {}
+          saveVisualSettingsLocally(next);
           return next;
         });
       },
@@ -1089,9 +1060,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       },
       onLessonSchedulesChange: data => {
-        if (data.length > 0) {
+        if (Date.now() - lastScheduleUpdateRef.current < 3000) {
+          return;
+        }
+        if (Array.isArray(data) && data.length > 0) {
           setLessonSchedules(data);
-          localStorage.setItem('myschool_lesson_schedules', JSON.stringify(data));
+          saveLessonSchedulesLocally(data);
         }
       },
       onStudentReportsMapChange: data => {
@@ -3235,6 +3209,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Visual Theme & Background Settings
   const updateVisualSettings = (updates: Partial<VisualSettings>) => {
+    lastVisualUpdateRef.current = Date.now();
     setVisualSettings(prev => {
       const nextModuleBgs =
         updates.moduleBannerBgs !== undefined
@@ -3268,35 +3243,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         boxBgs: updates.boxBgs !== undefined ? updates.boxBgs : prev.boxBgs || {},
         updatedAt: new Date().toISOString(),
       };
-      // Always save dedicated logo & favicon keys first so they never fail even if backgrounds are large
-      try {
-        if (next.appLogoUrl) {
-          localStorage.setItem('myschool_app_logo', next.appLogoUrl);
-        } else {
-          localStorage.removeItem('myschool_app_logo');
-        }
-        if (next.appLogoFit) {
-          localStorage.setItem('myschool_app_logo_fit', next.appLogoFit);
-        }
-        if (next.faviconUrl) {
-          localStorage.setItem('myschool_app_favicon', next.faviconUrl);
-        } else {
-          localStorage.removeItem('myschool_app_favicon');
-        }
-      } catch (err) {
-        console.warn('localStorage notice for dedicated logo/favicon:', err);
-      }
 
-      try {
-        localStorage.setItem('myschool_visual_settings', JSON.stringify(next));
-        if (next.loginBgUrl && next.loginBgUrl.length < 500_000) {
-          localStorage.setItem('myacademy_login_custom_bg', next.loginBgUrl);
-        } else if (!next.loginBgUrl) {
-          localStorage.removeItem('myacademy_login_custom_bg');
-        }
-      } catch (err) {
-        console.warn('localStorage quota notice for visualSettings:', err);
-      }
+      saveVisualSettingsLocally(next);
       firestoreSaveVisualSettings(next).catch(() => {});
       return next;
     });
@@ -3321,26 +3269,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const saveVisualSettingsToCloud = async () => {
+    lastVisualUpdateRef.current = Date.now();
     setIsSyncing(true);
     try {
-      try {
-        if (visualSettings.appLogoUrl) {
-          localStorage.setItem('myschool_app_logo', visualSettings.appLogoUrl);
-        } else {
-          localStorage.removeItem('myschool_app_logo');
-        }
-        if (visualSettings.faviconUrl) {
-          localStorage.setItem('myschool_app_favicon', visualSettings.faviconUrl);
-        } else {
-          localStorage.removeItem('myschool_app_favicon');
-        }
-        localStorage.setItem('myschool_visual_settings', JSON.stringify(visualSettings));
-      } catch {}
-      await firestoreSaveVisualSettings(visualSettings);
+      const updatedVisuals: VisualSettings = {
+        ...visualSettings,
+        updatedAt: new Date().toISOString(),
+      };
+      saveVisualSettingsLocally(updatedVisuals);
+      await firestoreSaveVisualSettings(updatedVisuals);
       setLastSyncTime(new Date());
-      addToast('Seluruh pengaturan visual, logo, favicon & background berhasil disimpan ke database!', 'success');
+      addToast('Seluruh pengaturan visual, logo, favicon & background berhasil disimpan permanen ke database!', 'success');
     } catch {
-      addToast('Pengaturan visual disimpan secara lokal.', 'info');
+      addToast('Pengaturan visual disimpan secara permanen di penyimpanan perangkat.', 'info');
     } finally {
       setIsSyncing(false);
     }
@@ -3365,15 +3306,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addAuditLog('UPDATE_SCHOOL_SETTINGS', 'Pengaturan Sistem', 'Memperbarui konfigurasi identitas sekolah & aturan akademik.');
   };
 
-  // Lesson Schedule CRUD (Jadwal Pelajaran)
+  // Lesson Schedule CRUD (Jadwal Pelajaran - Permanently saved to LocalStorage, IndexedDB & Firestore)
   const saveLessonSchedule = (schedule: LessonSchedule, isNew = false) => {
+    lastScheduleUpdateRef.current = Date.now();
     setLessonSchedules(prev => {
       const exists = prev.some(item => item.id === schedule.id);
       const next = exists ? prev.map(item => (item.id === schedule.id ? schedule : item)) : [schedule, ...prev];
-      localStorage.setItem('myschool_lesson_schedules', JSON.stringify(next));
+      saveLessonSchedulesLocally(next);
+      firestoreSaveLessonSchedule(schedule).catch(() => {});
+      firestoreSaveAllLessonSchedules(next).catch(() => {});
       return next;
     });
-    firestoreSaveLessonSchedule(schedule).catch(() => {});
     addAuditLog(
       isNew ? 'CREATE_SCHEDULE' : 'UPDATE_SCHEDULE',
       'Jadwal Pelajaran',
@@ -3382,13 +3325,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteLessonSchedule = (scheduleId: string) => {
+    lastScheduleUpdateRef.current = Date.now();
     const target = lessonSchedules.find(s => s.id === scheduleId);
     setLessonSchedules(prev => {
       const next = prev.filter(s => s.id !== scheduleId);
-      localStorage.setItem('myschool_lesson_schedules', JSON.stringify(next));
+      saveLessonSchedulesLocally(next);
+      firestoreDeleteLessonSchedule(scheduleId).catch(() => {});
+      firestoreSaveAllLessonSchedules(next, scheduleId).catch(() => {});
       return next;
     });
-    firestoreDeleteLessonSchedule(scheduleId).catch(() => {});
     if (target) {
       addAuditLog('DELETE_SCHEDULE', 'Jadwal Pelajaran', `Menghapus jadwal pelajaran: ${target.subjectName} (${target.className})`);
     }

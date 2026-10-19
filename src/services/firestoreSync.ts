@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   setDoc,
   deleteDoc,
@@ -50,7 +51,9 @@ import {
   initialNotifications,
   initialChatMessages,
   initialUsers,
+  initialLessonSchedules,
 } from '../data/seedData';
+import { ensureCompactImageDataUrl } from '../utils/persistentStorage';
 
 export interface SyncCallbacks {
   onStudentsChange: (data: Student[]) => void;
@@ -85,80 +88,122 @@ let isInitialized = false;
 // Auto-seed Firestore if collections are empty so all devices get real synchronized data
 export async function ensureFirestorePopulated(): Promise<void> {
   if (isInitialized) return;
+  isInitialized = true;
   try {
     const studentsSnap = await getDocs(collection(db, 'students'));
-    if (!studentsSnap.empty) {
-      isInitialized = true;
-      console.log(`Firestore already contains ${studentsSnap.size} students. Skipping initial seed.`);
-      return;
+    if (studentsSnap.empty) {
+      console.log('Firestore is empty. Initializing cloud database with authentic SMK Mardi Yuana Cikembar records...');
+      const batch = writeBatch(db);
+
+      initialStudents.forEach(item => {
+        batch.set(doc(db, 'students', item.id), sanitizeForFirestore(item));
+      });
+
+      initialTeachers.forEach(item => {
+        batch.set(doc(db, 'teachers', item.id), sanitizeForFirestore(item));
+      });
+
+      initialClasses.forEach(item => {
+        batch.set(doc(db, 'classes', item.id), sanitizeForFirestore(item));
+      });
+
+      initialMajors.forEach(item => {
+        batch.set(doc(db, 'majors', item.id), sanitizeForFirestore(item));
+      });
+
+      initialSubjects.forEach(item => {
+        batch.set(doc(db, 'subjects', item.id), sanitizeForFirestore(item));
+      });
+
+      initialAcademicYears.forEach(item => {
+        batch.set(doc(db, 'academicYears', item.id), sanitizeForFirestore(item));
+      });
+
+      initialUsers.forEach(item => {
+        batch.set(doc(db, 'users', item.id), sanitizeForFirestore(item));
+      });
+
+      initialAttendanceSessions.forEach(item => {
+        batch.set(doc(db, 'attendanceSessions', item.id), sanitizeForFirestore(item));
+      });
+
+      initialAttendanceRecords.forEach(item => {
+        batch.set(doc(db, 'attendanceRecords', item.id), sanitizeForFirestore(item));
+      });
+
+      initialAssessments.forEach(item => {
+        batch.set(doc(db, 'assessments', item.id), sanitizeForFirestore(item));
+      });
+
+      initialAssessmentScores.forEach(item => {
+        batch.set(doc(db, 'assessmentScores', item.id), sanitizeForFirestore(item));
+      });
+
+      initialNotifications.forEach(item => {
+        batch.set(doc(db, 'notifications', item.id), sanitizeForFirestore(item));
+      });
+
+      initialChatMessages.forEach(item => {
+        batch.set(doc(db, 'chatMessages', item.id), sanitizeForFirestore(item));
+      });
+
+      initialAuditLogs.forEach(item => {
+        batch.set(doc(db, 'auditLogs', item.id), sanitizeForFirestore(item));
+      });
+
+      let localSchedules: LessonSchedule[] = initialLessonSchedules;
+      try {
+        const savedLocal = typeof localStorage !== 'undefined' ? localStorage.getItem('myschool_lesson_schedules') : null;
+        if (savedLocal) {
+          const parsed = JSON.parse(savedLocal);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            localSchedules = parsed;
+          }
+        }
+      } catch {}
+
+      localSchedules.forEach(item => {
+        batch.set(doc(db, 'lessonSchedules', item.id), sanitizeForFirestore(item));
+      });
+
+      batch.set(doc(db, 'settings', 'schedules_meta'), {
+        initialized: true,
+        schedules: sanitizeForFirestore(localSchedules),
+        updatedAt: new Date().toISOString(),
+      });
+
+      await batch.commit();
+      console.log('Cloud Firestore successfully seeded and synchronized!');
+    } else {
+      console.log(`Firestore already contains ${studentsSnap.size} students. Verifying lessonSchedules initialization...`);
+      const schedulesMetaSnap = await getDoc(doc(db, 'settings', 'schedules_meta'));
+      const metaData = schedulesMetaSnap.exists() ? schedulesMetaSnap.data() : null;
+      if (!metaData || !Array.isArray(metaData.schedules)) {
+        let schedulesToPersist: LessonSchedule[] = initialLessonSchedules;
+        try {
+          const savedLocal = typeof localStorage !== 'undefined' ? localStorage.getItem('myschool_lesson_schedules') : null;
+          if (savedLocal) {
+            const parsed = JSON.parse(savedLocal);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              schedulesToPersist = parsed;
+            }
+          }
+        } catch {}
+
+        const schedBatch = writeBatch(db);
+        schedulesToPersist.forEach(item => {
+          schedBatch.set(doc(db, 'lessonSchedules', item.id), sanitizeForFirestore(item));
+        });
+        schedBatch.set(doc(db, 'settings', 'schedules_meta'), {
+          initialized: true,
+          schedules: sanitizeForFirestore(schedulesToPersist),
+          updatedAt: new Date().toISOString(),
+        });
+        await schedBatch.commit();
+        console.log('Lesson schedules initialized permanently in Firestore.');
+      }
     }
-
-    console.log('Firestore is empty. Initializing cloud database with authentic SMK Mardi Yuana Cikembar records...');
-    
-    // Batch seed students
-    const batch = writeBatch(db);
-
-    initialStudents.forEach(item => {
-      batch.set(doc(db, 'students', item.id), sanitizeForFirestore(item));
-    });
-
-    initialTeachers.forEach(item => {
-      batch.set(doc(db, 'teachers', item.id), sanitizeForFirestore(item));
-    });
-
-    initialClasses.forEach(item => {
-      batch.set(doc(db, 'classes', item.id), sanitizeForFirestore(item));
-    });
-
-    initialMajors.forEach(item => {
-      batch.set(doc(db, 'majors', item.id), sanitizeForFirestore(item));
-    });
-
-    initialSubjects.forEach(item => {
-      batch.set(doc(db, 'subjects', item.id), sanitizeForFirestore(item));
-    });
-
-    initialAcademicYears.forEach(item => {
-      batch.set(doc(db, 'academicYears', item.id), sanitizeForFirestore(item));
-    });
-
-    initialUsers.forEach(item => {
-      batch.set(doc(db, 'users', item.id), sanitizeForFirestore(item));
-    });
-
-    initialAttendanceSessions.forEach(item => {
-      batch.set(doc(db, 'attendanceSessions', item.id), sanitizeForFirestore(item));
-    });
-
-    initialAttendanceRecords.forEach(item => {
-      batch.set(doc(db, 'attendanceRecords', item.id), sanitizeForFirestore(item));
-    });
-
-    initialAssessments.forEach(item => {
-      batch.set(doc(db, 'assessments', item.id), sanitizeForFirestore(item));
-    });
-
-    initialAssessmentScores.forEach(item => {
-      batch.set(doc(db, 'assessmentScores', item.id), sanitizeForFirestore(item));
-    });
-
-    initialNotifications.forEach(item => {
-      batch.set(doc(db, 'notifications', item.id), sanitizeForFirestore(item));
-    });
-
-    initialChatMessages.forEach(item => {
-      batch.set(doc(db, 'chatMessages', item.id), sanitizeForFirestore(item));
-    });
-
-    initialAuditLogs.forEach(item => {
-      batch.set(doc(db, 'auditLogs', item.id), sanitizeForFirestore(item));
-    });
-
-    await batch.commit();
-    isInitialized = true;
-    console.log('Cloud Firestore successfully seeded and synchronized!');
   } catch (err) {
-    isInitialized = true;
     console.warn('Initial seeding encountered notice (may already have records):', err);
   }
 }
@@ -606,37 +651,177 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     }
   }
 
-  // 21. Visual Theme & Background Settings
+  // 21. Visual Theme & Background Settings (Split across dedicated documents so backgrounds never hit 1MB limit)
   if (callbacks.onVisualSettingsChange) {
+    const mergedVisualState: Partial<VisualSettings> = {};
+    let hasDedicatedLoginDoc = false;
+    let hasDedicatedMenuDoc = false;
+
+    const emitMergedVisuals = (patch: Partial<VisualSettings>) => {
+      for (const [k, v] of Object.entries(patch)) {
+        if (v !== undefined) {
+          (mergedVisualState as any)[k] = v;
+        }
+      }
+      if (patch.moduleBannerBgs) {
+        mergedVisualState.perModuleBannerBgs = patch.moduleBannerBgs;
+      }
+      if (patch.globalBannerBgUrl !== undefined) {
+        mergedVisualState.moduleBannerBgUrl = patch.globalBannerBgUrl;
+      }
+      callbacks.onVisualSettingsChange?.({ ...(mergedVisualState as VisualSettings) });
+      handleUpdate();
+    };
+
     try {
-      const unsubVisualSettings = onSnapshot(
+      const unsubVisualTheme = onSnapshot(
         doc(db, 'settings', 'visual_theme'),
         docSnap => {
           if (docSnap.exists()) {
-            callbacks.onVisualSettingsChange?.(docSnap.data() as VisualSettings);
-            handleUpdate();
+            const raw = docSnap.data() as Partial<VisualSettings>;
+            const themePatch: Partial<VisualSettings> = {
+              appLogoFit: raw.appLogoFit,
+              updatedAt: raw.updatedAt,
+            };
+            if (typeof raw.appLogoUrl === 'string' && raw.appLogoUrl.length > 0) {
+              themePatch.appLogoUrl = raw.appLogoUrl;
+            }
+            if (typeof raw.faviconUrl === 'string' && raw.faviconUrl.length > 0) {
+              themePatch.faviconUrl = raw.faviconUrl;
+            }
+            if (!hasDedicatedLoginDoc) {
+              if (raw.loginBgType !== undefined) themePatch.loginBgType = raw.loginBgType;
+              if (raw.loginLivePreset !== undefined) themePatch.loginLivePreset = raw.loginLivePreset;
+              if (typeof raw.loginBgUrl === 'string' && raw.loginBgUrl.length > 0) {
+                themePatch.loginBgUrl = raw.loginBgUrl;
+              } else if (raw.loginBgType === 'default' || raw.loginBgType === 'live_preset') {
+                themePatch.loginBgUrl = null;
+              }
+            }
+            if (!hasDedicatedMenuDoc) {
+              if (raw.menuBgType !== undefined) themePatch.menuBgType = raw.menuBgType;
+              if (raw.menuLivePreset !== undefined) themePatch.menuLivePreset = raw.menuLivePreset;
+              if (raw.menuBgOpacity !== undefined) themePatch.menuBgOpacity = raw.menuBgOpacity;
+              if (raw.ambientDarkMode !== undefined) themePatch.ambientDarkMode = raw.ambientDarkMode;
+              if (typeof raw.menuBgUrl === 'string' && raw.menuBgUrl.length > 0) {
+                themePatch.menuBgUrl = raw.menuBgUrl;
+              } else if (raw.menuBgType === 'default' || raw.menuBgType === 'live_preset') {
+                themePatch.menuBgUrl = null;
+              }
+            }
+            emitMergedVisuals(themePatch);
           }
         },
-        error => {
-          safeHandleListenerError(error, 'settings/visual_theme');
-        }
+        error => safeHandleListenerError(error, 'settings/visual_theme')
       );
-      unsubscribers.push(unsubVisualSettings);
+      unsubscribers.push(unsubVisualTheme);
+
+      const unsubBgLogin = onSnapshot(
+        doc(db, 'settings', 'visual_bg_login'),
+        docSnap => {
+          if (docSnap.exists()) {
+            hasDedicatedLoginDoc = true;
+            const d = docSnap.data() as Partial<VisualSettings>;
+            const loginPatch: Partial<VisualSettings> = {
+              loginBgType: d.loginBgType,
+              loginLivePreset: d.loginLivePreset,
+              updatedAt: d.updatedAt,
+            };
+            if (typeof d.loginBgUrl === 'string' && d.loginBgUrl.length > 0) {
+              loginPatch.loginBgUrl = d.loginBgUrl;
+            } else if (d.loginBgType === 'default' || d.loginBgType === 'live_preset') {
+              loginPatch.loginBgUrl = null;
+            }
+            emitMergedVisuals(loginPatch);
+          }
+        },
+        error => safeHandleListenerError(error, 'settings/visual_bg_login')
+      );
+      unsubscribers.push(unsubBgLogin);
+
+      const unsubBgMenu = onSnapshot(
+        doc(db, 'settings', 'visual_bg_menu'),
+        docSnap => {
+          if (docSnap.exists()) {
+            hasDedicatedMenuDoc = true;
+            const d = docSnap.data() as Partial<VisualSettings>;
+            const menuPatch: Partial<VisualSettings> = {
+              menuBgType: d.menuBgType,
+              menuLivePreset: d.menuLivePreset,
+              menuBgOpacity: d.menuBgOpacity,
+              ambientDarkMode: d.ambientDarkMode,
+              updatedAt: d.updatedAt,
+            };
+            if (typeof d.menuBgUrl === 'string' && d.menuBgUrl.length > 0) {
+              menuPatch.menuBgUrl = d.menuBgUrl;
+            } else if (d.menuBgType === 'default' || d.menuBgType === 'live_preset') {
+              menuPatch.menuBgUrl = null;
+            }
+            emitMergedVisuals(menuPatch);
+          }
+        },
+        error => safeHandleListenerError(error, 'settings/visual_bg_menu')
+      );
+      unsubscribers.push(unsubBgMenu);
+
+      const unsubBgBanners = onSnapshot(
+        doc(db, 'settings', 'visual_bg_banners'),
+        docSnap => {
+          if (docSnap.exists()) {
+            emitMergedVisuals(docSnap.data() as Partial<VisualSettings>);
+          }
+        },
+        error => safeHandleListenerError(error, 'settings/visual_bg_banners')
+      );
+      unsubscribers.push(unsubBgBanners);
+
+      const unsubBgModules = onSnapshot(
+        doc(db, 'settings', 'visual_bg_modules'),
+        docSnap => {
+          if (docSnap.exists()) {
+            emitMergedVisuals(docSnap.data() as Partial<VisualSettings>);
+          }
+        },
+        error => safeHandleListenerError(error, 'settings/visual_bg_modules')
+      );
+      unsubscribers.push(unsubBgModules);
     } catch (err) {
-      console.error('Error attaching visual_theme listener:', err);
+      console.error('Error attaching visual_theme listeners:', err);
     }
   }
 
-  // 22. Lesson Schedules (Jadwal Pelajaran)
+  // 22. Lesson Schedules (Jadwal Pelajaran - Atomic document + collection sync)
   if (callbacks.onLessonSchedulesChange) {
+    let hasAtomicMetaSchedules = false;
     try {
+      const unsubSchedulesMeta = onSnapshot(
+        doc(db, 'settings', 'schedules_meta'),
+        docSnap => {
+          if (docSnap.exists()) {
+            const raw = docSnap.data();
+            if (raw && Array.isArray(raw.schedules)) {
+              hasAtomicMetaSchedules = true;
+              callbacks.onLessonSchedulesChange?.(raw.schedules as LessonSchedule[]);
+              handleUpdate();
+            }
+          }
+        },
+        error => {
+          safeHandleListenerError(error, 'settings/schedules_meta');
+        }
+      );
+      unsubscribers.push(unsubSchedulesMeta);
+
       const unsubSchedules = onSnapshot(
         collection(db, 'lessonSchedules'),
         snapshot => {
+          if (hasAtomicMetaSchedules) return;
           const list: LessonSchedule[] = [];
           snapshot.forEach(docSnap => list.push(docSnap.data() as LessonSchedule));
-          callbacks.onLessonSchedulesChange?.(list);
-          handleUpdate();
+          if (list.length > 0) {
+            callbacks.onLessonSchedulesChange?.(list);
+            handleUpdate();
+          }
         },
         error => {
           safeHandleListenerError(error, 'lessonSchedules');
@@ -1184,49 +1369,101 @@ export async function firestoreClearAllPklData(
 
 export async function firestoreSaveVisualSettings(settings: VisualSettings): Promise<void> {
   try {
-    const MAX_FIELD_LEN = 550_000;
-    const safeSettings: VisualSettings = {
-      ...settings,
-      appLogoUrl:
-        settings.appLogoUrl && settings.appLogoUrl.length <= MAX_FIELD_LEN
-          ? settings.appLogoUrl
-          : settings.appLogoUrl === null
-          ? null
-          : undefined,
-      faviconUrl:
-        settings.faviconUrl && settings.faviconUrl.length <= MAX_FIELD_LEN
-          ? settings.faviconUrl
-          : settings.faviconUrl === null
-          ? null
-          : undefined,
-      loginBgUrl:
-        settings.loginBgUrl && settings.loginBgUrl.length > MAX_FIELD_LEN
-          ? null
-          : settings.loginBgUrl,
-      menuBgUrl:
-        settings.menuBgUrl && settings.menuBgUrl.length > MAX_FIELD_LEN
-          ? null
-          : settings.menuBgUrl,
-      globalBannerBgUrl:
-        settings.globalBannerBgUrl && settings.globalBannerBgUrl.length > MAX_FIELD_LEN
-          ? null
-          : settings.globalBannerBgUrl,
-      // Avoid storing duplicate map in Firestore document
-      perModuleBannerBgs: {},
+    const nowIso = new Date().toISOString();
+
+    // Compact any oversized base64 images automatically instead of discarding them to null
+    const [compactLogo, compactFavicon, compactLoginBg, compactMenuBg, compactGlobalBanner] = await Promise.all([
+      ensureCompactImageDataUrl(settings.appLogoUrl, 350_000, 512),
+      ensureCompactImageDataUrl(settings.faviconUrl, 150_000, 128),
+      ensureCompactImageDataUrl(settings.loginBgUrl, 680_000, 1440),
+      ensureCompactImageDataUrl(settings.menuBgUrl, 680_000, 1440),
+      ensureCompactImageDataUrl(settings.globalBannerBgUrl || settings.moduleBannerBgUrl, 500_000, 1280),
+    ]);
+
+    // Compact moduleBannerBgs and boxBgs entries
+    const rawModuleBgs = settings.moduleBannerBgs || settings.perModuleBannerBgs || {};
+    const compactModuleBgs: Record<string, string> = {};
+    for (const [k, v] of Object.entries(rawModuleBgs)) {
+      if (v) {
+        const c = await ensureCompactImageDataUrl(v, 180_000, 960);
+        if (c) compactModuleBgs[k] = c;
+      }
+    }
+
+    const rawBoxBgs = settings.boxBgs || {};
+    const compactBoxBgs: Record<string, string> = {};
+    for (const [k, v] of Object.entries(rawBoxBgs)) {
+      if (v) {
+        const c = await ensureCompactImageDataUrl(v, 150_000, 850);
+        if (c) compactBoxBgs[k] = c;
+      }
+    }
+
+    const safeCloudUrl = (url: string | null | undefined, maxLen = 780_000): string | null => {
+      if (!url || typeof url !== 'string') return null;
+      if (url.startsWith('blob:')) return null;
+      return url.length <= maxLen ? url : null;
     };
 
-    let serialized = JSON.stringify(safeSettings);
-    if (serialized.length > 850_000) {
-      // Trim heavy background maps if combined payload approaches Firestore 1MB limit, while always keeping logo & favicon
-      safeSettings.moduleBannerBgs = {};
-      serialized = JSON.stringify(safeSettings);
-    }
-    if (serialized.length > 850_000) {
-      safeSettings.boxBgs = {};
-      safeSettings.menuBgUrl = null;
-    }
+    const cloudLoginUrl = safeCloudUrl(compactLoginBg, 780_000);
+    const cloudMenuUrl = safeCloudUrl(compactMenuBg, 780_000);
+    const cloudBannerUrl = safeCloudUrl(compactGlobalBanner, 780_000);
 
-    await setDoc(doc(db, 'settings', 'visual_theme'), sanitizeForFirestore(safeSettings));
+    // 1. Core Theme & Branding Document
+    const coreThemeDoc = {
+      appLogoUrl: safeCloudUrl(compactLogo, 400_000),
+      appLogoFit: settings.appLogoFit || 'contain',
+      faviconUrl: safeCloudUrl(compactFavicon, 200_000),
+      loginBgUrl: cloudLoginUrl && cloudLoginUrl.length < 320_000 ? cloudLoginUrl : null,
+      loginBgType: settings.loginBgType || 'default',
+      loginLivePreset: settings.loginLivePreset || 'starlight_castle',
+      menuBgUrl: cloudMenuUrl && cloudMenuUrl.length < 320_000 ? cloudMenuUrl : null,
+      menuBgType: settings.menuBgType || 'default',
+      menuLivePreset: settings.menuLivePreset || 'starlight_castle',
+      menuBgOpacity: settings.menuBgOpacity ?? 45,
+      ambientDarkMode: settings.ambientDarkMode !== false,
+      updatedAt: nowIso,
+    };
+
+    // 2. Dedicated Login Background Document (Full 1MB capacity)
+    const loginBgDoc = {
+      loginBgUrl: cloudLoginUrl,
+      loginBgType: settings.loginBgType || 'default',
+      loginLivePreset: settings.loginLivePreset || 'starlight_castle',
+      updatedAt: nowIso,
+    };
+
+    // 3. Dedicated Menu Background Document (Full 1MB capacity)
+    const menuBgDoc = {
+      menuBgUrl: cloudMenuUrl,
+      menuBgType: settings.menuBgType || 'default',
+      menuLivePreset: settings.menuLivePreset || 'starlight_castle',
+      menuBgOpacity: settings.menuBgOpacity ?? 45,
+      ambientDarkMode: settings.ambientDarkMode !== false,
+      updatedAt: nowIso,
+    };
+
+    // 4. Dedicated Global Banner Background Document (Full 1MB capacity)
+    const bannerBgDoc = {
+      globalBannerBgUrl: cloudBannerUrl,
+      moduleBannerBgUrl: cloudBannerUrl,
+      updatedAt: nowIso,
+    };
+
+    // 5. Dedicated Per-Module & Box Backgrounds Document
+    const modulesBgDoc = {
+      moduleBannerBgs: compactModuleBgs,
+      boxBgs: compactBoxBgs,
+      updatedAt: nowIso,
+    };
+
+    await Promise.all([
+      setDoc(doc(db, 'settings', 'visual_theme'), sanitizeForFirestore(coreThemeDoc)),
+      setDoc(doc(db, 'settings', 'visual_bg_login'), sanitizeForFirestore(loginBgDoc)),
+      setDoc(doc(db, 'settings', 'visual_bg_menu'), sanitizeForFirestore(menuBgDoc)),
+      setDoc(doc(db, 'settings', 'visual_bg_banners'), sanitizeForFirestore(bannerBgDoc)),
+      setDoc(doc(db, 'settings', 'visual_bg_modules'), sanitizeForFirestore(modulesBgDoc)),
+    ]);
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, 'settings/visual_theme');
   }
@@ -1245,6 +1482,29 @@ export async function firestoreSaveLessonSchedule(schedule: LessonSchedule): Pro
     await setDoc(doc(db, 'lessonSchedules', schedule.id), sanitizeForFirestore(schedule));
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, `lessonSchedules/${schedule.id}`);
+  }
+}
+
+export async function firestoreSaveAllLessonSchedules(
+  schedules: LessonSchedule[],
+  deletedScheduleId?: string
+): Promise<void> {
+  try {
+    const batch = writeBatch(db);
+    if (deletedScheduleId) {
+      batch.delete(doc(db, 'lessonSchedules', deletedScheduleId));
+    }
+    schedules.forEach(sch => {
+      batch.set(doc(db, 'lessonSchedules', sch.id), sanitizeForFirestore(sch));
+    });
+    batch.set(doc(db, 'settings', 'schedules_meta'), {
+      initialized: true,
+      schedules: sanitizeForFirestore(schedules),
+      updatedAt: new Date().toISOString(),
+    });
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'lessonSchedules/batch');
   }
 }
 
