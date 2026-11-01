@@ -784,8 +784,8 @@ export const GradingModule: React.FC = () => {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-xl border border-[#D4AF37] bg-[#0B162C] px-4 py-3 text-xs font-bold text-amber-100 shadow-2xl animate-in slide-in-from-bottom-3">
-          <Check className="h-4 w-4 text-emerald-400 shrink-0" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-[16px] border border-[#6C60B8]/25 bg-white px-4 py-3 text-xs font-extrabold text-[#3E385B] shadow-[0_16px_36px_-8px_rgba(108,96,184,0.28)] animate-in slide-in-from-bottom-3">
+          <Check className="h-4 w-4 text-[#1CC865] shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -798,14 +798,14 @@ export const GradingModule: React.FC = () => {
         subtitle="Pengelolaan bobot penilaian dinamis, kalkulasi leger nilai akhir otomatis, dan penyusunan transkrip rapor siswa yang tersinkron ke Cloud Firestore."
         icon={GraduationCap}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#C8A44B]/50 bg-[#0F1E3A]/90 p-1.5 backdrop-blur-md">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5">
             <button
               type="button"
               onClick={() => setActiveTab('input')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
                 activeTab === 'input'
-                  ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 shadow-sm'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
               }`}
             >
               Input Nilai
@@ -813,10 +813,10 @@ export const GradingModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('leger')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
                 activeTab === 'leger'
-                  ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 shadow-sm'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
               }`}
             >
               Rekap &amp; Leger Kelas
@@ -824,10 +824,10 @@ export const GradingModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('reportCard')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
                 activeTab === 'reportCard'
-                  ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 shadow-sm'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
               }`}
             >
               Draf Rapor Siswa
@@ -1988,10 +1988,10 @@ export const GradingModule: React.FC = () => {
               {/* Kop Yayasan */}
               <div className="text-center border-b-2 border-slate-900 pb-4 dark:border-amber-500/40">
                 <h3 className="text-sm font-bold tracking-wider text-slate-800 dark:text-slate-200 uppercase">
-                  Yayasan Mardi Yuana
+                  Yayasan ORBITA
                 </h3>
                 <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white uppercase mt-0.5">
-                  SMK Mardi Yuana Cikembar — ORBITA
+                  ORBITA — ORBITA
                 </h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   Jl. Pelabuhan II KM. 19 Cikembar, Kabupaten Sukabumi, Jawa Barat 43359 | NPSN: 20253654

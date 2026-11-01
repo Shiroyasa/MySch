@@ -425,7 +425,7 @@ export const MasterDataModule: React.FC = () => {
         code: mCode.trim().toUpperCase(),
         name: mName.trim(),
         headOfMajor: mHead.trim() || 'Drs. Pendidik Kejuruan',
-        description: mDesc.trim() || `Program Keahlian Unggulan ${mName} di SMK Mardi Yuana Cikembar.`,
+        description: mDesc.trim() || `Program Keahlian Unggulan ${mName} di ORBITA.`,
       });
       showToast(`Program keahlian ${mName} berhasil ditambahkan.`);
     }
@@ -715,8 +715,8 @@ export const MasterDataModule: React.FC = () => {
     <div className="space-y-6">
       {/* Toast Feedback */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl dark:bg-blue-600 animate-in slide-in-from-bottom-3">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl border border-[#7265C2]/30 bg-[#6C60B8] px-4 py-3 text-xs font-bold text-white shadow-2xl animate-in slide-in-from-bottom-3">
+          <CheckCircle2 className="h-4 w-4 text-[#FFE680]" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -729,7 +729,7 @@ export const MasterDataModule: React.FC = () => {
         subtitle="Pengelolaan terpusat data siswa aktif, tenaga pendidik, rombongan belajar, kompetensi keahlian (jurusan), mata pelajaran, jadwal pelajaran, dan tahun ajaran."
         icon={Gem}
         rightContent={
-          <div className="flex flex-wrap gap-1.5 rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 backdrop-blur-md">
+          <div className="flex flex-wrap gap-1.5 rounded-xl border border-[#E4E2F2] bg-[#F4F3FA] p-1.5">
             {[
               { id: 'students', label: `Siswa (${students.length})`, icon: Gem },
               { id: 'teachers', label: `Guru (${teachers.length})`, icon: Crown },
@@ -747,11 +747,11 @@ export const MasterDataModule: React.FC = () => {
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                     isAct
-                      ? 'bg-[#2563EB] text-white shadow-xs'
-                      : 'text-slate-300 hover:text-white'
+                      ? 'bg-[#6C60B8] text-white shadow-sm'
+                      : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
                   }`}
                 >
-                  <Icon className="h-3.5 w-3.5 text-[#EAB308]" />
+                  <Icon className={`h-3.5 w-3.5 ${isAct ? 'text-[#FFE680]' : 'text-[#6C60B8]'}`} />
                   <span>{tab.label}</span>
                 </button>
               );
@@ -1028,7 +1028,7 @@ export const MasterDataModule: React.FC = () => {
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-[11px] text-slate-400">SMK Mardi Yuana</span>
+                  <span className="text-[11px] text-slate-400">ORBITA</span>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => openEditClassModal(c)}
@@ -1058,7 +1058,7 @@ export const MasterDataModule: React.FC = () => {
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
             <div>
               <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">Program &amp; Kompetensi Keahlian ({majors.length})</h2>
-              <p className="text-xs text-slate-500">Program kejuruan vokasi SMK Mardi Yuana Cikembar Terakreditasi A</p>
+              <p className="text-xs text-slate-500">Program kejuruan vokasi ORBITA Terakreditasi A</p>
             </div>
             <button
               onClick={openAddMajorModal}

@@ -20,7 +20,7 @@ export interface PedagogicalAnalysisRequest {
 
 export async function runPedagogicalThinkingAnalysis(req: PedagogicalAnalysisRequest): Promise<string> {
   const prompt = `
-Lakukan analisis pedagogik & akademik mendalam untuk siswa SMK Mardi Yuana Cikembar dengan data berikut:
+Lakukan analisis pedagogik & akademik mendalam untuk siswa ORBITA dengan data berikut:
 - Nama Siswa: ${req.studentName}
 - Kelas: ${req.className}
 - Tipe Analisis: ${req.queryType}

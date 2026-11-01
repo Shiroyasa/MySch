@@ -34,6 +34,13 @@ import {
   Clock,
   BookOpen,
   GraduationCap,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+  Maximize2,
+  Minimize2,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import {
   exportToExcel,
@@ -127,6 +134,99 @@ export const ReportsModule: React.FC = () => {
 
   // --- PDF Designer State ---
   const [designerConfig, setDesignerConfig] = useState<ReportCustomConfig>(reportTemplate);
+  const [previewPage, setPreviewPage] = useState<number>(1);
+  const [previewShowAllRows, setPreviewShowAllRows] = useState<boolean>(false);
+  const [previewZoom, setPreviewZoom] = useState<number>(100);
+  const [isFullscreenPreview, setIsFullscreenPreview] = useState<boolean>(false);
+  const rowsPerPage = 10;
+
+  const pdfDocumentCatalog: Array<{
+    type: 'attendance_class' | 'grade_class' | 'grade_subject' | 'student_transcript';
+    number: number;
+    shortLabel: string;
+    fullTitle: string;
+    orientation: 'Portrait A4' | 'Landscape A4';
+    desc: string;
+  }> = [
+    {
+      type: 'attendance_class',
+      number: 1,
+      shortLabel: '1. Rekap Presensi',
+      fullTitle: 'REKAPITULASI PRESENSI KEHADIRAN SISWA',
+      orientation: 'Landscape A4',
+      desc: 'Dokumen kehadiran harian & persentase ketertiban siswa per kelas',
+    },
+    {
+      type: 'grade_class',
+      number: 2,
+      shortLabel: '2. Leger Nilai Kelas',
+      fullTitle: 'LEGER NILAI AKADEMIK RESMI KELAS',
+      orientation: 'Landscape A4',
+      desc: 'Dokumen leger nilai seluruh mata pelajaran, rata-rata & peringkat kelas',
+    },
+    {
+      type: 'grade_subject',
+      number: 3,
+      shortLabel: '3. Nilai per Mapel',
+      fullTitle: `REKAPITULASI NILAI MATA PELAJARAN: ${currentSubject?.name || ''}`,
+      orientation: 'Portrait A4',
+      desc: 'Dokumen rincian nilai Tugas (20%), Praktik (30%), Formatif (20%) & Sumatif (30%)',
+    },
+    {
+      type: 'student_transcript',
+      number: 4,
+      shortLabel: '4. Rapor Siswa',
+      fullTitle: 'LAPORAN HASIL CAPAIAN PEMBELAJARAN SISWA (RAPOR)',
+      orientation: 'Portrait A4',
+      desc: 'Dokumen transkrip rapor individu siswa satu per satu beserta catatan wali kelas',
+    },
+  ];
+
+  const activeDocIndex = Math.max(
+    0,
+    pdfDocumentCatalog.findIndex(d => d.type === reportType)
+  );
+  const activeDocMeta = pdfDocumentCatalog[activeDocIndex] || pdfDocumentCatalog[0];
+
+  const stepDocument = (dir: -1 | 1) => {
+    const nextIdx = (activeDocIndex + dir + pdfDocumentCatalog.length) % pdfDocumentCatalog.length;
+    setReportType(pdfDocumentCatalog[nextIdx].type);
+    setPreviewPage(1);
+  };
+
+  const activeClassIndex = Math.max(0, classes.findIndex(c => c.id === currentClass?.id));
+  const stepClass = (dir: -1 | 1) => {
+    if (classes.length === 0) return;
+    const nextIdx = (activeClassIndex + dir + classes.length) % classes.length;
+    setSelectedClassId(classes[nextIdx].id);
+    setPreviewPage(1);
+  };
+
+  const activeSubjectIndex = Math.max(0, subjects.findIndex(s => s.id === currentSubject?.id));
+  const stepSubject = (dir: -1 | 1) => {
+    if (subjects.length === 0) return;
+    const nextIdx = (activeSubjectIndex + dir + subjects.length) % subjects.length;
+    setSelectedSubjectId(subjects[nextIdx].id);
+    setPreviewPage(1);
+  };
+
+  const activeStudentIndex = Math.max(0, classStudents.findIndex(s => s.id === activeStudent?.id));
+  const stepStudent = (dir: -1 | 1) => {
+    if (classStudents.length === 0) return;
+    const nextIdx = (activeStudentIndex + dir + classStudents.length) % classStudents.length;
+    setSelectedStudentId(classStudents[nextIdx].id);
+  };
+
+  const totalPreviewPages = useMemo(() => {
+    if (reportType === 'student_transcript' || previewShowAllRows) return 1;
+    return Math.max(1, Math.ceil(classStudents.length / rowsPerPage));
+  }, [reportType, previewShowAllRows, classStudents.length]);
+
+  useEffect(() => {
+    if (previewPage > totalPreviewPages) {
+      setPreviewPage(1);
+    }
+  }, [previewPage, totalPreviewPages]);
 
   // Sync if reportTemplate updates from cloud
   useEffect(() => {
@@ -753,8 +853,8 @@ export const ReportsModule: React.FC = () => {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toastMsg && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl dark:bg-blue-600 animate-slide-down">
-          <Check className="h-4 w-4 text-emerald-400" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl border border-[#7265C2]/30 bg-[#6C60B8] px-4 py-3 text-xs font-bold text-white shadow-2xl animate-slide-down">
+          <Check className="h-4 w-4 text-[#FFE680]" />
           <span>{toastMsg}</span>
         </div>
       )}
@@ -767,13 +867,13 @@ export const ReportsModule: React.FC = () => {
         subtitle="Ekspor dokumen resmi PDF & Excel berumus dinamis, kustomisasi kop surat & tanda tangan digital, serta sinkronisasi Google Sheets."
         icon={Scroll}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 backdrop-blur-md">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#E4E2F2] bg-[#F4F3FA] p-1.5">
             <button
               onClick={() => setActiveMainTab('export')}
               className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 activeMainTab === 'export'
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#6C60B8] text-white shadow-sm'
+                  : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
               }`}
             >
               <Download className="h-3.5 w-3.5" />
@@ -783,8 +883,8 @@ export const ReportsModule: React.FC = () => {
               onClick={() => setActiveMainTab('spreadsheet')}
               className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 activeMainTab === 'spreadsheet'
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#6C60B8] text-white shadow-sm'
+                  : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
               }`}
             >
               <Table className="h-3.5 w-3.5" />
@@ -794,11 +894,11 @@ export const ReportsModule: React.FC = () => {
               onClick={() => setActiveMainTab('designer')}
               className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 activeMainTab === 'designer'
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#6C60B8] text-white shadow-sm'
+                  : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
               }`}
             >
-              <Palette className="h-3.5 w-3.5 text-[#EAB308]" />
+              <Palette className={`h-3.5 w-3.5 ${activeMainTab === 'designer' ? 'text-[#FFE680]' : 'text-[#6C60B8]'}`} />
               <span>Desain &amp; Tata Letak PDF</span>
             </button>
           </div>
@@ -933,25 +1033,39 @@ export const ReportsModule: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
+                    type="button"
+                    onClick={() => {
+                      setActiveMainTab('designer');
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1 rounded-xl border border-blue-200 bg-blue-50 py-2 px-2 text-[11px] font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300 shadow-2xs cursor-pointer"
+                    title="Pratinjau Lembar Dokumen Satu per Satu"
+                  >
+                    <Eye className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                    <span>Pratinjau</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={handleDownloadExcel}
-                    className="flex-1 flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white py-2 px-2 text-[11px] font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 shadow-2xs"
+                    className="flex-1 flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white py-2 px-2 text-[11px] font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 shadow-2xs cursor-pointer"
                     title="Ekspor file Excel (.xlsx)"
                   >
                     <Download className="h-3.5 w-3.5 text-emerald-600" />
                     <span>Excel</span>
                   </button>
                   <button
+                    type="button"
                     onClick={handleDownloadPdf}
-                    className="flex-1 flex items-center justify-center gap-1 rounded-xl bg-blue-600 py-2 px-2 text-[11px] font-bold text-white shadow-xs hover:bg-blue-700 transition-colors"
+                    className="flex-1 flex items-center justify-center gap-1 rounded-xl bg-blue-600 py-2 px-2 text-[11px] font-bold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer"
                     title="Cetak PDF Resmi Sesuai Format"
                   >
                     <Printer className="h-3.5 w-3.5" />
                     <span>Cetak PDF</span>
                   </button>
                   <button
+                    type="button"
                     onClick={handleExportGoogleSheets}
                     disabled={isExportingSheets}
-                    className="flex-1 flex items-center justify-center gap-1 rounded-xl bg-emerald-600 py-2 px-2 text-[11px] font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-1 rounded-xl bg-emerald-600 py-2 px-2 text-[11px] font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     <Table className="h-3.5 w-3.5" />
                     <span>{isExportingSheets ? '...' : 'Sheets'}</span>
@@ -1828,9 +1942,20 @@ export const ReportsModule: React.FC = () => {
               </div>
             </div>
 
-            {/* Section 2: Header Kop Surat */}
+            {/* Section 2: Header Kop Surat & Warna Tabel */}
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3">
-              <h3 className="font-bold text-xs text-slate-900 dark:text-white">Informasi Kop Surat</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-xs text-slate-900 dark:text-white">Informasi Kop Surat &amp; Tema Tabel</h3>
+                <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={designerConfig.showKopSurat !== false}
+                    onChange={e => setDesignerConfig(prev => ({ ...prev, showKopSurat: e.target.checked }))}
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span>Tampilkan Kop</span>
+                </label>
+              </div>
 
               <div className="space-y-2">
                 <div>
@@ -1864,13 +1989,56 @@ export const ReportsModule: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 block">Alamat Lengkap &amp; Kontak</label>
+                  <label className="text-[10px] font-bold text-slate-500 block">Alamat Lengkap</label>
                   <input
                     type="text"
                     value={designerConfig.institutionAddress}
                     onChange={e => setDesignerConfig(prev => ({ ...prev, institutionAddress: e.target.value }))}
                     className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-2.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 block">Kontak / Email / Web</label>
+                    <input
+                      type="text"
+                      value={designerConfig.institutionContact}
+                      onChange={e => setDesignerConfig(prev => ({ ...prev, institutionContact: e.target.value }))}
+                      className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-2.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-500 block">Warna Header Tabel PDF</label>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      {(
+                        [
+                          { label: 'Navy', rgb: [15, 23, 42] as [number, number, number], hex: '#0f172a' },
+                          { label: 'Royal Blue', rgb: [30, 64, 175] as [number, number, number], hex: '#1e40af' },
+                          { label: 'Emerald', rgb: [6, 95, 70] as [number, number, number], hex: '#065f46' },
+                          { label: 'Crimson', rgb: [136, 19, 55] as [number, number, number], hex: '#881337' },
+                        ]
+                      ).map(preset => {
+                        const cur = designerConfig.accentColor || [15, 23, 42];
+                        const isSelected =
+                          cur[0] === preset.rgb[0] && cur[1] === preset.rgb[1] && cur[2] === preset.rgb[2];
+                        return (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() => setDesignerConfig(prev => ({ ...prev, accentColor: preset.rgb }))}
+                            style={{ backgroundColor: preset.hex }}
+                            className={`h-6 w-6 rounded-md border transition-transform cursor-pointer ${
+                              isSelected
+                                ? 'scale-110 ring-2 ring-blue-500 border-white'
+                                : 'border-slate-300 opacity-80 hover:opacity-100'
+                            }`}
+                            title={preset.label}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1972,11 +2140,32 @@ export const ReportsModule: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-[10px] text-slate-500 block">Kota &amp; Tanggal</label>
+                    <label className="text-[10px] text-slate-500 block">Kota</label>
                     <input
                       type="text"
                       value={designerConfig.rightSignerCity}
                       onChange={e => setDesignerConfig(prev => ({ ...prev, rightSignerCity: e.target.value }))}
+                      className="w-full rounded border border-slate-200 bg-white p-1 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-500 block">Tanggal Cetak</label>
+                    <input
+                      type="text"
+                      value={designerConfig.rightSignerDate}
+                      onChange={e => setDesignerConfig(prev => ({ ...prev, rightSignerDate: e.target.value }))}
+                      className="w-full rounded border border-slate-200 bg-white p-1 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-slate-500 block">Jabatan Kepala Sekolah</label>
+                    <input
+                      type="text"
+                      value={designerConfig.rightSignerTitle}
+                      onChange={e => setDesignerConfig(prev => ({ ...prev, rightSignerTitle: e.target.value }))}
                       className="w-full rounded border border-slate-200 bg-white p-1 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
                   </div>
@@ -2023,138 +2212,1007 @@ export const ReportsModule: React.FC = () => {
             </div>
           </div>
 
-          {/* Live A4 Preview Canvas (Right) */}
+          {/* Live A4 Preview Canvas (Right - Interactive One-by-One Document & Page Navigator) */}
           <div className="lg:col-span-7">
-            <div className="sticky top-20 rounded-2xl border border-slate-200 bg-slate-200/60 p-4 shadow-inner dark:border-slate-800 dark:bg-slate-950">
-              <div className="flex items-center justify-between mb-3 px-1">
-                <span className="text-xs font-extrabold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                  <Eye className="h-4 w-4 text-blue-600" />
-                  Pratinjau Nyata Lembar Kertas Dokumen (A4)
-                </span>
-                <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
-                  Logo &amp; TTD Proporsional
-                </span>
-              </div>
-
-              {/* Realistic Paper Container */}
-              <div className="bg-white text-slate-900 rounded-lg shadow-2xl p-6 sm:p-8 border border-slate-300 text-xs font-sans min-h-[620px] flex flex-col justify-between">
-                {/* Kop Surat with Proportional Sizing */}
-                <div>
-                  <div className="flex items-center gap-4 border-b-2 border-slate-900 pb-2">
-                    {designerConfig.logoDataUrl ? (
-                      <div className="flex items-center justify-center shrink-0 max-h-16 max-w-24">
-                        <img
-                          src={designerConfig.logoDataUrl}
-                          alt="Logo"
-                          className="h-14 w-auto max-w-full object-contain"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-14 w-14 rounded-full border border-dashed border-slate-300 flex items-center justify-center text-[9px] text-slate-400 shrink-0 text-center">
-                        Logo
-                      </div>
-                    )}
-                    <div className="flex-1 text-center">
-                      <h4 className="font-extrabold text-[11px] tracking-wide text-slate-800">
-                        {designerConfig.institutionFoundation}
+            <div className="sticky top-20 rounded-2xl border border-slate-200 bg-slate-200/70 p-4 shadow-inner dark:border-slate-800 dark:bg-slate-950 space-y-3">
+              {/* Top Bar: Document Switcher Tabs (1 to 4) + Prev/Next Document Stepper */}
+              <div className="rounded-xl border border-slate-300/80 bg-white p-3 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-2.5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white font-black text-xs">
+                      {activeDocMeta.number}/4
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <span>Pratinjau Dokumen PDF Satu per Satu</span>
+                        <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400">
+                          • {activeDocMeta.orientation}
+                        </span>
                       </h4>
-                      <h2 className="font-black text-sm tracking-tight text-blue-900">
-                        {designerConfig.institutionName}
-                      </h2>
-                      <p className="text-[8px] text-slate-600 mt-0.5 leading-tight">
-                        {designerConfig.institutionTagline}
-                      </p>
-                      <p className="text-[8px] text-slate-500 leading-tight">
-                        {designerConfig.institutionAddress} | {designerConfig.institutionContact}
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                        {activeDocMeta.desc}
                       </p>
                     </div>
                   </div>
 
-                  {/* Title & Metadata */}
-                  <div className="text-center my-4">
-                    <h3 className="font-black text-xs uppercase tracking-wider text-slate-900 underline">
-                      LEGER NILAI &amp; LAPORAN AKADEMIK SISWA RESMI
-                    </h3>
-                    <div className="flex justify-between items-center text-[9px] text-slate-600 mt-2 px-2">
-                      <span>Kelas: <strong>{currentClass.name}</strong></span>
-                      <span>Mata Pelajaran: <strong>{currentSubject.name}</strong></span>
-                      <span>Tahun Ajaran: <strong>{activeAcademicYear.name}</strong></span>
-                    </div>
+                  {/* Stepper: Previous / Next Document Type */}
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => stepDocument(-1)}
+                      className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+                      title="Lihat jenis dokumen sebelumnya"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                      <span>Dok. Sebelumnya</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => stepDocument(1)}
+                      className="flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-[11px] font-bold text-white hover:bg-blue-700 shadow-2xs cursor-pointer"
+                      title="Lihat jenis dokumen berikutnya"
+                    >
+                      <span>Dok. Berikutnya</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
                   </div>
-
-                  {/* Sample Table in Paper */}
-                  <table className="w-full text-left text-[9px] border-collapse border border-slate-300 mt-2">
-                    <thead>
-                      <tr className="bg-slate-900 text-white">
-                        <th className="border border-slate-300 p-1 text-center w-6">No</th>
-                        <th className="border border-slate-300 p-1">NISN</th>
-                        <th className="border border-slate-300 p-1">Nama Siswa</th>
-                        <th className="border border-slate-300 p-1 text-center">Tugas</th>
-                        <th className="border border-slate-300 p-1 text-center">Praktik</th>
-                        <th className="border border-slate-300 p-1 text-center">Nilai Akhir</th>
-                        <th className="border border-slate-300 p-1 text-center">Predikat</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {classStudents.slice(0, 5).map((std, idx) => (
-                        <tr key={std.id} className="border-b border-slate-200">
-                          <td className="border border-slate-300 p-1 text-center">{idx + 1}</td>
-                          <td className="border border-slate-300 p-1 font-mono">{std.nisn}</td>
-                          <td className="border border-slate-300 p-1 font-bold">{std.fullName}</td>
-                          <td className="border border-slate-300 p-1 text-center">85</td>
-                          <td className="border border-slate-300 p-1 text-center">88</td>
-                          <td className="border border-slate-300 p-1 text-center font-bold">87</td>
-                          <td className="border border-slate-300 p-1 text-center font-bold text-blue-700">A</td>
-                        </tr>
-                      ))}
-                      <tr>
-                        <td colSpan={7} className="p-1 text-center text-slate-400 italic text-[8px]">
-                          ... Dan {Math.max(0, classStudents.length - 5)} siswa lainnya dicetak lengkap pada dokumen ...
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
                 </div>
 
-                {/* Signatures at the bottom showing edited NIP */}
-                <div className="mt-8 pt-4 flex justify-between text-[9px]">
-                  {/* Left Signer */}
-                  <div className="w-48 text-left">
-                    <p>Mengetahui,</p>
-                    <p className="font-semibold">{designerConfig.leftSignerTitle}</p>
-                    <div className="h-14 my-1 flex items-center">
-                      {designerConfig.leftSignerSignatureUrl ? (
-                        <img src={designerConfig.leftSignerSignatureUrl} alt="TTD Guru" className="h-12 object-contain" />
-                      ) : (
-                        <div className="h-10 w-28 border border-dashed border-slate-300 flex items-center justify-center text-[8px] text-slate-400 italic">
-                          (Tanda Tangan)
-                        </div>
-                      )}
-                    </div>
-                    <p className="font-bold underline text-slate-900">{designerConfig.leftSignerName}</p>
-                    <p className="text-slate-600 font-mono">NIP. {designerConfig.leftSignerNip}</p>
+                {/* 4 Document Type Selector Buttons */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1 border-t border-slate-100 dark:border-slate-800">
+                  {pdfDocumentCatalog.map(docItem => {
+                    const isActive = reportType === docItem.type;
+                    return (
+                      <button
+                        key={docItem.type}
+                        type="button"
+                        onClick={() => {
+                          setReportType(docItem.type);
+                          setPreviewPage(1);
+                        }}
+                        className={`flex items-center justify-center gap-1.5 rounded-lg py-1.5 px-2 text-[11px] font-bold transition-all cursor-pointer ${
+                          isActive
+                            ? 'bg-slate-900 text-white shadow-xs dark:bg-blue-600'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        <FileText className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{docItem.shortLabel}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Second Row: One-by-One Entity Stepper (Per Kelas / Per Mapel / Per Siswa) & Page Controls */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px]">
+                  {/* 1. Class Stepper (Always available) */}
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] font-bold text-slate-500 mr-0.5">Kelas:</span>
+                    <button
+                      type="button"
+                      onClick={() => stepClass(-1)}
+                      className="p-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                      title="Kelas Sebelumnya"
+                    >
+                      <ChevronLeft className="h-3.5 w-3.5" />
+                    </button>
+                    <select
+                      value={selectedClassId}
+                      onChange={e => {
+                        setSelectedClassId(e.target.value);
+                        setPreviewPage(1);
+                      }}
+                      className="rounded border border-slate-200 bg-slate-50 py-1 px-2 text-[11px] font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    >
+                      {classes.map((c, idx) => (
+                        <option key={c.id} value={c.id}>
+                          {idx + 1}/{classes.length} • {c.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => stepClass(1)}
+                      className="p-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                      title="Kelas Berikutnya"
+                    >
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </button>
                   </div>
 
-                  {/* Right Signer */}
-                  <div className="w-48 text-right">
-                    <p>{designerConfig.rightSignerCity}, {designerConfig.rightSignerDate}</p>
-                    <p className="font-semibold">{designerConfig.rightSignerTitle}</p>
-                    <div className="h-14 my-1 flex items-center justify-end">
-                      {designerConfig.rightSignerSignatureUrl ? (
-                        <img src={designerConfig.rightSignerSignatureUrl} alt="TTD Kepsek" className="h-12 object-contain" />
-                      ) : (
-                        <div className="h-10 w-28 border border-dashed border-slate-300 flex items-center justify-center text-[8px] text-slate-400 italic">
-                          (Tanda Tangan)
+                  {/* 2. Subject Stepper (Visible when viewing Document 3: Rekap Nilai Mapel) */}
+                  {reportType === 'grade_subject' && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] font-bold text-slate-500 mr-0.5">Mapel:</span>
+                      <button
+                        type="button"
+                        onClick={() => stepSubject(-1)}
+                        className="p-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                        title="Mata Pelajaran Sebelumnya"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                      </button>
+                      <select
+                        value={selectedSubjectId}
+                        onChange={e => {
+                          setSelectedSubjectId(e.target.value);
+                          setPreviewPage(1);
+                        }}
+                        className="max-w-[180px] rounded border border-slate-200 bg-slate-50 py-1 px-2 text-[11px] font-bold text-blue-700 dark:border-slate-700 dark:bg-slate-800 dark:text-blue-300"
+                      >
+                        {subjects.map((s, idx) => (
+                          <option key={s.id} value={s.id}>
+                            {idx + 1}/{subjects.length} • {s.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => stepSubject(1)}
+                        className="p-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                        title="Mata Pelajaran Berikutnya"
+                      >
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 3. Individual Student Stepper (Visible when viewing Document 4: Rapor Siswa Satu per Satu) */}
+                  {reportType === 'student_transcript' && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 mr-0.5">
+                        Siswa:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => stepStudent(-1)}
+                        className="flex items-center gap-0.5 px-1.5 py-1 rounded border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold cursor-pointer"
+                        title="Siswa Sebelumnya"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                        <span>Prev</span>
+                      </button>
+                      <select
+                        value={activeStudent?.id || ''}
+                        onChange={e => setSelectedStudentId(e.target.value)}
+                        className="max-w-[195px] rounded border border-emerald-300 bg-emerald-50/70 py-1 px-2 text-[11px] font-bold text-emerald-950 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+                      >
+                        {classStudents.map((std, idx) => (
+                          <option key={std.id} value={std.id}>
+                            Siswa {idx + 1}/{classStudents.length}: {std.fullName}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => stepStudent(1)}
+                        className="flex items-center gap-0.5 px-1.5 py-1 rounded border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold cursor-pointer"
+                        title="Siswa Berikutnya"
+                      >
+                        <span>Next</span>
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 4. Multi-page Sheet Stepper for Class Tables (Docs 1, 2, 3) */}
+                  {reportType !== 'student_transcript' && (
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewShowAllRows(prev => !prev)}
+                        className={`px-2 py-1 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
+                          previewShowAllRows
+                            ? 'bg-indigo-600 text-white border-indigo-600'
+                            : 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                        }`}
+                      >
+                        {previewShowAllRows ? 'Semua Baris Aktif' : 'Mode Per Lembar'}
+                      </button>
+                      {!previewShowAllRows && (
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            disabled={previewPage <= 1}
+                            onClick={() => setPreviewPage(p => Math.max(1, p - 1))}
+                            className="p-1 rounded border border-slate-200 bg-slate-50 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 cursor-pointer"
+                            title="Halaman Sebelumnya"
+                          >
+                            <ChevronLeft className="h-3 w-3" />
+                          </button>
+                          <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 px-1">
+                            Hal {previewPage}/{totalPreviewPages}
+                          </span>
+                          <button
+                            type="button"
+                            disabled={previewPage >= totalPreviewPages}
+                            onClick={() => setPreviewPage(p => Math.min(totalPreviewPages, p + 1))}
+                            className="p-1 rounded border border-slate-200 bg-slate-50 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 cursor-pointer"
+                            title="Halaman Berikutnya"
+                          >
+                            <ChevronRight className="h-3 w-3" />
+                          </button>
                         </div>
                       )}
                     </div>
-                    <p className="font-bold underline text-slate-900">{designerConfig.rightSignerName}</p>
-                    <p className="text-slate-600 font-mono">NIP. {designerConfig.rightSignerNip}</p>
+                  )}
+                </div>
+
+                {/* Third Row: Zoom & Fullscreen & Quick Print */}
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px]">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-slate-500 font-semibold">Skala Kertas:</span>
+                    {[85, 100, 110].map(z => (
+                      <button
+                        key={z}
+                        type="button"
+                        onClick={() => setPreviewZoom(z)}
+                        className={`px-2 py-0.5 rounded font-bold cursor-pointer ${
+                          previewZoom === z
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+                        }`}
+                      >
+                        {z}%
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setIsFullscreenPreview(true)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+                    >
+                      <Maximize2 className="h-3 w-3 text-blue-600" />
+                      <span>Layar Penuh</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadPdf}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 font-bold text-white hover:bg-emerald-700 cursor-pointer"
+                    >
+                      <Printer className="h-3 w-3" />
+                      <span>Cetak Dokumen Ini</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Realistic Paper Container (Dynamically Renders Document 1, 2, 3, or 4) */}
+              <div className="overflow-x-auto pb-2">
+                <div
+                  style={{
+                    transform: `scale(${previewZoom / 100})`,
+                    transformOrigin: 'top center',
+                  }}
+                  className="bg-white text-slate-900 rounded-lg shadow-2xl p-6 sm:p-8 border border-slate-300 text-xs font-sans min-h-[660px] flex flex-col justify-between transition-all duration-200 mx-auto"
+                >
+                  {/* TOP SECTION: Kop Surat + Document Header + Document Body */}
+                  <div>
+                    {/* Kop Surat with Proportional Sizing */}
+                    {designerConfig.showKopSurat !== false && (
+                      <div className="flex items-center gap-4 border-b-[3px] border-double border-slate-900 pb-3">
+                        {designerConfig.logoDataUrl ? (
+                          <div className="flex items-center justify-center shrink-0">
+                            <img
+                              src={designerConfig.logoDataUrl}
+                              alt="Logo Instansi"
+                              style={{
+                                width: `${(designerConfig.logoWidth || 20) * 3.2}px`,
+                                maxHeight: '72px',
+                              }}
+                              className="object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <div className="h-14 w-14 rounded-xl border border-dashed border-slate-300 flex items-center justify-center text-[9px] text-slate-400 shrink-0 text-center font-bold">
+                            LOGO
+                          </div>
+                        )}
+                        <div className="flex-1 text-center">
+                          <h4 className="font-extrabold text-[11px] tracking-wider uppercase text-slate-800">
+                            {designerConfig.institutionFoundation}
+                          </h4>
+                          <h2 className="font-black text-sm sm:text-base tracking-tight uppercase text-blue-950 mt-0.5">
+                            {designerConfig.institutionName}
+                          </h2>
+                          <p className="text-[8.5px] text-slate-600 mt-0.5 leading-tight">
+                            {designerConfig.institutionTagline}
+                          </p>
+                          <p className="text-[8px] text-slate-500 leading-tight mt-0.5">
+                            {designerConfig.institutionAddress} | {designerConfig.institutionContact}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Document Specific Title & Metadata */}
+                    <div className="text-center my-3.5">
+                      <h3 className="font-black text-xs uppercase tracking-wider text-slate-900 underline">
+                        {activeDocMeta.fullTitle}
+                      </h3>
+                      <p className="text-[9px] text-slate-600 mt-0.5">
+                        Tahun Pelajaran: <strong>{activeAcademicYear.name}</strong> • Semester:{' '}
+                        <strong className="uppercase">{activeAcademicYear.activeSemester}</strong>
+                      </p>
+
+                      {reportType !== 'student_transcript' && (
+                        <div className="flex flex-wrap justify-between items-center text-[9px] text-slate-700 mt-2.5 px-2 py-1.5 rounded bg-slate-50 border border-slate-200">
+                          <span>
+                            Kelas / Rombel: <strong>{currentClass?.name} ({currentClass?.majorCode})</strong>
+                          </span>
+                          {reportType === 'grade_subject' ? (
+                            <span>
+                              Mata Pelajaran: <strong>{currentSubject?.name} (KKM: {currentSubject?.kkm})</strong>
+                            </span>
+                          ) : (
+                            <span>
+                              Jumlah Siswa: <strong>{classStudents.length} Siswa</strong>
+                            </span>
+                          )}
+                          <span>
+                            Lembar:{' '}
+                            <strong>
+                              {previewShowAllRows ? 'Lengkap (1/1)' : `Halaman ${previewPage} dari ${totalPreviewPages}`}
+                            </strong>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* ==================================================== */}
+                    {/* DOCUMENT 1 BODY: REKAP PRESENSI KEHADIRAN KELAS       */}
+                    {/* ==================================================== */}
+                    {reportType === 'attendance_class' && (
+                      <div className="space-y-2.5">
+                        <table className="w-full text-left text-[8.5px] border-collapse border border-slate-400">
+                          <thead>
+                            <tr
+                              style={{
+                                backgroundColor: designerConfig.accentColor
+                                  ? `rgb(${designerConfig.accentColor.join(',')})`
+                                  : '#0f172a',
+                              }}
+                              className="text-white"
+                            >
+                              <th className="border border-slate-400 p-1 text-center w-6">No</th>
+                              <th className="border border-slate-400 p-1">NISN</th>
+                              <th className="border border-slate-400 p-1">Nama Lengkap Siswa</th>
+                              <th className="border border-slate-400 p-1 text-center">Hadir (H)</th>
+                              <th className="border border-slate-400 p-1 text-center">Sakit (S)</th>
+                              <th className="border border-slate-400 p-1 text-center">Izin (I)</th>
+                              <th className="border border-slate-400 p-1 text-center">Alpa (A)</th>
+                              <th className="border border-slate-400 p-1 text-center">Telat (T)</th>
+                              <th className="border border-slate-400 p-1 text-center">Total</th>
+                              <th className="border border-slate-400 p-1 text-center">% Hadir</th>
+                              <th className="border border-slate-400 p-1 text-center">Keterangan</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(previewShowAllRows
+                              ? classAttendanceData
+                              : classAttendanceData.slice(
+                                  (previewPage - 1) * rowsPerPage,
+                                  previewPage * rowsPerPage
+                                )
+                            ).map(r => (
+                              <tr key={r.studentId} className="even:bg-slate-50">
+                                <td className="border border-slate-300 p-1 text-center">{r.no}</td>
+                                <td className="border border-slate-300 p-1 font-mono">{r.nisn}</td>
+                                <td className="border border-slate-300 p-1 font-bold">{r.fullName}</td>
+                                <td className="border border-slate-300 p-1 text-center font-bold text-emerald-700">{r.h}</td>
+                                <td className="border border-slate-300 p-1 text-center">{r.s}</td>
+                                <td className="border border-slate-300 p-1 text-center">{r.i}</td>
+                                <td className="border border-slate-300 p-1 text-center font-bold text-rose-700">{r.a}</td>
+                                <td className="border border-slate-300 p-1 text-center">{r.t}</td>
+                                <td className="border border-slate-300 p-1 text-center">{r.total}</td>
+                                <td className="border border-slate-300 p-1 text-center font-bold text-blue-800">{r.rate}</td>
+                                <td className="border border-slate-300 p-1 text-center font-semibold">{r.statusLabel}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    {/* ==================================================== */}
+                    {/* DOCUMENT 2 BODY: LEGER NILAI AKADEMIK KELAS           */}
+                    {/* ==================================================== */}
+                    {reportType === 'grade_class' && (
+                      <div className="space-y-2.5">
+                        <table className="w-full text-left text-[8px] border-collapse border border-slate-400">
+                          <thead>
+                            <tr
+                              style={{
+                                backgroundColor: designerConfig.accentColor
+                                  ? `rgb(${designerConfig.accentColor.join(',')})`
+                                  : '#0f172a',
+                              }}
+                              className="text-white"
+                            >
+                              <th className="border border-slate-400 p-1 text-center w-6">No</th>
+                              <th className="border border-slate-400 p-1">NISN</th>
+                              <th className="border border-slate-400 p-1">Nama Siswa</th>
+                              {subjects.map(s => (
+                                <th key={s.id} className="border border-slate-400 p-1 text-center" title={s.name}>
+                                  {s.code}
+                                </th>
+                              ))}
+                              <th className="border border-slate-400 p-1 text-center bg-blue-950">Rata2</th>
+                              <th className="border border-slate-400 p-1 text-center">Pred</th>
+                              <th className="border border-slate-400 p-1 text-center">Rank</th>
+                              <th className="border border-slate-400 p-1 text-center">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(previewShowAllRows
+                              ? classLegerData
+                              : classLegerData.slice(
+                                  (previewPage - 1) * rowsPerPage,
+                                  previewPage * rowsPerPage
+                                )
+                            ).map(r => (
+                              <tr key={r.studentId} className="even:bg-slate-50">
+                                <td className="border border-slate-300 p-1 text-center">{r.no}</td>
+                                <td className="border border-slate-300 p-1 font-mono">{r.nisn}</td>
+                                <td className="border border-slate-300 p-1 font-bold">{r.fullName}</td>
+                                {subjects.map(s => (
+                                  <td key={s.id} className="border border-slate-300 p-1 text-center">
+                                    {r.subjectScores[s.id] || 0}
+                                  </td>
+                                ))}
+                                <td className="border border-slate-300 p-1 text-center font-black text-blue-900 bg-blue-50/50">
+                                  {r.average}
+                                </td>
+                                <td className="border border-slate-300 p-1 text-center font-bold">{r.predicate}</td>
+                                <td className="border border-slate-300 p-1 text-center font-bold">#{r.rank}</td>
+                                <td className="border border-slate-300 p-1 text-center font-bold">
+                                  {r.isPassed ? 'TUNTAS' : 'REMEDIAL'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    {/* ==================================================== */}
+                    {/* DOCUMENT 3 BODY: REKAP NILAI MATA PELAJARAN           */}
+                    {/* ==================================================== */}
+                    {reportType === 'grade_subject' && (
+                      <div className="space-y-2.5">
+                        <table className="w-full text-left text-[8.5px] border-collapse border border-slate-400">
+                          <thead>
+                            <tr
+                              style={{
+                                backgroundColor: designerConfig.accentColor
+                                  ? `rgb(${designerConfig.accentColor.join(',')})`
+                                  : '#0f172a',
+                              }}
+                              className="text-white"
+                            >
+                              <th className="border border-slate-400 p-1 text-center w-6">No</th>
+                              <th className="border border-slate-400 p-1">NISN</th>
+                              <th className="border border-slate-400 p-1">Nama Siswa</th>
+                              <th className="border border-slate-400 p-1 text-center">Tugas (20%)</th>
+                              <th className="border border-slate-400 p-1 text-center">Praktik (30%)</th>
+                              <th className="border border-slate-400 p-1 text-center">Formatif (20%)</th>
+                              <th className="border border-slate-400 p-1 text-center">Sumatif (30%)</th>
+                              <th className="border border-slate-400 p-1 text-center bg-blue-950">Nilai Akhir</th>
+                              <th className="border border-slate-400 p-1 text-center">Predikat</th>
+                              <th className="border border-slate-400 p-1 text-center">Ketuntasan</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(previewShowAllRows
+                              ? subjectGradingData
+                              : subjectGradingData.slice(
+                                  (previewPage - 1) * rowsPerPage,
+                                  previewPage * rowsPerPage
+                                )
+                            ).map(r => (
+                              <tr key={r.studentId} className="even:bg-slate-50">
+                                <td className="border border-slate-300 p-1 text-center">{r.no}</td>
+                                <td className="border border-slate-300 p-1 font-mono">{r.nisn}</td>
+                                <td className="border border-slate-300 p-1 font-bold">{r.fullName}</td>
+                                <td className="border border-slate-300 p-1 text-center">{r.tugas}</td>
+                                <td className="border border-slate-300 p-1 text-center">{r.praktik}</td>
+                                <td className="border border-slate-300 p-1 text-center">{r.formatif}</td>
+                                <td className="border border-slate-300 p-1 text-center">{r.sumatif}</td>
+                                <td className="border border-slate-300 p-1 text-center font-black text-blue-900 bg-blue-50/50">
+                                  {r.finalScore}
+                                </td>
+                                <td className="border border-slate-300 p-1 text-center font-bold">{r.predicate}</td>
+                                <td className="border border-slate-300 p-1 text-center font-bold">
+                                  {r.isPassed ? 'TUNTAS' : 'REMEDIAL'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    {/* ==================================================== */}
+                    {/* DOCUMENT 4 BODY: RAPOR & TRANSKRIP INDIVIDU SISWA     */}
+                    {/* ==================================================== */}
+                    {reportType === 'student_transcript' && studentTranscriptData && (
+                      <div className="space-y-3">
+                        {/* Student Identity Box on Rapor Paper */}
+                        <div className="grid grid-cols-2 gap-3 rounded border border-slate-300 bg-slate-50 p-2.5 text-[9px]">
+                          <div className="space-y-1">
+                            <p>
+                              <span className="text-slate-500">Nama Peserta Didik:</span>{' '}
+                              <strong className="text-slate-900 uppercase">
+                                {studentTranscriptData.student.fullName}
+                              </strong>
+                            </p>
+                            <p>
+                              <span className="text-slate-500">NISN / NIS:</span>{' '}
+                              <strong className="font-mono">
+                                {studentTranscriptData.student.nisn} / {studentTranscriptData.student.nis}
+                              </strong>
+                            </p>
+                          </div>
+                          <div className="space-y-1">
+                            <p>
+                              <span className="text-slate-500">Kelas / Rombel:</span>{' '}
+                              <strong>
+                                {studentTranscriptData.student.className} ({studentTranscriptData.student.majorCode})
+                              </strong>
+                            </p>
+                            <p>
+                              <span className="text-slate-500">Siswa Urutan:</span>{' '}
+                              <strong>
+                                {activeStudentIndex + 1} dari {classStudents.length} Siswa
+                              </strong>
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Grades Table */}
+                        <table className="w-full text-left text-[8.5px] border-collapse border border-slate-400">
+                          <thead>
+                            <tr
+                              style={{
+                                backgroundColor: designerConfig.accentColor
+                                  ? `rgb(${designerConfig.accentColor.join(',')})`
+                                  : '#0f172a',
+                              }}
+                              className="text-white"
+                            >
+                              <th className="border border-slate-400 p-1 text-center w-6">No</th>
+                              <th className="border border-slate-400 p-1">Mata Pelajaran</th>
+                              <th className="border border-slate-400 p-1 text-center w-10">KKM</th>
+                              <th className="border border-slate-400 p-1 text-center w-12">Nilai</th>
+                              <th className="border border-slate-400 p-1 text-center w-12">Predikat</th>
+                              <th className="border border-slate-400 p-1">Capaian Kompetensi</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {studentTranscriptData.subjectsList.map(sub => (
+                              <tr key={sub.subjectId} className="even:bg-slate-50">
+                                <td className="border border-slate-300 p-1 text-center">{sub.no}</td>
+                                <td className="border border-slate-300 p-1 font-bold">
+                                  {sub.name}{' '}
+                                  <span className="font-normal text-slate-500">({sub.code})</span>
+                                </td>
+                                <td className="border border-slate-300 p-1 text-center">{sub.kkm}</td>
+                                <td className="border border-slate-300 p-1 text-center font-black text-blue-900">
+                                  {sub.score}
+                                </td>
+                                <td className="border border-slate-300 p-1 text-center font-bold">
+                                  {sub.predicate}
+                                </td>
+                                <td className="border border-slate-300 p-1 text-[8px] text-slate-700">
+                                  {sub.feedback}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot>
+                            <tr className="bg-slate-100 font-bold">
+                              <td colSpan={3} className="border border-slate-400 p-1 text-right">
+                                Rata-rata Nilai Akademik:
+                              </td>
+                              <td className="border border-slate-400 p-1 text-center font-black text-blue-900">
+                                {studentTranscriptData.averageScore}
+                              </td>
+                              <td className="border border-slate-400 p-1 text-center">
+                                {studentTranscriptData.averageScore >= 90
+                                  ? 'A'
+                                  : studentTranscriptData.averageScore >= 80
+                                  ? 'B'
+                                  : 'C'}
+                              </td>
+                              <td className="border border-slate-400 p-1 text-emerald-800">
+                                Ketuntasan: TUNTAS
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+
+                        {/* Attendance Summary on Rapor Paper */}
+                        <div className="grid grid-cols-2 gap-3 text-[8.5px]">
+                          <div className="rounded border border-slate-300 p-2">
+                            <p className="font-bold text-slate-800 mb-1">Rekapitulasi Kehadiran:</p>
+                            <div className="flex items-center justify-between text-slate-700">
+                              <span>Hadir: <strong>{studentTranscriptData.attendance.h}</strong></span>
+                              <span>Sakit: <strong>{studentTranscriptData.attendance.s}</strong></span>
+                              <span>Izin: <strong>{studentTranscriptData.attendance.i}</strong></span>
+                              <span>Alpa: <strong>{studentTranscriptData.attendance.a}</strong></span>
+                            </div>
+                          </div>
+                          <div className="rounded border border-slate-300 p-2">
+                            <p className="font-bold text-slate-800 mb-0.5">Catatan Wali Kelas:</p>
+                            <p className="italic text-slate-600 leading-snug">
+                              "Pertahankan prestasi akademik dan kedisiplinan belajar."
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* BOTTOM SECTION: Signatures & NIP on Paper */}
+                  <div className="mt-8 pt-4 flex justify-between text-[9px] border-t border-slate-200">
+                    {/* Left Signer */}
+                    <div className="w-48 text-left">
+                      <p>Mengetahui,</p>
+                      <p className="font-semibold">{designerConfig.leftSignerTitle}</p>
+                      <div className="h-14 my-1 flex items-center">
+                        {designerConfig.leftSignerSignatureUrl ? (
+                          <img
+                            src={designerConfig.leftSignerSignatureUrl}
+                            alt="TTD Guru"
+                            className="h-12 object-contain"
+                          />
+                        ) : (
+                          <div className="h-10 w-28 border border-dashed border-slate-300 flex items-center justify-center text-[8px] text-slate-400 italic">
+                            (Tanda Tangan)
+                          </div>
+                        )}
+                      </div>
+                      <p className="font-bold underline text-slate-900">{designerConfig.leftSignerName}</p>
+                      <p className="text-slate-600 font-mono">NIP. {designerConfig.leftSignerNip}</p>
+                    </div>
+
+                    {/* Right Signer */}
+                    <div className="w-48 text-right">
+                      <p>
+                        {designerConfig.rightSignerCity}, {designerConfig.rightSignerDate}
+                      </p>
+                      <p className="font-semibold">{designerConfig.rightSignerTitle}</p>
+                      <div className="h-14 my-1 flex items-center justify-end">
+                        {designerConfig.rightSignerSignatureUrl ? (
+                          <img
+                            src={designerConfig.rightSignerSignatureUrl}
+                            alt="TTD Kepsek"
+                            className="h-12 object-contain"
+                          />
+                        ) : (
+                          <div className="h-10 w-28 border border-dashed border-slate-300 flex items-center justify-center text-[8px] text-slate-400 italic">
+                            (Tanda Tangan)
+                          </div>
+                        )}
+                      </div>
+                      <p className="font-bold underline text-slate-900">{designerConfig.rightSignerName}</p>
+                      <p className="text-slate-600 font-mono">NIP. {designerConfig.rightSignerNip}</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Fullscreen Modal Preview (Allows inspecting each document one by one at large scale) */}
+          {isFullscreenPreview && (
+            <div className="fixed inset-0 z-50 flex flex-col bg-[#3E385B]/45 backdrop-blur-md p-4 sm:p-6 overflow-y-auto animate-fade-in">
+              <div className="max-w-5xl w-full mx-auto flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#E6E8F2] bg-white p-3.5 text-[#3E385B] mb-4 shadow-2xl">
+                <div className="flex items-center gap-2.5">
+                  <span className="px-2.5 py-1 rounded-lg bg-[#685BC7] text-white text-xs font-black">
+                    Dokumen {activeDocMeta.number}/4
+                  </span>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-extrabold text-[#3E385B]">{activeDocMeta.fullTitle}</h3>
+                    <p className="text-[10px] text-[#8C88A4]">
+                      Kelas {currentClass?.name} •{' '}
+                      {reportType === 'student_transcript'
+                        ? `Siswa ${activeStudentIndex + 1}/${classStudents.length}: ${activeStudent?.fullName}`
+                        : reportType === 'grade_subject'
+                        ? `Mapel ${activeSubjectIndex + 1}/${subjects.length}: ${currentSubject?.name}`
+                        : `${classStudents.length} Siswa`}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => stepDocument(-1)}
+                    className="no-ornament flex items-center gap-1 rounded-full border border-[#E6E8F2] bg-[#F5F6FA] hover:bg-[#ECEEF7] px-3 py-1.5 text-xs font-bold text-[#3E385B] cursor-pointer"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span>Dokumen Sebelumnya</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => stepDocument(1)}
+                    className="no-ornament flex items-center gap-1 rounded-full bg-[#685BC7] hover:bg-[#584AB8] px-3 py-1.5 text-xs font-bold text-white cursor-pointer"
+                  >
+                    <span>Dokumen Berikutnya</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                  {reportType === 'student_transcript' && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => stepStudent(-1)}
+                        className="flex items-center gap-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 px-2.5 py-1.5 text-xs font-bold cursor-pointer"
+                      >
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                        <span>Siswa Prev</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => stepStudent(1)}
+                        className="flex items-center gap-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 px-2.5 py-1.5 text-xs font-bold cursor-pointer"
+                      >
+                        <span>Siswa Next</span>
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleDownloadPdf}
+                    className="flex items-center gap-1 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 px-3 py-1.5 text-xs font-extrabold cursor-pointer"
+                  >
+                    <Printer className="h-3.5 w-3.5" />
+                    <span>Cetak PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsFullscreenPreview(false)}
+                    className="flex items-center gap-1 rounded-lg bg-rose-600 hover:bg-rose-500 px-3 py-1.5 text-xs font-bold cursor-pointer"
+                  >
+                    <Minimize2 className="h-3.5 w-3.5" />
+                    <span>Tutup</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Large A4 Sheet inside Modal */}
+              <div className="max-w-4xl w-full mx-auto bg-white text-slate-900 rounded-xl shadow-2xl p-8 sm:p-10 border border-slate-300 text-xs flex-1 flex flex-col justify-between">
+                <div>
+                  {designerConfig.showKopSurat !== false && (
+                    <div className="flex items-center gap-5 border-b-[3px] border-double border-slate-900 pb-4">
+                      {designerConfig.logoDataUrl ? (
+                        <img
+                          src={designerConfig.logoDataUrl}
+                          alt="Logo"
+                          style={{
+                            width: `${(designerConfig.logoWidth || 20) * 3.6}px`,
+                            maxHeight: '84px',
+                          }}
+                          className="object-contain shrink-0"
+                        />
+                      ) : (
+                        <div className="h-16 w-16 rounded-xl border border-dashed border-slate-300 flex items-center justify-center text-[10px] text-slate-400 shrink-0 font-bold">
+                          LOGO
+                        </div>
+                      )}
+                      <div className="flex-1 text-center">
+                        <h4 className="font-extrabold text-xs tracking-wider uppercase text-slate-800">
+                          {designerConfig.institutionFoundation}
+                        </h4>
+                        <h2 className="font-black text-lg tracking-tight uppercase text-blue-950 mt-0.5">
+                          {designerConfig.institutionName}
+                        </h2>
+                        <p className="text-[10px] text-slate-600 mt-0.5">
+                          {designerConfig.institutionTagline}
+                        </p>
+                        <p className="text-[9px] text-slate-500 mt-0.5">
+                          {designerConfig.institutionAddress} | {designerConfig.institutionContact}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="text-center my-4">
+                    <h3 className="font-black text-sm uppercase tracking-wider text-slate-900 underline">
+                      {activeDocMeta.fullTitle}
+                    </h3>
+                    <p className="text-[11px] text-slate-600 mt-1">
+                      Kelas: <strong>{currentClass?.name}</strong> • Tahun Pelajaran:{' '}
+                      <strong>{activeAcademicYear.name}</strong> ({activeAcademicYear.activeSemester.toUpperCase()})
+                    </p>
+                  </div>
+
+                  {/* Render full rows in fullscreen modal */}
+                  {reportType === 'attendance_class' && (
+                    <table className="w-full text-left text-[10px] border-collapse border border-slate-400">
+                      <thead>
+                        <tr className="bg-slate-900 text-white">
+                          <th className="border border-slate-400 p-1.5 text-center">No</th>
+                          <th className="border border-slate-400 p-1.5">NISN</th>
+                          <th className="border border-slate-400 p-1.5">Nama Siswa</th>
+                          <th className="border border-slate-400 p-1.5 text-center">H</th>
+                          <th className="border border-slate-400 p-1.5 text-center">S</th>
+                          <th className="border border-slate-400 p-1.5 text-center">I</th>
+                          <th className="border border-slate-400 p-1.5 text-center">A</th>
+                          <th className="border border-slate-400 p-1.5 text-center">T</th>
+                          <th className="border border-slate-400 p-1.5 text-center">% Hadir</th>
+                          <th className="border border-slate-400 p-1.5 text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {classAttendanceData.map(r => (
+                          <tr key={r.studentId} className="even:bg-slate-50">
+                            <td className="border border-slate-300 p-1.5 text-center">{r.no}</td>
+                            <td className="border border-slate-300 p-1.5 font-mono">{r.nisn}</td>
+                            <td className="border border-slate-300 p-1.5 font-bold">{r.fullName}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-bold text-emerald-700">{r.h}</td>
+                            <td className="border border-slate-300 p-1.5 text-center">{r.s}</td>
+                            <td className="border border-slate-300 p-1.5 text-center">{r.i}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-bold text-rose-700">{r.a}</td>
+                            <td className="border border-slate-300 p-1.5 text-center">{r.t}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-bold">{r.rate}</td>
+                            <td className="border border-slate-300 p-1.5 text-center">{r.statusLabel}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {reportType === 'grade_class' && (
+                    <table className="w-full text-left text-[9.5px] border-collapse border border-slate-400">
+                      <thead>
+                        <tr className="bg-slate-900 text-white">
+                          <th className="border border-slate-400 p-1 text-center">No</th>
+                          <th className="border border-slate-400 p-1">NISN</th>
+                          <th className="border border-slate-400 p-1">Nama Siswa</th>
+                          {subjects.map(s => (
+                            <th key={s.id} className="border border-slate-400 p-1 text-center">
+                              {s.code}
+                            </th>
+                          ))}
+                          <th className="border border-slate-400 p-1 text-center">Rata2</th>
+                          <th className="border border-slate-400 p-1 text-center">Pred</th>
+                          <th className="border border-slate-400 p-1 text-center">Rank</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {classLegerData.map(r => (
+                          <tr key={r.studentId} className="even:bg-slate-50">
+                            <td className="border border-slate-300 p-1 text-center">{r.no}</td>
+                            <td className="border border-slate-300 p-1 font-mono">{r.nisn}</td>
+                            <td className="border border-slate-300 p-1 font-bold">{r.fullName}</td>
+                            {subjects.map(s => (
+                              <td key={s.id} className="border border-slate-300 p-1 text-center">
+                                {r.subjectScores[s.id] || 0}
+                              </td>
+                            ))}
+                            <td className="border border-slate-300 p-1 text-center font-black">{r.average}</td>
+                            <td className="border border-slate-300 p-1 text-center font-bold">{r.predicate}</td>
+                            <td className="border border-slate-300 p-1 text-center font-bold">#{r.rank}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {reportType === 'grade_subject' && (
+                    <table className="w-full text-left text-[10px] border-collapse border border-slate-400">
+                      <thead>
+                        <tr className="bg-slate-900 text-white">
+                          <th className="border border-slate-400 p-1.5 text-center">No</th>
+                          <th className="border border-slate-400 p-1.5">NISN</th>
+                          <th className="border border-slate-400 p-1.5">Nama Siswa</th>
+                          <th className="border border-slate-400 p-1.5 text-center">Tugas</th>
+                          <th className="border border-slate-400 p-1.5 text-center">Praktik</th>
+                          <th className="border border-slate-400 p-1.5 text-center">Formatif</th>
+                          <th className="border border-slate-400 p-1.5 text-center">Sumatif</th>
+                          <th className="border border-slate-400 p-1.5 text-center">Nilai Akhir</th>
+                          <th className="border border-slate-400 p-1.5 text-center">Predikat</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {subjectGradingData.map(r => (
+                          <tr key={r.studentId} className="even:bg-slate-50">
+                            <td className="border border-slate-300 p-1.5 text-center">{r.no}</td>
+                            <td className="border border-slate-300 p-1.5 font-mono">{r.nisn}</td>
+                            <td className="border border-slate-300 p-1.5 font-bold">{r.fullName}</td>
+                            <td className="border border-slate-300 p-1.5 text-center">{r.tugas}</td>
+                            <td className="border border-slate-300 p-1.5 text-center">{r.praktik}</td>
+                            <td className="border border-slate-300 p-1.5 text-center">{r.formatif}</td>
+                            <td className="border border-slate-300 p-1.5 text-center">{r.sumatif}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-black">{r.finalScore}</td>
+                            <td className="border border-slate-300 p-1.5 text-center font-bold">{r.predicate}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {reportType === 'student_transcript' && studentTranscriptData && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4 rounded border border-slate-300 bg-slate-50 p-3 text-[11px]">
+                        <div>
+                          <p>Nama Siswa: <strong>{studentTranscriptData.student.fullName}</strong></p>
+                          <p>NISN / NIS: <strong>{studentTranscriptData.student.nisn} / {studentTranscriptData.student.nis}</strong></p>
+                        </div>
+                        <div>
+                          <p>Kelas: <strong>{studentTranscriptData.student.className}</strong></p>
+                          <p>Urutan Siswa: <strong>{activeStudentIndex + 1} dari {classStudents.length}</strong></p>
+                        </div>
+                      </div>
+                      <table className="w-full text-left text-[10px] border-collapse border border-slate-400">
+                        <thead>
+                          <tr className="bg-slate-900 text-white">
+                            <th className="border border-slate-400 p-1.5 text-center">No</th>
+                            <th className="border border-slate-400 p-1.5">Mata Pelajaran</th>
+                            <th className="border border-slate-400 p-1.5 text-center">KKM</th>
+                            <th className="border border-slate-400 p-1.5 text-center">Nilai</th>
+                            <th className="border border-slate-400 p-1.5 text-center">Predikat</th>
+                            <th className="border border-slate-400 p-1.5">Capaian Kompetensi</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {studentTranscriptData.subjectsList.map(sub => (
+                            <tr key={sub.subjectId} className="even:bg-slate-50">
+                              <td className="border border-slate-300 p-1.5 text-center">{sub.no}</td>
+                              <td className="border border-slate-300 p-1.5 font-bold">{sub.name}</td>
+                              <td className="border border-slate-300 p-1.5 text-center">{sub.kkm}</td>
+                              <td className="border border-slate-300 p-1.5 text-center font-black">{sub.score}</td>
+                              <td className="border border-slate-300 p-1.5 text-center font-bold">{sub.predicate}</td>
+                              <td className="border border-slate-300 p-1.5">{sub.feedback}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* Signatures in Fullscreen */}
+                <div className="mt-8 pt-4 flex justify-between text-[11px] border-t border-slate-200">
+                  <div className="w-56 text-left">
+                    <p>Mengetahui,</p>
+                    <p className="font-semibold">{designerConfig.leftSignerTitle}</p>
+                    <div className="h-16 my-1 flex items-center">
+                      {designerConfig.leftSignerSignatureUrl ? (
+                        <img src={designerConfig.leftSignerSignatureUrl} alt="TTD Guru" className="h-14 object-contain" />
+                      ) : (
+                        <div className="h-12 w-32 border border-dashed border-slate-300 flex items-center justify-center text-[9px] text-slate-400 italic">
+                          (Tanda Tangan)
+                        </div>
+                      )}
+                    </div>
+                    <p className="font-bold underline">{designerConfig.leftSignerName}</p>
+                    <p className="font-mono text-slate-600">NIP. {designerConfig.leftSignerNip}</p>
+                  </div>
+
+                  <div className="w-56 text-right">
+                    <p>{designerConfig.rightSignerCity}, {designerConfig.rightSignerDate}</p>
+                    <p className="font-semibold">{designerConfig.rightSignerTitle}</p>
+                    <div className="h-16 my-1 flex items-center justify-end">
+                      {designerConfig.rightSignerSignatureUrl ? (
+                        <img src={designerConfig.rightSignerSignatureUrl} alt="TTD Kepsek" className="h-14 object-contain" />
+                      ) : (
+                        <div className="h-12 w-32 border border-dashed border-slate-300 flex items-center justify-center text-[9px] text-slate-400 italic">
+                          (Tanda Tangan)
+                        </div>
+                      )}
+                    </div>
+                    <p className="font-bold underline">{designerConfig.rightSignerName}</p>
+                    <p className="font-mono text-slate-600">NIP. {designerConfig.rightSignerNip}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

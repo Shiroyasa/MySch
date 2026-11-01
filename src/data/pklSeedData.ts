@@ -408,7 +408,7 @@ export const samplePklVisits: PklVisitRecord[] = [
     studentNames: ['Ahmad Rizky Pratama', 'Anisa Nur Rahmah', 'Daffa Raihan Alfarizi'],
     attendanceRate: 100,
     guidanceNotes: 'Semua siswa hadir tepat waktu pukul 07.30 WIB. Sedang mengerjakan modul antarmuka web sistem monitoring pelanggan.',
-    industryFeedback: 'Siswa SMK Mardi Yuana memiliki inisiatif tinggi, penguasaan framework React dan Tailwind CSS sangat memuaskan.',
+    industryFeedback: 'Siswa ORBITA memiliki inisiatif tinggi, penguasaan framework React dan Tailwind CSS sangat memuaskan.',
     status: 'terlaksana',
   },
   {

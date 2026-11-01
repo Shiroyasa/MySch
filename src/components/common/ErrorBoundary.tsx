@@ -133,7 +133,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
               <div className="mt-6 flex items-center gap-2 border-t border-slate-800 pt-4 text-[11px] text-slate-400">
                 <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                <span>SMK Mardi Yuana Cikembar &bull; ORBITA v3.5</span>
+                <span>ORBITA &bull; ORBITA v3.5</span>
               </div>
             </div>
           </div>

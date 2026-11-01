@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { exportToPdf } from '../../utils/exportUtils';
 import { AttendanceStatus } from '../../types';
+import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 
 interface StudentPortalModuleProps {
   initialTab?: 'profile' | 'grades' | 'summary' | 'attendance';
@@ -169,57 +170,37 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
     <div className="space-y-6">
       {/* Toast Feedback */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl dark:bg-blue-600 animate-in slide-in-from-bottom-3">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl border border-[#7265C2]/30 bg-[#6C60B8] px-4 py-3 text-xs font-bold text-white shadow-2xl animate-in slide-in-from-bottom-3">
+          <CheckCircle2 className="h-4 w-4 text-[#FFE680]" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Top Identity Card */}
-      <div className="rounded-3xl bg-gradient-to-r from-blue-700 via-indigo-800 to-slate-900 p-6 text-white shadow-xl relative overflow-hidden">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-white font-black text-2xl shadow-inner border border-white/20">
-              {student.fullName.charAt(0)}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300 border border-emerald-400/30">
-                  <CheckCircle2 className="h-3 w-3" /> Status: Siswa Aktif Terverifikasi
-                </span>
-                <span className="text-[11px] text-blue-200">
-                  T.A. {activeAcademicYear.name} ({activeAcademicYear.activeSemester.toUpperCase()})
-                </span>
-              </div>
-              <h1 className="mt-1 text-xl sm:text-2xl font-extrabold tracking-tight">
-                {student.fullName}
-              </h1>
-              <p className="text-xs text-blue-100 font-medium mt-0.5">
-                NISN: <span className="font-mono font-bold">{student.nisn}</span> &bull; NIS: <span className="font-mono">{student.nis}</span> &bull; Kelas: <span className="font-bold">{student.className}</span> ({student.majorCode})
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <button
-              onClick={handleExportTranscriptPdf}
-              className="flex items-center gap-1.5 rounded-xl bg-white/10 px-3.5 py-2 text-xs font-bold text-white hover:bg-white/20 border border-white/20 transition-colors"
-            >
-              <Download className="h-3.5 w-3.5" />
-              <span>Unduh Transkrip PDF</span>
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Genshin Impact Ororon Pop-Out Hero Banner for Siswa Role */}
+      <AcademyHeroBanner
+        moduleKey="student-portal"
+        kicker={`PORTAL SISWA • T.A. ${activeAcademicYear.name} (${activeAcademicYear.activeSemester.toUpperCase()})`}
+        title={student.fullName}
+        subtitle={`NISN: ${student.nisn} • NIS: ${student.nis} • Kelas: ${student.className} (${student.majorCode}) • Rata-rata Akademik: ${overallAvg}`}
+        rightContent={
+          <button
+            onClick={handleExportTranscriptPdf}
+            className="no-ornament flex items-center gap-1.5 rounded-xl bg-[#6C60B8] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#5E52A8] shadow-sm transition-colors cursor-pointer"
+          >
+            <Download className="h-3.5 w-3.5 text-[#FFE680]" />
+            <span>Unduh Transkrip PDF</span>
+          </button>
+        }
+      />
 
       {/* Navigation Tabs tailored to Siswa Role */}
-      <div className="flex flex-wrap gap-1.5 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex flex-wrap gap-1.5 rounded-2xl border border-[#ECEAF6] bg-white p-1.5 shadow-xs">
         <button
           onClick={() => setActiveTab('profile')}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'profile'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              ? 'bg-[#6C60B8] text-white shadow-sm'
+              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
           }`}
         >
           <User className="h-4 w-4" />
@@ -228,10 +209,10 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
 
         <button
           onClick={() => setActiveTab('grades')}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'grades'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              ? 'bg-[#6C60B8] text-white shadow-sm'
+              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
           }`}
         >
           <GraduationCap className="h-4 w-4" />
@@ -240,10 +221,10 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
 
         <button
           onClick={() => setActiveTab('summary')}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'summary'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              ? 'bg-[#6C60B8] text-white shadow-sm'
+              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
           }`}
         >
           <Award className="h-4 w-4" />
@@ -252,10 +233,10 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
 
         <button
           onClick={() => setActiveTab('attendance')}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'attendance'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+              ? 'bg-[#6C60B8] text-white shadow-sm'
+              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
           }`}
         >
           <CalendarCheck className="h-4 w-4" />
@@ -274,7 +255,7 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
                   Kartu Tanda Pelajar Digital
                 </span>
                 <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                  SMK Mardi Yuana
+                  ORBITA
                 </span>
               </div>
 

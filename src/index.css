@@ -3,32 +3,32 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
-  html.dark {
-    color-scheme: dark;
-    background-color: #060d1f;
-    color: #f8fafc;
-  }
-
+  html,
+  html.dark,
   body {
+    background-color: #C8D0E0 !important;
+    color: #3E385B !important;
+    color-scheme: light !important;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   }
 
-  /* Smooth tactile button micro-animations across all pages */
   button, [role="button"], a.btn {
-    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
-                box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), 
-                background-color 0.2s ease, 
-                color 0.2s ease, 
-                border-color 0.2s ease,
-                opacity 0.2s ease;
+    transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1), 
+                background-color 0.16s ease, 
+                color 0.16s ease, 
+                border-color 0.16s ease,
+                opacity 0.16s ease;
   }
 
-  button:hover:not(:disabled), [role="button"]:hover:not(:disabled) {
-    transform: translateY(-1.5px);
+  main button:not(.no-ornament):not([role="checkbox"]):hover:not(:disabled),
+  .fixed button:not(.no-ornament):hover:not(:disabled) {
+    transform: translateY(-1px);
   }
 
-  button:active:not(:disabled), [role="button"]:active:not(:disabled) {
-    transform: translateY(1px) scale(0.985);
+  main button:not(.no-ornament):not([role="checkbox"]):active:not(:disabled),
+  .fixed button:not(.no-ornament):active:not(:disabled) {
+    transform: translateY(0.5px);
   }
 }
 
@@ -42,40 +42,52 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-@keyframes pulseGlow {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.82; transform: scale(1.04); }
-}
-
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes jrpgBorderPulse {
-  0%, 100% {
-    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.12), 0 0 16px rgba(212, 175, 55, 0.28), inset 0 0 12px rgba(212, 175, 55, 0.08);
+@keyframes pageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.992);
+    filter: blur(3px);
   }
-  50% {
-    box-shadow: 0 14px 36px -5px rgba(15, 23, 42, 0.18), 0 0 24px rgba(59, 130, 246, 0.32), inset 0 0 18px rgba(212, 175, 55, 0.14);
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
   }
 }
 
-@keyframes sakuraFall {
+@keyframes elementRise {
   0% {
-    transform: translateY(-20px) translateX(0) rotate(0deg);
-  }
-  25% {
-    transform: translateY(25vh) translateX(35px) rotate(60deg);
-  }
-  50% {
-    transform: translateY(50vh) translateX(-25px) rotate(135deg);
-  }
-  75% {
-    transform: translateY(75vh) translateX(45px) rotate(210deg);
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
   }
   100% {
-    transform: translateY(105vh) translateX(15px) rotate(320deg);
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes loginGateReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes sidebarFloatPulse {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-2px);
   }
 }
 
@@ -91,421 +103,346 @@
   animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-pulse-glow {
-  animation: pulseGlow 2s ease-in-out infinite;
+.animate-page-enter {
+  animation: pageEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.sakura-petal {
-  animation-name: sakuraFall;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
-  animation-iteration-count: infinite;
-  will-change: transform;
+.animate-login-reveal {
+  animation: loginGateReveal 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-stagger-1 {
+  animation: elementRise 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
+}
+.animate-stagger-2 {
+  animation: elementRise 0.44s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+.animate-stagger-3 {
+  animation: elementRise 0.46s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+}
+.animate-stagger-4 {
+  animation: elementRise 0.48s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both;
+}
+.animate-stagger-5 {
+  animation: elementRise 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
+}
+
+/* Automatic Staggered Element Choreography when switching menus */
+.page-transition-stage > div > * {
+  animation: elementRise 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.page-transition-stage > div > *:nth-child(1) { animation-delay: 0.02s; }
+.page-transition-stage > div > *:nth-child(2) { animation-delay: 0.07s; }
+.page-transition-stage > div > *:nth-child(3) { animation-delay: 0.12s; }
+.page-transition-stage > div > *:nth-child(4) { animation-delay: 0.17s; }
+.page-transition-stage > div > *:nth-child(5) { animation-delay: 0.22s; }
+.page-transition-stage > div > *:nth-child(6) { animation-delay: 0.27s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-enter,
+  .animate-login-reveal,
+  .animate-stagger-1,
+  .animate-stagger-2,
+  .animate-stagger-3,
+  .animate-stagger-4,
+  .animate-stagger-5,
+  .page-transition-stage > div > * {
+    animation: none !important;
+  }
 }
 
 /* ========================================================================== */
-/* MAGICAL ACADEMY & CELESTIAL ASTROLABE ANIMATIONS                          */
-/* ========================================================================== */
-
-@keyframes celestialSpinClockwise {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes celestialSpinCounter {
-  from { transform: rotate(360deg); }
-  to { transform: rotate(0deg); }
-}
-
-@keyframes magicalPulseGlow {
-  0%, 100% {
-    filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.45)) drop-shadow(0 0 25px rgba(59, 130, 246, 0.35));
-    opacity: 0.9;
-  }
-  50% {
-    filter: drop-shadow(0 0 24px rgba(250, 204, 21, 0.85)) drop-shadow(0 0 45px rgba(168, 85, 247, 0.6));
-    opacity: 1;
-  }
-}
-
-@keyframes astralFloat {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-6px) rotate(0.4deg); }
-}
-
-@keyframes magicalShimmerBorder {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-@keyframes runeTwinkle {
-  0%, 100% { opacity: 0.3; transform: scale(0.92); }
-  50% { opacity: 1; transform: scale(1.15) rotate(45deg); filter: drop-shadow(0 0 8px rgba(253, 224, 71, 0.8)); }
-}
-
-@keyframes goldenRayPulse {
-  0%, 100% { opacity: 0.35; transform: scale(0.96) rotate(0deg); }
-  50% { opacity: 0.85; transform: scale(1.05) rotate(15deg); }
-}
-
-.animate-astral-float {
-  animation: astralFloat 5s ease-in-out infinite;
-}
-
-.animate-celestial-spin {
-  animation: celestialSpinClockwise 40s linear infinite;
-}
-
-.animate-celestial-spin-reverse {
-  animation: celestialSpinCounter 30s linear infinite;
-}
-
-.animate-celestial-spin-slow {
-  animation: celestialSpinClockwise 90s linear infinite;
-}
-
-.animate-magical-glow {
-  animation: magicalPulseGlow 3s ease-in-out infinite;
-}
-
-.animate-rune-twinkle {
-  animation: runeTwinkle 3.5s ease-in-out infinite;
-}
-
-.animate-golden-rays {
-  animation: goldenRayPulse 4s ease-in-out infinite;
-}
-
-.magical-shimmer-border {
-  background-size: 300% 300%;
-  animation: magicalShimmerBorder 6s ease infinite;
-}
-
-@keyframes manaRipple {
-  0% { transform: scale(0.85); opacity: 0.9; }
-  50% { opacity: 0.4; }
-  100% { transform: scale(1.4); opacity: 0; }
-}
-
-@keyframes cometPulse {
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px #fde047) drop-shadow(0 0 20px #38bdf8); }
-  50% { transform: scale(1.25); filter: drop-shadow(0 0 18px #fff) drop-shadow(0 0 30px #f59e0b); }
-}
-
-@keyframes manaFlicker {
-  0%, 100% {
-    text-shadow: 0 0 12px rgba(253, 224, 71, 0.8), 0 0 24px rgba(56, 189, 248, 0.5);
-  }
-  50% {
-    text-shadow: 0 0 22px rgba(255, 255, 255, 1), 0 0 36px rgba(250, 204, 21, 0.95), 0 0 50px rgba(168, 85, 247, 0.6);
-  }
-}
-
-@keyframes celestialOrbPulse {
-  0%, 100% { transform: scale(1); opacity: 0.85; }
-  50% { transform: scale(1.08); opacity: 1; }
-}
-
-@keyframes glintSweep {
-  0% { transform: translateX(-150%) skewX(-20deg); opacity: 0; }
-  25% { opacity: 0.75; }
-  75% { opacity: 0.75; }
-  100% { transform: translateX(250%) skewX(-20deg); opacity: 0; }
-}
-
-.animate-mana-ripple {
-  animation: manaRipple 3s cubic-bezier(0.1, 0.6, 0.3, 1) infinite;
-}
-
-.animate-comet-pulse {
-  animation: cometPulse 2s ease-in-out infinite;
-}
-
-.animate-mana-flicker {
-  animation: manaFlicker 3s ease-in-out infinite;
-}
-
-.animate-celestial-orb {
-  animation: celestialOrbPulse 4s ease-in-out infinite;
-}
-
-.animate-glint-sweep {
-  animation: glintSweep 4.5s ease-in-out infinite;
-}
-
-/* ========================================================================== */
-/* JRPG DIALOGUE BOX, CARD & TABLE SYSTEM + INTERACTIVE HOVER ANIMATIONS       */
+/* REFERENCE IMAGE UI SYSTEM: SOFT WHITE CARDS, FLOATING PURPLE SQUIRCLES,    */
+/* CORAL PINK ACCENTS & EMERALD PROGRESS BARS ACROSS ALL PAGES                */
 /* ========================================================================== */
 
 .jrpg-glass {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(252, 249, 242, 0.96) 100%);
-  border: 1.5px solid #D9C391;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+  background: #FFFFFF !important;
+  border: 1px solid #F0F0F7 !important;
+  border-radius: 26px !important;
+  box-shadow: 0 14px 34px -6px rgba(108, 96, 184, 0.09) !important;
+  color: #3E385B !important;
+  overflow: visible !important;
 }
 
-html.dark .jrpg-glass {
-  background: linear-gradient(180deg, rgba(13, 25, 48, 0.94) 0%, rgba(9, 17, 34, 0.96) 100%) !important;
-  border: 1.5px solid rgba(212, 175, 55, 0.38) !important;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(250, 204, 21, 0.1) !important;
-}
-
-/* Universal JRPG Frame Styling for all Cards/Boxes inside main (excluding 3D flipcards) */
-main div.rounded-2xl[class*="border"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back),
-main div.rounded-3xl[class*="border"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back),
+/* Top-level Module Cards & OrnateCards: preserve scrollability on overflow-x-auto / overflow-y-auto */
+main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):not(.overflow-x-auto):not(.overflow-y-auto):not(.overflow-hidden),
+main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):not(.overflow-x-auto):not(.overflow-y-auto):not(.overflow-hidden),
 main .jrpg-glass:not(.academy-ornate-card):not(.jrpg-flip-card),
 .academy-ornate-card:not(.jrpg-flip-card) {
   position: relative;
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.28s ease,
-              background-color 0.28s ease;
+  overflow: visible !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s ease;
 }
 
+/* Top-level module cards -> Reference Image Crisp Soft White Cards (#FFFFFF) */
 main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back),
-main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back) {
-  border-width: 1.5px;
-  border-color: #DEC896;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(252, 249, 241, 0.96) 100%);
-  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04), inset 0 0 0 1px rgba(212, 175, 55, 0.16);
+main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back),
+.fixed div.rounded-2xl[class*="bg-white"]:not(.no-ornament),
+.fixed div.rounded-3xl[class*="bg-white"]:not(.no-ornament) {
+  border-width: 1px !important;
+  border-color: #EFEFF7 !important;
+  border-radius: 26px !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 14px 34px -6px rgba(108, 96, 184, 0.09) !important;
+  color: #3E385B !important;
 }
 
-/* Interactive Mouse Hover Effect on JRPG Boxes & Cards (excluding 3D flipcards so they stay in place) */
+/* Nested rounded-xl sub-cards inside modules -> Soft Lavender-Tinted White Sub-Panels */
+main div.rounded-xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back) {
+  border-width: 1px !important;
+  border-color: #EFEFF7 !important;
+  border-radius: 18px !important;
+  background: #FAF9FE !important;
+  box-shadow: 0 6px 16px -4px rgba(108, 96, 184, 0.05) !important;
+  color: #3E385B !important;
+}
+
+/* Interactive Hover Effect on Top-Level Cards */
 main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):hover,
 main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):hover,
 main .jrpg-glass:not(.jrpg-flip-card):hover,
 .academy-ornate-card:not(.jrpg-flip-card):hover {
-  transform: translateY(-2.5px);
-  border-color: #D4AF37 !important;
-  box-shadow: 0 12px 30px -6px rgba(15, 23, 42, 0.12),
-              0 0 18px rgba(212, 175, 55, 0.26),
-              inset 0 0 0 1px rgba(250, 204, 21, 0.32) !important;
-}
-
-html.dark main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):hover,
-html.dark main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):hover,
-html.dark main .jrpg-glass:not(.jrpg-flip-card):hover,
-html.dark .academy-ornate-card:not(.jrpg-flip-card):hover {
-  transform: translateY(-2.5px);
-  border-color: rgba(250, 204, 21, 0.72) !important;
-  box-shadow: 0 14px 36px -6px rgba(0, 0, 0, 0.65),
-              0 0 22px rgba(234, 179, 8, 0.25),
-              0 0 35px rgba(59, 130, 246, 0.18),
-              inset 0 0 14px rgba(250, 204, 21, 0.12) !important;
-}
-
-/* Corner JRPG Star Runes on Cards */
-main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back)::before,
-main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back)::before,
-main .jrpg-glass:not(.academy-ornate-card):not(.jrpg-flip-card)::before {
-  content: '❖';
-  position: absolute;
-  top: 6px;
-  left: 8px;
-  font-size: 9px;
-  line-height: 1;
-  color: #D4AF37;
-  opacity: 0.75;
-  pointer-events: none;
-  user-select: none;
-  z-index: 2;
-  transition: transform 0.3s ease, color 0.3s ease, opacity 0.3s ease, text-shadow 0.3s ease;
-}
-
-main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back)::after,
-main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back)::after,
-main .jrpg-glass:not(.academy-ornate-card):not(.jrpg-flip-card)::after {
-  content: '❖';
-  position: absolute;
-  bottom: 6px;
-  right: 8px;
-  font-size: 9px;
-  line-height: 1;
-  color: #D4AF37;
-  opacity: 0.75;
-  pointer-events: none;
-  user-select: none;
-  z-index: 2;
-  transition: transform 0.3s ease, color 0.3s ease, opacity 0.3s ease, text-shadow 0.3s ease;
-}
-
-main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):hover::before,
-main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):hover::after {
-  opacity: 1;
-  color: #F59E0B;
-  transform: scale(1.25) rotate(90deg);
-  text-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+  transform: translateY(-2px);
+  border-color: #DFDCF2 !important;
+  box-shadow: 0 18px 40px -6px rgba(108, 96, 184, 0.14) !important;
 }
 
 /* ========================================================================== */
-/* JRPG TACTICAL ROSTER TABLE DESIGN & ROW HOVER ANIMATION                    */
+/* REFERENCE IMAGE CLEAN LAVENDER & WHITE TABLE DESIGN                        */
 /* ========================================================================== */
 
 main table {
   border-collapse: separate;
   border-spacing: 0;
+  border: 1px solid #EFEFF7;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #FFFFFF;
 }
 
 main table thead tr {
-  background: linear-gradient(90deg, #101E38 0%, #172B4D 50%, #101E38 100%) !important;
-  color: #FDE68A !important;
-  border-bottom: 2px solid #D4AF37 !important;
+  background: #F4F3FA !important;
+  color: #3E385B !important;
+  border-bottom: 1px solid #E6E4F2 !important;
 }
 
 main table thead th {
-  color: #FEF3C7 !important;
-  font-family: 'Cinzel', 'Plus Jakarta Sans', serif;
-  letter-spacing: 0.05em;
+  color: #6C60B8 !important;
+  font-weight: 800;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   font-size: 10.5px;
-  border-bottom: 1.5px solid rgba(212, 175, 55, 0.55) !important;
-  position: relative;
+  border-bottom: 1px solid #E6E4F2 !important;
 }
 
 main table tbody tr {
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-              background-color 0.2s ease,
-              box-shadow 0.2s ease;
-  position: relative;
+  transition: background-color 0.15s ease;
+  background-color: #FFFFFF !important;
+  color: #3E385B !important;
+}
+
+main table tbody tr:nth-child(even) {
+  background-color: #FAF9FE !important;
 }
 
 main table tbody tr:hover {
-  background: linear-gradient(90deg, rgba(250, 204, 21, 0.14) 0%, rgba(59, 130, 246, 0.08) 55%, rgba(250, 204, 21, 0.05) 100%) !important;
-  box-shadow: inset 4px 0 0 0 #EAB308, 0 3px 12px rgba(212, 175, 55, 0.14);
-}
-
-html.dark main table tbody tr:hover {
-  background: linear-gradient(90deg, rgba(234, 179, 8, 0.2) 0%, rgba(37, 99, 235, 0.18) 55%, rgba(15, 23, 42, 0.4) 100%) !important;
-  box-shadow: inset 4px 0 0 0 #FACC15, 0 4px 16px rgba(0, 0, 0, 0.45);
-}
-
-main table tbody tr:hover td:first-child {
-  color: #D97706 !important;
-  font-weight: 800;
-}
-
-html.dark main table tbody tr:hover td:first-child {
-  color: #FDE047 !important;
+  background: #F2F0FC !important;
 }
 
 /* ========================================================================== */
-/* COMPREHENSIVE DARK MODE PROTECTION (FIXES ANY WHITE BLANK CARDS/MENUS)     */
+/* UNIVERSAL LIGHT SURFACE & INPUT HARMONIZATION ACROSS ALL MODULES           */
 /* ========================================================================== */
 
-html.dark body {
-  background-color: #060d1f !important;
-  color: #f8fafc !important;
+main .bg-slate-950,
+main .bg-slate-950\/80,
+main .bg-slate-950\/75,
+main .bg-slate-950\/55,
+main .bg-slate-900,
+main .bg-slate-900\/90,
+main .bg-slate-900\/80,
+main .bg-slate-800,
+main .bg-slate-800\/60,
+main .bg-slate-800\/40,
+main .bg-\[\#151D3B\],
+main .bg-\[\#1B2A47\],
+main .bg-\[\#1E2952\],
+main .bg-\[\#121936\],
+main .bg-\[\#0F1E3A\],
+main .bg-\[\#0F1E3A\]\/90,
+main .bg-\[\#0B162C\],
+main .bg-\[\#0B1528\],
+main .bg-\[\#132550\],
+main .bg-\[\#232F5C\],
+.fixed .bg-slate-900:not([class*="inset-0"]),
+.fixed .bg-slate-800 {
+  background-color: #F4F3FA !important;
+  color: #3E385B !important;
+  border-color: #E4E2F2 !important;
 }
 
-html.dark header {
-  background-color: rgba(11, 21, 40, 0.92) !important;
-  border-color: rgba(212, 175, 55, 0.28) !important;
+main .bg-rose-950,
+main .bg-rose-950\/70 {
+  background-color: #FFE4EC !important;
+  color: #F25781 !important;
+  border-color: #FFCCD9 !important;
 }
 
-/* Prevent any bg-white, bg-slate-50, or parchment bg-[#FCFBF7] from staying white in Dark Mode */
-html.dark main .bg-white,
-html.dark main .bg-white\/95,
-html.dark main .bg-white\/90,
-html.dark main .bg-white\/80,
-html.dark .fixed .bg-white {
-  background: linear-gradient(180deg, rgba(13, 25, 48, 0.92) 0%, rgba(9, 18, 36, 0.95) 100%) !important;
-  border-color: rgba(212, 175, 55, 0.32) !important;
-  color: #f1f5f9 !important;
+main .bg-emerald-950,
+main .bg-emerald-950\/70 {
+  background-color: #E7F9EF !important;
+  color: #139A4C !important;
+  border-color: #BCEAD1 !important;
 }
 
-html.dark main .bg-\[\#FCFBF7\],
-html.dark main .bg-slate-50,
-html.dark main .bg-slate-50\/80,
-html.dark main .bg-slate-50\/70,
-html.dark main .bg-slate-50\/60,
-html.dark main .bg-slate-100 {
-  background-color: rgba(15, 29, 56, 0.78) !important;
-  border-color: rgba(212, 175, 55, 0.22) !important;
-  color: #e2e8f0 !important;
+main .bg-slate-50,
+main .bg-slate-50\/90,
+main .bg-slate-50\/80,
+main .bg-slate-50\/70,
+main .bg-slate-50\/60,
+main .bg-slate-50\/50,
+main .bg-slate-100,
+main .bg-slate-100\/80,
+.fixed .bg-slate-50,
+.fixed .bg-slate-100 {
+  background-color: #F5F5FA !important;
+  border-color: #ECEBF5 !important;
+  color: #3E385B !important;
 }
 
-html.dark main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-html.dark main select,
-html.dark main textarea,
-html.dark .fixed input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-html.dark .fixed select,
-html.dark .fixed textarea {
-  background-color: rgba(10, 19, 38, 0.92) !important;
-  border-color: rgba(212, 175, 55, 0.32) !important;
-  color: #f8fafc !important;
+/* Soft Lavender-Gray Pill/Rounded Inputs, Selects, and Textareas (Matching Search Bar in Reference Image) */
+main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+main select,
+main textarea,
+.fixed input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+.fixed select,
+.fixed textarea {
+  background-color: #F0F1F6 !important;
+  border: 1.5px solid #E4E3F0 !important;
+  border-radius: 14px !important;
+  color: #3E385B !important;
+  -webkit-text-fill-color: #3E385B !important;
+  caret-color: #6C60B8 !important;
+  color-scheme: light !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
-html.dark main input:focus,
-html.dark main select:focus,
-html.dark main textarea:focus {
-  border-color: #FACC15 !important;
-  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.2) !important;
+main input::placeholder,
+main textarea::placeholder,
+.fixed input::placeholder,
+.fixed textarea::placeholder {
+  color: #A2A0B4 !important;
+  -webkit-text-fill-color: #A2A0B4 !important;
+  opacity: 1;
 }
 
-html.dark main .text-slate-900,
-html.dark main .text-slate-800,
-html.dark .fixed .text-slate-900,
-html.dark .fixed .text-slate-800 {
-  color: #f8fafc !important;
+main input:focus:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+main select:focus,
+main textarea:focus,
+.fixed input:focus:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.fixed select:focus,
+.fixed textarea:focus {
+  background-color: #FFFFFF !important;
+  border-color: #6C60B8 !important;
+  box-shadow: 0 0 0 3px rgba(108, 96, 184, 0.16) !important;
+  outline: none !important;
 }
 
-html.dark main .text-slate-700,
-html.dark main .text-slate-600,
-html.dark .fixed .text-slate-700,
-html.dark .fixed .text-slate-600 {
-  color: #cbd5e1 !important;
+/* Autofill protection */
+main input:-webkit-autofill,
+main input:-webkit-autofill:hover,
+main input:-webkit-autofill:focus,
+.fixed input:-webkit-autofill,
+.fixed input:-webkit-autofill:hover,
+.fixed input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #F0F1F6 inset !important;
+  box-shadow: 0 0 0px 1000px #F0F1F6 inset !important;
+  -webkit-text-fill-color: #3E385B !important;
+  color: #3E385B !important;
+  caret-color: #6C60B8 !important;
 }
 
-html.dark main .border-slate-200,
-html.dark main .border-slate-100,
-html.dark main .border-\[\#EFE2BE\] {
-  border-color: rgba(212, 175, 55, 0.25) !important;
+/* Crisp Slate-Indigo Typography inside White Cards across all modules */
+main .academy-ornate-card .text-slate-900,
+main .academy-ornate-card .text-slate-800,
+main .academy-ornate-card .text-white:not(button *):not(button),
+main div[class*="rounded-"][class*="border"][class*="bg-white"] .text-slate-900,
+main div[class*="rounded-"][class*="border"][class*="bg-white"] .text-slate-800,
+.fixed .text-slate-900,
+.fixed .text-slate-800,
+.fixed .text-white:not(button *):not(button) {
+  color: #3E385B !important;
 }
 
-html.dark main .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
-html.dark main .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
-  border-color: rgba(212, 175, 55, 0.16) !important;
+main .academy-ornate-card .text-slate-700,
+main .academy-ornate-card .text-slate-600,
+main .academy-ornate-card .text-\[\#C7D2FE\],
+main .academy-ornate-card .text-\[\#DCE6FF\],
+main div[class*="rounded-"][class*="border"][class*="bg-white"] .text-slate-700,
+main div[class*="rounded-"][class*="border"][class*="bg-white"] .text-slate-600,
+.fixed .text-slate-700,
+.fixed .text-slate-600 {
+  color: #5A537A !important;
 }
 
-.jrpg-rank-s {
-  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-  color: white;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+main .academy-ornate-card .text-slate-500,
+main .academy-ornate-card .text-slate-400,
+main .academy-ornate-card .text-\[\#BAC7EC\],
+main div[class*="rounded-"][class*="border"][class*="bg-white"] .text-slate-500,
+main div[class*="rounded-"][class*="border"][class*="bg-white"] .text-slate-400,
+.fixed .text-slate-500,
+.fixed .text-slate-400 {
+  color: #9694A8 !important;
 }
 
-.jrpg-rank-a {
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-  color: white;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+main .text-\[\#9A7314\],
+main .text-\[\#8A6410\],
+main .text-\[\#FDE68A\]:not(button *):not(button),
+main .text-\[\#F3D77D\] {
+  color: #6C60B8 !important;
+}
+
+main .border-slate-300,
+main .border-slate-200,
+main .border-slate-100,
+main .border-slate-800,
+main .border-slate-700,
+main .border-\[\#EFE2BE\],
+main .border-\[\#DEC896\],
+.fixed .border-slate-200,
+.fixed .border-slate-100 {
+  border-color: #ECEBF5 !important;
+}
+
+main .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+main .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+main .divide-slate-800 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #F0F1F6 !important;
 }
 
 /* ========================================================================== */
-/* JRPG STAT PROGRESS BAR & 3D FLIPCARD HOVER EFFECT                          */
+/* STAT PROGRESS BAR (EMERALD GREEN #1CC865 ON #F0F1F6 TRACK) & 3D FLIPCARD   */
 /* ========================================================================== */
 
 .jrpg-stat-bar {
   position: relative;
   width: 100%;
-  height: 8px;
+  height: 6px;
   border-radius: 9999px;
-  background-color: rgba(148, 163, 184, 0.22);
-  border: 1px solid rgba(212, 175, 55, 0.32);
+  background-color: #F0F1F6;
   overflow: hidden;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
-}
-
-html.dark .jrpg-stat-bar {
-  background-color: rgba(15, 23, 42, 0.85);
-  border-color: rgba(212, 175, 55, 0.35);
 }
 
 .jrpg-stat-bar-fill {
   height: 100%;
   border-radius: 9999px;
+  background-color: #1CC865;
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 8px rgba(250, 204, 21, 0.35);
 }
 
-/* 3D Flipcard Container & Faces: Stationary In-Place Flip on Hover */
+/* 3D Flipcard Container & Faces */
 .jrpg-flip-card {
   perspective: 1200px;
   position: relative;
@@ -516,16 +453,9 @@ html.dark .jrpg-stat-bar {
   box-shadow: none !important;
   border: none !important;
   background: transparent !important;
+  overflow: visible !important;
 }
 
-.jrpg-flip-card:hover {
-  transform: none !important;
-  box-shadow: none !important;
-  border: none !important;
-  background: transparent !important;
-}
-
-/* Flat 2D stationary hit-plane so hover never drops out when card is at 90deg mid-flip */
 .jrpg-flip-card::before {
   content: '' !important;
   position: absolute !important;
@@ -566,7 +496,7 @@ html.dark .jrpg-stat-bar {
   transform-style: preserve-3d;
   transform-origin: center center;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible !important;
 }
 
 .jrpg-flip-front {
@@ -598,14 +528,14 @@ html.dark .jrpg-stat-bar {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #F0F1F6;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(212, 175, 55, 0.4);
+  background: #C5C0E2;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 175, 55, 0.7);
+  background: #6C60B8;
 }
 
 @media print {
@@ -625,4 +555,3 @@ html.dark .jrpg-stat-bar {
     padding: 0 !important;
   }
 }
-

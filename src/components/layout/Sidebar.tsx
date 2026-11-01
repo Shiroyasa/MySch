@@ -1,24 +1,8 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
-import {
-  Home,
-  CalendarCheck,
-  GraduationCap,
-  Building2,
-  Database,
-  FileBarChart2,
-  Users,
-  ShieldCheck,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
-  Award,
-  UserCheck,
-  BookOpen,
-  Camera,
-} from 'lucide-react';
+import { Camera } from 'lucide-react';
+import { OrbitaMenuIcon } from '../common/AcademyOrnaments';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -30,16 +14,9 @@ interface SidebarProps {
 interface NavItem {
   id: string;
   label: string;
-  icon: React.ElementType;
+  subLabel: string;
   roles: UserRole[];
   badge?: string;
-  badgeStyle?: string;
-}
-
-interface NavGroup {
-  groupTitle?: string;
-  roles: UserRole[];
-  items: NavItem[];
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -59,64 +36,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
     updateVisualSettings,
     addToast,
   } = useApp();
-  const [mousePos, setMousePos] = React.useState<{ x: number; y: number; active: boolean }>({
-    x: 120,
-    y: 220,
-    active: false,
-  });
+
   const quickLogoInputRef = React.useRef<HTMLInputElement | null>(null);
   const isAdmin = currentRole === 'admin' || currentRole === 'super_admin';
   const activeLogoUrl = visualSettings?.appLogoUrl || schoolSettings?.logoUrl || null;
-  const logoFitClass =
-    visualSettings?.appLogoFit === 'cover'
-      ? 'h-full w-full object-cover rounded-lg'
-      : 'max-h-full max-w-full object-contain';
 
   const handleQuickLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.type === 'image/svg+xml' && file.size < 400_000) {
-      const reader = new FileReader();
-      reader.onload = ev => {
-        const res = ev.target?.result as string;
-        if (res) {
-          updateVisualSettings({ appLogoUrl: res });
-          addToast('Logo aplikasi (SVG) berhasil diperbarui!', 'success');
-        }
-      };
-      reader.readAsDataURL(file);
-      e.target.value = '';
-      return;
-    }
     const reader = new FileReader();
     reader.onload = ev => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const maxDim = 320;
-        let w = img.width;
-        let h = img.height;
-        if (w > maxDim || h > maxDim) {
-          if (w >= h) {
-            h = Math.round((h * maxDim) / w);
-            w = maxDim;
-          } else {
-            w = Math.round((w * maxDim) / h);
-            h = maxDim;
-          }
-        }
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.clearRect(0, 0, w, h);
-          ctx.drawImage(img, 0, 0, w, h);
-          const dataUrl = canvas.toDataURL('image/png');
-          updateVisualSettings({ appLogoUrl: dataUrl });
-          addToast('Logo aplikasi berhasil diperbarui & disimpan!', 'success');
-        }
-      };
-      img.src = ev.target?.result as string;
+      const res = ev.target?.result as string;
+      if (res) {
+        updateVisualSettings({ appLogoUrl: res });
+        addToast('Logo aplikasi berhasil diperbarui!', 'success');
+      }
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -124,123 +58,86 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const pendingCorrectionsCount = attendanceCorrections.filter(c => c.status === 'pending').length;
 
-  const navGroups: NavGroup[] = [
-    // GROUP 1: PRIMARY ACADEMIC NAVIGATION (No top header above Dashboard, matching image.png)
+  const navItems: NavItem[] = [
     {
-      groupTitle: currentRole === 'siswa' ? 'AKADEMIK SISWA' : undefined,
-      roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah', 'siswa'],
-      items: [
-        {
-          id: 'student-profile',
-          label: 'Profil Siswa',
-          icon: UserCheck,
-          roles: ['siswa'],
-        },
-        {
-          id: 'student-grades',
-          label: 'Nilai Siswa',
-          icon: Award,
-          roles: ['siswa'],
-        },
-        {
-          id: 'dashboard',
-          label: 'Dashboard',
-          icon: Home,
-          roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
-        },
-        {
-          id: 'attendance',
-          label: 'Presensi & Absensi',
-          icon: CalendarCheck,
-          roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
-          badge:
-            pendingCorrectionsCount > 0 && ['wali_kelas', 'guru', 'super_admin'].includes(currentRole)
-              ? `${pendingCorrectionsCount}`
-              : undefined,
-          badgeStyle: 'border border-amber-500/60 bg-amber-950/80 text-amber-300',
-        },
-        {
-          id: 'grading',
-          label: 'Penilaian Akademik',
-          icon: GraduationCap,
-          roles: ['super_admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
-        },
-        {
-          id: 'reports',
-          label: 'Laporan & Ekspor',
-          icon: FileBarChart2,
-          roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
-        },
-      ],
+      id: 'student-profile',
+      label: 'Profil Siswa',
+      subLabel: 'Biodata & Kehadiran',
+      roles: ['siswa'],
     },
-
-    // GROUP 2: ADMINISTRASI PKL & DUDI
     {
-      groupTitle: 'ADMINISTRASI PKL',
-      roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah', 'siswa'],
-      items: [
-        {
-          id: 'pkl',
-          label: 'Administrasi PKL',
-          icon: Building2,
-          roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah', 'siswa'],
-        },
-      ],
+      id: 'student-grades',
+      label: 'Nilai Akademik',
+      subLabel: 'Transkrip & KKM',
+      roles: ['siswa'],
     },
-
-    // GROUP 3: DATA POKOK & MASTER
     {
-      groupTitle: 'DATA POKOK & MASTER',
-      roles: ['super_admin', 'admin'],
-      items: [
-        {
-          id: 'master-data',
-          label: 'Master Data',
-          icon: Database,
-          roles: ['super_admin', 'admin'],
-        },
-        {
-          id: 'user-management',
-          label: 'Manajemen Akun',
-          icon: Users,
-          roles: ['super_admin', 'admin'],
-        },
-      ],
-    },
-
-    // GROUP 4: LAYANAN & PENGATURAN
-    {
-      groupTitle: 'LAYANAN & PENGATURAN',
+      id: 'dashboard',
+      label: 'Dashboard',
+      subLabel: 'Overview Utama',
       roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
-      items: [
-        {
-          id: 'audit-logs',
-          label: 'Audit Log & Akses',
-          icon: ShieldCheck,
-          roles: ['super_admin', 'admin', 'kepala_sekolah'],
-        },
-        {
-          id: 'settings',
-          label: 'Pengaturan Sistem',
-          icon: Settings,
-          roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
-        },
-      ],
+    },
+    {
+      id: 'attendance',
+      label: 'Presensi & Absensi',
+      subLabel: 'Rekapitulasi Harian',
+      roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
+      badge:
+        pendingCorrectionsCount > 0 && ['wali_kelas', 'guru', 'super_admin'].includes(currentRole)
+          ? `${pendingCorrectionsCount}`
+          : undefined,
+    },
+    {
+      id: 'grading',
+      label: 'Penilaian Akademik',
+      subLabel: 'Evaluasi & KKM',
+      roles: ['super_admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
+    },
+    {
+      id: 'reports',
+      label: 'Laporan & Ekspor',
+      subLabel: 'Analitik & Cetak',
+      roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
+    },
+    {
+      id: 'pkl',
+      label: 'Administrasi PKL',
+      subLabel: 'Monitoring Prakerin',
+      roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah', 'siswa'],
+    },
+    {
+      id: 'master-data',
+      label: 'Master Data',
+      subLabel: 'Siswa, Guru & Kelas',
+      roles: ['super_admin', 'admin'],
+    },
+    {
+      id: 'user-management',
+      label: 'Manajemen Akun',
+      subLabel: 'Otorisasi Role',
+      roles: ['super_admin', 'admin'],
+    },
+    {
+      id: 'audit-logs',
+      label: 'Audit Log',
+      subLabel: 'Jejak Keamanan',
+      roles: ['super_admin', 'admin', 'kepala_sekolah'],
+    },
+    {
+      id: 'settings',
+      label: 'Pengaturan',
+      subLabel: 'Konfigurasi Sistem',
+      roles: ['super_admin', 'admin', 'guru', 'wali_kelas', 'kepala_sekolah'],
     },
   ];
+
+  const [hoveredItemId, setHoveredItemId] = React.useState<string | null>(null);
+
+  const visibleItems = navItems.filter(item => item.roles.includes(currentRole));
 
   const handleSelectNav = (id: string) => {
     setActiveNav(id);
     onCloseMobile();
-  };
-
-  const handleSidebarMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setMousePos({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-      active: true,
-    });
   };
 
   return (
@@ -249,299 +146,171 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {mobileOpen && (
         <div
           onClick={onCloseMobile}
-          className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-md lg:hidden animate-in fade-in"
+          className="fixed inset-0 z-40 bg-[#3E385B]/45 backdrop-blur-xs lg:hidden animate-fade-in"
         />
       )}
 
-      {/* Royal Midnight Navy Sidebar Container with Magical Interactive Aura */}
+      {/* Exact Reference Image Left Floating Vertical Purple Pill Sidebar (#6C60B8) with Interactive Animations */}
       <aside
-        onMouseMove={handleSidebarMouseMove}
-        onMouseEnter={() => setMousePos(prev => ({ ...prev, active: true }))}
-        onMouseLeave={() => setMousePos(prev => ({ ...prev, active: false }))}
-        className={`fixed top-0 bottom-0 left-0 z-50 flex flex-col overflow-hidden border-r border-[#182644] bg-[#0B162C]/95 backdrop-blur-xl text-slate-300 transition-all duration-300 lg:static ${
-          collapsed ? 'w-20' : 'w-64'
-        } ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+        style={{
+          background: 'linear-gradient(180deg, #7468C4 0%, #6558B5 100%)',
+          boxShadow: '0 18px 38px -8px rgba(101, 88, 181, 0.42)',
+        }}
+        className={`fixed top-3 bottom-3 left-3 z-50 flex flex-col items-center justify-between rounded-[28px] py-5 text-white transition-all duration-300 ease-out lg:static lg:my-4 lg:ml-4 ${
+          collapsed ? 'w-[74px] px-2.5' : 'w-60 px-3.5'
+        } ${mobileOpen ? 'translate-x-0 w-60 px-3.5' : '-translate-x-[120%] lg:translate-x-0'}`}
       >
-        {/* Magical Interactive Cursor Spotlight & Celestial Stardust Layer */}
-        <div
-          className="pointer-events-none absolute inset-0 z-0 overflow-hidden transition-opacity duration-500"
-          style={{ opacity: mousePos.active ? 1 : 0.35 }}
-          aria-hidden="true"
-        >
-          {/* Primary Golden-Sapphire Magical Cursor Orb */}
-          <div
-            className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-transform duration-75 ease-out"
-            style={{
-              left: `${mousePos.x}px`,
-              top: `${mousePos.y}px`,
-              width: '260px',
-              height: '260px',
-              background:
-                'radial-gradient(circle, rgba(250,204,21,0.16) 0%, rgba(59,130,246,0.14) 38%, rgba(14,165,233,0.05) 65%, transparent 80%)',
-              filter: 'blur(8px)',
-            }}
+        {isAdmin && (
+          <input
+            ref={quickLogoInputRef}
+            type="file"
+            accept="image/png,image/svg+xml,image/webp,image/jpeg,image/x-icon"
+            onChange={handleQuickLogoUpload}
+            className="hidden"
           />
-          {/* Trailing Stardust Sparkle Nodes following Mouse */}
-          <span
-            className="absolute text-[10px] text-[#FDE047] transition-all duration-200 ease-out select-none"
-            style={{
-              left: `${mousePos.x - 26}px`,
-              top: `${mousePos.y - 18}px`,
-              opacity: mousePos.active ? 0.85 : 0,
-              textShadow: '0 0 8px rgba(250,204,21,0.9)',
-            }}
-          >
-            ✦
-          </span>
-          <span
-            className="absolute text-[8px] text-sky-300 transition-all duration-300 ease-out select-none"
-            style={{
-              left: `${mousePos.x + 28}px`,
-              top: `${mousePos.y + 14}px`,
-              opacity: mousePos.active ? 0.75 : 0,
-              textShadow: '0 0 8px rgba(56,189,248,0.9)',
-            }}
-          >
-            ✧
-          </span>
-          <span
-            className="absolute text-[7px] text-amber-200 transition-all duration-500 ease-out select-none"
-            style={{
-              left: `${mousePos.x + 12}px`,
-              top: `${mousePos.y - 28}px`,
-              opacity: mousePos.active ? 0.65 : 0,
-            }}
-          >
-            ⋆
-          </span>
-        </div>
+        )}
 
-        {/* Top Brand Emblem Header (Supports Proportional Custom App Logo + Quick Upload for Admin) */}
-        <div className="relative z-10 flex h-20 items-center justify-between border-b border-[#182644] px-4">
-          {isAdmin && (
-            <input
-              ref={quickLogoInputRef}
-              type="file"
-              accept="image/png,image/svg+xml,image/webp,image/jpeg,image/x-icon"
-              onChange={handleQuickLogoUpload}
-              className="hidden"
-            />
-          )}
-          {!collapsed ? (
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div
-                onClick={() => {
-                  if (isAdmin) quickLogoInputRef.current?.click();
-                }}
-                title={isAdmin ? 'Klik untuk mengganti Logo Aplikasi secara langsung' : 'Logo Aplikasi ORBITA'}
-                className={`group/logo relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#C8A44B]/75 bg-gradient-to-b from-[#15284E] to-[#0D1A36] p-1 shadow-[0_0_15px_rgba(200,164,75,0.22),inset_0_0_8px_rgba(250,204,21,0.12)] overflow-hidden ${
-                  isAdmin ? 'cursor-pointer hover:border-[#FDE047]' : ''
-                }`}
-              >
-                {activeLogoUrl ? (
-                  <img
-                    src={activeLogoUrl}
-                    alt="Logo Aplikasi"
-                    className={`${logoFitClass} drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover/logo:scale-105`}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center">
-                    <span className="text-[7px] leading-none text-[#EAB308] mb-0.5">✦</span>
-                    <BookOpen className="h-4.5 w-4.5 text-[#EAB308]" strokeWidth={1.8} />
-                  </div>
-                )}
-                {isAdmin && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-slate-950/70 opacity-0 group-hover/logo:opacity-100 transition-opacity">
-                    <Camera className="h-4 w-4 text-[#FDE047]" />
-                  </div>
-                )}
-              </div>
-              <div className="overflow-hidden">
-                <p
-                  className="truncate text-sm font-bold tracking-[0.12em] text-white uppercase leading-tight"
-                  style={{ fontFamily: "'Cinzel', 'Playfair Display', Georgia, serif" }}
-                >
-                  ORBITA
-                </p>
-                <p className="truncate text-[11px] font-medium text-[#8DA2C0] mt-0.5">
-                  Sistem Informasi Akademik
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div
-              onClick={() => {
-                if (isAdmin) quickLogoInputRef.current?.click();
-              }}
-              title={isAdmin ? 'Klik untuk mengganti Logo Aplikasi' : 'Logo Aplikasi ORBITA'}
-              className={`group/logo relative mx-auto flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#C8A44B]/75 bg-gradient-to-b from-[#15284E] to-[#0D1A36] p-1 shadow-[0_0_14px_rgba(200,164,75,0.2)] overflow-hidden ${
-                isAdmin ? 'cursor-pointer hover:border-[#FDE047]' : ''
-              }`}
-            >
+        {/* Top Circular Ring Button (Architectural Emblem / Custom Logo) */}
+        <div className="flex w-full items-center justify-center">
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            onDoubleClick={() => {
+              if (isAdmin) quickLogoInputRef.current?.click();
+            }}
+            title={
+              collapsed
+                ? 'Klik untuk perluas label menu (Klik 2x ganti logo)'
+                : 'Klik untuk mode ikon ringkas'
+            }
+            className={`no-ornament group relative flex items-center justify-center rounded-full border border-white/30 bg-white/10 hover:bg-white/22 hover:scale-[1.04] active:scale-95 text-white transition-all duration-300 cursor-pointer ${
+              collapsed ? 'h-11 w-11' : 'w-full gap-3 rounded-[20px] px-3.5 py-2.5 justify-start'
+            }`}
+          >
+            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-transform duration-300 group-hover:rotate-6">
               {activeLogoUrl ? (
                 <img
                   src={activeLogoUrl}
-                  alt="Logo Aplikasi"
-                  className={`${logoFitClass} drop-shadow-[0_2px_6px_rgba(0,0,0,0.5)]`}
+                  alt="ORBITA"
+                  className="h-7 w-7 rounded-full object-contain"
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center">
-                  <span className="text-[7px] leading-none text-[#EAB308] mb-0.5">✦</span>
-                  <BookOpen className="h-4.5 w-4.5 text-[#EAB308]" strokeWidth={1.8} />
-                </div>
+                <OrbitaMenuIcon variant="brand" className="h-5.5 w-5.5 text-white" />
               )}
               {isAdmin && (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/70 opacity-0 group-hover/logo:opacity-100 transition-opacity">
-                  <Camera className="h-4 w-4 text-[#FDE047]" />
-                </div>
+                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera className="h-3 w-3 text-white" />
+                </span>
               )}
             </div>
-          )}
 
-          <button
-            onClick={onToggleCollapse}
-            className="hidden lg:flex h-7 w-7 items-center justify-center rounded-lg text-[#64748B] hover:bg-[#152648] hover:text-white cursor-pointer transition-colors"
-            title={collapsed ? 'Perluas Menu' : 'Ciutkan Menu'}
-          >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {!collapsed && (
+              <div className="min-w-0 text-left animate-fade-in">
+                <p className="truncate text-sm font-extrabold tracking-tight text-white leading-none">
+                  ORBITA
+                </p>
+                <p className="truncate text-[10px] font-medium text-white/75 mt-0.5">
+                  Academic Portal
+                </p>
+              </div>
+            )}
           </button>
         </div>
 
-        {/* Navigation Menu Items */}
-        <div className="relative z-10 flex-1 overflow-y-auto px-3 py-4 space-y-4">
-          {navGroups
-            .filter(group => group.roles.includes(currentRole))
-            .map((group, groupIdx) => {
-              const visibleGroupItems = group.items.filter(item => item.roles.includes(currentRole));
-              if (visibleGroupItems.length === 0) return null;
+        {/* Center Navigation Icons Stack (Active = Dark Slate Squircle #4B436B with Spring Hover) */}
+        <nav className="my-3 flex w-full flex-1 flex-col items-center justify-center gap-2 overflow-y-auto overflow-x-visible scrollbar-none py-1">
+          {visibleItems.map(item => {
+            const isActive = activeNav === item.id;
+            const isHovered = hoveredItemId === item.id;
 
-              return (
-                <div key={groupIdx} className="space-y-1">
-                  {group.groupTitle && !collapsed && (
-                    <div className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-[0.11em] text-[#7A8FA8]">
-                      {group.groupTitle}
+            return (
+              <div key={item.id} className="relative w-full flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => handleSelectNav(item.id)}
+                  onMouseEnter={() => setHoveredItemId(item.id)}
+                  onMouseLeave={() => setHoveredItemId(null)}
+                  title={`${item.label} • ${item.subLabel}`}
+                  className={`no-ornament group relative flex items-center transition-all duration-300 ease-out cursor-pointer ${
+                    collapsed
+                      ? 'h-12 w-12 justify-center rounded-[16px]'
+                      : 'w-full gap-3 rounded-[16px] px-3.5 py-2.5 justify-start'
+                  } ${
+                    isActive
+                      ? 'bg-[#4B436B] text-white shadow-[0_10px_22px_rgba(45,38,76,0.38)] scale-[1.03]'
+                      : 'text-white/80 hover:bg-white/16 hover:text-white hover:-translate-y-0.5 active:scale-95'
+                  }`}
+                >
+                  {/* Active Left Glow Pill Indicator */}
+                  {isActive && (
+                    <span
+                      className="pointer-events-none absolute -left-1.5 top-1/2 -translate-y-1/2 h-5 w-1 rounded-full bg-[#FF7597] shadow-[0_0_10px_#FF7597] transition-all duration-300"
+                      aria-hidden="true"
+                    />
+                  )}
+
+                  <span
+                    className={`flex items-center justify-center transition-transform duration-300 ${
+                      isActive
+                        ? 'scale-110'
+                        : 'group-hover:scale-110 group-hover:-rotate-3'
+                    }`}
+                  >
+                    <OrbitaMenuIcon variant={item.id} className="h-5.5 w-5.5 shrink-0" />
+                  </span>
+
+                  {!collapsed && (
+                    <div className="min-w-0 flex-1 text-left transition-transform duration-200 group-hover:translate-x-0.5">
+                      <span className="block truncate text-xs font-bold leading-tight">
+                        {item.label}
+                      </span>
+                      <span className="block truncate text-[10px] text-white/70 leading-tight mt-0.5">
+                        {item.subLabel}
+                      </span>
                     </div>
                   )}
-                  {group.groupTitle && collapsed && groupIdx > 0 && (
-                    <div className="my-2 border-t border-[#182644]" />
+
+                  {item.badge && (
+                    <span className="absolute -top-1 -right-1 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF6E96] px-1 text-[9px] font-extrabold text-white shadow-sm animate-pulse">
+                      {item.badge}
+                    </span>
                   )}
+                </button>
 
-                  {visibleGroupItems.map(item => {
-                    const Icon = item.icon;
-                    const isActive = activeNav === item.id;
+                {/* Interactive Floating Tooltip Pill when Collapsed */}
+                {collapsed && isHovered && (
+                  <div
+                    className="pointer-events-none fixed left-[96px] z-50 hidden lg:flex flex-col rounded-[14px] border border-white/25 bg-[#3E385B]/95 px-3 py-1.5 text-white shadow-[0_12px_28px_rgba(45,38,76,0.35)] backdrop-blur-md animate-fade-in"
+                    style={{ transform: 'translateY(2px)' }}
+                  >
+                    <span className="text-xs font-extrabold whitespace-nowrap leading-tight">
+                      {item.label}
+                    </span>
+                    <span className="text-[10px] text-white/75 whitespace-nowrap leading-tight">
+                      {item.subLabel}
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </nav>
 
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => handleSelectNav(item.id)}
-                        className={`group relative flex w-full items-center overflow-hidden rounded-xl transition-all duration-300 cursor-pointer ${
-                          collapsed ? 'justify-center px-2 py-2.5' : 'justify-between px-3.5 py-2.5'
-                        } ${
-                          isActive
-                            ? 'bg-gradient-to-r from-[#1D4ED8] via-[#2563EB] to-[#1E40AF] text-white font-bold shadow-[0_0_20px_rgba(37,99,235,0.55),inset_0_0_12px_rgba(250,204,21,0.28)] border border-[#FACC15]/45'
-                            : 'text-[#CBD5E1] hover:bg-[#132342]/90 hover:text-white hover:shadow-[0_0_14px_rgba(200,164,75,0.18)] border border-transparent hover:border-[#C8A44B]/30 font-medium'
-                        }`}
-                        title={collapsed ? item.label : undefined}
-                      >
-                        {/* Magical Hover & Active Shimmer Aura */}
-                        <span
-                          className={`pointer-events-none absolute inset-0 transition-opacity duration-300 ${
-                            isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                          }`}
-                          style={{
-                            background: isActive
-                              ? 'radial-gradient(circle at 18% 50%, rgba(250,204,21,0.25), transparent 65%)'
-                              : 'radial-gradient(circle at 20% 50%, rgba(250,204,21,0.12), rgba(56,189,248,0.08) 50%, transparent 75%)',
-                          }}
-                          aria-hidden="true"
-                        />
-
-                        {/* Golden Vertical Accent Bar + Magical Sparkles on Active Item */}
-                        {isActive && (
-                          <>
-                            <span
-                              className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-gradient-to-b from-[#FEF08A] via-[#F59E0B] to-[#FDE047] shadow-[0_0_10px_#FACC15]"
-                              aria-hidden="true"
-                            />
-                            <span
-                              className="pointer-events-none absolute right-2 top-1 text-[9px] text-[#FDE047] animate-pulse"
-                              aria-hidden="true"
-                            >
-                              ✦
-                            </span>
-                            <span
-                              className="pointer-events-none absolute right-6 bottom-1 text-[7px] text-sky-200 animate-ping"
-                              style={{ animationDuration: '2.6s' }}
-                              aria-hidden="true"
-                            >
-                              ⋆
-                            </span>
-                          </>
-                        )}
-
-                        {/* Hover Sparkle when not active */}
-                        {!isActive && (
-                          <span
-                            className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-[#FACC15] opacity-0 group-hover:opacity-90 transition-all duration-300 group-hover:rotate-45"
-                            aria-hidden="true"
-                          >
-                            ✦
-                          </span>
-                        )}
-
-                        <div className={`relative z-10 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
-                          <Icon
-                            className={`h-4 w-4 shrink-0 transition-all duration-300 ${
-                              isActive
-                                ? 'text-[#FDE047] drop-shadow-[0_0_6px_rgba(250,204,21,0.8)] scale-110'
-                                : 'text-[#8DA2C0] group-hover:text-[#FDE047] group-hover:scale-110'
-                            }`}
-                            strokeWidth={isActive ? 2.2 : 1.8}
-                          />
-                          {!collapsed && (
-                            <span className="truncate text-xs tracking-wide text-left">
-                              {item.label}
-                            </span>
-                          )}
-                        </div>
-
-                        {!collapsed && item.badge && (
-                          <span
-                            className={`relative z-10 ml-2 shrink-0 rounded-md px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${
-                              item.badgeStyle || 'bg-blue-600 text-white'
-                            }`}
-                          >
-                            {item.badge}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              );
-            })}
-        </div>
-
-        {/* Bottom Logout Trigger (My Academy logo & text removed as requested) */}
-        <div className="relative z-10 border-t border-[#182644] p-3">
-          {!collapsed ? (
-            <button
-              onClick={() => setShowLogoutModal(true)}
-              className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-rose-500/30 bg-rose-950/35 px-3.5 py-2.5 text-xs font-bold text-rose-300 hover:border-rose-500/60 hover:bg-rose-950/70 hover:text-white transition-all cursor-pointer"
-              title="Keluar Akun (Log Out)"
-            >
-              <LogOut className="h-4 w-4 shrink-0" />
-              <span>Keluar Sesi Akun</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => setShowLogoutModal(true)}
-              className="mx-auto flex h-9 w-9 items-center justify-center rounded-full border border-rose-500/40 bg-rose-950/40 text-rose-300 hover:border-rose-500/70 hover:text-white transition-colors cursor-pointer"
-              title="Keluar Akun (Log Out)"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          )}
+        {/* Bottom Logout Icon Button (Bespoke Duotone Logout Vector) */}
+        <div className="flex w-full items-center justify-center pt-1">
+          <button
+            type="button"
+            onClick={() => setShowLogoutModal(true)}
+            title="Keluar Sesi Akun (Log Out)"
+            className={`no-ornament group flex items-center justify-center rounded-[16px] text-white/85 hover:bg-[#FF6E96]/25 hover:text-white active:scale-95 transition-all duration-300 cursor-pointer ${
+              collapsed ? 'h-11 w-11' : 'w-full gap-2.5 px-3.5 py-2.5 justify-start'
+            }`}
+          >
+            <span className="transition-transform duration-300 group-hover:translate-x-0.5">
+              <OrbitaMenuIcon variant="logout" className="h-5.5 w-5.5 shrink-0" />
+            </span>
+            {!collapsed && <span className="text-xs font-bold">Keluar Sesi</span>}
+          </button>
         </div>
       </aside>
     </>

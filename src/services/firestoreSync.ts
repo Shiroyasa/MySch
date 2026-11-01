@@ -92,7 +92,7 @@ export async function ensureFirestorePopulated(): Promise<void> {
   try {
     const studentsSnap = await getDocs(collection(db, 'students'));
     if (studentsSnap.empty) {
-      console.log('Firestore is empty. Initializing cloud database with authentic SMK Mardi Yuana Cikembar records...');
+      console.log('Firestore is empty. Initializing cloud database with authentic ORBITA records...');
       const batch = writeBatch(db);
 
       initialStudents.forEach(item => {

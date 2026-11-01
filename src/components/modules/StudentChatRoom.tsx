@@ -187,14 +187,14 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
         icon={MessageSquare}
         rightContent={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 text-xs">
+            <div className="flex items-center rounded-xl border border-[#E4E2F2] bg-[#F4F3FA] p-1.5 text-xs">
               <button
                 type="button"
                 onClick={() => setActiveTab('public')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
                   activeTab === 'public'
-                    ? 'bg-[#2563EB] text-white shadow-2xs'
-                    : 'text-slate-300 hover:text-white'
+                    ? 'bg-[#6C60B8] text-white shadow-sm'
+                    : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
                 }`}
               >
                 <Users className="h-3.5 w-3.5" />
@@ -205,14 +205,14 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
                 onClick={() => setActiveTab('dm')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all relative cursor-pointer ${
                   activeTab === 'dm'
-                    ? 'bg-[#2563EB] text-white shadow-2xs'
-                    : 'text-slate-300 hover:text-white'
+                    ? 'bg-[#6C60B8] text-white shadow-sm'
+                    : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
                 }`}
               >
                 <MessageCircle className="h-3.5 w-3.5" />
                 <span>Chat DM Pribadi</span>
                 {directMessages.some(m => m.recipientId === currentUser.id) && (
-                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="h-2 w-2 rounded-full bg-[#F25781] animate-pulse" />
                 )}
               </button>
             </div>
@@ -220,9 +220,9 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
             {isAdmin && activeTab === 'public' && (
               <button
                 onClick={() => setShowModAnnounceForm(!showModAnnounceForm)}
-                className="flex items-center gap-1.5 rounded-xl border border-[#C8A44B]/60 bg-[#1B2A47] px-3 py-2 text-xs font-bold text-[#FDE68A] hover:bg-[#24375C] transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 rounded-xl border border-[#D8D3F2] bg-[#F4F3FA] px-3.5 py-2 text-xs font-bold text-[#5E53A8] hover:bg-[#EAE7F8] transition-colors cursor-pointer"
               >
-                <Megaphone className="h-3.5 w-3.5 text-[#EAB308]" />
+                <Megaphone className="h-3.5 w-3.5 text-[#F25781]" />
                 <span>Pengumuman Moderator</span>
               </button>
             )}

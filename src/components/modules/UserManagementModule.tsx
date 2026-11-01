@@ -409,8 +409,8 @@ export const UserManagementModule: React.FC = () => {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl dark:bg-blue-600 animate-in slide-in-from-bottom-3">
-          <Check className="h-4 w-4 text-emerald-400" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl border border-[#7265C2]/30 bg-[#6C60B8] px-4 py-3 text-xs font-bold text-white shadow-2xl animate-in slide-in-from-bottom-3">
+          <Check className="h-4 w-4 text-[#FFE680]" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -427,17 +427,17 @@ export const UserManagementModule: React.FC = () => {
             <button
               type="button"
               onClick={openCreateModal}
-              className="flex items-center gap-2 rounded-xl border border-[#C8A44B]/80 bg-[#2563EB] px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer"
+              className="flex items-center gap-2 rounded-xl bg-[#6C60B8] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#5E52A8] transition-colors cursor-pointer"
             >
-              <UserPlus className="h-4 w-4 text-[#FDE68A]" />
+              <UserPlus className="h-4 w-4 text-[#FFE680]" />
               <span>Tambah Data Pengguna &amp; Hak Akses</span>
             </button>
           ) : undefined
         }
       />
 
-      {/* 3D Flipcard Role Presentation Boxes (Stationary In-Place Flip + Per-Box Custom BG) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
+      {/* 3D Flipcard Role Presentation Boxes (Stationary In-Place Flip + Single Top Floating Icon) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pt-4 items-stretch">
         {(Object.keys(rolePresets) as UserRole[]).map(r => {
           const preset = rolePresets[r];
           const count = users.filter(u => u && u.role === r).length;
@@ -448,12 +448,12 @@ export const UserManagementModule: React.FC = () => {
               boxId={`role_card_${r}`}
               minFlipHeight="min-h-[172px]"
               onClick={() => setRoleFilter(prev => (prev === r ? 'ALL' : r))}
-              className="p-4"
+              className="p-5"
               flipBack={
                 <div className="flex flex-col justify-between h-full">
                   <div>
                     <div className="pr-16">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-[#F3D77D] block truncate">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-[#FFE680] block truncate">
                         ✦ Hak Akses • {preset.title}
                       </span>
                     </div>
@@ -461,21 +461,21 @@ export const UserManagementModule: React.FC = () => {
                       {preset.defaultPermissions.slice(0, 5).map(perm => (
                         <span
                           key={perm}
-                          className="no-ornament rounded-md bg-white/10 border border-white/15 px-2 py-0.5 text-[10px] font-semibold text-slate-200 leading-tight"
+                          className="no-ornament rounded-md bg-white/15 border border-white/20 px-2 py-0.5 text-[10px] font-semibold text-white leading-tight"
                         >
                           {perm}
                         </span>
                       ))}
                       {preset.defaultPermissions.length > 5 && (
-                        <span className="no-ornament rounded-md bg-[#D4AF37]/20 border border-[#D4AF37]/30 px-2 py-0.5 text-[10px] font-bold text-[#F3D77D] leading-tight">
+                        <span className="no-ornament rounded-md bg-white/25 border border-white/30 px-2 py-0.5 text-[10px] font-bold text-[#FFE680] leading-tight">
                           +{preset.defaultPermissions.length - 5} lainnya
                         </span>
                       )}
                     </div>
                   </div>
-                  <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[11px] font-extrabold text-cyan-300">
+                  <div className="mt-2 pt-1.5 border-t border-white/20 flex items-center justify-between text-[11px] font-extrabold text-white">
                     <span>Klik untuk Filter ({count} Akun)</span>
-                    <Sparkles className="h-3.5 w-3.5 text-[#F3D77D] shrink-0" />
+                    <Sparkles className="h-3.5 w-3.5 text-[#FFE680] shrink-0" />
                   </div>
                 </div>
               }
@@ -484,32 +484,27 @@ export const UserManagementModule: React.FC = () => {
                 <div>
                   <div className="flex items-center justify-between gap-2">
                     <AcademyCornerBadge
-                      text={`GUILD • ${preset.role.replace('_', ' ').toUpperCase()}`}
+                      text={`ROLE • ${preset.role.replace('_', ' ').toUpperCase()}`}
                       className="mb-0"
                     />
-                    <span className="no-ornament rounded-full bg-[#132550] px-2.5 py-0.5 text-[10px] font-black text-[#F3D77D] shrink-0">
+                    <span className="no-ornament rounded-full bg-[#EFEAFC] border border-[#DDD4F6] px-2.5 py-0.5 text-[10px] font-black text-[#6C60B8] shrink-0">
                       {count} Akun
                     </span>
                   </div>
-                  <div className="flex items-start gap-3 mt-2.5">
-                    <div className="no-ornament rounded-xl bg-blue-500/15 border border-blue-500/30 p-2.5 text-blue-600 dark:text-cyan-400 shrink-0">
-                      <ShieldCheck className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
-                        {preset.title}
-                      </h3>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5 leading-snug">
-                        {preset.description}
-                      </p>
-                    </div>
+                  <div className="mt-2.5">
+                    <h3 className="font-extrabold text-sm text-[#262833] truncate">
+                      {preset.title}
+                    </h3>
+                    <p className="text-[11px] text-[#6E7287] line-clamp-2 mt-1 leading-snug">
+                      {preset.description}
+                    </p>
                   </div>
                 </div>
-                <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/70 dark:border-slate-800 flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-blue-600 dark:text-cyan-400">
+                <div className="mt-2.5 pt-2 border-t border-[#EFEFF7] flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-[#6C60B8]">
                     {preset.defaultPermissions.length} Modul Terotorisasi
                   </span>
-                  <span className="text-[10px] font-bold text-amber-600 dark:text-[#F3D77D]">
+                  <span className="text-[10px] font-bold text-[#F25781]">
                     Detail Akses ✦
                   </span>
                 </div>

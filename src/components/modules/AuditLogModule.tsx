@@ -40,7 +40,7 @@ export const AuditLogModule: React.FC = () => {
       Tindakan: l.action,
       Keterangan: l.details,
     }));
-    exportToExcel(rows, 'Audit_Log_Keamanan_SMK_Mardi_Yuana');
+    exportToExcel(rows, 'Audit_Log_Keamanan_ORBITA');
   };
 
   return (
@@ -54,9 +54,9 @@ export const AuditLogModule: React.FC = () => {
         rightContent={
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 rounded-xl border border-[#C8A44B]/70 bg-[#1B2A47] px-4 py-2 text-xs font-bold text-[#FDE68A] hover:bg-[#24375C] cursor-pointer transition-colors"
+            className="flex items-center gap-2 rounded-xl bg-[#6C60B8] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#5E52A8] cursor-pointer transition-colors"
           >
-            <Download className="h-4 w-4 text-[#EAB308]" />
+            <Download className="h-4 w-4 text-[#FFE680]" />
             <span>Ekspor Audit Log (XLSX)</span>
           </button>
         }
@@ -75,7 +75,7 @@ export const AuditLogModule: React.FC = () => {
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 pr-14">
           <select
             value={filterModule}
             onChange={e => setFilterModule(e.target.value)}

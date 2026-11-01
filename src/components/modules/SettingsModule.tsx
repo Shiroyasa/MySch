@@ -485,7 +485,7 @@ export const SettingsModule: React.FC = () => {
   }, [currentUser]);
 
   // School Metadata State (Synced with AppContext & Cloud Firestore)
-  const [schoolName, setSchoolName] = useState(schoolSettings?.schoolName || 'SMK MARDI YUANA CIKEMBAR');
+  const [schoolName, setSchoolName] = useState(schoolSettings?.schoolName || 'ORBITA');
   const [npsn, setNpsn] = useState(schoolSettings?.npsn || '20253654');
   const [accreditation, setAccreditation] = useState(schoolSettings?.accreditation || 'A (Unggul)');
   const [headmaster, setHeadmaster] = useState(
@@ -501,7 +501,7 @@ export const SettingsModule: React.FC = () => {
 
   useEffect(() => {
     if (schoolSettings) {
-      setSchoolName(schoolSettings.schoolName || 'SMK MARDI YUANA CIKEMBAR');
+      setSchoolName(schoolSettings.schoolName || 'ORBITA');
       setNpsn(schoolSettings.npsn || '20253654');
       setAccreditation(schoolSettings.accreditation || 'A (Unggul)');
       setHeadmaster(schoolSettings.headmaster || schoolSettings.principalName || 'Drs. H. Suryana, M.M.Pd.');
@@ -562,7 +562,7 @@ export const SettingsModule: React.FC = () => {
   const handleSaveSchoolSettings = (e: React.FormEvent) => {
     e.preventDefault();
     updateSchoolSettings({
-      schoolName: schoolName.trim() || 'SMK MARDI YUANA CIKEMBAR',
+      schoolName: schoolName.trim() || 'ORBITA',
       npsn: npsn.trim() || '20253654',
       accreditation: accreditation.trim() || 'A (Unggul)',
       headmaster: headmaster.trim() || 'Drs. H. Suryana, M.M.Pd.',
@@ -631,24 +631,24 @@ export const SettingsModule: React.FC = () => {
         subtitle="Kelola Logo Aplikasi (Login & Sidebar), Background Menu & Halaman Login (termasuk Live Wallpaper), Ambience Dark Mode, serta Sinkronisasi Cloud Firestore."
         icon={Settings}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 backdrop-blur-md">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[18px] border border-[#E6E8F2] bg-[#F5F6FA] p-1.5 shadow-xs">
             <button
               onClick={() => setActiveSection('backgrounds')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`no-ornament flex items-center gap-1.5 rounded-[12px] px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 activeSection === 'backgrounds'
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#685BC7] text-white shadow-xs'
+                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
               }`}
             >
-              <Palette className="h-3.5 w-3.5 text-[#FACC15]" />
+              <Palette className="h-3.5 w-3.5" />
               <span>Logo &amp; Background</span>
             </button>
             <button
               onClick={() => setActiveSection('profile')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`no-ornament flex items-center gap-1.5 rounded-[12px] px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 activeSection === 'profile'
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#685BC7] text-white shadow-xs'
+                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
               }`}
             >
               <User className="h-3.5 w-3.5" />
@@ -656,10 +656,10 @@ export const SettingsModule: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveSection('school')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`no-ornament flex items-center gap-1.5 rounded-[12px] px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 activeSection === 'school'
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#685BC7] text-white shadow-xs'
+                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
               }`}
             >
               <School className="h-3.5 w-3.5" />
@@ -667,10 +667,10 @@ export const SettingsModule: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveSection('backup')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`no-ornament flex items-center gap-1.5 rounded-[12px] px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 activeSection === 'backup'
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#685BC7] text-white shadow-xs'
+                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
               }`}
             >
               <ShieldCheck className="h-3.5 w-3.5" />
@@ -678,13 +678,13 @@ export const SettingsModule: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveSection('cloud-sync')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`no-ornament flex items-center gap-1.5 rounded-[12px] px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
                 activeSection === 'cloud-sync'
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#685BC7] text-white shadow-xs'
+                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
               }`}
             >
-              <Cloud className="h-3.5 w-3.5 text-emerald-400" />
+              <Cloud className="h-3.5 w-3.5" />
               <span>Cloud Sync</span>
             </button>
           </div>
@@ -717,8 +717,13 @@ export const SettingsModule: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
               {/* Preview 1: Login Crest Frame */}
-              <div className="flex items-center gap-4 rounded-2xl border border-[#C8A44B]/60 bg-[#0B162C] p-4 text-white">
-                <div className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border-2 border-[#D4AF37] bg-gradient-to-b from-[#0F1E3A] to-[#091224] p-2 shadow-[0_6px_18px_rgba(0,0,0,0.55)]">
+              <div className="flex items-center gap-4 rounded-2xl border border-[#E6E8F2] bg-[#F5F6FA] p-4 text-[#3E385B]">
+                <div
+                  style={{
+                    background: 'linear-gradient(145deg, #7468C4 0%, #5D51B2 100%)',
+                  }}
+                  className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl p-2 shadow-md"
+                >
                   {visualSettings?.appLogoUrl ? (
                     <img
                       src={visualSettings.appLogoUrl}
@@ -728,17 +733,17 @@ export const SettingsModule: React.FC = () => {
                       }`}
                     />
                   ) : (
-                    <BookOpen className="h-9 w-9 text-[#FDE047]" />
+                    <BookOpen className="h-9 w-9 text-white" />
                   )}
                 </div>
                 <div>
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#FDE047]">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#685BC7]">
                     Pratinjau Login Page
                   </span>
-                  <p className="text-sm font-bold text-white mt-0.5">Emblem Gerbang Login</p>
-                  <p className="text-[11px] text-slate-300 mt-0.5">
+                  <p className="text-sm font-bold text-[#3E385B] mt-0.5">Emblem Gerbang Login</p>
+                  <p className="text-[11px] text-[#6A6584] mt-0.5">
                     Mode:{' '}
-                    <span className="font-semibold text-amber-300 uppercase">
+                    <span className="font-semibold text-[#685BC7] uppercase">
                       {visualSettings?.appLogoFit === 'cover' ? 'Isi Penuh (Cover)' : 'Proporsional (Contain)'}
                     </span>
                   </p>
@@ -746,8 +751,13 @@ export const SettingsModule: React.FC = () => {
               </div>
 
               {/* Preview 2: Sidebar Brand Header */}
-              <div className="flex items-center gap-3.5 rounded-2xl border border-[#182644] bg-[#0B162C] p-4 text-white">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#C8A44B]/75 bg-gradient-to-b from-[#15284E] to-[#0D1A36] p-1.5 shadow-[0_0_15px_rgba(200,164,75,0.22)]">
+              <div
+                style={{
+                  background: 'linear-gradient(135deg, #7468C4 0%, #6558B5 100%)',
+                }}
+                className="flex items-center gap-3.5 rounded-2xl p-4 text-white shadow-sm"
+              >
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/15 p-1.5">
                   {visualSettings?.appLogoUrl ? (
                     <img
                       src={visualSettings.appLogoUrl}
@@ -757,20 +767,17 @@ export const SettingsModule: React.FC = () => {
                       }`}
                     />
                   ) : (
-                    <BookOpen className="h-5 w-5 text-[#EAB308]" />
+                    <BookOpen className="h-5 w-5 text-white" />
                   )}
                 </div>
                 <div>
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-sky-400">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-white/80">
                     Pratinjau Sidebar
                   </span>
-                  <p
-                    className="text-sm font-bold tracking-wider text-white uppercase mt-0.5"
-                    style={{ fontFamily: "'Cinzel', 'Playfair Display', Georgia, serif" }}
-                  >
+                  <p className="text-sm font-extrabold tracking-wider text-white uppercase mt-0.5">
                     ORBITA
                   </p>
-                  <p className="text-[11px] text-[#8DA2C0]">Sistem Informasi Akademik</p>
+                  <p className="text-[11px] text-white/85">Sistem Informasi Akademik</p>
                 </div>
               </div>
 
@@ -907,7 +914,7 @@ export const SettingsModule: React.FC = () => {
                           : 'border-slate-200 bg-slate-50/70 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-800/40'
                       }`}
                     >
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0B162C] p-1 border border-amber-400/50 shadow-inner mb-1.5">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#685BC7]/12 p-1 border border-[#685BC7]/25 mb-1.5">
                         <img src={preset.url} alt={preset.name} className="h-9 w-9 object-contain drop-shadow" />
                       </div>
                       <p className="text-[11px] font-bold text-slate-900 dark:text-white line-clamp-1">
@@ -1537,9 +1544,9 @@ export const SettingsModule: React.FC = () => {
                 type="button"
                 onClick={handleExplicitSaveVisualSettings}
                 disabled={isSavingVisuals}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#132550] to-[#1D4ED8] border border-[#D4AF37]/60 px-6 py-3 text-xs font-extrabold text-white shadow-md hover:brightness-110 transition-all cursor-pointer disabled:opacity-50"
+                className="no-ornament inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#7266C4] to-[#5D51B2] px-6 py-3 text-xs font-extrabold text-white shadow-md hover:brightness-105 transition-all cursor-pointer disabled:opacity-50"
               >
-                <Save className="h-4 w-4 text-[#FDE047]" />
+                <Save className="h-4 w-4 text-white" />
                 <span>
                   {isSavingVisuals
                     ? 'Menyimpan Pengaturan...'

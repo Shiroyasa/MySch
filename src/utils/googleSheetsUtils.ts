@@ -38,7 +38,7 @@ export async function exportToGoogleSheets({
       },
       body: JSON.stringify({
         properties: {
-          title: `${title} - SMK Mardi Yuana (${new Date().toLocaleDateString('id-ID')})`,
+          title: `${title} - ORBITA (${new Date().toLocaleDateString('id-ID')})`,
         },
         sheets: [
           {

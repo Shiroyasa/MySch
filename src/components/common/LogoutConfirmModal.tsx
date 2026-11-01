@@ -65,7 +65,7 @@ export const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
           </h2>
 
           <p className="mt-2 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-            Apakah Anda yakin ingin keluar dari portal <strong>MySchool SMK Mardi Yuana Cikembar</strong>?
+            Apakah Anda yakin ingin keluar dari portal <strong>MySchool ORBITA</strong>?
           </p>
 
           {userName && (

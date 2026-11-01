@@ -511,7 +511,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                   <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
                     Data Pokok Peserta Didik (Buku Induk)
                   </h2>
-                  <p className="text-xs text-slate-500">Identitas resmi yang terdaftar pada Dapodik SMK Mardi Yuana Cikembar</p>
+                  <p className="text-xs text-slate-500">Identitas resmi yang terdaftar pada Dapodik ORBITA</p>
                 </div>
                 <span className="rounded-xl bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">
                   NIS: {student.nis}
@@ -588,7 +588,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                     </div>
                     <div>
                       <p className="text-xs font-black tracking-wider uppercase">Kartu Pelajar Siswa</p>
-                      <p className="text-[10px] text-blue-300">SMK Mardi Yuana Cikembar</p>
+                      <p className="text-[10px] text-blue-300">ORBITA</p>
                     </div>
                   </div>
                   <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[9px] font-bold text-emerald-300 border border-emerald-400/30">
@@ -810,7 +810,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                       Rekapitulasi Nilai Keseluruhan Siswa (Kurikulum Merdeka)
                     </h2>
                     <p className="text-xs text-slate-500">
-                      Seluruh capaian kompetensi semester ganjil T.A. {activeAcademicYear.name} SMK Mardi Yuana Cikembar
+                      Seluruh capaian kompetensi semester ganjil T.A. {activeAcademicYear.name} ORBITA
                     </p>
                   </div>
 

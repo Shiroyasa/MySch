@@ -135,7 +135,7 @@ export const defaultVisualSettings: VisualSettings = {
 };
 
 export const defaultSchoolSettings: SchoolSettings = {
-  schoolName: 'SMK Mardi Yuana Cikembar',
+  schoolName: 'ORBITA',
   npsn: '20258124',
   nss: '402020610045',
   accreditation: 'A (Unggul)',
@@ -143,8 +143,8 @@ export const defaultSchoolSettings: SchoolSettings = {
   principalNip: '19680412 199403 1 005',
   address: 'Jl. Pelabuhan II Km. 18, Cikembar, Kab. Sukabumi, Jawa Barat 43161',
   phone: '(0266) 321455',
-  email: 'info@smkmardiyuana-ckb.sch.id',
-  website: 'https://smkmardiyuana-ckb.sch.id',
+  email: 'info@orbita.sch.id',
+  website: 'https://orbita.sch.id',
   curriculum: 'Kurikulum Merdeka SMK Pusat Keunggulan',
   defaultKkm: 75,
   maxAlphaWarning: 3,
@@ -748,11 +748,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   // School Identity & Academic Configuration Settings
+  const sanitizeSchoolIdentity = (s: SchoolSettings): SchoolSettings => {
+    const cleaned = { ...s };
+    if (!cleaned.schoolName || /mardi\s*yuana/i.test(cleaned.schoolName)) {
+      cleaned.schoolName = 'ORBITA';
+    }
+    if (cleaned.email && /mardi\s*yuana/i.test(cleaned.email)) {
+      cleaned.email = 'info@orbita.sch.id';
+    }
+    if (cleaned.website && /mardi\s*yuana/i.test(cleaned.website)) {
+      cleaned.website = 'https://orbita.sch.id';
+    }
+    return cleaned;
+  };
+
   const [schoolSettings, setSchoolSettings] = useState<SchoolSettings>(() => {
     try {
       const saved = localStorage.getItem('myschool_school_settings');
       if (saved) {
-        return { ...defaultSchoolSettings, ...JSON.parse(saved) };
+        return sanitizeSchoolIdentity({ ...defaultSchoolSettings, ...JSON.parse(saved) });
       }
     } catch (e) {}
     return defaultSchoolSettings;
@@ -909,7 +923,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Mount Firestore real-time listeners for all collections
   useEffect(() => {
-    // 1. Ensure Firestore is initially seeded with SMK Mardi Yuana Cikembar data
+    // 1. Ensure Firestore is initially seeded with ORBITA data
     ensureFirestorePopulated().catch(err => {
       console.warn('Firestore initial populate notice:', err);
     });
@@ -1052,7 +1066,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       },
       onSchoolSettingsChange: data => {
         setSchoolSettings(prev => {
-          const next = { ...prev, ...data };
+          const next = sanitizeSchoolIdentity({ ...prev, ...data });
           try {
             localStorage.setItem('myschool_school_settings', JSON.stringify(next));
           } catch {}
@@ -3463,17 +3477,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           {globalToasts.map(t => (
             <div
               key={t.id}
-              className={`pointer-events-auto flex items-center gap-3 rounded-xl border px-4 py-3 text-xs font-bold shadow-2xl backdrop-blur-md transition-all duration-300 ${
+              className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-3 text-xs font-bold shadow-[0_14px_34px_rgba(62,56,91,0.18)] backdrop-blur-md transition-all duration-300 ${
                 t.type === 'error'
-                  ? 'border-rose-400/60 bg-rose-950/95 text-rose-100'
+                  ? 'border-[#FF7597]/50 bg-[#FF5C86] text-white'
                   : t.type === 'warning'
-                  ? 'border-amber-400/60 bg-amber-950/95 text-amber-100'
+                  ? 'border-amber-300 bg-amber-50 text-amber-900'
                   : t.type === 'info'
-                  ? 'border-sky-400/60 bg-slate-900/95 text-sky-100'
-                  : 'border-[#D4AF37]/70 bg-[#0B1528]/95 text-[#FDE68A]'
+                  ? 'border-[#E6E8F2] bg-white text-[#3E385B]'
+                  : 'border-[#7468C4] bg-[#6558B5] text-white'
               }`}
             >
-              <span className="text-sm text-[#EAB308]">✦</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-[11px]">
+                ✓
+              </span>
               <span className="flex-1 leading-snug">{t.message}</span>
             </div>
           ))}

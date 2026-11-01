@@ -575,8 +575,8 @@ export const AttendanceModule: React.FC = () => {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white shadow-2xl dark:bg-blue-600 animate-in slide-in-from-bottom-3">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-[16px] border border-[#6C60B8]/25 bg-white px-4 py-3 text-xs font-extrabold text-[#3E385B] shadow-[0_16px_36px_-8px_rgba(108,96,184,0.28)] animate-in slide-in-from-bottom-3">
+          <CheckCircle2 className="h-4 w-4 text-[#1CC865] shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -589,44 +589,43 @@ export const AttendanceModule: React.FC = () => {
         subtitle="Pencatatan kehadiran jam pelajaran, rekapitulasi laporan presensi interaktif (editable), riwayat sesi, dan verifikasi koreksi absensi tersinkron langsung ke Cloud Database."
         icon={CalendarCheck}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#C8A44B]/40 bg-[#0F1E3A]/90 p-1.5 backdrop-blur-md">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5">
             <button
               onClick={() => setActiveTab('input')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
                 activeTab === 'input'
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
               }`}
             >
               Input Presensi
             </button>
             <button
               onClick={() => setActiveTab('editable_report')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
                 activeTab === 'editable_report'
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
               }`}
             >
-              <Edit3 className="h-3.5 w-3.5 text-[#EAB308]" />
-              <span>Laporan Editable</span>
+              Laporan Editable
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
                 activeTab === 'history'
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
               }`}
             >
               Riwayat ({attendanceSessions.length})
             </button>
             <button
               onClick={() => setActiveTab('correction')}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
                 activeTab === 'correction'
-                  ? 'bg-[#2563EB] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
               }`}
             >
               Koreksi ({attendanceCorrections.length})

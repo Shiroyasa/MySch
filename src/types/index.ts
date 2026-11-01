@@ -232,6 +232,8 @@ export interface AuditLog {
   userId: string;
   userName: string;
   userRole: UserRole;
+  actorName?: string;
+  actorRole?: UserRole | string;
   action: string;
   module: string;
   details: string;
@@ -351,6 +353,8 @@ export interface PklVisitRecord {
   attendanceRate: number; // % kehadiran siswa saat kunjungan
   guidanceNotes: string;
   industryFeedback: string;
+  findings?: string;
+  notes?: string;
   status: 'terlaksana' | 'terjadwal' | 'tertunda';
 }
 
@@ -366,6 +370,7 @@ export interface PklStudentReportItem {
   reportTitle: string;
   submissionStatus: 'sudah_dikumpulkan' | 'belum_dikumpulkan' | 'revisi';
   submissionDate?: string;
+  submittedAt?: string;
   schoolMentorScore: number;
   industryMentorScore: number;
   finalScore: number;

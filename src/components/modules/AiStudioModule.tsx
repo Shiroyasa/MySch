@@ -82,7 +82,7 @@ export const AiStudioModule: React.FC = () => {
 
   // Veo Video Generation State
   const [veoPrompt, setVeoPrompt] = useState<string>(
-    'Siswa-siswi SMK Mardi Yuana Cikembar sedang merakit komputer dan coding di laboratorium komputer modern'
+    'Siswa-siswi ORBITA sedang merakit komputer dan coding di laboratorium komputer modern'
   );
   const [veoAspectRatio, setVeoAspectRatio] = useState<'16:9' | '9:16'>('16:9');
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -316,7 +316,7 @@ export const AiStudioModule: React.FC = () => {
             </div>
 
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
-              <span>SMK Mardi Yuana Cikembar &bull; Asisten AI Terverifikasi</span>
+              <span>ORBITA &bull; Asisten AI Terverifikasi</span>
               <span>Model: gemini-4-argon</span>
             </div>
           </div>
@@ -336,7 +336,7 @@ export const AiStudioModule: React.FC = () => {
                 Animasikan Foto Kegiatan Menjadi Video (Veo)
               </h2>
               <p className="text-xs text-slate-500">
-                Unggah foto kegiatan praktikum bengkel vokasi atau kelas SMK Mardi Yuana Cikembar, lalu hidupkan menjadi video berkualitas sinematik.
+                Unggah foto kegiatan praktikum bengkel vokasi atau kelas ORBITA, lalu hidupkan menjadi video berkualitas sinematik.
               </p>
             </div>
 
@@ -453,7 +453,7 @@ export const AiStudioModule: React.FC = () => {
             </div>
 
             <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400">
-              SMK Mardi Yuana Cikembar &bull; Google Veo Video Generation Engine
+              ORBITA &bull; Google Veo Video Generation Engine
             </div>
           </div>
         </div>

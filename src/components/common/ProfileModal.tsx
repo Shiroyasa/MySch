@@ -22,28 +22,28 @@ interface ProfileModalProps {
 
 const PRESET_AVATARS = [
   {
-    label: 'Kepala Sekolah (Resmi)',
-    url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+    label: 'Ororon • Chibi Night-Wind (5★)',
+    url: '/assets/aistudio/ororon_chibi_1.png',
   },
   {
-    label: 'Guru Pria (Batik)',
-    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80',
+    label: 'Ororon • Chibi Bat-Ears (5★)',
+    url: '/assets/aistudio/ororon_chibi_2.png',
   },
   {
-    label: 'Guru Wanita (Formal)',
-    url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80',
+    label: 'Ororon • Spirit Companion (5★)',
+    url: '/assets/aistudio/ororon_spirit_1.png',
   },
   {
-    label: 'Siswa Laki-laki (Kejuruan)',
-    url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=256&q=80',
+    label: 'Ororon • Electro Portrait (5★)',
+    url: '/assets/aistudio/ororon_art_1.png',
   },
   {
-    label: 'Siswi Perempuan (Seragam)',
-    url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=256&q=80',
+    label: 'Ororon • Autumn Artboard (5★)',
+    url: '/assets/aistudio/ororon_art_2.png',
   },
   {
-    label: 'Administrator Sistem',
-    url: 'https://images.unsplash.com/photo-1628157582853-a796fa650a6a?auto=format&fit=crop&w=256&q=80',
+    label: 'Ororon • Forest Sanctuary (5★)',
+    url: '/assets/aistudio/ororon_art_3.png',
   },
 ];
 

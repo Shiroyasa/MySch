@@ -946,8 +946,8 @@ export const PklModule: React.FC = () => {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-950/90 py-3 px-5 text-xs font-bold text-emerald-100 shadow-2xl backdrop-blur-md animate-fade-in">
-          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-[#7265C2]/30 bg-[#6C60B8] py-3 px-5 text-xs font-bold text-white shadow-2xl animate-fade-in">
+          <CheckCircle2 className="h-4 w-4 text-[#FFE680] shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
@@ -974,7 +974,7 @@ export const PklModule: React.FC = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handleClearAllPklData}
-              className="flex items-center gap-1.5 rounded-xl border border-rose-400/40 bg-rose-950/70 py-2 px-3 text-xs font-bold text-rose-200 hover:bg-rose-900/80 cursor-pointer transition-colors"
+              className="flex items-center gap-1.5 rounded-xl border border-[#FFC4D4] bg-[#FFE8EF] py-2 px-3.5 text-xs font-bold text-[#E14A74] hover:bg-[#FFD6E3] cursor-pointer transition-colors"
               title="Kosongkan seluruh data di menu Administrasi PKL"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -984,17 +984,17 @@ export const PklModule: React.FC = () => {
             {partners.length === 0 && (
               <button
                 onClick={handleLoadSampleData}
-                className="flex items-center gap-1.5 rounded-xl border border-emerald-400/40 bg-emerald-950/70 py-2 px-3 text-xs font-bold text-emerald-200 hover:bg-emerald-900/80 cursor-pointer transition-colors"
+                className="flex items-center gap-1.5 rounded-xl border border-[#BCEBD0] bg-[#E7F9EF] py-2 px-3.5 text-xs font-bold text-[#139A4C] hover:bg-[#D5F4E3] cursor-pointer transition-colors"
                 title="Muat contoh data mitra industri & penempatan PKL"
               >
-                <Sparkles className="h-3.5 w-3.5 text-[#EAB308]" />
+                <Sparkles className="h-3.5 w-3.5 text-[#139A4C]" />
                 <span>Muat Contoh Data</span>
               </button>
             )}
 
             <button
               onClick={() => setShowAddPartnerModal(true)}
-              className="flex items-center gap-1.5 rounded-xl bg-[#2563EB] py-2 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+              className="flex items-center gap-1.5 rounded-xl bg-[#6C60B8] py-2 px-4 text-xs font-bold text-white shadow-sm hover:bg-[#5E52A8] cursor-pointer transition-colors"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Tambah Instansi Mitra</span>
@@ -1008,45 +1008,45 @@ export const PklModule: React.FC = () => {
                 }
                 setShowAddVisitModal(true);
               }}
-              className="flex items-center gap-1.5 rounded-xl border border-[#C8A44B]/60 bg-[#1B2A47] py-2 px-3.5 text-xs font-bold text-[#FDE68A] hover:bg-[#24375C] cursor-pointer"
+              className="flex items-center gap-1.5 rounded-xl border border-[#D8D3F2] bg-[#F4F3FA] py-2 px-3.5 text-xs font-bold text-[#5E53A8] hover:bg-[#EAE7F8] cursor-pointer transition-colors"
             >
-              <Calendar className="h-3.5 w-3.5 text-[#EAB308]" />
+              <Calendar className="h-3.5 w-3.5 text-[#6C60B8]" />
               <span>Jadwal Supervisi</span>
             </button>
           </div>
         }
       />
 
-      {/* Top 4 Ornate Key Metrics Bar (Stationary In-Place 3D Flipcard & Per-Box BG Changer) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-stretch">
+      {/* Top 4 Ornate Key Metrics Bar (Stationary In-Place 3D Flipcard & Single Top Floating Icon) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-4 items-stretch">
         <OrnateCard
           boxId="pkl_metric_partners"
-          className="p-4"
+          className="p-5"
           minFlipHeight="min-h-[172px]"
           flipBack={
             <div className="flex flex-col justify-between h-full">
               <div>
                 <div className="pr-16">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-cyan-300 block truncate">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-white/90 block truncate">
                     ✦ Detail Instansi PKL
                   </span>
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
-                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
-                    <span className="text-slate-300 block text-[10px] leading-tight">Instansi</span>
-                    <span className="font-black text-cyan-300 text-[11px] leading-tight block mt-0.5">
+                  <div className="no-ornament rounded-lg bg-white/15 border border-white/20 px-2 py-1.5">
+                    <span className="text-white/80 block text-[10px] leading-tight">Instansi</span>
+                    <span className="font-black text-white text-[11px] leading-tight block mt-0.5">
                       {partners.length} Mitra
                     </span>
                   </div>
-                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
-                    <span className="text-slate-300 block text-[10px] leading-tight">Kuota PKL</span>
-                    <span className="font-black text-amber-300 text-[11px] leading-tight block mt-0.5">
+                  <div className="no-ornament rounded-lg bg-white/15 border border-white/20 px-2 py-1.5">
+                    <span className="text-white/80 block text-[10px] leading-tight">Kuota PKL</span>
+                    <span className="font-black text-[#FFE680] text-[11px] leading-tight block mt-0.5">
                       {totalCapacity} Siswa
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-extrabold text-[#F3D77D]">
+              <div className="mt-2 pt-1.5 border-t border-white/20 flex items-center justify-between text-[10px] font-extrabold text-[#FFE680]">
                 <span>Sektor: {Math.max(0, sectors.length - 1)} Bidang</span>
                 <span>Terverifikasi</span>
               </div>
@@ -1054,22 +1054,16 @@ export const PklModule: React.FC = () => {
           }
         >
           <div className="flex flex-col justify-between h-full">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <AcademyCornerBadge text="MITRA • INSTANSI" className="mb-1.5" />
-                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 truncate">
-                  <Building2 className="h-3.5 w-3.5 text-blue-600 shrink-0" /> Instansi Penempatan
-                </span>
-                <p
-                  className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 leading-tight"
-                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
-                >
-                  {partners.length}
-                </p>
-              </div>
-              <CharacterMedallion variant="guild" />
+            <div>
+              <AcademyCornerBadge text="MITRA • INSTANSI" className="mb-1.5" />
+              <span className="text-xs font-bold text-[#6E7287] block truncate">
+                Instansi Penempatan
+              </span>
+              <p className="text-2xl sm:text-3xl font-black text-[#262833] mt-1 leading-tight">
+                {partners.length}
+              </p>
             </div>
-            <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+            <div className="mt-2.5 pt-2 border-t border-[#EFEFF7] flex items-center justify-between text-[11px] font-bold text-[#139A4C]">
               <span>Perusahaan Terafiliasi</span>
               <span>Aktif</span>
             </div>
@@ -1078,32 +1072,32 @@ export const PklModule: React.FC = () => {
 
         <OrnateCard
           boxId="pkl_metric_students"
-          className="p-4"
+          className="p-5"
           minFlipHeight="min-h-[172px]"
           flipBack={
             <div className="flex flex-col justify-between h-full">
               <div>
                 <div className="pr-16">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-indigo-300 block truncate">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-white/90 block truncate">
                     ✦ Rasio Penempatan
                   </span>
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
-                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
-                    <span className="text-slate-300 block text-[10px] leading-tight">Siswa Aktif</span>
-                    <span className="font-black text-emerald-300 text-[11px] leading-tight block mt-0.5">
+                  <div className="no-ornament rounded-lg bg-white/15 border border-white/20 px-2 py-1.5">
+                    <span className="text-white/80 block text-[10px] leading-tight">Siswa Aktif</span>
+                    <span className="font-black text-white text-[11px] leading-tight block mt-0.5">
                       {totalActiveStudents} Siswa
                     </span>
                   </div>
-                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
-                    <span className="text-slate-300 block text-[10px] leading-tight">Keterisian</span>
-                    <span className="font-black text-indigo-300 text-[11px] leading-tight block mt-0.5">
+                  <div className="no-ornament rounded-lg bg-white/15 border border-white/20 px-2 py-1.5">
+                    <span className="text-white/80 block text-[10px] leading-tight">Keterisian</span>
+                    <span className="font-black text-[#FFE680] text-[11px] leading-tight block mt-0.5">
                       {totalCapacity > 0 ? Math.round((totalActiveStudents / totalCapacity) * 100) : 0}%
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-extrabold text-[#F3D77D]">
+              <div className="mt-2 pt-1.5 border-t border-white/20 flex items-center justify-between text-[10px] font-extrabold text-[#FFE680]">
                 <span>Total Kuota: {totalCapacity}</span>
                 <span>Aktif</span>
               </div>
@@ -1111,22 +1105,16 @@ export const PklModule: React.FC = () => {
           }
         >
           <div className="flex flex-col justify-between h-full">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <AcademyCornerBadge text="PESERTA • PRAKERIN" className="mb-1.5" />
-                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 truncate">
-                  <Users className="h-3.5 w-3.5 text-indigo-600 shrink-0" /> Siswa Sedang PKL
-                </span>
-                <p
-                  className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 leading-tight"
-                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
-                >
-                  {totalActiveStudents}
-                </p>
-              </div>
-              <CharacterMedallion variant="cadet" />
+            <div>
+              <AcademyCornerBadge text="PESERTA • PRAKERIN" className="mb-1.5" />
+              <span className="text-xs font-bold text-[#6E7287] block truncate">
+                Siswa Sedang PKL
+              </span>
+              <p className="text-2xl sm:text-3xl font-black text-[#262833] mt-1 leading-tight">
+                {totalActiveStudents}
+              </p>
             </div>
-            <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-bold text-blue-600 dark:text-cyan-400">
+            <div className="mt-2.5 pt-2 border-t border-[#EFEFF7] flex items-center justify-between text-[11px] font-bold text-[#6C60B8]">
               <span>Dari {totalCapacity} Kuota Tersedia</span>
               <span>Terdata</span>
             </div>
@@ -1135,32 +1123,32 @@ export const PklModule: React.FC = () => {
 
         <OrnateCard
           boxId="pkl_metric_mou"
-          className="p-4"
+          className="p-5"
           minFlipHeight="min-h-[172px]"
           flipBack={
             <div className="flex flex-col justify-between h-full">
               <div>
                 <div className="pr-16">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300 block truncate">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-white/90 block truncate">
                     ✦ Legalitas MoU / PKS
                   </span>
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
-                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
-                    <span className="text-slate-300 block text-[10px] leading-tight">MoU Aktif</span>
-                    <span className="font-black text-emerald-300 text-[11px] leading-tight block mt-0.5">
+                  <div className="no-ornament rounded-lg bg-white/15 border border-white/20 px-2 py-1.5">
+                    <span className="text-white/80 block text-[10px] leading-tight">MoU Aktif</span>
+                    <span className="font-black text-white text-[11px] leading-tight block mt-0.5">
                       {activeMousCount} Dokumen
                     </span>
                   </div>
-                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
-                    <span className="text-slate-300 block text-[10px] leading-tight">Cakupan</span>
-                    <span className="font-black text-amber-300 text-[11px] leading-tight block mt-0.5">
+                  <div className="no-ornament rounded-lg bg-white/15 border border-white/20 px-2 py-1.5">
+                    <span className="text-white/80 block text-[10px] leading-tight">Cakupan</span>
+                    <span className="font-black text-[#FFE680] text-[11px] leading-tight block mt-0.5">
                       {partners.length > 0 ? Math.round((activeMousCount / partners.length) * 100) : 0}% Mitra
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-extrabold text-[#F3D77D]">
+              <div className="mt-2 pt-1.5 border-t border-white/20 flex items-center justify-between text-[10px] font-extrabold text-[#FFE680]">
                 <span>Status Dokumen</span>
                 <span>Berlaku</span>
               </div>
@@ -1168,22 +1156,16 @@ export const PklModule: React.FC = () => {
           }
         >
           <div className="flex flex-col justify-between h-full">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <AcademyCornerBadge text="DOKUMEN • KERJA SAMA" className="mb-1.5" />
-                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 truncate">
-                  <FileCheck2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> Kerja Sama MoU/PKS
-                </span>
-                <p
-                  className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 leading-tight"
-                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
-                >
-                  {activeMousCount}
-                </p>
-              </div>
-              <CharacterMedallion variant="scholar" />
+            <div>
+              <AcademyCornerBadge text="DOKUMEN • KERJA SAMA" className="mb-1.5" />
+              <span className="text-xs font-bold text-[#6E7287] block truncate">
+                Kerja Sama MoU/PKS
+              </span>
+              <p className="text-2xl sm:text-3xl font-black text-[#262833] mt-1 leading-tight">
+                {activeMousCount}
+              </p>
             </div>
-            <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+            <div className="mt-2.5 pt-2 border-t border-[#EFEFF7] flex items-center justify-between text-[11px] font-bold text-[#139A4C]">
               <span>Berstatus Sah &amp; Berlaku</span>
               <span>Terverifikasi</span>
             </div>
@@ -1192,32 +1174,32 @@ export const PklModule: React.FC = () => {
 
         <OrnateCard
           boxId="pkl_metric_visits"
-          className="p-4"
+          className="p-5"
           minFlipHeight="min-h-[172px]"
           flipBack={
             <div className="flex flex-col justify-between h-full">
               <div>
                 <div className="pr-16">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-purple-300 block truncate">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-white/90 block truncate">
                     ✦ Supervisi Pembimbing
                   </span>
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
-                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
-                    <span className="text-slate-300 block text-[10px] leading-tight">Kunjungan</span>
-                    <span className="font-black text-purple-300 text-[11px] leading-tight block mt-0.5">
+                  <div className="no-ornament rounded-lg bg-white/15 border border-white/20 px-2 py-1.5">
+                    <span className="text-white/80 block text-[10px] leading-tight">Kunjungan</span>
+                    <span className="font-black text-white text-[11px] leading-tight block mt-0.5">
                       {visits.length} Sesi
                     </span>
                   </div>
-                  <div className="no-ornament rounded-lg bg-white/10 border border-white/10 px-2 py-1.5">
-                    <span className="text-slate-300 block text-[10px] leading-tight">Laporan</span>
-                    <span className="font-black text-cyan-300 text-[11px] leading-tight block mt-0.5">
+                  <div className="no-ornament rounded-lg bg-white/15 border border-white/20 px-2 py-1.5">
+                    <span className="text-white/80 block text-[10px] leading-tight">Laporan</span>
+                    <span className="font-black text-[#FFE680] text-[11px] leading-tight block mt-0.5">
                       {studentReports.length} Siswa
                     </span>
                   </div>
                 </div>
               </div>
-              <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-extrabold text-[#F3D77D]">
+              <div className="mt-2 pt-1.5 border-t border-white/20 flex items-center justify-between text-[10px] font-extrabold text-[#FFE680]">
                 <span>Monitoring Lapangan</span>
                 <span>Tersinkron</span>
               </div>
@@ -1225,22 +1207,16 @@ export const PklModule: React.FC = () => {
           }
         >
           <div className="flex flex-col justify-between h-full">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <AcademyCornerBadge text="AGENDA • MONITORING" className="mb-1.5" />
-                <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 truncate">
-                  <Clock className="h-3.5 w-3.5 text-purple-600 shrink-0" /> Supervisi Kunjungan
-                </span>
-                <p
-                  className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 leading-tight"
-                  style={{ fontFamily: "'Playfair Display', 'Cinzel', Georgia, serif" }}
-                >
-                  {visits.length}
-                </p>
-              </div>
-              <CharacterMedallion variant="aegis" />
+            <div>
+              <AcademyCornerBadge text="AGENDA • MONITORING" className="mb-1.5" />
+              <span className="text-xs font-bold text-[#6E7287] block truncate">
+                Supervisi Kunjungan
+              </span>
+              <p className="text-2xl sm:text-3xl font-black text-[#262833] mt-1 leading-tight">
+                {visits.length}
+              </p>
             </div>
-            <div className="mt-2.5 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-bold text-purple-600 dark:text-purple-400">
+            <div className="mt-2.5 pt-2 border-t border-[#EFEFF7] flex items-center justify-between text-[11px] font-bold text-[#F25781]">
               <span>Monitoring Terjadwal</span>
               <span>Aktif</span>
             </div>
@@ -1249,13 +1225,13 @@ export const PklModule: React.FC = () => {
       </div>
 
       {/* Main Tabs Selection */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+      <div className="flex items-center gap-2 rounded-2xl border border-[#ECEAF6] bg-white p-2 shadow-xs">
         <button
           onClick={() => setActiveTab('dudi_database')}
           className={`flex items-center gap-2 rounded-xl py-2 px-4 text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'dudi_database'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+              ? 'bg-[#6C60B8] text-white shadow-sm'
+              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
           }`}
         >
           <Building2 className="h-4 w-4" />
@@ -1266,8 +1242,8 @@ export const PklModule: React.FC = () => {
           onClick={() => setActiveTab('automated_reports')}
           className={`flex items-center gap-2 rounded-xl py-2 px-4 text-xs font-bold transition-all cursor-pointer ${
             activeTab === 'automated_reports'
-              ? 'bg-blue-600 text-white shadow-xs'
-              : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+              ? 'bg-[#6C60B8] text-white shadow-sm'
+              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
           }`}
         >
           <FileSpreadsheet className="h-4 w-4" />
@@ -1674,7 +1650,7 @@ export const PklModule: React.FC = () => {
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide flex items-center gap-2">
                             <Award className="h-4 w-4 text-amber-500" />
-                            Evaluasi Perusahaan oleh Sekolah SMK Mardi Yuana
+                            Evaluasi Perusahaan oleh Sekolah ORBITA
                           </h3>
                           <button
                             onClick={() => {

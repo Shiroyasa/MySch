@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { LogOut, AlertTriangle, X, ShieldCheck } from 'lucide-react';
+import { LogOut, AlertTriangle, X } from 'lucide-react';
 
 interface LogoutModalProps {
   isOpen: boolean;
@@ -23,83 +23,94 @@ export const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onCon
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div 
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 dark:border-slate-800 dark:bg-slate-900 animate-in zoom-in-95 duration-200"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3E385B]/35 backdrop-blur-sm animate-in fade-in duration-200">
+      <div
+        className="relative w-full max-w-md rounded-[28px] border border-[#E6E8F2] bg-white p-6 text-[#3E385B] shadow-[0_24px_60px_rgba(62,56,91,0.22)] animate-in zoom-in-95 duration-200"
         role="dialog"
         aria-modal="true"
         aria-labelledby="logout-title"
       >
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-slate-100 pb-4 dark:border-slate-800">
+        <div className="flex items-start justify-between border-b border-[#E6E8F2] pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400">
+            <div
+              style={{
+                background: 'linear-gradient(145deg, #7468C4 0%, #5D51B2 100%)',
+              }}
+              className="flex h-11 w-11 items-center justify-center rounded-[16px] text-white shadow-sm"
+            >
               <LogOut className="h-5 w-5" />
             </div>
             <div>
-              <h3 id="logout-title" className="text-base font-bold text-slate-900 dark:text-white">
-                Konfirmasi Keluar Sistem
+              <h3 id="logout-title" className="text-base font-extrabold text-[#3E385B]">
+                Keluar Sistem ORBITA
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                ORBITA &bull; SMK Mardi Yuana Cikembar
+              <p className="text-[11px] font-semibold text-[#8C88A4]">
+                Portal Akademik &bull; Konfirmasi Sesi
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors"
+            className="no-ornament rounded-full border border-[#E6E8F2] bg-[#F5F6FA] p-1.5 text-[#6A6584] hover:bg-[#ECEEF7] hover:text-[#3E385B] transition-colors cursor-pointer"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Content Body */}
         <div className="py-5 space-y-3.5">
-          <div className="flex items-start gap-3 rounded-xl bg-amber-50 p-3.5 border border-amber-200/70 dark:bg-amber-950/30 dark:border-amber-900/40 text-amber-900 dark:text-amber-200 text-xs">
-            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 rounded-[18px] border border-[#FFE0E9] bg-[#FFF5F8] p-3.5 text-xs">
+            <AlertTriangle className="h-5 w-5 text-[#FF6E96] shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold">Apakah Anda yakin ingin keluar dari sistem?</p>
-              <p className="mt-1 text-amber-800 dark:text-amber-300">
+              <p className="font-bold text-[#3E385B]">
+                Apakah Anda yakin ingin keluar dari sistem?
+              </p>
+              <p className="mt-1 text-[#6A6584]">
                 Sesi akun aktif Anda akan diakhiri. Pastikan pekerjaan atau input data Anda sudah tersimpan dengan baik.
               </p>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-800/50 text-xs space-y-1.5">
+          <div className="rounded-[18px] border border-[#E6E8F2] bg-[#F8F9FD] p-3.5 text-xs space-y-2">
             <div className="flex justify-between">
-              <span className="text-slate-500 dark:text-slate-400">Pengguna:</span>
-              <span className="font-bold text-slate-900 dark:text-white">{currentUser.displayName}</span>
+              <span className="text-[#8C88A4] font-medium">Pengguna:</span>
+              <span className="font-extrabold text-[#3E385B]">{currentUser.displayName}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500 dark:text-slate-400">Peran / Jabatan:</span>
-              <span className="font-semibold text-blue-600 dark:text-blue-400">{roleNameMap[currentRole] || currentRole}</span>
+              <span className="text-[#8C88A4] font-medium">Peran / Jabatan:</span>
+              <span className="font-bold text-[#685BC7]">{roleNameMap[currentRole] || currentRole}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500 dark:text-slate-400">Tujuan Setelah Keluar:</span>
-              <span className="text-slate-700 dark:text-slate-300 font-medium">Halaman Login Sistem</span>
+              <span className="text-[#8C88A4] font-medium">Tujuan Setelah Keluar:</span>
+              <span className="text-[#3E385B] font-semibold">Halaman Login ORBITA</span>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E6E8F2]">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+            className="no-ornament rounded-full border border-[#E6E8F2] bg-[#F5F6FA] px-4 py-2 text-xs font-bold text-[#6A6584] hover:bg-[#ECEEF7] hover:text-[#3E385B] transition-colors cursor-pointer"
           >
-            Batal (Tetap di Aplikasi)
+            Batal
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className="flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-red-500/20 hover:bg-red-700 transition-colors"
+            style={{
+              background: 'linear-gradient(135deg, #FF7597 0%, #FF5C86 100%)',
+            }}
+            className="no-ornament flex items-center gap-2 rounded-full px-5 py-2 text-xs font-bold text-white shadow-md hover:brightness-105 transition-all cursor-pointer"
           >
             <LogOut className="h-4 w-4" />
-            <span>Ya, Boleh Keluar</span>
+            <span>Ya, Keluar</span>
           </button>
         </div>
       </div>
     </div>
   );
 };
+

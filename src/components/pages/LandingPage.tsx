@@ -47,7 +47,7 @@ export const LandingPage: React.FC = () => {
                 MySchool
               </span>
               <span className="text-[11px] text-slate-500 block dark:text-slate-400 font-medium">
-                SMK Mardi Yuana Cikembar
+                ORBITA
               </span>
             </div>
           </div>
@@ -106,7 +106,7 @@ export const LandingPage: React.FC = () => {
 
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.15]">
-              Sistem Terpadu Presensi &amp; Penilaian Akademik SMK Mardi Yuana
+              Sistem Terpadu Presensi &amp; Penilaian Akademik ORBITA
             </h1>
 
             {/* Subtitle */}
@@ -295,7 +295,7 @@ export const LandingPage: React.FC = () => {
               Konsentrasi Kejuruan
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white mt-1">
-              Program Vokasi Unggulan SMK Mardi Yuana
+              Program Vokasi Unggulan ORBITA
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 mt-2">
               Mempersiapkan lulusan berkarakter unggul, siap kerja, dan kompeten di industri teknologi maupun bisnis.
@@ -461,7 +461,7 @@ export const LandingPage: React.FC = () => {
                 <span>Institusi Pendidikan Formal Terakreditasi Unggul</span>
               </div>
               <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
-                SMK Mardi Yuana Cikembar
+                ORBITA
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                 Mencetak generasi vokasi yang unggul dalam ilmu pengetahuan dan teknologi (IPTEK), berakhlak mulia, berjiwa wirausaha mandiri, dan berdaya saing global di industri nasional.
@@ -493,12 +493,12 @@ export const LandingPage: React.FC = () => {
               M
             </div>
             <span className="font-bold text-slate-800 dark:text-slate-200">
-              MySchool &bull; SMK Mardi Yuana Cikembar
+              MySchool &bull; ORBITA
             </span>
           </div>
 
           <div className="text-center md:text-right text-[11px] text-slate-400">
-            <p>&copy; {new Date().getFullYear()} SMK Mardi Yuana Cikembar. Hak Cipta Dilindungi Undang-Undang.</p>
+            <p>&copy; {new Date().getFullYear()} ORBITA. Hak Cipta Dilindungi Undang-Undang.</p>
             <p className="mt-0.5">Sistem Informasi Absensi &amp; Penilaian Akademik Vokasi Berbasis Cloud.</p>
           </div>
         </div>

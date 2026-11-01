@@ -32,8 +32,8 @@ export interface ReportCustomConfig {
 }
 
 export const defaultReportConfig: ReportCustomConfig = {
-  institutionFoundation: 'YAYASAN MARDI YUANA',
-  institutionName: 'SMK MARDI YUANA CIKEMBAR',
+  institutionFoundation: 'YAYASAN ORBITA',
+  institutionName: 'ORBITA',
   institutionTagline: 'Kompetensi Keahlian: Rekayasa Perangkat Lunak | Teknik Komputer Jaringan | OTKP | AKL | BDP',
   institutionAddress: 'Jl. Pelabuhan II KM. 19 Cikembar, Kab. Sukabumi, Jawa Barat 43359',
   institutionContact: 'Telp: (0266) 632145 | Surel: info@smkmy-cikembar.sch.id | Web: smkmy-cikembar.sch.id',
@@ -49,7 +49,7 @@ export const defaultReportConfig: ReportCustomConfig = {
     month: 'long',
     year: 'numeric',
   }),
-  rightSignerTitle: 'Kepala SMK Mardi Yuana Cikembar,',
+  rightSignerTitle: 'Kepala ORBITA,',
   rightSignerName: 'Drs. H. Suryana, M.M.Pd.',
   rightSignerNip: '196803151992031002',
 };
@@ -333,7 +333,7 @@ export function exportLegerExcelWithFormulas(
 
     // Headers information
     const data: any[][] = [
-      ['YAYASAN MARDI YUANA - SMK MARDI YUANA CIKEMBAR'],
+      ['YAYASAN ORBITA - ORBITA'],
       ['LEGER NILAI AKADEMIK KURIKULUM MERDEKA (BERUMUS OTOMATIS)'],
       [`Kelas: ${className}`, `Mata Pelajaran: ${subjectName}`, `KKM: ${kkm}`, `T.A.: ${academicYear}`],
       [], // blank row
@@ -496,7 +496,7 @@ export function exportAttendanceExcelWithFormulas(
     const wb = XLSX.utils.book_new();
 
     const data: any[][] = [
-      ['YAYASAN MARDI YUANA - SMK MARDI YUANA CIKEMBAR'],
+      ['YAYASAN ORBITA - ORBITA'],
       ['REKAPITULASI PRESENSI SISWA (BERUMUS OTOMATIS)'],
       [`Kelas: ${className}`, `Tahun Ajaran: ${academicYear}`, `Total Siswa: ${students.length}`],
       [],
