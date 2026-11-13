@@ -407,36 +407,6 @@ export const LoginPage: React.FC = () => {
                         </button>
                       </div>
 
-                      {/* Quick Interactive Role Credentials */}
-                      <div className="pt-1">
-                        <div className="flex items-center justify-between text-[11px] font-bold text-[#3E385B] mb-1.5">
-                          <span>Pilih Akun Demo:</span>
-                          <span className="text-[10px] text-[#A2A0B4]">Klik untuk isi</span>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-1.5">
-                          {[
-                            { role: 'Admin', email: 'admin@smkmardiyuana.sch.id', pass: 'admin123', tag: 'Administrator' },
-                            { role: 'Guru', email: 'guru@smkmardiyuana.sch.id', pass: 'guru123', tag: 'Pendidik' },
-                            { role: 'Siswa', email: 'siswa@smkmardiyuana.sch.id', pass: 'siswa123', tag: 'Peserta Didik' },
-                            { role: 'Kepsek', email: 'kepsek@smkmardiyuana.sch.id', pass: 'kepsek123', tag: 'Kepala Sekolah' },
-                          ].map(acc => (
-                            <button
-                              key={acc.role}
-                              type="button"
-                              onClick={() => {
-                                setEmail(acc.email);
-                                setPassword(acc.pass);
-                                setErrorMessage(null);
-                              }}
-                              title={`Gunakan akun demo ${acc.tag}`}
-                              className="no-ornament inline-flex min-h-[40px] sm:h-8 items-center justify-center rounded-xl border border-[#E3E2F0] bg-[#F8F9FD] hover:bg-[#EDE9FE] hover:border-[#6C60B8] px-2 text-xs sm:text-[10.5px] font-bold text-[#4B436B] transition-all cursor-pointer active:scale-95 whitespace-nowrap leading-none"
-                            >
-                              {acc.role}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
                       {/* Submit Button */}
                       <div className="pt-2">
                         <button
