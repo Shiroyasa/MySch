@@ -585,6 +585,7 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({
   const cardRef = React.useRef<HTMLDivElement>(null);
   const [autoBoxKey, setAutoBoxKey] = React.useState<string>('');
   const [cardIndex, setCardIndex] = React.useState<number>(0);
+  const [isTouchFlipped, setIsTouchFlipped] = React.useState(false);
 
   React.useLayoutEffect(() => {
     const el = cardRef.current;
@@ -625,17 +626,17 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({
         data-ornate-card="true"
         onClick={onClick}
         className={`jrpg-flip-card no-ornament group/jrpg relative w-full h-full mt-5 ${
-          onClick ? 'cursor-pointer' : ''
-        } ${minFlipHeight}`}
+          isTouchFlipped ? 'is-flipped' : ''
+        } ${onClick ? 'cursor-pointer' : ''} ${minFlipHeight}`}
       >
         <div className={`jrpg-flip-inner no-ornament w-full h-full ${minFlipHeight}`}>
           {/* FRONT FACE: Reference Image White Card with Top Centered Floating Purple Squircle Badge */}
           <div
             style={cleanWhiteCardStyle}
-            className={`jrpg-flip-front no-ornament ${minFlipHeight} rounded-[26px] border border-[#F0F0F7] text-[#3E385B] flex flex-col justify-between !overflow-visible pt-8 px-5 pb-5 ${className}`}
+            className={`jrpg-flip-front no-ornament ${minFlipHeight} rounded-[24px] sm:rounded-[26px] border border-[#F0F0F7] text-[#3E385B] flex flex-col justify-between !overflow-visible pt-8 px-4 sm:px-5 pb-4 sm:pb-5 ${className}`}
           >
             {customBoxBg && (
-              <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[26px]">
+              <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[24px] sm:rounded-[26px]">
                 <img
                   src={customBoxBg}
                   alt=""
@@ -644,7 +645,7 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({
               </div>
             )}
 
-            {/* Single Top-Center Floating Purple Squircle Icon Badge (Exact Reference Image Detail) */}
+            {/* Single Top-Center Floating Purple Squircle Icon Badge */}
             <div
               className="pointer-events-none select-none absolute -top-6 left-1/2 -translate-x-1/2 z-20 flex h-12 w-12 items-center justify-center rounded-[18px] bg-gradient-to-br from-[#7568C6] to-[#6356B5] text-white shadow-[0_8px_20px_rgba(108,96,184,0.35)]"
               aria-hidden="true"
@@ -655,13 +656,20 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({
               />
             </div>
 
-            {/* Top-Right 3-Dots Indicator */}
-            <div
-              className="pointer-events-none select-none absolute top-4 right-4 z-10 text-[#C6C4D6]"
-              aria-hidden="true"
+            {/* Touch-friendly Flip Button (visible & handy on touch devices tablet/mobile) */}
+            <button
+              type="button"
+              onClick={e => {
+                e.stopPropagation();
+                setIsTouchFlipped(prev => !prev);
+              }}
+              aria-label="Balik kartu detail"
+              title="Tap untuk balik rincian"
+              className="no-ornament xl:pointer-events-none absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#F4F3FA] text-[#6C60B8] hover:bg-[#EAE7F8] xl:bg-transparent xl:text-[#C6C4D6] cursor-pointer"
             >
-              <MoreVertical className="h-4 w-4" />
-            </div>
+              <RotateCcw className="h-3.5 w-3.5 xl:hidden" />
+              <MoreVertical className="hidden xl:block h-4 w-4" />
+            </button>
 
             <div className="relative z-10 flex-1 flex flex-col justify-between w-full h-full">
               {children}
@@ -674,8 +682,20 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({
               background: 'linear-gradient(135deg, #6E62BF 0%, #584CA9 100%)',
               boxShadow: '0 18px 36px -6px rgba(94, 82, 178, 0.34)',
             }}
-            className={`jrpg-flip-back no-ornament ${minFlipHeight} rounded-[26px] border border-white/25 text-white flex flex-col justify-between !overflow-visible p-5`}
+            className={`jrpg-flip-back no-ornament ${minFlipHeight} rounded-[24px] sm:rounded-[26px] border border-white/25 text-white flex flex-col justify-between !overflow-visible p-4 sm:p-5`}
           >
+            <button
+              type="button"
+              onClick={e => {
+                e.stopPropagation();
+                setIsTouchFlipped(false);
+              }}
+              aria-label="Kembali ke depan"
+              className="no-ornament xl:hidden absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white cursor-pointer"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+            </button>
+
             {!hideBgControl && resolvedKey && (
               <div className="absolute bottom-2.5 right-3 z-30 opacity-0 group-hover/jrpg:opacity-100 transition-opacity">
                 <BoxBgControl boxKey={resolvedKey} compact />
@@ -1121,7 +1141,7 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
             background: 'linear-gradient(145deg, #7266C4 0%, #5D51B2 52%, #4B3FA0 100%)',
             boxShadow: '0 20px 42px -8px rgba(93, 81, 178, 0.34)',
           }}
-          className="group/banner lg:col-span-7 relative rounded-[28px] p-5 sm:p-6 text-white flex flex-col justify-between overflow-hidden"
+          className="group/banner lg:col-span-7 relative rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 text-white flex flex-col justify-between overflow-hidden"
         >
           {perModuleBg && (
             <img
@@ -1132,7 +1152,7 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
           )}
 
           {/* Top Header Row: Title + Interactive Class / Year / Metric Filter Controls */}
-          <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5">
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div className="min-w-0">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-white/75 block">
                 {kicker}
@@ -1142,8 +1162,8 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
               </h1>
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-              <div className="opacity-0 group-hover/banner:opacity-100 transition-opacity">
+            <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 w-full sm:w-auto shrink-0">
+              <div className="hidden sm:block opacity-0 group-hover/banner:opacity-100 transition-opacity">
                 <BoxBgControl boxKey={bannerBoxKey} isBanner moduleKey={targetKey} compact />
               </div>
 
@@ -1158,7 +1178,7 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
                   WebkitTextFillColor: '#FFFFFF',
                   borderColor: 'rgba(255,255,255,0.28)',
                 }}
-                className="no-ornament rounded-full border px-2.5 py-1 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
+                className="no-ornament min-w-0 w-full sm:w-auto truncate rounded-full border px-2.5 py-1.5 sm:py-1 text-[10.5px] sm:text-[11px] font-bold text-white focus:outline-none cursor-pointer"
               >
                 <option value="ALL" className="text-[#3E385B] bg-white">
                   Semua Kelas ({students.length})
@@ -1181,7 +1201,7 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
                   WebkitTextFillColor: '#FFFFFF',
                   borderColor: 'rgba(255,255,255,0.28)',
                 }}
-                className="no-ornament rounded-full border px-2.5 py-1 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
+                className="no-ornament min-w-0 w-full sm:w-auto truncate rounded-full border px-2.5 py-1.5 sm:py-1 text-[10.5px] sm:text-[11px] font-bold text-white focus:outline-none cursor-pointer"
               >
                 <option value="ALL" className="text-[#3E385B] bg-white">
                   Semua Tahun
@@ -1204,7 +1224,7 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
                   WebkitTextFillColor: '#FFFFFF',
                   borderColor: 'rgba(255,255,255,0.32)',
                 }}
-                className="no-ornament rounded-full border px-2.5 py-1 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
+                className="no-ornament min-w-0 w-full sm:w-auto truncate rounded-full border px-2.5 py-1.5 sm:py-1 text-[10.5px] sm:text-[11px] font-bold text-white focus:outline-none cursor-pointer"
               >
                 <option value="kehadiran" className="text-[#3E385B] bg-white">
                   {metricLabelMap.kehadiran}
@@ -1304,8 +1324,8 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
               })}
             </svg>
 
-            {/* Interactive 12-Month Strip (Jan - Des) */}
-            <div className="mt-1 flex items-center justify-between gap-0.5 text-[10.5px] text-white/75 px-0.5 overflow-x-auto">
+            {/* Interactive 12-Month Strip (Jan - Des) — Snap-scrollable on narrow phones */}
+            <div className="mt-1.5 flex items-center sm:justify-between gap-1 text-[10.5px] text-white/75 px-0.5 overflow-x-auto snap-x snap-mandatory scrollbar-none">
               {monthlySeries.map((m, idx) => {
                 const isAct = idx === activeMonthIdx;
                 return (
@@ -1313,7 +1333,7 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
                     key={m.month}
                     type="button"
                     onClick={() => setActiveMonthIdx(idx)}
-                    className={`no-ornament px-2 py-0.5 rounded-full text-[10.5px] transition-all cursor-pointer ${
+                    className={`no-ornament snap-center inline-flex min-h-[28px] min-w-[36px] sm:min-w-0 items-center justify-center px-2 py-0.5 rounded-full text-[10.5px] whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                       isAct
                         ? 'bg-white text-[#4E42A1] font-extrabold shadow-xs'
                         : 'text-white/70 hover:text-white font-medium'
@@ -1327,17 +1347,17 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
           </div>
 
           {/* Bottom 3-Column Metric Bar with Center Elevated Pedestal */}
-          <div className="relative z-10 grid grid-cols-3 items-center gap-2 pt-2 border-t border-white/12 text-center">
+          <div className="relative z-10 grid grid-cols-3 items-center gap-1.5 sm:gap-2 pt-2 border-t border-white/12 text-center">
             <div
               onClick={() => setMetricMode('kehadiran')}
-              className="cursor-pointer rounded-xl py-1 hover:bg-white/8 transition-colors"
+              className="cursor-pointer rounded-xl py-1 px-1 hover:bg-white/8 transition-colors min-w-0"
             >
-              <span className="text-[10px] text-white/75 block">{selectedClassNameLabel}</span>
-              <span className="text-base sm:text-lg font-extrabold text-white tabular-nums block leading-tight">
+              <span className="text-[9.5px] sm:text-[10px] text-white/75 block truncate">{selectedClassNameLabel}</span>
+              <span className="text-sm sm:text-lg font-extrabold text-white tabular-nums block leading-tight">
                 {filteredStudents.length} Siswa
               </span>
-              <span className="text-[10px] text-white/75 block">
-                {filteredSessions.length} Sesi Presensi
+              <span className="text-[9.5px] sm:text-[10px] text-white/75 block truncate">
+                {filteredSessions.length} Sesi
               </span>
             </div>
 
@@ -1353,16 +1373,16 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
                         : 'kehadiran'
                 )
               }
-              className="cursor-pointer rounded-[20px] bg-white/15 border border-white/25 px-3 py-2.5 shadow-inner hover:bg-white/20 transition-colors"
+              className="cursor-pointer rounded-[18px] sm:rounded-[20px] bg-white/15 border border-white/25 px-2 sm:px-3 py-2 sm:py-2.5 shadow-inner hover:bg-white/20 transition-colors min-w-0"
             >
-              <span className="text-[10px] text-white/85 block">
+              <span className="text-[9.5px] sm:text-[10px] text-white/85 block truncate">
                 {metricLabelMap[metricMode]} ({activePoint.month})
               </span>
-              <span className="text-lg sm:text-xl font-black text-white tabular-nums block leading-tight">
+              <span className="text-base sm:text-xl font-black text-white tabular-nums block leading-tight">
                 {activePoint.value}
                 {metricMode === 'akademik' ? ' Poin' : '%'}
               </span>
-              <span className="text-[10px] text-white/80 block">
+              <span className="text-[9.5px] sm:text-[10px] text-white/80 block truncate">
                 {selectedYear === 'ALL'
                   ? `T.A. ${activeAcademicYear?.name || '2025/2026'}`
                   : `Tahun ${selectedYear}`}
@@ -1371,13 +1391,13 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
 
             <div
               onClick={() => setMetricMode('akademik')}
-              className="cursor-pointer rounded-xl py-1 hover:bg-white/8 transition-colors"
+              className="cursor-pointer rounded-xl py-1 px-1 hover:bg-white/8 transition-colors min-w-0"
             >
-              <span className="text-[10px] text-white/75 block">Rata-rata Nilai</span>
-              <span className="text-base sm:text-lg font-extrabold text-white tabular-nums block leading-tight">
+              <span className="text-[9.5px] sm:text-[10px] text-white/75 block truncate">Rata-rata Nilai</span>
+              <span className="text-sm sm:text-lg font-extrabold text-white tabular-nums block leading-tight">
                 {avgScore} Poin
               </span>
-              <span className="text-[10px] text-white/75 block">KKM Lulus {kkmPassPct}%</span>
+              <span className="text-[9.5px] sm:text-[10px] text-white/75 block truncate">Lulus {kkmPassPct}%</span>
             </div>
           </div>
         </div>
@@ -1481,13 +1501,13 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
             background: '#FFFFFF',
             boxShadow: '0 10px 26px -6px rgba(108, 96, 184, 0.08)',
           }}
-          className="rounded-[22px] border border-[#ECEBF5] px-4 py-3 flex flex-wrap items-center justify-between gap-3"
+          className="rounded-[22px] border border-[#ECEBF5] px-4 py-3 flex flex-col xl:flex-row xl:items-center justify-between gap-3"
         >
-          <div className="flex items-center gap-2 text-xs font-bold text-[#6C60B8]">
-            <PrimogemIcon className="h-4 w-4" />
+          <div className="flex items-center gap-2 text-xs font-bold text-[#6C60B8] whitespace-nowrap shrink-0">
+            <OrbitaMenuIcon variant="brand" className="h-4 w-4 shrink-0" />
             <span>Navigasi &amp; Aksi Modul</span>
           </div>
-          <div className="flex flex-wrap items-center gap-2">{rightContent}</div>
+          <div className="flex flex-wrap items-center gap-2 xl:justify-end">{rightContent}</div>
         </div>
       )}
     </div>

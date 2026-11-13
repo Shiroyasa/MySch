@@ -53,10 +53,11 @@ export const AuditLogModule: React.FC = () => {
         icon={ShieldCheck}
         rightContent={
           <button
+            type="button"
             onClick={handleExport}
-            className="flex items-center gap-2 rounded-xl bg-[#6C60B8] px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#5E52A8] cursor-pointer transition-colors"
+            className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-4 text-xs font-bold text-white shadow-sm hover:bg-[#5E52A8] cursor-pointer transition-colors whitespace-nowrap shrink-0 leading-none"
           >
-            <Download className="h-4 w-4 text-[#FFE680]" />
+            <Download className="h-3.5 w-3.5 text-white shrink-0" />
             <span>Ekspor Audit Log (XLSX)</span>
           </button>
         }
@@ -64,22 +65,22 @@ export const AuditLogModule: React.FC = () => {
 
       {/* Filter and Search */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-        <div className="relative flex-1 max-w-sm">
+        <div className="relative w-full sm:flex-1 sm:min-w-[220px] sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
           <input
             type="text"
             placeholder="Cari aksi, pengguna, atau rincian audit..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-1.5 pl-8 pr-3 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
+            className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 pr-14">
+        <div className="flex flex-wrap items-center gap-2">
           <select
             value={filterModule}
             onChange={e => setFilterModule(e.target.value)}
-            className="rounded-xl border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           >
             <option value="ALL">Semua Modul</option>
             {modules.map(m => (

@@ -74,19 +74,21 @@ export const LandingPage: React.FC = () => {
           {/* Zone 3: Actions (Theme switch + 1 Primary CTA) */}
           <div className="flex items-center gap-3 shrink-0">
             <button
+              type="button"
               onClick={toggleDarkMode}
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
               title={darkMode ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'}
             >
               {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
             <button
+              type="button"
               onClick={() => setPageView('login')}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-colors whitespace-nowrap shrink-0"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-colors whitespace-nowrap shrink-0 cursor-pointer leading-none"
             >
               <span>Masuk Portal</span>
-              <ArrowRight className="h-3.5 w-3.5" />
+              <ArrowRight className="h-3.5 w-3.5 shrink-0" />
             </button>
           </div>
         </div>
@@ -117,25 +119,27 @@ export const LandingPage: React.FC = () => {
             {/* Primary CTA Decision Group */}
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
               <button
+                type="button"
                 onClick={() => setPageView('login')}
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-500/25 hover:bg-blue-700 transition-all hover:-translate-y-0.5"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-bold text-white shadow-lg shadow-blue-500/25 hover:bg-blue-700 transition-all hover:-translate-y-0.5 cursor-pointer whitespace-nowrap shrink-0 leading-none"
               >
                 <span>Buka Portal Akademik</span>
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 shrink-0" />
               </button>
 
               <button
+                type="button"
                 onClick={() => handleRoleQuickStart('guru')}
-                className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-all"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none"
               >
-                <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
                 <span>Coba Akses Sebagai Guru</span>
               </button>
             </div>
 
             {/* Regional / School trust banner below CTA */}
             <p className="text-xs text-slate-400 dark:text-slate-500 pt-2">
-              NPSN: 20253654 &bull; Terakreditasi A (Unggul) &bull; Sukabumi, Jawa Barat
+              Sukabumi, Jawa Barat
             </p>
           </div>
 
@@ -438,11 +442,12 @@ export const LandingPage: React.FC = () => {
 
                 <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800">
                   <button
+                    type="button"
                     onClick={() => handleRoleQuickStart(p.role)}
-                    className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-slate-100 py-2 text-xs font-bold text-slate-800 hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-blue-600 dark:hover:text-white transition-colors"
+                    className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl bg-slate-100 px-3 text-xs font-bold text-slate-800 hover:bg-blue-600 hover:text-white dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-blue-600 dark:hover:text-white transition-colors cursor-pointer whitespace-nowrap leading-none"
                   >
                     <span>Masuk Sebagai {p.title}</span>
-                    <ChevronRight className="h-3.5 w-3.5" />
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0" />
                   </button>
                 </div>
               </div>
@@ -467,18 +472,18 @@ export const LandingPage: React.FC = () => {
                 Mencetak generasi vokasi yang unggul dalam ilmu pengetahuan dan teknologi (IPTEK), berakhlak mulia, berjiwa wirausaha mandiri, dan berdaya saing global di industri nasional.
               </p>
               <div className="pt-2 text-xs text-slate-500 space-y-1">
-                <p>&bull; <strong>NPSN:</strong> 20253654 &bull; <strong>Akreditasi:</strong> A (Unggul)</p>
                 <p>&bull; <strong>Alamat:</strong> Jl. Pelabuhan II Km. 18, Cikembar, Kab. Sukabumi, Jawa Barat</p>
               </div>
             </div>
 
             <div className="shrink-0 flex flex-col sm:flex-row gap-3">
               <button
+                type="button"
                 onClick={() => setPageView('login')}
-                className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-blue-700 transition-colors"
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
               >
                 <span>Masuk Sekarang</span>
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRight className="h-4 w-4 shrink-0" />
               </button>
             </div>
           </div>

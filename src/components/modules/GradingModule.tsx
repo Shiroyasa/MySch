@@ -802,7 +802,7 @@ export const GradingModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('input')}
-              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'input'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
                   : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
@@ -813,7 +813,7 @@ export const GradingModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('leger')}
-              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'leger'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
                   : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
@@ -824,7 +824,7 @@ export const GradingModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('reportCard')}
-              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'reportCard'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
                   : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
@@ -901,16 +901,16 @@ export const GradingModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={openCreateAssessmentModal}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 py-2 px-3 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer"
+                  className="inline-flex h-[38px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 whitespace-nowrap transition-colors cursor-pointer"
                 >
-                  <PlusCircle className="h-4 w-4" />
+                  <PlusCircle className="h-4 w-4 shrink-0" />
                   <span>Tambah Komponen</span>
                 </button>
                 {activeAssessment && (
                   <button
                     type="button"
                     onClick={() => openEditAssessmentModal(activeAssessment)}
-                    className="flex items-center justify-center gap-1 rounded-xl border border-[#D4AF37]/60 bg-amber-50 py-2 px-2.5 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-300 cursor-pointer"
+                    className="inline-flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-xl border border-[#D4AF37]/60 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-300 cursor-pointer"
                     title="Edit Komponen Penilaian"
                   >
                     <Edit3 className="h-4 w-4" />
@@ -969,31 +969,31 @@ export const GradingModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleResetScoresClick}
-                  className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-700/70 dark:bg-amber-950/60 dark:text-amber-300 transition-colors cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-700/70 dark:bg-amber-950/60 dark:text-amber-300 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                   title="Reset seluruh nilai komponen ini ke 0 dan simpan ke database"
                 >
-                  <RotateCcw className="h-3.5 w-3.5" />
+                  <RotateCcw className="h-3.5 w-3.5 shrink-0" />
                   <span>Reset Nilai</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleResetAllSubjectScoresClick}
-                  className="flex items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-800/70 dark:bg-rose-950/60 dark:text-rose-300 transition-colors cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3.5 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-800/70 dark:bg-rose-950/60 dark:text-rose-300 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                   title="Reset semua komponen nilai mata pelajaran ini ke 0"
                 >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  <span className="hidden md:inline">Reset Semua Mapel</span>
+                  <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                  <span>Reset Semua Mapel</span>
                 </button>
 
                 {activeAssessment && (
                   <button
                     type="button"
                     onClick={() => handleDeleteAssessmentClick(activeAssessment)}
-                    className="flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400 transition-colors cursor-pointer"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                     title="Hapus Komponen Penilaian ini"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-3.5 w-3.5 shrink-0" />
                     <span>Hapus</span>
                   </button>
                 )}
@@ -1001,18 +1001,18 @@ export const GradingModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleSaveScores}
-                  className="flex items-center gap-1.5 rounded-xl border border-[#D4AF37] bg-white px-3.5 py-1.5 text-xs font-bold text-slate-900 hover:bg-amber-50 dark:bg-slate-800 dark:text-white cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D4AF37] bg-white px-3.5 text-xs font-bold text-slate-900 hover:bg-amber-50 dark:bg-slate-800 dark:text-white whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <Save className="h-3.5 w-3.5 text-amber-600" />
+                  <Save className="h-3.5 w-3.5 text-amber-600 shrink-0" />
                   <span>Simpan Nilai</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handlePublish}
-                  className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <CheckCircle2 className="h-4 w-4" />
+                  <CheckCircle2 className="h-4 w-4 shrink-0" />
                   <span>Publikasikan Nilai</span>
                 </button>
               </div>
@@ -1075,14 +1075,14 @@ export const GradingModule: React.FC = () => {
           <OrnateCard className="p-3.5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-1.5">
-                <span className="flex items-center gap-1 text-xs font-bold text-slate-700 dark:text-slate-200 mr-1">
-                  <Sliders className="h-3.5 w-3.5 text-amber-500" />
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-700 dark:text-slate-200 mr-1 whitespace-nowrap shrink-0">
+                  <Sliders className="h-3.5 w-3.5 text-amber-500 shrink-0" />
                   <span>Isi Cepat &amp; Sinkron DB:</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => handleBulkFill(kkmVal)}
-                  className="rounded-lg border border-[#DEC896] bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-amber-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition-colors cursor-pointer"
+                  className="inline-flex h-8 items-center justify-center rounded-lg border border-[#DEC896] bg-white px-2.5 text-[11px] font-bold text-slate-700 hover:bg-amber-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                   title={`Set semua siswa ke nilai KKM (${kkmVal}) dan simpan ke database`}
                 >
                   Set KKM ({kkmVal})
@@ -1090,47 +1090,47 @@ export const GradingModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleBulkFill(80)}
-                  className="rounded-lg border border-[#DEC896] bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-amber-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition-colors cursor-pointer"
+                  className="inline-flex h-8 items-center justify-center rounded-lg border border-[#DEC896] bg-white px-2.5 text-[11px] font-bold text-slate-700 hover:bg-amber-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
                   Set 80
                 </button>
                 <button
                   type="button"
                   onClick={() => handleBulkFill(85)}
-                  className="rounded-lg border border-[#DEC896] bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-amber-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition-colors cursor-pointer"
+                  className="inline-flex h-8 items-center justify-center rounded-lg border border-[#DEC896] bg-white px-2.5 text-[11px] font-bold text-slate-700 hover:bg-amber-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
                   Set 85
                 </button>
                 <button
                   type="button"
                   onClick={() => handleBulkFill(90)}
-                  className="rounded-lg border border-[#DEC896] bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-amber-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 transition-colors cursor-pointer"
+                  className="inline-flex h-8 items-center justify-center rounded-lg border border-[#DEC896] bg-white px-2.5 text-[11px] font-bold text-slate-700 hover:bg-amber-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
                   Set 90
                 </button>
                 <button
                   type="button"
                   onClick={() => handleBulkFill(0)}
-                  className="rounded-lg border border-rose-300 bg-rose-50 px-2.5 py-1 text-[11px] font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300 transition-colors cursor-pointer"
+                  className="inline-flex h-8 items-center justify-center rounded-lg border border-rose-300 bg-rose-50 px-2.5 text-[11px] font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
-                  Kosongkan (Set 0)
+                  Kosongkan (0)
                 </button>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <div className="hidden xl:flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-300 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
-                  <Keyboard className="h-3 w-3 text-amber-500" />
+                <div className="hidden xl:flex h-8 items-center gap-1 text-[11px] text-slate-500 dark:text-slate-300 bg-white dark:bg-slate-800 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 whitespace-nowrap shrink-0">
+                  <Keyboard className="h-3 w-3 text-amber-500 shrink-0" />
                   <span>
                     Tekan <kbd className="px-1 py-0.2 rounded bg-slate-100 dark:bg-slate-700 font-mono font-bold">Enter</kbd> ke siswa berikutnya
                   </span>
                 </div>
 
                 {/* Status Filter */}
-                <div className="flex items-center rounded-lg border border-[#DEC896] bg-white p-0.5 dark:border-slate-700 dark:bg-slate-800 text-[11px]">
+                <div className="inline-flex items-center gap-0.5 rounded-lg border border-[#DEC896] bg-white p-0.5 dark:border-slate-700 dark:bg-slate-800 text-[11px]">
                   <button
                     type="button"
                     onClick={() => setInputStatusFilter('all')}
-                    className={`px-2 py-1 rounded-md font-bold transition-all cursor-pointer ${
+                    className={`inline-flex h-7 items-center justify-center px-2.5 rounded-md font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                       inputStatusFilter === 'all'
                         ? 'bg-blue-600 text-white shadow-2xs'
                         : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
@@ -1141,7 +1141,7 @@ export const GradingModule: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setInputStatusFilter('tuntas')}
-                    className={`px-2 py-1 rounded-md font-bold transition-all cursor-pointer ${
+                    className={`inline-flex h-7 items-center justify-center px-2.5 rounded-md font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                       inputStatusFilter === 'tuntas'
                         ? 'bg-emerald-600 text-white shadow-2xs'
                         : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
@@ -1152,7 +1152,7 @@ export const GradingModule: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setInputStatusFilter('remedial')}
-                    className={`px-2 py-1 rounded-md font-bold transition-all cursor-pointer ${
+                    className={`inline-flex h-7 items-center justify-center px-2.5 rounded-md font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                       inputStatusFilter === 'remedial'
                         ? 'bg-rose-600 text-white shadow-2xs'
                         : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
@@ -1170,7 +1170,7 @@ export const GradingModule: React.FC = () => {
                     placeholder="Cari siswa..."
                     value={inputSearchQuery}
                     onChange={e => setInputSearchQuery(e.target.value)}
-                    className="rounded-lg border border-[#DEC896] bg-white py-1 pl-8 pr-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="h-8 rounded-lg border border-[#DEC896] bg-white pl-8 pr-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>
               </div>
@@ -1297,27 +1297,27 @@ export const GradingModule: React.FC = () => {
                                   onClick={() =>
                                     handleApplyQuickFeedback(std.id, 'Sangat baik, aktif dan menguasai TP')
                                   }
-                                  className="text-[10px] bg-slate-100 hover:bg-amber-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded px-1.5 py-0.5 transition-colors cursor-pointer"
+                                  className="inline-flex h-6 items-center justify-center text-[10px] font-semibold bg-slate-100 hover:bg-amber-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded px-2 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                                 >
-                                  ✦ Sangat Baik
+                                  Sangat Baik
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() =>
                                     handleApplyQuickFeedback(std.id, 'Tuntas sesuai kriteria capaian')
                                   }
-                                  className="text-[10px] bg-slate-100 hover:bg-emerald-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded px-1.5 py-0.5 transition-colors cursor-pointer"
+                                  className="inline-flex h-6 items-center justify-center text-[10px] font-semibold bg-slate-100 hover:bg-emerald-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded px-2 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                                 >
-                                  ✓ Tuntas CP
+                                  Tuntas CP
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() =>
                                     handleApplyQuickFeedback(std.id, 'Perlu bimbingan dan remedial')
                                   }
-                                  className="text-[10px] bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-300 rounded px-1.5 py-0.5 transition-colors cursor-pointer"
+                                  className="inline-flex h-6 items-center justify-center text-[10px] font-semibold bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/50 dark:text-rose-300 rounded px-2 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                                 >
-                                  ! Remedial
+                                  Remedial
                                 </button>
                               </div>
                             </div>
@@ -1355,24 +1355,26 @@ export const GradingModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleResetAllSubjectScoresClick}
-                  className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-700/70 dark:bg-amber-950/60 dark:text-amber-300 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-700/70 dark:bg-amber-950/60 dark:text-amber-300 whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <RotateCcw className="h-3.5 w-3.5" />
+                  <RotateCcw className="h-3.5 w-3.5 shrink-0" />
                   <span>Reset Leger (0)</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleExportLegerExcel}
-                  className="flex items-center gap-1.5 rounded-xl border border-[#D4AF37] bg-white px-3 py-1.5 text-xs font-bold text-slate-800 hover:bg-amber-50 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D4AF37] bg-white px-3.5 text-xs font-bold text-slate-800 hover:bg-amber-50 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <Download className="h-4 w-4 text-emerald-600" /> Unduh Leger Excel
+                  <Download className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <span>Unduh Leger Excel</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleExportLegerPdf}
-                  className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <Printer className="h-4 w-4" /> Cetak PDF Resmi
+                  <Printer className="h-4 w-4 shrink-0" />
+                  <span>Cetak PDF Resmi</span>
                 </button>
               </div>
             </div>
@@ -1505,7 +1507,7 @@ export const GradingModule: React.FC = () => {
                     disabled={
                       reportClassStudents.findIndex(s => s.id === selectedStudentId) <= 0
                     }
-                    className="rounded-lg border border-slate-200 p-1 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:hover:bg-slate-800 cursor-pointer"
+                    className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:hover:bg-slate-800 shrink-0 cursor-pointer"
                     title="Siswa Sebelumnya"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -1527,7 +1529,7 @@ export const GradingModule: React.FC = () => {
                       reportClassStudents.findIndex(s => s.id === selectedStudentId) >=
                       reportClassStudents.length - 1
                     }
-                    className="rounded-lg border border-slate-200 p-1 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:hover:bg-slate-800 cursor-pointer"
+                    className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:hover:bg-slate-800 shrink-0 cursor-pointer"
                     title="Siswa Berikutnya"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -1540,20 +1542,20 @@ export const GradingModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleSyncReportFromAcademicClick}
-                  className="flex items-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 py-2 px-3 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 whitespace-nowrap shrink-0 cursor-pointer"
                   title="Sinkronkan ulang nilai & presensi rapor dari data Leger & Absensi terbaru"
                 >
-                  <ShieldCheck className="h-3.5 w-3.5" />
+                  <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
                   <span>Sinkronkan Data</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleResetStudentReportClick}
-                  className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 py-2 px-3 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-300 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-300 whitespace-nowrap shrink-0 cursor-pointer"
                   title="Reset seluruh nilai pada rapor siswa ini menjadi 0"
                 >
-                  <RotateCcw className="h-3.5 w-3.5" />
+                  <RotateCcw className="h-3.5 w-3.5 shrink-0" />
                   <span>Reset Nilai Rapor</span>
                 </button>
 
@@ -1566,13 +1568,13 @@ export const GradingModule: React.FC = () => {
                       startEditingCurrentStudent();
                     }
                   }}
-                  className={`flex items-center gap-1.5 rounded-xl py-2 px-3.5 text-xs font-bold transition-all cursor-pointer ${
+                  className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-xl px-3.5 text-xs font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                     isEditingReport
                       ? 'bg-amber-600 text-white shadow-xs hover:bg-amber-700'
                       : 'border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/60 dark:text-blue-300'
                   }`}
                 >
-                  <Edit3 className="h-3.5 w-3.5" />
+                  <Edit3 className="h-3.5 w-3.5 shrink-0" />
                   <span>{isEditingReport ? 'Kembali ke Pratinjau' : 'Edit Rapor Siswa'}</span>
                 </button>
 
@@ -1638,9 +1640,9 @@ export const GradingModule: React.FC = () => {
                       `Dokumen PDF draf rapor untuk ${reportStudent.fullName} berhasil dicetak.`
                     );
                   }}
-                  className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <Printer className="h-3.5 w-3.5" />
+                  <Printer className="h-3.5 w-3.5 shrink-0" />
                   <span>Cetak PDF Resmi</span>
                 </button>
               </div>
@@ -1663,20 +1665,20 @@ export const GradingModule: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setIsEditingReport(false)}
-                    className="rounded-xl border border-slate-300 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 cursor-pointer"
+                    className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     Batal
                   </button>
                   <button
                     type="button"
                     onClick={handleSaveReport}
-                    className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 cursor-pointer"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap shrink-0 cursor-pointer"
                   >
-                    <Save className="h-3.5 w-3.5" />
+                    <Save className="h-3.5 w-3.5 shrink-0" />
                     <span>Simpan Perubahan Rapor</span>
                   </button>
                 </div>
@@ -1964,20 +1966,20 @@ export const GradingModule: React.FC = () => {
               </div>
 
               {/* Bottom Save Action */}
-              <div className="flex justify-end gap-2 pt-2 border-t border-[#DEC896]/60 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-[#DEC896]/60 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsEditingReport(false)}
-                  className="rounded-xl border border-slate-300 bg-white px-5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveReport}
-                  className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-6 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <Save className="h-4 w-4" />
+                  <Save className="h-4 w-4 shrink-0" />
                   <span>Simpan Perubahan Rapor</span>
                 </button>
               </div>
@@ -2247,17 +2249,17 @@ export const GradingModule: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="rounded-xl border border-slate-300 px-4 py-2 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 font-bold text-white shadow-md hover:bg-blue-700 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
                   {editingAssessmentId ? 'Simpan Perubahan' : 'Buat Penilaian'}
                 </button>

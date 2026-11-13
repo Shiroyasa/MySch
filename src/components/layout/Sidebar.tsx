@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
-import { Camera } from 'lucide-react';
+import { Camera, X } from 'lucide-react';
 import { OrbitaMenuIcon } from '../common/AcademyOrnaments';
 
 interface SidebarProps {
@@ -40,6 +40,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const quickLogoInputRef = React.useRef<HTMLInputElement | null>(null);
   const isAdmin = currentRole === 'admin' || currentRole === 'super_admin';
   const activeLogoUrl = visualSettings?.appLogoUrl || schoolSettings?.logoUrl || null;
+
+  // Always show labels inside the mobile/tablet slide-over drawer even if desktop sidebar is collapsed
+  const showExpanded = !collapsed || mobileOpen;
 
   const handleQuickLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -142,23 +145,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      {/* Mobile Backdrop */}
-      {mobileOpen && (
-        <div
-          onClick={onCloseMobile}
-          className="fixed inset-0 z-40 bg-[#3E385B]/45 backdrop-blur-xs lg:hidden animate-fade-in"
-        />
-      )}
+      {/* Mobile / Tablet Drawer Backdrop — Always mounted on <lg so open & auto-hide fade smoothly */}
+      <div
+        onClick={onCloseMobile}
+        aria-hidden={!mobileOpen}
+        className={`fixed inset-0 z-40 bg-[#3E385B]/45 backdrop-blur-xs transition-opacity duration-300 ease-out lg:hidden ${
+          mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      />
 
-      {/* Exact Reference Image Left Floating Vertical Purple Pill Sidebar (#6C60B8) with Interactive Animations */}
+      {/* Left Floating Vertical Purple Pill Sidebar (#6C60B8) — Animated Slide-Over Drawer on <lg, Floating Rail on lg+ */}
       <aside
         style={{
           background: 'linear-gradient(180deg, #7468C4 0%, #6558B5 100%)',
           boxShadow: '0 18px 38px -8px rgba(101, 88, 181, 0.42)',
         }}
-        className={`fixed top-3 bottom-3 left-3 z-50 flex flex-col items-center justify-between rounded-[28px] py-5 text-white transition-all duration-300 ease-out lg:static lg:my-4 lg:ml-4 ${
-          collapsed ? 'w-[74px] px-2.5' : 'w-60 px-3.5'
-        } ${mobileOpen ? 'translate-x-0 w-60 px-3.5' : '-translate-x-[120%] lg:translate-x-0'}`}
+        className={`fixed top-2.5 bottom-2.5 left-2.5 z-50 flex flex-col items-center justify-between rounded-[28px] py-4 sm:py-5 text-white transition-[transform,opacity,width] duration-350 will-change-transform lg:static lg:my-4 lg:ml-4 ${
+          showExpanded ? 'w-[268px] max-w-[84vw] lg:w-60 px-3.5' : 'w-[74px] px-2.5'
+        } ${
+          mobileOpen
+            ? 'translate-x-0 scale-100 opacity-100 pointer-events-auto ease-[cubic-bezier(0.34,1.25,0.64,1)]'
+            : '-translate-x-[118%] scale-[0.94] opacity-0 pointer-events-none ease-[cubic-bezier(0.22,1,0.36,1)] lg:translate-x-0 lg:scale-100 lg:opacity-100 lg:pointer-events-auto'
+        }`}
       >
         {isAdmin && (
           <input
@@ -170,21 +178,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
           />
         )}
 
-        {/* Top Circular Ring Button (Architectural Emblem / Custom Logo) */}
-        <div className="flex w-full items-center justify-center">
+        {/* Top Brand Ring Button + Mobile/Tablet Close Button */}
+        <div className="flex w-full items-center justify-between gap-2">
           <button
             type="button"
-            onClick={onToggleCollapse}
+            onClick={() => {
+              if (!mobileOpen) onToggleCollapse();
+              else if (isAdmin) quickLogoInputRef.current?.click();
+            }}
             onDoubleClick={() => {
               if (isAdmin) quickLogoInputRef.current?.click();
             }}
             title={
-              collapsed
+              !showExpanded
                 ? 'Klik untuk perluas label menu (Klik 2x ganti logo)'
-                : 'Klik untuk mode ikon ringkas'
+                : 'ORBITA Academic Portal'
             }
-            className={`no-ornament group relative flex items-center justify-center rounded-full border border-white/30 bg-white/10 hover:bg-white/22 hover:scale-[1.04] active:scale-95 text-white transition-all duration-300 cursor-pointer ${
-              collapsed ? 'h-11 w-11' : 'w-full gap-3 rounded-[20px] px-3.5 py-2.5 justify-start'
+            className={`no-ornament group relative flex items-center justify-center rounded-full border border-white/30 bg-white/10 hover:bg-white/22 active:scale-95 text-white transition-all duration-300 cursor-pointer ${
+              !showExpanded
+                ? 'h-11 w-11 mx-auto'
+                : 'flex-1 min-w-0 gap-3 rounded-[20px] px-3 py-2 justify-start'
             }`}
           >
             <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-transform duration-300 group-hover:rotate-6">
@@ -204,7 +217,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               )}
             </div>
 
-            {!collapsed && (
+            {showExpanded && (
               <div className="min-w-0 text-left animate-fade-in">
                 <p className="truncate text-sm font-extrabold tracking-tight text-white leading-none">
                   ORBITA
@@ -215,30 +228,50 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             )}
           </button>
+
+          {/* Explicit Touch Close Button for Mobile/Tablet Drawer */}
+          <button
+            type="button"
+            onClick={onCloseMobile}
+            aria-label="Tutup Menu"
+            className="no-ornament lg:hidden flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15 hover:bg-white/25 text-white active:scale-95 transition-all cursor-pointer"
+          >
+            <X className="h-4.5 w-4.5" />
+          </button>
         </div>
 
-        {/* Center Navigation Icons Stack (Active = Dark Slate Squircle #4B436B with Spring Hover) */}
-        <nav className="my-3 flex w-full flex-1 flex-col items-center justify-center gap-2 overflow-y-auto overflow-x-visible scrollbar-none py-1">
-          {visibleItems.map(item => {
+        {/* Center Navigation Icons Stack (Active = Dark Slate Squircle #4B436B) */}
+        <nav className="my-3 flex w-full flex-1 flex-col items-center justify-start lg:justify-center gap-1.5 sm:gap-2 overflow-y-auto overflow-x-visible scrollbar-none py-1">
+          {visibleItems.map((item, idx) => {
             const isActive = activeNav === item.id;
             const isHovered = hoveredItemId === item.id;
 
             return (
-              <div key={item.id} className="relative w-full flex justify-center">
+              <div
+                key={item.id}
+                style={{
+                  transitionDelay: mobileOpen ? `${Math.min(idx * 26, 200)}ms` : '0ms',
+                }}
+                className={`relative w-full flex justify-center max-lg:transition-[transform,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  mobileOpen
+                    ? 'max-lg:translate-x-0 max-lg:opacity-100'
+                    : 'max-lg:-translate-x-4 max-lg:opacity-0'
+                }`}
+              >
                 <button
                   type="button"
                   onClick={() => handleSelectNav(item.id)}
                   onMouseEnter={() => setHoveredItemId(item.id)}
                   onMouseLeave={() => setHoveredItemId(null)}
                   title={`${item.label} • ${item.subLabel}`}
-                  className={`no-ornament group relative flex items-center transition-all duration-300 ease-out cursor-pointer ${
-                    collapsed
+                  className={`no-ornament group relative flex min-h-[44px] items-center transition-all duration-300 ease-out cursor-pointer ${
+                    !showExpanded
                       ? 'h-12 w-12 justify-center rounded-[16px]'
                       : 'w-full gap-3 rounded-[16px] px-3.5 py-2.5 justify-start'
                   } ${
                     isActive
-                      ? 'bg-[#4B436B] text-white shadow-[0_10px_22px_rgba(45,38,76,0.38)] scale-[1.03]'
-                      : 'text-white/80 hover:bg-white/16 hover:text-white hover:-translate-y-0.5 active:scale-95'
+                      ? 'bg-[#4B436B] text-white shadow-[0_10px_22px_rgba(45,38,76,0.38)] scale-[1.02]'
+                      : 'text-white/85 hover:bg-white/16 hover:text-white active:scale-95'
                   }`}
                 >
                   {/* Active Left Glow Pill Indicator */}
@@ -259,26 +292,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <OrbitaMenuIcon variant={item.id} className="h-5.5 w-5.5 shrink-0" />
                   </span>
 
-                  {!collapsed && (
+                  {showExpanded && (
                     <div className="min-w-0 flex-1 text-left transition-transform duration-200 group-hover:translate-x-0.5">
                       <span className="block truncate text-xs font-bold leading-tight">
                         {item.label}
                       </span>
-                      <span className="block truncate text-[10px] text-white/70 leading-tight mt-0.5">
+                      <span className="block truncate text-[10px] text-white/75 leading-tight mt-0.5">
                         {item.subLabel}
                       </span>
                     </div>
                   )}
 
                   {item.badge && (
-                    <span className="absolute -top-1 -right-1 flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF6E96] px-1 text-[9px] font-extrabold text-white shadow-sm animate-pulse">
+                    <span
+                      className={`${
+                        !showExpanded
+                          ? 'absolute -top-1 -right-1'
+                          : 'shrink-0'
+                      } flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#FF6E96] px-1.5 text-[9.5px] font-extrabold text-white shadow-sm animate-pulse`}
+                    >
                       {item.badge}
                     </span>
                   )}
                 </button>
 
-                {/* Interactive Floating Tooltip Pill when Collapsed */}
-                {collapsed && isHovered && (
+                {/* Interactive Floating Tooltip Pill when Collapsed on Desktop */}
+                {!showExpanded && isHovered && (
                   <div
                     className="pointer-events-none fixed left-[96px] z-50 hidden lg:flex flex-col rounded-[14px] border border-white/25 bg-[#3E385B]/95 px-3 py-1.5 text-white shadow-[0_12px_28px_rgba(45,38,76,0.35)] backdrop-blur-md animate-fade-in"
                     style={{ transform: 'translateY(2px)' }}
@@ -300,16 +339,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex w-full items-center justify-center pt-1">
           <button
             type="button"
-            onClick={() => setShowLogoutModal(true)}
+            onClick={() => {
+              onCloseMobile();
+              setShowLogoutModal(true);
+            }}
             title="Keluar Sesi Akun (Log Out)"
-            className={`no-ornament group flex items-center justify-center rounded-[16px] text-white/85 hover:bg-[#FF6E96]/25 hover:text-white active:scale-95 transition-all duration-300 cursor-pointer ${
-              collapsed ? 'h-11 w-11' : 'w-full gap-2.5 px-3.5 py-2.5 justify-start'
+            className={`no-ornament group flex min-h-[44px] items-center justify-center rounded-[16px] text-white/85 hover:bg-[#FF6E96]/25 hover:text-white active:scale-95 transition-all duration-300 cursor-pointer ${
+              !showExpanded ? 'h-11 w-11' : 'w-full gap-2.5 px-3.5 py-2.5 justify-start'
             }`}
           >
             <span className="transition-transform duration-300 group-hover:translate-x-0.5">
               <OrbitaMenuIcon variant="logout" className="h-5.5 w-5.5 shrink-0" />
             </span>
-            {!collapsed && <span className="text-xs font-bold">Keluar Sesi</span>}
+            {showExpanded && <span className="text-xs font-bold whitespace-nowrap">Keluar Sesi</span>}
           </button>
         </div>
       </aside>

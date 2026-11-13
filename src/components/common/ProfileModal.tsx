@@ -316,17 +316,17 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex flex-wrap items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
+              className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 whitespace-nowrap shrink-0 cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+              className="inline-flex h-9 items-center justify-center rounded-xl bg-[#6C60B8] px-5 text-xs font-bold text-white shadow-xs hover:bg-[#5B4FA8] whitespace-nowrap shrink-0 cursor-pointer"
             >
               Simpan Perubahan Profil
             </button>

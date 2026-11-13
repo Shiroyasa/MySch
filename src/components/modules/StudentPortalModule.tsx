@@ -184,62 +184,67 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
         subtitle={`NISN: ${student.nisn} • NIS: ${student.nis} • Kelas: ${student.className} (${student.majorCode}) • Rata-rata Akademik: ${overallAvg}`}
         rightContent={
           <button
+            type="button"
             onClick={handleExportTranscriptPdf}
-            className="no-ornament flex items-center gap-1.5 rounded-xl bg-[#6C60B8] px-4 py-2.5 text-xs font-bold text-white hover:bg-[#5E52A8] shadow-sm transition-colors cursor-pointer"
+            className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-4 text-xs font-bold text-white hover:bg-[#5E52A8] shadow-sm transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
           >
-            <Download className="h-3.5 w-3.5 text-[#FFE680]" />
+            <Download className="h-3.5 w-3.5 text-white shrink-0" />
             <span>Unduh Transkrip PDF</span>
           </button>
         }
       />
 
       {/* Navigation Tabs tailored to Siswa Role */}
-      <div className="flex flex-wrap gap-1.5 rounded-2xl border border-[#ECEAF6] bg-white p-1.5 shadow-xs">
+      <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-[#ECEAF6] bg-white p-1.5 shadow-xs">
         <button
+          type="button"
           onClick={() => setActiveTab('profile')}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+          className={`no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
             activeTab === 'profile'
               ? 'bg-[#6C60B8] text-white shadow-sm'
               : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
           }`}
         >
-          <User className="h-4 w-4" />
+          <User className="h-4 w-4 shrink-0" />
           <span>Profil Siswa</span>
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab('grades')}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+          className={`no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
             activeTab === 'grades'
               ? 'bg-[#6C60B8] text-white shadow-sm'
               : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
           }`}
         >
-          <GraduationCap className="h-4 w-4" />
+          <GraduationCap className="h-4 w-4 shrink-0" />
           <span>Nilai Siswa Per Mata Pelajaran</span>
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab('summary')}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+          className={`no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
             activeTab === 'summary'
               ? 'bg-[#6C60B8] text-white shadow-sm'
               : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
           }`}
         >
-          <Award className="h-4 w-4" />
+          <Award className="h-4 w-4 shrink-0" />
           <span>Nilai Siswa Keseluruhan &amp; Rekap</span>
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab('attendance')}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
+          className={`no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
             activeTab === 'attendance'
               ? 'bg-[#6C60B8] text-white shadow-sm'
               : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
           }`}
         >
-          <CalendarCheck className="h-4 w-4" />
+          <CalendarCheck className="h-4 w-4 shrink-0" />
           <span>Kehadiran &amp; Koreksi Presensi</span>
         </button>
       </div>
@@ -270,7 +275,7 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
                   NISN: {student.nisn}
                 </p>
                 <span className="inline-block mt-2 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-700 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">
-                  Siswa Aktif &bull; Terakreditasi A
+                  Siswa Aktif
                 </span>
               </div>
 
@@ -291,7 +296,7 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
             </div>
 
             <div className="mt-6 pt-3 border-t border-slate-100 dark:border-slate-800 text-center text-[10px] text-slate-400 font-mono">
-              NPSN: 20253654 &bull; Cikembar, Sukabumi
+              Cikembar, Sukabumi
             </div>
           </div>
 
@@ -374,10 +379,11 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
             </div>
 
             <button
+              type="button"
               onClick={handleExportTranscriptPdf}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-colors"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
             >
-              <Printer className="h-3.5 w-3.5" />
+              <Printer className="h-3.5 w-3.5 shrink-0" />
               <span>Cetak Transkrip PDF</span>
             </button>
           </div>
@@ -585,9 +591,9 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
 
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 py-2.5 font-bold text-white shadow-md hover:bg-blue-700 transition-colors"
+                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap leading-none"
               >
-                <Send className="h-4 w-4" />
+                <Send className="h-4 w-4 shrink-0" />
                 <span>Kirim Permohonan ke Wali Kelas</span>
               </button>
             </form>

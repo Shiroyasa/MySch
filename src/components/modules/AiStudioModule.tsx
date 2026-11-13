@@ -160,27 +160,29 @@ export const AiStudioModule: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100/70 p-1 dark:border-slate-800 dark:bg-slate-800/60">
+        <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100/70 p-1.5 dark:border-slate-800 dark:bg-slate-800/60">
           <button
+            type="button"
             onClick={() => setActiveTab('thinking')}
-            className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
+            className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
               activeTab === 'thinking'
                 ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
             }`}
           >
-            <BrainCircuit className="h-4 w-4 text-purple-600" />
+            <BrainCircuit className="h-4 w-4 text-purple-600 shrink-0" />
             <span>Analisis Pedagogik Cerdas (Gemini 4 Argon)</span>
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('veo')}
-            className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
+            className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
               activeTab === 'veo'
                 ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
                 : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
             }`}
           >
-            <Video className="h-4 w-4 text-cyan-500" />
+            <Video className="h-4 w-4 text-cyan-500 shrink-0" />
             <span>Studio Animasi Video Sekolah (Veo)</span>
           </button>
         </div>
@@ -243,18 +245,19 @@ export const AiStudioModule: React.FC = () => {
             </div>
 
             <button
+              type="button"
               onClick={handleRunPedagogicalAnalysis}
               disabled={isThinking}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all"
+              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all cursor-pointer whitespace-nowrap leading-none"
             >
               {isThinking ? (
                 <>
-                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <RefreshCw className="h-4 w-4 animate-spin shrink-0" />
                   <span>Model Sedang Bernalar (High Thinking)...</span>
                 </>
               ) : (
                 <>
-                  <Sparkles className="h-4 w-4 text-amber-300" />
+                  <Sparkles className="h-4 w-4 text-amber-300 shrink-0" />
                   <span>Jalankan Penalaran Mendalam</span>
                 </>
               )}
@@ -264,9 +267,9 @@ export const AiStudioModule: React.FC = () => {
           {/* Results Output */}
           <div className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+              <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <Bot className="h-4 w-4 text-blue-600" />
+                  <Bot className="h-4 w-4 text-blue-600 shrink-0" />
                   <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">
                     Hasil Analisis Pedagogik Berbasis Data
                   </h2>
@@ -274,10 +277,11 @@ export const AiStudioModule: React.FC = () => {
 
                 {thinkingOutput && (
                   <button
+                    type="button"
                     onClick={handleCopy}
-                    className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                    className="inline-flex h-7 items-center justify-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-2.5 text-xs font-semibold text-blue-600 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300 cursor-pointer whitespace-nowrap shrink-0 leading-none"
                   >
-                    {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copied ? <Check className="h-3.5 w-3.5 text-emerald-600 shrink-0" /> : <Copy className="h-3.5 w-3.5 shrink-0" />}
                     <span>{copied ? 'Tersalin' : 'Salin Teks'}</span>
                   </button>
                 )}
@@ -376,11 +380,11 @@ export const AiStudioModule: React.FC = () => {
               <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
                 Aspek Rasio Video
               </label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={() => setVeoAspectRatio('16:9')}
-                  className={`rounded-xl p-2.5 text-xs font-bold border transition-all ${
+                  className={`inline-flex h-9 items-center justify-center rounded-xl px-3 text-xs font-bold border transition-all cursor-pointer whitespace-nowrap leading-none ${
                     veoAspectRatio === '16:9'
                       ? 'border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 ring-2 ring-blue-500/20'
                       : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400'
@@ -391,7 +395,7 @@ export const AiStudioModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setVeoAspectRatio('9:16')}
-                  className={`rounded-xl p-2.5 text-xs font-bold border transition-all ${
+                  className={`inline-flex h-9 items-center justify-center rounded-xl px-3 text-xs font-bold border transition-all cursor-pointer whitespace-nowrap leading-none ${
                     veoAspectRatio === '9:16'
                       ? 'border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 ring-2 ring-blue-500/20'
                       : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400'
@@ -403,18 +407,19 @@ export const AiStudioModule: React.FC = () => {
             </div>
 
             <button
+              type="button"
               onClick={handleGenerateVideo}
               disabled={isGeneratingVideo}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-cyan-600 py-2.5 text-xs font-bold text-white shadow-md shadow-cyan-500/20 hover:bg-cyan-700 disabled:opacity-50 transition-all"
+              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-cyan-600 px-4 text-xs font-bold text-white shadow-md shadow-cyan-500/20 hover:bg-cyan-700 disabled:opacity-50 transition-all cursor-pointer whitespace-nowrap leading-none"
             >
               {isGeneratingVideo ? (
                 <>
-                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <RefreshCw className="h-4 w-4 animate-spin shrink-0" />
                   <span>Memproses dengan Veo...</span>
                 </>
               ) : (
                 <>
-                  <Film className="h-4 w-4" />
+                  <Film className="h-4 w-4 shrink-0" />
                   <span>Hasilkan Video Veo</span>
                 </>
               )}
@@ -443,10 +448,11 @@ export const AiStudioModule: React.FC = () => {
 
               {operationName && (
                 <button
+                  type="button"
                   onClick={handleCheckStatus}
-                  className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-bold text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs font-bold text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-white cursor-pointer whitespace-nowrap leading-none"
                 >
-                  <RefreshCw className="h-3.5 w-3.5 text-blue-600" />
+                  <RefreshCw className="h-3.5 w-3.5 text-blue-600 shrink-0" />
                   <span>Periksa Status Render Sekarang</span>
                 </button>
               )}

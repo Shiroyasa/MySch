@@ -19,17 +19,17 @@ export const SortByControl: React.FC<SortByControlProps> = ({
   compact = false,
 }) => {
   return (
-    <div className={`inline-flex items-center gap-1.5 ${className}`}>
+    <div className={`inline-flex items-center gap-1.5 shrink-0 ${className}`}>
       {!compact && (
-        <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">
-          <ArrowUpDown className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap shrink-0">
+          <ArrowUpDown className="h-3.5 w-3.5 text-[#6C60B8] shrink-0" />
           <span>{label}</span>
         </span>
       )}
       <select
         value={value}
         onChange={e => onChange(e.target.value as SortOption)}
-        className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-800 shadow-2xs focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 cursor-pointer"
+        className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-800 shadow-2xs focus:border-[#6C60B8] focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 whitespace-nowrap cursor-pointer"
       >
         <option value="az">Nama (A - Z)</option>
         <option value="za">Nama (Z - A)</option>

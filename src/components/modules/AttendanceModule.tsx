@@ -591,8 +591,9 @@ export const AttendanceModule: React.FC = () => {
         rightContent={
           <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5">
             <button
+              type="button"
               onClick={() => setActiveTab('input')}
-              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'input'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
                   : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
@@ -601,8 +602,9 @@ export const AttendanceModule: React.FC = () => {
               Input Presensi
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('editable_report')}
-              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'editable_report'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
                   : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
@@ -611,8 +613,9 @@ export const AttendanceModule: React.FC = () => {
               Laporan Editable
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('history')}
-              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'history'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
                   : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
@@ -621,8 +624,9 @@ export const AttendanceModule: React.FC = () => {
               Riwayat ({attendanceSessions.length})
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('correction')}
-              className={`rounded-[12px] px-3.5 py-2 text-xs font-extrabold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'correction'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
                   : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
@@ -710,9 +714,9 @@ export const AttendanceModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => markAll('H')}
-                  className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2 px-3 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors cursor-pointer"
+                  className="inline-flex h-[38px] items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
-                  <CheckCheck className="h-4 w-4" />
+                  <CheckCheck className="h-4 w-4 shrink-0" />
                   <span>Tandai Semua Hadir</span>
                 </button>
               </div>
@@ -727,7 +731,7 @@ export const AttendanceModule: React.FC = () => {
                   value={inputSearch}
                   onChange={e => setInputSearch(e.target.value)}
                   placeholder="Cari nama siswa atau NISN..."
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-8 pr-3 text-xs text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 text-xs text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
 
@@ -737,9 +741,9 @@ export const AttendanceModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleSave(true)}
-                  className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white shadow-sm hover:bg-blue-700 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
-                  <Save className="h-3.5 w-3.5" />
+                  <Save className="h-3.5 w-3.5 shrink-0" />
                   <span>Simpan Presensi</span>
                 </button>
               </div>
@@ -803,7 +807,7 @@ export const AttendanceModule: React.FC = () => {
                         </td>
                         <td className="py-3 px-4 text-center text-slate-500 font-semibold">{std.gender}</td>
                         <td className="py-3 px-4">
-                          <div className="flex items-center justify-center gap-1">
+                          <div className="inline-flex flex-nowrap items-center justify-center gap-1">
                             {[
                               { code: 'H', label: 'Hadir', bg: 'bg-emerald-500 text-white', hover: 'hover:bg-emerald-100' },
                               { code: 'S', label: 'Sakit', bg: 'bg-amber-500 text-white', hover: 'hover:bg-amber-100' },
@@ -818,9 +822,9 @@ export const AttendanceModule: React.FC = () => {
                                   key={btn.code}
                                   type="button"
                                   onClick={() => handleStatusChange(std.id, btn.code as AttendanceStatus)}
-                                  className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all cursor-pointer ${
+                                  className={`inline-flex h-7 items-center justify-center rounded-lg px-2.5 text-[11px] font-bold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                                     isChecked
-                                      ? `${btn.bg} shadow-xs scale-105 ring-2 ring-blue-500/30`
+                                      ? `${btn.bg} shadow-xs ring-2 ring-blue-500/25`
                                       : `border border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 ${btn.hover}`
                                   }`}
                                 >
@@ -848,24 +852,26 @@ export const AttendanceModule: React.FC = () => {
 
             {/* Bottom Action Footer */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-900">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={handleExportExcel}
-                  className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <Download className="h-4 w-4" /> Ekspor Excel
+                  <Download className="h-4 w-4 shrink-0" />
+                  <span>Ekspor Excel</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleExportPdf}
-                  className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <Printer className="h-4 w-4" /> Unduh PDF
+                  <Printer className="h-4 w-4 shrink-0" />
+                  <span>Unduh PDF</span>
                 </button>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -887,26 +893,26 @@ export const AttendanceModule: React.FC = () => {
                       },
                     });
                   }}
-                  className="flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400 transition-colors cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                   title="Hapus atau kosongkan presensi sesi kelas ini"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4 shrink-0" />
                   <span>Kosongkan Sesi</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleSave(false)}
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white transition-colors"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-xs font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
                   Simpan Draf
                 </button>
                 <button
                   type="button"
                   onClick={() => handleSave(true)}
-                  className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-colors"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
-                  <FileCheck className="h-4 w-4" />
-                  <span>Simpan &amp; Finalisasi Presensi</span>
+                  <FileCheck className="h-4 w-4 shrink-0" />
+                  <span>Simpan &amp; Finalisasi</span>
                 </button>
               </div>
             </div>
@@ -953,17 +959,19 @@ export const AttendanceModule: React.FC = () => {
 
                   <div className="flex items-center gap-2 shrink-0">
                     <button
+                      type="button"
                       onClick={() => {
                         setSelectedClassId(ses.classId);
                         setSelectedDate(ses.date);
                         setAttendanceType(ses.type);
                         setActiveTab('input');
                       }}
-                      className="rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700"
+                      className="inline-flex h-8 items-center justify-center rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white hover:bg-blue-700 whitespace-nowrap shrink-0 cursor-pointer"
                     >
                       Buka Data
                     </button>
                     <button
+                      type="button"
                       onClick={() => {
                         setDeleteModalConfig({
                           isOpen: true,
@@ -977,7 +985,7 @@ export const AttendanceModule: React.FC = () => {
                           },
                         });
                       }}
-                      className="rounded-xl border border-rose-200 bg-rose-50 p-2 text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400 shrink-0 cursor-pointer"
                       title="Hapus Sesi Presensi"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -1071,7 +1079,7 @@ export const AttendanceModule: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full rounded-xl bg-blue-600 py-2.5 font-bold text-white shadow-md hover:bg-blue-700 transition-colors"
+                className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-blue-600 font-bold text-white shadow-md hover:bg-blue-700 whitespace-nowrap transition-colors cursor-pointer"
               >
                 Kirim Permohonan Koreksi
               </button>
@@ -1108,8 +1116,9 @@ export const AttendanceModule: React.FC = () => {
                     </p>
                     <p className="text-[11px] text-slate-500 italic">&ldquo;{cor.reason}&rdquo;</p>
 
-                    <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-700">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-200 dark:border-slate-700">
                       <button
+                        type="button"
                         onClick={() => {
                           setDeleteModalConfig({
                             isOpen: true,
@@ -1123,23 +1132,25 @@ export const AttendanceModule: React.FC = () => {
                             },
                           });
                         }}
-                        className="text-slate-400 hover:text-rose-600 p-1 rounded-md"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 shrink-0 cursor-pointer"
                         title="Hapus Permohonan"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
 
                       {cor.status === 'pending' && (
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <button
+                            type="button"
                             onClick={() => reviewAttendanceCorrection(cor.id, 'rejected', 'Alasan belum memenuhi syarat verifikasi')}
-                            className="rounded-lg border border-rose-300 px-3 py-1 text-[11px] font-bold text-rose-600 hover:bg-rose-50"
+                            className="inline-flex h-8 items-center justify-center rounded-lg border border-rose-300 px-3 text-[11px] font-bold text-rose-600 hover:bg-rose-50 whitespace-nowrap shrink-0 cursor-pointer"
                           >
                             Tolak
                           </button>
                           <button
+                            type="button"
                             onClick={() => reviewAttendanceCorrection(cor.id, 'approved', 'Disetujui berdasarkan surat keterangan resmi')}
-                            className="rounded-lg bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white hover:bg-emerald-700"
+                            className="inline-flex h-8 items-center justify-center rounded-lg bg-emerald-600 px-3 text-[11px] font-bold text-white hover:bg-emerald-700 whitespace-nowrap shrink-0 cursor-pointer"
                           >
                             Setujui &amp; Ubah Presensi
                           </button>
@@ -1159,7 +1170,7 @@ export const AttendanceModule: React.FC = () => {
         <div className="space-y-6">
           {/* Control & Export Bar */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                   Pilih Kelas Rekapitulasi
@@ -1167,7 +1178,7 @@ export const AttendanceModule: React.FC = () => {
                 <select
                   value={selectedClassId}
                   onChange={e => handleClassChange(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-bold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
                   {classes.map(cls => (
                     <option key={cls.id} value={cls.id}>
@@ -1185,7 +1196,7 @@ export const AttendanceModule: React.FC = () => {
                   type="text"
                   value={reportPeriodLabel}
                   onChange={e => setReportPeriodLabel(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   placeholder="Rekapitulasi Semester Ganjil"
                 />
               </div>
@@ -1201,61 +1212,21 @@ export const AttendanceModule: React.FC = () => {
                     value={reportSearch}
                     onChange={e => setReportSearch(e.target.value)}
                     placeholder="Ketik nama atau NISN..."
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-8 pr-3 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Aksi Simpan &amp; Ekspor Resmi
-                </label>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={handleSaveEditableReport}
-                    className="flex-1 flex items-center justify-center gap-1 rounded-xl bg-blue-600 py-2.5 px-2.5 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer shadow-xs"
-                    title="Simpan Perubahan Laporan Presensi"
-                  >
-                    <Save className="h-3.5 w-3.5" />
-                    <span>Simpan</span>
-                  </button>
-                  <button
-                    onClick={handleExportEditableReportExcel}
-                    className="flex items-center justify-center gap-1 rounded-xl border border-emerald-200 bg-emerald-50 py-2.5 px-2.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-950/50 dark:text-emerald-300 cursor-pointer"
-                    title="Ekspor Excel (.xlsx)"
-                  >
-                    <FileSpreadsheet className="h-3.5 w-3.5" />
-                    <span>Excel</span>
-                  </button>
-                  <button
-                    onClick={handleExportEditableReportCsv}
-                    className="flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white py-2.5 px-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
-                    title="Ekspor CSV (.csv)"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    <span>CSV</span>
-                  </button>
-                  <button
-                    onClick={handleExportEditableReportPdf}
-                    className="flex items-center justify-center gap-1 rounded-xl bg-indigo-600 py-2.5 px-2.5 text-xs font-bold text-white hover:bg-indigo-700 cursor-pointer shadow-xs"
-                    title="Cetak PDF Resmi"
-                  >
-                    <Printer className="h-3.5 w-3.5" />
-                    <span>PDF</span>
-                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Signers & Reset Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+            {/* Signers Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
               <div>
                 <label className="text-[11px] font-semibold text-slate-500 block mb-1">Nama Wali Kelas (Penandatangan)</label>
                 <input
                   type="text"
                   value={signerWaliName}
                   onChange={e => setSignerWaliName(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
               <div>
@@ -1264,7 +1235,7 @@ export const AttendanceModule: React.FC = () => {
                   type="text"
                   value={signerWaliNip}
                   onChange={e => setSignerWaliNip(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-mono dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-mono dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
               <div>
@@ -1273,7 +1244,7 @@ export const AttendanceModule: React.FC = () => {
                   type="text"
                   value={signerKepsekName}
                   onChange={e => setSignerKepsekName(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
               <div>
@@ -1282,16 +1253,58 @@ export const AttendanceModule: React.FC = () => {
                   type="text"
                   value={signerKepsekNip}
                   onChange={e => setSignerKepsekNip(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-mono dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-mono dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
               </div>
-              <div className="flex items-end">
+            </div>
+
+            {/* Dedicated Full-Width Action Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={handleResetEditableReportClass}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-xs font-bold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                <span>Reset Hitungan Sesi</span>
+              </button>
+
+              <div className="flex flex-wrap items-center gap-2">
                 <button
-                  onClick={handleResetEditableReportClass}
-                  className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-bold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 cursor-pointer"
+                  type="button"
+                  onClick={handleExportEditableReportExcel}
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-950/50 dark:text-emerald-300 whitespace-nowrap shrink-0 cursor-pointer"
+                  title="Ekspor Excel (.xlsx)"
                 >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  <span>Reset Hitungan Sesi</span>
+                  <FileSpreadsheet className="h-3.5 w-3.5 shrink-0" />
+                  <span>Ekspor Excel</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportEditableReportCsv}
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
+                  title="Ekspor CSV (.csv)"
+                >
+                  <Download className="h-3.5 w-3.5 shrink-0" />
+                  <span>Ekspor CSV</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportEditableReportPdf}
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 text-xs font-bold text-white hover:bg-indigo-700 whitespace-nowrap shrink-0 cursor-pointer shadow-xs"
+                  title="Cetak PDF Resmi"
+                >
+                  <Printer className="h-3.5 w-3.5 shrink-0" />
+                  <span>Cetak PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveEditableReport}
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white hover:bg-blue-700 whitespace-nowrap shrink-0 cursor-pointer shadow-xs"
+                  title="Simpan Perubahan Laporan Presensi"
+                >
+                  <Save className="h-3.5 w-3.5 shrink-0" />
+                  <span>Simpan Laporan</span>
                 </button>
               </div>
             </div>
@@ -1433,18 +1446,18 @@ export const AttendanceModule: React.FC = () => {
               <button
                 type="button"
                 onClick={handleResetEditableReportClass}
-                className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400 cursor-pointer transition-colors"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-4 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400 whitespace-nowrap shrink-0 cursor-pointer transition-colors"
               >
-                <RotateCcw className="h-3.5 w-3.5" />
+                <RotateCcw className="h-3.5 w-3.5 shrink-0" />
                 <span>Reset Semua Presensi ke 0</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleSaveEditableReport}
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 cursor-pointer transition-colors"
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-md shadow-blue-500/20 hover:bg-blue-700 whitespace-nowrap shrink-0 cursor-pointer transition-colors"
               >
-                <Save className="h-4 w-4" />
+                <Save className="h-4 w-4 shrink-0" />
                 <span>Simpan Presensi</span>
               </button>
             </div>

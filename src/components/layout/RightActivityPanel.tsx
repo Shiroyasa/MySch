@@ -49,7 +49,15 @@ function detectDeviceName(): string {
   return 'Perangkat Web Aktif';
 }
 
-export const RightActivityPanel: React.FC = () => {
+export interface RightActivityPanelProps {
+  isOpenMobile?: boolean;
+  onCloseMobile?: () => void;
+}
+
+export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
+  isOpenMobile = false,
+  onCloseMobile,
+}) => {
   const {
     classes = [],
     lessonSchedules = [],
@@ -62,6 +70,11 @@ export const RightActivityPanel: React.FC = () => {
     setActiveNav,
     addToast,
   } = useApp();
+
+  const navigateAndClose = (navId: string) => {
+    setActiveNav(navId);
+    if (onCloseMobile) onCloseMobile();
+  };
 
   const [tab, setTab] = useState<'jadwal' | 'log'>('jadwal');
   const [selectedClassId, setSelectedClassId] = useState<string>('ALL');
@@ -442,30 +455,30 @@ export const RightActivityPanel: React.FC = () => {
 
   const pendingCorrCount = attendanceCorrections.filter(c => c.status === 'pending').length;
 
-  return (
+  const panelBody = (isDrawerMode: boolean) => (
     <>
-      <aside className="hidden xl:flex w-[304px] shrink-0 flex-col justify-between border-l border-[#ECEBF5] bg-[#F5F6FB]/75 px-5 py-6 overflow-y-auto select-none">
-        {/* Top Section: Agenda Jadwal KBM & Log Sistem Real-Time */}
-        <div>
-          {/* Header Row */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-[#ECE9FA] text-[#6C60B8]">
-                <OrbitaMenuIcon variant="attendance" className="h-4 w-4" />
+      {/* Top Section: Agenda Jadwal KBM & Log Sistem Real-Time */}
+      <div>
+        {/* Header Row */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] bg-[#ECE9FA] text-[#6C60B8]">
+              <OrbitaMenuIcon variant="attendance" className="h-4 w-4" />
+            </span>
+            <div className="min-w-0">
+              <h3 className="text-xs font-extrabold text-[#3E385B] tracking-tight leading-none truncate">
+                Agenda KBM &amp; Sistem
+              </h3>
+              <span className="text-[10px] font-semibold text-[#9694A8] truncate block">
+                Sinkronisasi Database Aktif
               </span>
-              <div>
-                <h3 className="text-xs font-extrabold text-[#3E385B] tracking-tight leading-none">
-                  Agenda KBM &amp; Sistem
-                </h3>
-                <span className="text-[10px] font-semibold text-[#9694A8]">
-                  Sinkronisasi Database Aktif
-                </span>
-              </div>
             </div>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               type="button"
               onClick={() =>
-                setActiveNav(
+                navigateAndClose(
                   tab === 'jadwal'
                     ? currentRole === 'siswa'
                       ? 'student-profile'
@@ -479,14 +492,25 @@ export const RightActivityPanel: React.FC = () => {
             >
               Buka Modul
             </button>
+            {isDrawerMode && onCloseMobile && (
+              <button
+                type="button"
+                onClick={onCloseMobile}
+                aria-label="Tutup Agenda"
+                className="no-ornament flex h-8 w-8 items-center justify-center rounded-full bg-[#EAE9F4] text-[#3E385B] hover:bg-[#FFE4EC] hover:text-[#F25781] cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
+        </div>
 
-          {/* Pill Toggle ("Jadwal KBM" / "Log & Koreksi") */}
-          <div className="mt-3.5 grid grid-cols-2 rounded-full bg-[#EAE9F4] p-1">
+        {/* Pill Toggle ("Jadwal KBM" / "Log & Koreksi") */}
+        <div className="mt-3.5 grid grid-cols-2 gap-1 rounded-full bg-[#EAE9F4] p-1">
             <button
               type="button"
               onClick={() => setTab('jadwal')}
-              className={`no-ornament rounded-full py-1.5 text-[11px] font-extrabold transition-all cursor-pointer ${
+              className={`no-ornament inline-flex items-center justify-center h-8 px-2 rounded-full text-[10.5px] font-extrabold whitespace-nowrap truncate transition-all cursor-pointer ${
                 tab === 'jadwal'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_16px_rgba(108,96,184,0.34)]'
                   : 'text-[#8E8BA3] hover:text-[#3E385B]'
@@ -497,7 +521,7 @@ export const RightActivityPanel: React.FC = () => {
             <button
               type="button"
               onClick={() => setTab('log')}
-              className={`no-ornament rounded-full py-1.5 text-[11px] font-extrabold transition-all cursor-pointer ${
+              className={`no-ornament inline-flex items-center justify-center h-8 px-2 rounded-full text-[10.5px] font-extrabold whitespace-nowrap truncate transition-all cursor-pointer ${
                 tab === 'log'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_16px_rgba(108,96,184,0.34)]'
                   : 'text-[#8E8BA3] hover:text-[#3E385B]'
@@ -556,7 +580,7 @@ export const RightActivityPanel: React.FC = () => {
                   <div
                     key={sched.id}
                     onClick={() =>
-                      setActiveNav(currentRole === 'siswa' ? 'student-profile' : 'attendance')
+                      navigateAndClose(currentRole === 'siswa' ? 'student-profile' : 'attendance')
                     }
                     className="group flex items-center justify-between gap-2.5 rounded-[18px] bg-white/75 p-2.5 border border-[#ECEBF5] hover:bg-white hover:border-[#6C60B8]/35 hover:shadow-[0_8px_22px_rgba(108,96,184,0.08)] transition-all cursor-pointer"
                   >
@@ -597,7 +621,7 @@ export const RightActivityPanel: React.FC = () => {
                 return (
                   <div
                     key={item.id}
-                    onClick={() => setActiveNav(item.targetNav)}
+                    onClick={() => navigateAndClose(item.targetNav)}
                     className="group flex items-center justify-between gap-2.5 rounded-[18px] bg-white/75 p-2.5 border border-[#ECEBF5] hover:bg-white hover:border-[#6C60B8]/35 hover:shadow-[0_8px_22px_rgba(108,96,184,0.08)] transition-all cursor-pointer"
                   >
                     <div className="min-w-0 flex-1">
@@ -711,22 +735,22 @@ export const RightActivityPanel: React.FC = () => {
                   type="button"
                   onClick={() => handleStartAndShareLiveLocation(false)}
                   disabled={isLocating}
-                  className="no-ornament flex items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] hover:bg-[#5A4EA8] px-2.5 py-2 text-[10.5px] font-extrabold text-white shadow-xs transition-all cursor-pointer disabled:opacity-60"
+                  className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] hover:bg-[#5A4EA8] px-2.5 text-[10.5px] font-extrabold text-white whitespace-nowrap shadow-xs transition-all cursor-pointer disabled:opacity-60"
                 >
                   <Navigation className="h-3 w-3 shrink-0" />
                   <span className="truncate">
                     {isLocating
                       ? 'Melacak GPS...'
                       : isSharingLive
-                      ? 'Update Live GPS'
-                      : 'Share Live Location'}
+                      ? 'Update GPS'
+                      : 'Share Live'}
                   </span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleShareOrCopyCoordinateLink}
-                  className="no-ornament flex items-center justify-center gap-1.5 rounded-xl bg-[#FFE4EC] hover:bg-[#FFD4E2] px-2.5 py-2 text-[10.5px] font-extrabold text-[#F25781] transition-all cursor-pointer"
+                  className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#FFE4EC] hover:bg-[#FFD4E2] px-2.5 text-[10.5px] font-extrabold text-[#F25781] whitespace-nowrap transition-all cursor-pointer"
                 >
                   {copiedLink ? (
                     <>
@@ -742,14 +766,14 @@ export const RightActivityPanel: React.FC = () => {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between gap-1.5 pt-1 border-t border-[#F0F1F6]">
+              <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-[#F0F1F6]">
                 <a
                   href={googleMapsPinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[10px] font-bold text-[#6C60B8] hover:underline"
+                  className="inline-flex items-center gap-1 text-[10px] font-bold text-[#6C60B8] hover:underline whitespace-nowrap shrink-0"
                 >
-                  <ExternalLink className="h-3 w-3" />
+                  <ExternalLink className="h-3 w-3 shrink-0" />
                   <span>Buka Google Maps</span>
                 </a>
 
@@ -757,12 +781,12 @@ export const RightActivityPanel: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleStopLiveLocation}
-                    className="no-ornament text-[10px] font-bold text-[#F25781] hover:underline cursor-pointer"
+                    className="no-ornament inline-flex items-center text-[10px] font-bold text-[#F25781] hover:underline whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     Matikan Live
                   </button>
                 ) : (
-                  <span className="text-[9.5px] font-medium text-[#A2A0B4]">
+                  <span className="text-[9.5px] font-medium text-[#A2A0B4] whitespace-nowrap shrink-0">
                     {pklPartners.length} Mitra DUDI
                   </span>
                 )}
@@ -770,17 +794,39 @@ export const RightActivityPanel: React.FC = () => {
             </div>
           </div>
         </div>
+      </>
+  );
+
+  return (
+    <>
+      {/* Desktop Right Static Rail (xl+) */}
+      <aside className="hidden xl:flex w-[304px] shrink-0 flex-col justify-between border-l border-[#ECEBF5] bg-[#F5F6FB]/75 px-5 py-6 overflow-y-auto select-none">
+        {panelBody(false)}
       </aside>
+
+      {/* Mobile & Tablet Interactive Slide-Over Agenda & Live GPS Drawer (<xl) */}
+      {isOpenMobile && (
+        <div className="xl:hidden fixed inset-0 z-50 flex justify-end">
+          <div
+            onClick={onCloseMobile}
+            className="fixed inset-0 bg-[#3E385B]/45 backdrop-blur-xs animate-fade-in"
+            aria-hidden="true"
+          />
+          <aside className="relative z-10 flex h-full w-full max-w-[360px] flex-col justify-between border-l border-[#ECEBF5] bg-[#F8F9FD] px-4 py-5 pb-24 lg:pb-6 overflow-y-auto shadow-2xl animate-drawer-right select-none">
+            {panelBody(true)}
+          </aside>
+        </div>
+      )}
 
       {/* EXPANDED INTERACTIVE LIVE MAPS & MULTI-DEVICE COORDINATE MODAL */}
       {showExpandedMapModal && (
         <div
           onClick={() => setShowExpandedMapModal(false)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#3E385B]/45 backdrop-blur-xs p-4 animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#3E385B]/45 backdrop-blur-xs p-3 sm:p-4 animate-fade-in"
         >
           <div
             onClick={e => e.stopPropagation()}
-            className="w-full max-w-3xl rounded-[28px] border border-[#ECEBF5] bg-white p-5 sm:p-6 text-[#3E385B] shadow-[0_28px_70px_rgba(62,56,91,0.28)] space-y-4 animate-scale-up max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-3xl rounded-[24px] sm:rounded-[28px] border border-[#ECEBF5] bg-white p-4 sm:p-6 text-[#3E385B] shadow-[0_28px_70px_rgba(62,56,91,0.28)] space-y-4 animate-scale-up max-h-[90dvh] overflow-y-auto"
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between gap-3 border-b border-[#F0F1F6] pb-3.5">
@@ -855,18 +901,18 @@ export const RightActivityPanel: React.FC = () => {
                   type="button"
                   onClick={() => handleStartAndShareLiveLocation(false)}
                   disabled={isLocating}
-                  className="no-ornament inline-flex items-center gap-1.5 rounded-xl bg-[#6C60B8] hover:bg-[#5B4FA8] px-4 py-2 text-xs font-extrabold text-white shadow-sm transition-all cursor-pointer"
+                  className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] hover:bg-[#5B4FA8] px-4 text-xs font-extrabold text-white whitespace-nowrap shrink-0 shadow-sm transition-all cursor-pointer disabled:opacity-60"
                 >
-                  <LocateFixed className="h-3.5 w-3.5" />
+                  <LocateFixed className="h-3.5 w-3.5 shrink-0" />
                   <span>{isLocating ? 'Melacak GPS...' : 'Share Live Location Sekarang'}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleShareOrCopyCoordinateLink}
-                  className="no-ornament inline-flex items-center gap-1.5 rounded-xl bg-[#FFE4EC] hover:bg-[#FFD4E2] px-3.5 py-2 text-xs font-extrabold text-[#F25781] transition-all cursor-pointer"
+                  className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#FFE4EC] hover:bg-[#FFD4E2] px-3.5 text-xs font-extrabold text-[#F25781] whitespace-nowrap shrink-0 transition-all cursor-pointer"
                 >
-                  <Copy className="h-3.5 w-3.5" />
+                  <Copy className="h-3.5 w-3.5 shrink-0" />
                   <span>Salin / Share Link</span>
                 </button>
 
@@ -874,9 +920,9 @@ export const RightActivityPanel: React.FC = () => {
                   href={googleMapsPinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-[#E7F9EF] hover:bg-[#D2F4E1] px-3.5 py-2 text-xs font-extrabold text-[#139A4C] transition-all"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#E7F9EF] hover:bg-[#D2F4E1] px-3.5 text-xs font-extrabold text-[#139A4C] whitespace-nowrap shrink-0 transition-all"
                 >
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  <ExternalLink className="h-3.5 w-3.5 shrink-0" />
                   <span>Buka Google Maps</span>
                 </a>
               </div>
@@ -918,12 +964,12 @@ export const RightActivityPanel: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 pt-1">
                   <button
                     type="submit"
-                    className="no-ornament flex-1 rounded-xl bg-[#6C60B8] hover:bg-[#5B4FA8] px-3.5 py-2 text-xs font-extrabold text-white transition-all cursor-pointer"
+                    className="no-ornament inline-flex h-9 flex-1 items-center justify-center rounded-xl bg-[#6C60B8] hover:bg-[#5B4FA8] px-3.5 text-xs font-extrabold text-white whitespace-nowrap transition-all cursor-pointer"
                   >
-                    Terapkan &amp; Share Koordinat
+                    Terapkan &amp; Share
                   </button>
                   <button
                     type="button"
@@ -932,7 +978,7 @@ export const RightActivityPanel: React.FC = () => {
                       setManualLatInput(String(DEFAULT_SCHOOL_COORDS.latitude));
                       setManualLngInput(String(DEFAULT_SCHOOL_COORDS.longitude));
                     }}
-                    className="no-ornament rounded-xl bg-[#F0F1F6] hover:bg-[#E4E3F0] px-3 py-2 text-xs font-bold text-[#3E385B] cursor-pointer"
+                    className="no-ornament inline-flex h-9 items-center justify-center rounded-xl bg-[#F0F1F6] hover:bg-[#E4E3F0] px-3.5 text-xs font-bold text-[#3E385B] whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     Kampus ORBITA
                   </button>

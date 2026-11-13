@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import {
   IndustryPartner,
@@ -971,36 +972,40 @@ export const PklModule: React.FC = () => {
         subtitle="Kelola database perusahaan mitra dunia usaha & industri, dokumen MoU/PKS, penempatan siswa, supervisi kunjungan, serta rekapitulasi nilai PKL."
         icon={Building2}
         rightContent={
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-wrap items-center gap-2">
             <button
+              type="button"
               onClick={handleClearAllPklData}
-              className="flex items-center gap-1.5 rounded-xl border border-[#FFC4D4] bg-[#FFE8EF] py-2 px-3.5 text-xs font-bold text-[#E14A74] hover:bg-[#FFD6E3] cursor-pointer transition-colors"
+              className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#FFC4D4] bg-[#FFE8EF] px-3.5 text-xs font-bold text-[#E14A74] hover:bg-[#FFD6E3] cursor-pointer transition-colors whitespace-nowrap shrink-0"
               title="Kosongkan seluruh data di menu Administrasi PKL"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-3.5 w-3.5 shrink-0" />
               <span>Kosongkan Data PKL</span>
             </button>
 
             {partners.length === 0 && (
               <button
+                type="button"
                 onClick={handleLoadSampleData}
-                className="flex items-center gap-1.5 rounded-xl border border-[#BCEBD0] bg-[#E7F9EF] py-2 px-3.5 text-xs font-bold text-[#139A4C] hover:bg-[#D5F4E3] cursor-pointer transition-colors"
+                className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#BCEBD0] bg-[#E7F9EF] px-3.5 text-xs font-bold text-[#139A4C] hover:bg-[#D5F4E3] cursor-pointer transition-colors whitespace-nowrap shrink-0"
                 title="Muat contoh data mitra industri & penempatan PKL"
               >
-                <Sparkles className="h-3.5 w-3.5 text-[#139A4C]" />
+                <Sparkles className="h-3.5 w-3.5 text-[#139A4C] shrink-0" />
                 <span>Muat Contoh Data</span>
               </button>
             )}
 
             <button
+              type="button"
               onClick={() => setShowAddPartnerModal(true)}
-              className="flex items-center gap-1.5 rounded-xl bg-[#6C60B8] py-2 px-4 text-xs font-bold text-white shadow-sm hover:bg-[#5E52A8] cursor-pointer transition-colors"
+              className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-4 text-xs font-bold text-white shadow-sm hover:bg-[#5E52A8] cursor-pointer transition-colors whitespace-nowrap shrink-0"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-3.5 w-3.5 shrink-0" />
               <span>Tambah Instansi Mitra</span>
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 if (partners.length === 0) {
                   showToast('Tambahkan instansi mitra terlebih dahulu sebelum menjadwalkan supervisi.');
@@ -1008,9 +1013,9 @@ export const PklModule: React.FC = () => {
                 }
                 setShowAddVisitModal(true);
               }}
-              className="flex items-center gap-1.5 rounded-xl border border-[#D8D3F2] bg-[#F4F3FA] py-2 px-3.5 text-xs font-bold text-[#5E53A8] hover:bg-[#EAE7F8] cursor-pointer transition-colors"
+              className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D8D3F2] bg-[#F4F3FA] px-3.5 text-xs font-bold text-[#5E53A8] hover:bg-[#EAE7F8] cursor-pointer transition-colors whitespace-nowrap shrink-0"
             >
-              <Calendar className="h-3.5 w-3.5 text-[#6C60B8]" />
+              <Calendar className="h-3.5 w-3.5 text-[#6C60B8] shrink-0" />
               <span>Jadwal Supervisi</span>
             </button>
           </div>
@@ -1225,28 +1230,30 @@ export const PklModule: React.FC = () => {
       </div>
 
       {/* Main Tabs Selection */}
-      <div className="flex items-center gap-2 rounded-2xl border border-[#ECEAF6] bg-white p-2 shadow-xs">
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#ECEAF6] bg-white p-1.5 shadow-xs">
         <button
+          type="button"
           onClick={() => setActiveTab('dudi_database')}
-          className={`flex items-center gap-2 rounded-xl py-2 px-4 text-xs font-bold transition-all cursor-pointer ${
+          className={`no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'dudi_database'
               ? 'bg-[#6C60B8] text-white shadow-sm'
               : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
           }`}
         >
-          <Building2 className="h-4 w-4" />
+          <Building2 className="h-4 w-4 shrink-0" />
           <span>A. Database Instansi Mitra PKL</span>
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab('automated_reports')}
-          className={`flex items-center gap-2 rounded-xl py-2 px-4 text-xs font-bold transition-all cursor-pointer ${
+          className={`no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'automated_reports'
               ? 'bg-[#6C60B8] text-white shadow-sm'
               : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
           }`}
         >
-          <FileSpreadsheet className="h-4 w-4" />
+          <FileSpreadsheet className="h-4 w-4 shrink-0" />
           <span>B. Laporan &amp; Rekap Otomatis PKL</span>
         </button>
       </div>
@@ -1259,23 +1266,23 @@ export const PklModule: React.FC = () => {
           {/* Controls & Filter Bar */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Cari perusahaan, HRD, bidang usaha, atau kota..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-4 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-4 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <div className="flex items-center gap-1.5">
-                <Filter className="h-3.5 w-3.5 text-slate-400" />
+                <Filter className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                 <select
                   value={selectedSectorFilter}
                   onChange={e => setSelectedSectorFilter(e.target.value)}
-                  className="rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                  className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-700 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                 >
                   {sectors.map(sec => (
                     <option key={sec} value={sec}>
@@ -1287,7 +1294,7 @@ export const PklModule: React.FC = () => {
 
               <SortByControl value={sortBy} onChange={setSortBy} />
 
-              <span className="text-xs text-slate-400 font-semibold px-2">
+              <span className="text-xs text-slate-400 font-semibold px-2 whitespace-nowrap">
                 {filteredPartners.length} Mitra
               </span>
             </div>
@@ -1305,19 +1312,21 @@ export const PklModule: React.FC = () => {
               <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
                 Silakan tambahkan data perusahaan mitra DUDI baru, atau muat template contoh data industri untuk memulai.
               </p>
-              <div className="mt-6 flex items-center justify-center gap-3">
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                 <button
+                  type="button"
                   onClick={() => setShowAddPartnerModal(true)}
-                  className="flex items-center gap-1.5 rounded-xl bg-blue-600 py-2 px-4 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
-                  <Plus className="h-3.5 w-3.5" />
+                  <Plus className="h-3.5 w-3.5 shrink-0" />
                   <span>Tambah Mitra DUDI</span>
                 </button>
                 <button
+                  type="button"
                   onClick={handleLoadSampleData}
-                  className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
                 >
-                  <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+                  <Sparkles className="h-3.5 w-3.5 text-blue-600 shrink-0" />
                   <span>Muat Template Contoh</span>
                 </button>
               </div>
@@ -1408,24 +1417,27 @@ export const PklModule: React.FC = () => {
                       </div>
 
                       {/* CRUD Partner Buttons */}
-                      <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-800 pl-3">
+                      <div className="inline-flex items-center gap-1 border-l border-slate-200 dark:border-slate-800 pl-3 shrink-0">
                         <button
+                          type="button"
                           onClick={() => setEditingPartner(partner)}
-                          className="rounded-lg p-1.5 text-slate-400 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/60 dark:hover:text-blue-300 transition-colors"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-950/60 dark:hover:text-blue-300 transition-colors cursor-pointer shrink-0"
                           title="Edit Profil Perusahaan"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDeletePartner(partner)}
-                          className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/60 dark:hover:text-rose-400 transition-colors"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/60 dark:hover:text-rose-400 transition-colors cursor-pointer shrink-0"
                           title="Hapus Perusahaan DUDI"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
                         <button
+                          type="button"
                           onClick={() => setExpandedPartnerId(isExpanded ? null : partner.id)}
-                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
                         >
                           {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
                         </button>
@@ -1440,14 +1452,15 @@ export const PklModule: React.FC = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Box Kontak HRD */}
                         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 shadow-2xs">
-                          <div className="flex items-center justify-between mb-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                             <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide flex items-center gap-2">
-                              <UserCheck className="h-4 w-4 text-blue-600" />
-                              Kontak HRD &amp; Penanggung Jawab DUDI
+                              <UserCheck className="h-4 w-4 text-blue-600 shrink-0" />
+                              <span>Kontak HRD &amp; Penanggung Jawab DUDI</span>
                             </h3>
                             <button
+                              type="button"
                               onClick={() => setEditingPartner(partner)}
-                              className="text-[10px] font-bold text-blue-600 hover:underline"
+                              className="inline-flex h-7 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 px-2.5 text-[11px] font-bold text-blue-600 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300 cursor-pointer whitespace-nowrap shrink-0"
                             >
                               Edit Kontak
                             </button>
@@ -1474,12 +1487,13 @@ export const PklModule: React.FC = () => {
 
                         {/* Box Riwayat Kerja Sama MoU / PKS */}
                         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 shadow-2xs">
-                          <div className="flex items-center justify-between mb-3">
+                          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                             <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide flex items-center gap-2">
-                              <FileCheck2 className="h-4 w-4 text-emerald-600" />
-                              Riwayat Kerja Sama &amp; Masa Berlaku MoU/PKS
+                              <FileCheck2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                              <span>Riwayat Kerja Sama &amp; Masa Berlaku MoU/PKS</span>
                             </h3>
                             <button
+                              type="button"
                               onClick={() => {
                                 setMouModalPartner(partner);
                                 setMouForm({
@@ -1491,10 +1505,10 @@ export const PklModule: React.FC = () => {
                                   documentTitle: `PKS Perpanjangan Kemitraan Vokasi ${partner.name}`,
                                 });
                               }}
-                              className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:underline"
+                              className="inline-flex h-7 items-center justify-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 text-[11px] font-bold text-emerald-700 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300 cursor-pointer whitespace-nowrap shrink-0"
                             >
-                              <Plus className="h-3 w-3" />
-                              <span>+ Perpanjang MoU</span>
+                              <Plus className="h-3 w-3 shrink-0" />
+                              <span>Perpanjang MoU</span>
                             </button>
                           </div>
                           <div className="space-y-2">
@@ -1503,11 +1517,11 @@ export const PklModule: React.FC = () => {
                                 key={mou.id}
                                 className="p-2.5 rounded-lg border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/60 text-xs"
                               >
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between gap-2">
                                   <span className="font-mono font-bold text-blue-600 dark:text-cyan-400">
                                     {mou.mouNumber}
                                   </span>
-                                  <div className="flex items-center gap-2">
+                                  <div className="inline-flex items-center gap-1.5 shrink-0">
                                     <span
                                       className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${
                                         mou.status === 'aktif'
@@ -1518,15 +1532,17 @@ export const PklModule: React.FC = () => {
                                       {mou.status}
                                     </span>
                                     <button
+                                      type="button"
                                       onClick={() => setEditingMou({ partnerId: partner.id, mou })}
-                                      className="text-slate-400 hover:text-blue-600 cursor-pointer"
+                                      className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-400 hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
                                       title="Edit Dokumen MoU"
                                     >
                                       <Edit className="h-3 w-3" />
                                     </button>
                                     <button
+                                      type="button"
                                       onClick={() => handleDeleteMou(partner.id, mou.id, mou.mouNumber)}
-                                      className="text-slate-400 hover:text-rose-600 cursor-pointer"
+                                      className="inline-flex h-6 w-6 items-center justify-center rounded-md text-slate-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
                                       title="Hapus MoU ini"
                                     >
                                       <Trash2 className="h-3 w-3" />
@@ -1536,7 +1552,7 @@ export const PklModule: React.FC = () => {
                                 <p className="font-semibold text-slate-800 dark:text-slate-200 text-[11px] mt-1">
                                   {mou.documentTitle}
                                 </p>
-                                <div className="flex items-center justify-between text-[10px] text-slate-500 mt-1">
+                                <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-500 mt-1">
                                   <span>Berlaku: {mou.startDate} s/d <strong>{mou.endDate}</strong></span>
                                   <span>Ruang Lingkup: {mou.scope}</span>
                                 </div>
@@ -1548,12 +1564,13 @@ export const PklModule: React.FC = () => {
 
                       {/* Riwayat Penempatan Siswa per Perusahaan (CRUD Siswa) */}
                       <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 shadow-2xs">
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                           <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide flex items-center gap-2">
-                            <Users className="h-4 w-4 text-indigo-600" />
-                            Riwayat Penempatan Siswa di {partner.name}
+                            <Users className="h-4 w-4 text-indigo-600 shrink-0" />
+                            <span>Riwayat Penempatan Siswa di {partner.name}</span>
                           </h3>
                           <button
+                            type="button"
                             onClick={() => {
                               setPlacementModalPartner(partner);
                               setPlacementForm({
@@ -1565,10 +1582,10 @@ export const PklModule: React.FC = () => {
                                 finalScore: 88,
                               });
                             }}
-                            className="flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-blue-700 cursor-pointer shadow-2xs"
+                            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-3 text-[11px] font-bold text-white hover:bg-blue-700 cursor-pointer shadow-2xs whitespace-nowrap shrink-0"
                           >
-                            <Plus className="h-3 w-3" />
-                            <span>+ Tempatkan Siswa Baru</span>
+                            <Plus className="h-3.5 w-3.5 shrink-0" />
+                            <span>Tempatkan Siswa Baru</span>
                           </button>
                         </div>
 
@@ -1620,17 +1637,19 @@ export const PklModule: React.FC = () => {
                                       </span>
                                     </td>
                                     <td className="p-2 text-center">
-                                      <div className="flex items-center justify-center gap-1">
+                                      <div className="inline-flex items-center justify-center gap-1">
                                         <button
+                                          type="button"
                                           onClick={() => setEditingPlacement({ partnerId: partner.id, placement: plc })}
-                                          className="p-1 text-slate-400 hover:text-blue-600"
+                                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 cursor-pointer shrink-0"
                                           title="Edit Nilai & Status Penempatan"
                                         >
                                           <Edit className="h-3.5 w-3.5" />
                                         </button>
                                         <button
+                                          type="button"
                                           onClick={() => handleDeletePlacement(partner.id, plc.id, plc.studentName)}
-                                          className="p-1 text-slate-400 hover:text-rose-600"
+                                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer shrink-0"
                                           title="Tarik Siswa dari Perusahaan"
                                         >
                                           <Trash2 className="h-3.5 w-3.5" />
@@ -1647,12 +1666,13 @@ export const PklModule: React.FC = () => {
 
                       {/* Evaluasi Perusahaan oleh Sekolah (CRUD Evaluasi) */}
                       <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 shadow-2xs">
-                        <div className="flex items-center justify-between mb-4">
+                        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                           <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wide flex items-center gap-2">
-                            <Award className="h-4 w-4 text-amber-500" />
-                            Evaluasi Perusahaan oleh Sekolah ORBITA
+                            <Award className="h-4 w-4 text-amber-500 shrink-0" />
+                            <span>Evaluasi Perusahaan oleh Sekolah ORBITA</span>
                           </h3>
                           <button
+                            type="button"
                             onClick={() => {
                               setEvaluatingPartner(partner);
                               setEvalForm({
@@ -1666,9 +1686,9 @@ export const PklModule: React.FC = () => {
                               });
                               setShowEvaluationModal(true);
                             }}
-                            className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1 cursor-pointer"
+                            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 text-xs font-bold text-blue-600 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300 cursor-pointer whitespace-nowrap shrink-0"
                           >
-                            <Edit3 className="h-3.5 w-3.5" />
+                            <Edit3 className="h-3.5 w-3.5 shrink-0" />
                             <span>Beri / Perbarui Evaluasi</span>
                           </button>
                         </div>
@@ -1730,10 +1750,11 @@ export const PklModule: React.FC = () => {
         <div className="space-y-6">
           {/* Sub-tab Navigation */}
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex flex-wrap items-center gap-1.5">
               <button
+                type="button"
                 onClick={() => setReportSubTab('by_class_major')}
-                className={`rounded-xl py-1.5 px-3 text-xs font-bold transition-all cursor-pointer ${
+                className={`inline-flex h-8 items-center justify-center rounded-xl px-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   reportSubTab === 'by_class_major'
                     ? 'bg-blue-600 text-white'
                     : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
@@ -1742,8 +1763,9 @@ export const PklModule: React.FC = () => {
                 1. Rekap Kelas &amp; Jurusan
               </button>
               <button
+                type="button"
                 onClick={() => setReportSubTab('by_company')}
-                className={`rounded-xl py-1.5 px-3 text-xs font-bold transition-all cursor-pointer ${
+                className={`inline-flex h-8 items-center justify-center rounded-xl px-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   reportSubTab === 'by_company'
                     ? 'bg-blue-600 text-white'
                     : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
@@ -1752,8 +1774,9 @@ export const PklModule: React.FC = () => {
                 2. Rekap per Perusahaan
               </button>
               <button
+                type="button"
                 onClick={() => setReportSubTab('visits_attendance')}
-                className={`rounded-xl py-1.5 px-3 text-xs font-bold transition-all cursor-pointer ${
+                className={`inline-flex h-8 items-center justify-center rounded-xl px-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   reportSubTab === 'visits_attendance'
                     ? 'bg-blue-600 text-white'
                     : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
@@ -1762,8 +1785,9 @@ export const PklModule: React.FC = () => {
                 3. Absensi &amp; Kunjungan
               </button>
               <button
+                type="button"
                 onClick={() => setReportSubTab('pending_reports')}
-                className={`rounded-xl py-1.5 px-3 text-xs font-bold transition-all cursor-pointer ${
+                className={`inline-flex h-8 items-center justify-center rounded-xl px-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   reportSubTab === 'pending_reports'
                     ? 'bg-blue-600 text-white'
                     : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
@@ -1772,8 +1796,9 @@ export const PklModule: React.FC = () => {
                 4. Laporan Belum Kumpul
               </button>
               <button
+                type="button"
                 onClick={() => setReportSubTab('grades')}
-                className={`rounded-xl py-1.5 px-3 text-xs font-bold transition-all cursor-pointer ${
+                className={`inline-flex h-8 items-center justify-center rounded-xl px-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   reportSubTab === 'grades'
                     ? 'bg-blue-600 text-white'
                     : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
@@ -1782,8 +1807,9 @@ export const PklModule: React.FC = () => {
                 5. Rekap Nilai PKL
               </button>
               <button
+                type="button"
                 onClick={() => setReportSubTab('graduate_absorption')}
-                className={`rounded-xl py-1.5 px-3 text-xs font-bold transition-all cursor-pointer ${
+                className={`inline-flex h-8 items-center justify-center rounded-xl px-3 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                   reportSubTab === 'graduate_absorption'
                     ? 'bg-blue-600 text-white'
                     : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
@@ -1794,8 +1820,9 @@ export const PklModule: React.FC = () => {
             </div>
 
             {/* Export & Action Tools */}
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex flex-wrap items-center gap-2">
               <button
+                type="button"
                 onClick={() => {
                   setStudentReportForm({
                     studentId: students[0]?.id || '',
@@ -1809,34 +1836,37 @@ export const PklModule: React.FC = () => {
                   });
                   setShowAddReportModal(true);
                 }}
-                className="flex items-center gap-1 rounded-xl bg-blue-600 py-1.5 px-3 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer shadow-xs"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer shadow-xs whitespace-nowrap shrink-0"
               >
-                <Plus className="h-3.5 w-3.5" />
-                <span>+ Entri Laporan Siswa</span>
+                <Plus className="h-3.5 w-3.5 shrink-0" />
+                <span>Entri Laporan Siswa</span>
               </button>
 
               <button
+                type="button"
                 onClick={exportToExcelReport}
-                className="flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 py-1.5 px-3 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-900/60 dark:bg-emerald-950/50 dark:text-emerald-300 cursor-pointer shadow-2xs"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-900/60 dark:bg-emerald-950/50 dark:text-emerald-300 cursor-pointer shadow-2xs whitespace-nowrap shrink-0"
                 title="Unduh Lembar Kerja Excel (.xlsx)"
               >
-                <Download className="h-3.5 w-3.5" />
+                <Download className="h-3.5 w-3.5 shrink-0" />
                 <span>Excel (.xlsx)</span>
               </button>
               <button
+                type="button"
                 onClick={exportToCsvReport}
-                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white py-1.5 px-3 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer shadow-2xs whitespace-nowrap shrink-0"
                 title="Unduh Data CSV (.csv)"
               >
-                <FileText className="h-3.5 w-3.5" />
+                <FileText className="h-3.5 w-3.5 shrink-0" />
                 <span>CSV</span>
               </button>
               <button
+                type="button"
                 onClick={exportToPdfReport}
-                className="flex items-center gap-1.5 rounded-xl bg-blue-600 py-1.5 px-3 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 title="Cetak Laporan PDF Resmi Lengkap dengan Kop Sekolah"
               >
-                <Printer className="h-3.5 w-3.5" />
+                <Printer className="h-3.5 w-3.5 shrink-0" />
                 <span>Cetak PDF</span>
               </button>
             </div>
@@ -1917,17 +1947,19 @@ export const PklModule: React.FC = () => {
                             {r.finalScore} ({r.grade})
                           </td>
                           <td className="p-2.5 text-center">
-                            <div className="flex items-center justify-center gap-1">
+                            <div className="inline-flex items-center justify-center gap-1">
                               <button
+                                type="button"
                                 onClick={() => setEditingReportItem(r)}
-                                className="p-1 text-slate-400 hover:text-blue-600"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 cursor-pointer shrink-0"
                                 title="Edit Laporan Siswa"
                               >
                                 <Edit className="h-3.5 w-3.5" />
                               </button>
                               <button
+                                type="button"
                                 onClick={() => handleDeleteStudentReport(r)}
-                                className="p-1 text-slate-400 hover:text-rose-600"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer shrink-0"
                                 title="Hapus Laporan Siswa"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
@@ -2011,8 +2043,9 @@ export const PklModule: React.FC = () => {
                             </td>
                             <td className="p-2.5 text-center">
                               <button
+                                type="button"
                                 onClick={() => setEditingPartner(p)}
-                                className="p-1 text-slate-400 hover:text-blue-600"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 cursor-pointer shrink-0"
                                 title="Edit Kuota / Data Perusahaan"
                               >
                                 <Edit className="h-3.5 w-3.5" />
@@ -2031,7 +2064,7 @@ export const PklModule: React.FC = () => {
           {/* SUB-VIEW 3: ABSENSI & KUNJUNGAN PEMBIMBING */}
           {reportSubTab === 'visits_attendance' && (
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3 dark:border-slate-800">
                 <div>
                   <h3 className="text-sm font-extrabold text-slate-900 dark:text-white">
                     Rekapitulasi Absensi &amp; Kunjungan Supervisi Guru Pembimbing
@@ -2041,11 +2074,12 @@ export const PklModule: React.FC = () => {
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setShowAddVisitModal(true)}
-                  className="flex items-center gap-1.5 rounded-xl bg-blue-600 py-1.5 px-3 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-8 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>+ Tambah Kunjungan</span>
+                  <Plus className="h-3.5 w-3.5 shrink-0" />
+                  <span>Tambah Kunjungan</span>
                 </button>
               </div>
 
@@ -2104,17 +2138,19 @@ export const PklModule: React.FC = () => {
                             </span>
                           </td>
                           <td className="p-2.5 text-center">
-                            <div className="flex items-center justify-center gap-1">
+                            <div className="inline-flex items-center justify-center gap-1">
                               <button
+                                type="button"
                                 onClick={() => setEditingVisit(v)}
-                                className="p-1 text-slate-400 hover:text-blue-600"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 cursor-pointer shrink-0"
                                 title="Edit Catatan Supervisi"
                               >
                                 <Edit className="h-3.5 w-3.5" />
                               </button>
                               <button
+                                type="button"
                                 onClick={() => handleDeleteVisit(v)}
-                                className="p-1 text-slate-400 hover:text-rose-600"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer shrink-0"
                                 title="Hapus Log Kunjungan"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
@@ -2133,17 +2169,17 @@ export const PklModule: React.FC = () => {
           {/* SUB-VIEW 4: LAPORAN YANG BELUM DIKUMPULKAN */}
           {reportSubTab === 'pending_reports' && (
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3 dark:border-slate-800">
                 <div>
                   <h3 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-500" />
-                    Rekapitulasi Tunggakan Laporan PKL yang Belum Dikumpulkan
+                    <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+                    <span>Rekapitulasi Tunggakan Laporan PKL yang Belum Dikumpulkan</span>
                   </h3>
                   <p className="text-xs text-slate-500">
                     Daftar siswa yang belum mengunggah laporan akhir magang atau memerlukan revisi pembimbing
                   </p>
                 </div>
-                <span className="rounded-full bg-rose-50 dark:bg-rose-950/60 border border-rose-200 px-3 py-1 text-xs font-bold text-rose-700 dark:text-rose-300">
+                <span className="rounded-full bg-rose-50 dark:bg-rose-950/60 border border-rose-200 px-3 py-1 text-xs font-bold text-rose-700 dark:text-rose-300 whitespace-nowrap">
                   {studentReports.filter(r => r.submissionStatus !== 'sudah_dikumpulkan').length} Siswa Menunggak
                 </span>
               </div>
@@ -2188,7 +2224,7 @@ export const PklModule: React.FC = () => {
                             </td>
                             <td className="p-2.5 text-center">
                               <span
-                                className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                                className={`rounded-full px-2 py-0.5 text-[9px] font-bold whitespace-nowrap ${
                                   r.submissionStatus === 'revisi'
                                     ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
                                     : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
@@ -2198,8 +2234,9 @@ export const PklModule: React.FC = () => {
                               </span>
                             </td>
                             <td className="p-2.5 text-center">
-                              <div className="flex items-center justify-center gap-1.5">
+                              <div className="inline-flex items-center justify-center gap-1.5">
                                 <button
+                                  type="button"
                                   onClick={() => {
                                     savePklReport({
                                       ...r,
@@ -2208,14 +2245,15 @@ export const PklModule: React.FC = () => {
                                     });
                                     showToast(`Laporan ${r.studentName} ditandai SUDAH DIKUMPULKAN.`);
                                   }}
-                                  className="rounded-lg bg-emerald-600 px-2 py-1 text-[10px] font-bold text-white hover:bg-emerald-700 cursor-pointer shadow-2xs"
+                                  className="inline-flex h-7 items-center justify-center rounded-lg bg-emerald-600 px-2.5 text-[10px] font-bold text-white hover:bg-emerald-700 cursor-pointer shadow-2xs whitespace-nowrap shrink-0"
                                   title="Tandai Sudah Dikumpulkan"
                                 >
                                   Verifikasi Kumpul
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={() => showToast(`Notifikasi pengingat laporan berhasil dikirim ke siswa ${r.studentName}.`)}
-                                  className="rounded-lg bg-amber-500 px-2 py-1 text-[10px] font-bold text-white hover:bg-amber-600 cursor-pointer shadow-2xs"
+                                  className="inline-flex h-7 items-center justify-center rounded-lg bg-amber-500 px-2.5 text-[10px] font-bold text-white hover:bg-amber-600 cursor-pointer shadow-2xs whitespace-nowrap shrink-0"
                                 >
                                   Reminder
                                 </button>
@@ -2302,8 +2340,9 @@ export const PklModule: React.FC = () => {
                           </td>
                           <td className="p-2.5 text-center">
                             <button
+                              type="button"
                               onClick={() => setEditingReportItem(r)}
-                              className="p-1 text-slate-400 hover:text-blue-600"
+                              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 cursor-pointer shrink-0"
                               title="Edit Nilai PKL Siswa"
                             >
                               <Edit className="h-3.5 w-3.5" />
@@ -2463,9 +2502,14 @@ export const PklModule: React.FC = () => {
       {/* ==================================================================== */}
       {/* MODAL: TAMBAH MITRA INDUSTRI / DUDI BARU                            */}
       {/* ==================================================================== */}
-      {showAddPartnerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 max-h-[90vh] overflow-y-auto">
+      {showAddPartnerModal && typeof document !== 'undefined' && createPortal(
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowAddPartnerModal(false);
+          }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/65 backdrop-blur-md overflow-y-auto animate-fade-in"
+        >
+          <div className="relative m-auto w-full max-w-2xl rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-2xl dark:border-slate-800 dark:bg-slate-900 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 dark:border-slate-800">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
@@ -2479,8 +2523,9 @@ export const PklModule: React.FC = () => {
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setShowAddPartnerModal(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -2591,32 +2636,38 @@ export const PklModule: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowAddPartnerModal(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Mitra DUDI
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ==================================================================== */}
       {/* MODAL: EDIT DATA MITRA INDUSTRI / DUDI                              */}
       {/* ==================================================================== */}
-      {editingPartner && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+      {editingPartner && typeof document !== 'undefined' && createPortal(
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setEditingPartner(null);
+          }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/65 backdrop-blur-md overflow-y-auto animate-fade-in"
+        >
+          <div className="relative m-auto w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 sm:p-7 shadow-2xl dark:border-slate-800 dark:bg-slate-900 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <Edit className="h-5 w-5 text-blue-600" />
@@ -2625,8 +2676,9 @@ export const PklModule: React.FC = () => {
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={() => setEditingPartner(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -2697,24 +2749,25 @@ export const PklModule: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEditingPartner(null)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Perubahan
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ==================================================================== */}
@@ -2800,17 +2853,17 @@ export const PklModule: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setPlacementModalPartner(null)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Tempatkan Siswa
                 </button>
@@ -2908,17 +2961,17 @@ export const PklModule: React.FC = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEditingPlacement(null)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Perubahan
                 </button>
@@ -3002,17 +3055,17 @@ export const PklModule: React.FC = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setMouModalPartner(null)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-emerald-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-emerald-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan MoU
                 </button>
@@ -3140,17 +3193,17 @@ export const PklModule: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEditingMou(null)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Perubahan MoU
                 </button>
@@ -3269,17 +3322,17 @@ export const PklModule: React.FC = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowAddVisitModal(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Catatan Supervisi
                 </button>
@@ -3355,17 +3408,17 @@ export const PklModule: React.FC = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEditingVisit(null)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Perubahan
                 </button>
@@ -3494,17 +3547,17 @@ export const PklModule: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowAddReportModal(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Laporan &amp; Nilai
                 </button>
@@ -3599,17 +3652,17 @@ export const PklModule: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEditingReportItem(null)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Perubahan
                 </button>
@@ -3727,17 +3780,17 @@ export const PklModule: React.FC = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowEvaluationModal(false)}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Evaluasi
                 </button>

@@ -709,7 +709,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             background: 'linear-gradient(145deg, #7266C4 0%, #5D51B2 52%, #4B3FA0 100%)',
             boxShadow: '0 22px 44px -10px rgba(93, 81, 178, 0.36)',
           }}
-          className="group/banner lg:col-span-7 relative rounded-[28px] p-6 text-white flex flex-col justify-between overflow-hidden"
+          className="group/banner lg:col-span-7 relative rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 text-white flex flex-col justify-between overflow-hidden"
         >
           {dashboardBannerBg && (
             <img
@@ -721,18 +721,18 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           )}
 
           {/* Top Row: "Overview" + Interactive Class, Month, Year & Dataset Filters */}
-          <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5">
-            <div>
-              <h1 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-xl font-extrabold text-white tracking-tight truncate">
                 Overview Real-Time Database
               </h1>
-              <p className="text-[11px] text-white/75 font-medium">
+              <p className="text-[11px] text-white/75 font-medium truncate">
                 ORBITA Akademi &middot; T.A. {activeAcademicYear?.name || '2025/2026'}
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5">
-              <div className="opacity-0 group-hover/banner:opacity-100 transition-opacity">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 w-full sm:w-auto">
+              <div className="hidden sm:block opacity-0 group-hover/banner:opacity-100 transition-opacity">
                 <BoxBgControl boxKey="banner_dashboard" isBanner moduleKey="dashboard" compact />
               </div>
 
@@ -741,7 +741,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                 value={selectedClassFilter}
                 onChange={e => setSelectedClassFilter(e.target.value)}
                 title="Filter Kelas / Rombel"
-                className="rounded-full border border-white/25 bg-white/14 hover:bg-white/22 px-3 py-1 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
+                className="min-w-0 w-full sm:w-auto truncate rounded-full border border-white/25 bg-white/14 hover:bg-white/22 px-2.5 py-1.5 sm:py-1 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
               >
                 <option value="ALL" className="text-[#3E385B]">
                   Semua Kelas ({students.length} Siswa)
@@ -764,7 +764,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                   }
                 }}
                 title="Filter Bulan"
-                className="rounded-full border border-white/25 bg-white/14 hover:bg-white/22 px-2.5 py-1 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
+                className="min-w-0 w-full sm:w-auto truncate rounded-full border border-white/25 bg-white/14 hover:bg-white/22 px-2.5 py-1.5 sm:py-1 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
               >
                 <option value="ALL" className="text-[#3E385B]">
                   Semua Bulan
@@ -781,7 +781,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                 value={selectedYearFilter}
                 onChange={e => setSelectedYearFilter(e.target.value)}
                 title="Filter Tahun"
-                className="rounded-full border border-white/25 bg-white/14 hover:bg-white/22 px-2.5 py-1 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
+                className="min-w-0 w-full sm:w-auto truncate rounded-full border border-white/25 bg-white/14 hover:bg-white/22 px-2.5 py-1.5 sm:py-1 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
               >
                 <option value="ALL" className="text-[#3E385B]">
                   Semua Tahun
@@ -808,7 +808,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                   )
                 }
                 title="Klik untuk beralih dataset grafik (Kehadiran / Nilai Akademik / PKL / Siswa)"
-                className="no-ornament inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/20 hover:bg-white/30 px-3 py-1 text-[11px] font-extrabold text-white transition-all cursor-pointer"
+                className="no-ornament inline-flex h-8 sm:h-7 w-full sm:w-auto items-center justify-center gap-1.5 rounded-full border border-white/30 bg-white/20 hover:bg-white/30 px-3 text-[11px] font-extrabold text-white whitespace-nowrap shrink-0 transition-all cursor-pointer"
               >
                 <span>
                   {activeChartView === 'kehadiran'
@@ -912,7 +912,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             </svg>
 
             {/* Interactive 12-Month Strip */}
-            <div className="mt-1.5 flex items-center justify-between gap-0.5 text-[10px] text-white/75 px-0.5 overflow-x-auto scrollbar-none">
+            <div className="mt-1.5 flex items-center sm:justify-between gap-1 text-[10px] text-white/75 px-0.5 overflow-x-auto snap-x snap-mandatory scrollbar-none">
               {overviewWaveSeries.map((m, idx) => {
                 const isAct = idx === effectivePointIdx;
                 return (
@@ -925,7 +925,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                         selectedMonthFilter === m.monthValue ? 'ALL' : m.monthValue
                       );
                     }}
-                    className={`no-ornament px-2 py-0.5 rounded-full text-[10px] transition-all cursor-pointer shrink-0 ${
+                    className={`no-ornament snap-center inline-flex h-7 min-w-[36px] sm:min-w-0 items-center justify-center px-2 rounded-full text-[10px] whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                       isAct
                         ? 'bg-white text-[#4E42A1] font-extrabold shadow-xs'
                         : 'text-white/70 hover:text-white font-medium'
@@ -939,20 +939,20 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           </div>
 
           {/* Bottom 3-Column Metric Bar with Center Elevated Pedestal */}
-          <div className="relative z-10 grid grid-cols-3 items-center gap-2 pt-3 border-t border-white/12 text-center">
+          <div className="relative z-10 grid grid-cols-3 items-center gap-1.5 sm:gap-2 pt-3 border-t border-white/12 text-center">
             <div
               onClick={() => {
                 setActiveChartView('kehadiran');
               }}
-              className={`cursor-pointer rounded-xl py-1.5 transition-colors ${
+              className={`cursor-pointer rounded-xl py-1.5 px-1 transition-colors min-w-0 ${
                 activeChartView === 'kehadiran' ? 'bg-white/10' : 'hover:bg-white/8'
               }`}
             >
-              <span className="text-[10px] text-white/75 block">Presensi ({activeMonth})</span>
-              <span className="text-base sm:text-xl font-extrabold text-white tabular-nums block leading-tight mt-0.5">
+              <span className="text-[9.5px] sm:text-[10px] text-white/75 block truncate">Presensi ({activeMonth})</span>
+              <span className="text-sm sm:text-xl font-extrabold text-white tabular-nums block leading-tight mt-0.5">
                 {activeWavePoint.attPct}%
               </span>
-              <span className="text-[10px] text-white/75 block">{filteredSessions.length} Sesi</span>
+              <span className="text-[9.5px] sm:text-[10px] text-white/75 block truncate">{filteredSessions.length} Sesi</span>
             </div>
 
             <div
@@ -965,20 +965,20 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                       : 'kehadiran'
                 )
               }
-              className="rounded-[22px] bg-white/15 border border-white/25 px-3 py-3 shadow-inner cursor-pointer hover:bg-white/22 transition-colors"
+              className="rounded-[18px] sm:rounded-[22px] bg-white/15 border border-white/25 px-2 sm:px-3 py-2.5 sm:py-3 shadow-inner cursor-pointer hover:bg-white/22 transition-colors min-w-0"
             >
-              <span className="text-[10px] text-white/85 block">
+              <span className="text-[9.5px] sm:text-[10px] text-white/85 block truncate">
                 {activeChartView === 'kehadiran'
                   ? 'Kehadiran Efektif'
                   : activeChartView === 'akademik'
                   ? 'Skor Rata-rata'
                   : 'Verifikasi PKL'}
               </span>
-              <span className="text-lg sm:text-2xl font-black text-white tabular-nums block leading-tight mt-0.5">
+              <span className="text-base sm:text-2xl font-black text-white tabular-nums block leading-tight mt-0.5">
                 {activeWavePoint.value}
                 {activeChartView === 'akademik' ? ' Poin' : '%'}
               </span>
-              <span className="text-[10px] text-white/85 block">
+              <span className="text-[9.5px] sm:text-[10px] text-white/85 block truncate">
                 {activeMonth} &bull; {activeWavePoint.contextLabel}
               </span>
             </div>
@@ -987,15 +987,15 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
               onClick={() => {
                 setActiveChartView('akademik');
               }}
-              className={`cursor-pointer rounded-xl py-1.5 transition-colors ${
+              className={`cursor-pointer rounded-xl py-1.5 px-1 transition-colors min-w-0 ${
                 activeChartView === 'akademik' ? 'bg-white/10' : 'hover:bg-white/8'
               }`}
             >
-              <span className="text-[10px] text-white/75 block">Lulus KKM ({activeMonth})</span>
-              <span className="text-base sm:text-xl font-extrabold text-white tabular-nums block leading-tight mt-0.5">
+              <span className="text-[9.5px] sm:text-[10px] text-white/75 block truncate">Lulus KKM ({activeMonth})</span>
+              <span className="text-sm sm:text-xl font-extrabold text-white tabular-nums block leading-tight mt-0.5">
                 {academicAnalytics.kkmPassPct}%
               </span>
-              <span className="text-[10px] text-white/75 block">Rata-rata {activeWavePoint.gradeVal}</span>
+              <span className="text-[9.5px] sm:text-[10px] text-white/75 block truncate">Avg {activeWavePoint.gradeVal}</span>
             </div>
           </div>
         </div>
@@ -1083,9 +1083,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
 
       {/* ============================================================ */}
       {/* ROW 2: EXACT 3 WHITE FLOATING PURPLE-SQUIRCLE PROGRESS CARDS */}
-      {/* ("Bicycle Drill", "Jogging Hero", "Healthy Busy" 1:1 Style)  */}
-      {/* ============================================================ */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6 pt-6">
         {[
           {
             id: 'drill_attendance',
@@ -1179,10 +1177,8 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
         ))}
       </div>
 
-      {/* ============================================================ */}
-      {/* ROW 3: 4 INTERACTIVE 3D FLIPCARD KPI PRESENTATION BOXES      */}
-      {/* ============================================================ */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch pt-3">
+      {/* ROW 3: 4 INTERACTIVE 3D FLIPCARD KPI PRESENTATION BOXES */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-7 sm:gap-5 items-stretch pt-4">
         {/* FLIPCARD 1: KEHADIRAN */}
         <JrpgFlipBox
           boxId="kpi_attendance"
@@ -1478,7 +1474,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
       {/* INTERACTIVE CHARTS & PERCENTAGE TELEMETRY HUB                */}
       {/* (Replaces old Student Directory with full Charts & % Stats)  */}
       {/* ============================================================ */}
-      <OrnateCard boxId="dashboard_charts_hub" className="p-6">
+      <OrnateCard boxId="dashboard_charts_hub" className="p-4 sm:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#EFE2BE] dark:border-slate-800 pb-4 mb-6">
           <div>
             <OrnateSectionHeader
@@ -1487,7 +1483,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 pr-8">
+          <div className="flex flex-wrap items-center gap-2 pr-0 sm:pr-8">
             {/* Class Filter (Semua Kelas vs Per Kelas) */}
             <div className="flex items-center gap-1.5 rounded-full border border-[#E4E3F0] bg-[#F4F3FA] px-3 py-1.5 shadow-2xs">
               <OrbitaMenuIcon variant="master-data" className="h-3.5 w-3.5 text-[#6C60B8]" />
@@ -1555,60 +1551,60 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                   setSelectedMonthFilter('ALL');
                   setSelectedYearFilter('ALL');
                 }}
-                className="no-ornament rounded-full bg-[#FFE4EC] hover:bg-[#FFD2E0] px-3 py-1.5 text-[11px] font-extrabold text-[#F25781] transition-colors cursor-pointer"
+                className="no-ornament inline-flex h-9 items-center justify-center rounded-full bg-[#FFE4EC] hover:bg-[#FFD2E0] px-3.5 text-[11px] font-extrabold text-[#F25781] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
               >
                 Reset Filter
               </button>
             )}
 
             {/* Chart Category Switcher (Soft Lavender & Royal Purple Rounded Tabs) */}
-            <div className="flex flex-wrap rounded-full border border-[#E4E3F0] bg-[#F4F3FA] p-1 shadow-2xs">
+            <div className="flex flex-wrap items-center gap-1 rounded-2xl sm:rounded-full border border-[#E4E3F0] bg-[#F4F3FA] p-1 shadow-2xs">
               <button
                 type="button"
                 onClick={() => setActiveChartView('kehadiran')}
-                className={`no-ornament flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-extrabold transition-all cursor-pointer ${
+                className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                   activeChartView === 'kehadiran'
                     ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.3)]'
                     : 'text-[#6E6A86] hover:text-[#3E385B]'
                 }`}
               >
-                <OrbitaMenuIcon variant="attendance" className="h-3.5 w-3.5" />
+                <OrbitaMenuIcon variant="attendance" className="h-3.5 w-3.5 shrink-0" />
                 <span>Presensi</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveChartView('akademik')}
-                className={`no-ornament flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-extrabold transition-all cursor-pointer ${
+                className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                   activeChartView === 'akademik'
                     ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.3)]'
                     : 'text-[#6E6A86] hover:text-[#3E385B]'
                 }`}
               >
-                <OrbitaMenuIcon variant="grading" className="h-3.5 w-3.5" />
+                <OrbitaMenuIcon variant="grading" className="h-3.5 w-3.5 shrink-0" />
                 <span>Penilaian &amp; KKM</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveChartView('pkl_bk')}
-                className={`no-ornament flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-extrabold transition-all cursor-pointer ${
+                className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                   activeChartView === 'pkl_bk'
                     ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.3)]'
                     : 'text-[#6E6A86] hover:text-[#3E385B]'
                 }`}
               >
-                <OrbitaMenuIcon variant="pkl" className="h-3.5 w-3.5" />
+                <OrbitaMenuIcon variant="pkl" className="h-3.5 w-3.5 shrink-0" />
                 <span>PKL</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveChartView('siswa')}
-                className={`no-ornament flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-extrabold transition-all cursor-pointer ${
+                className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                   activeChartView === 'siswa'
                     ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.3)]'
                     : 'text-[#6E6A86] hover:text-[#3E385B]'
                 }`}
               >
-                <OrbitaMenuIcon variant="master-data" className="h-3.5 w-3.5" />
+                <OrbitaMenuIcon variant="master-data" className="h-3.5 w-3.5 shrink-0" />
                 <span>Data Siswa</span>
               </button>
             </div>
@@ -1749,17 +1745,17 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-[#ECEBF5] flex items-center justify-between text-xs">
+              <div className="mt-4 pt-3 border-t border-[#ECEBF5] flex flex-wrap items-center justify-between gap-2 text-xs">
                 <span className="text-[#9694A8] font-semibold">
                   Total Sesi Presensi Tercatat: <strong className="text-[#3E385B]">{attendanceSessions.length} Sesi</strong>
                 </span>
                 <button
                   type="button"
                   onClick={() => handleNavigate('attendance')}
-                  className="no-ornament inline-flex items-center gap-1 font-extrabold text-[#6C60B8] hover:underline cursor-pointer"
+                  className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-xl bg-[#F0EEFA] hover:bg-[#E4E1F6] px-3 text-xs font-extrabold text-[#6C60B8] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
                   <span>Buka Modul Presensi</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
+                  <ChevronRight className="h-3.5 w-3.5 shrink-0" />
                 </button>
               </div>
             </OrnateCard>
@@ -1881,7 +1877,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                 </div>
 
                 {/* Interactive Vertical Columns Chart */}
-                <div className="grid grid-cols-4 gap-3 items-end h-48 pt-6 px-2 border-b border-[#ECEBF5]">
+                <div className="grid grid-cols-4 gap-1.5 sm:gap-3 items-end h-48 pt-6 px-1 sm:px-2 border-b border-[#ECEBF5]">
                   {[
                     {
                       grade: 'A',
@@ -2019,10 +2015,10 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                 <button
                   type="button"
                   onClick={() => handleNavigate('grading')}
-                  className="no-ornament inline-flex items-center gap-1 rounded-xl bg-[#6C60B8] px-3.5 py-2 text-xs font-extrabold text-white hover:bg-[#5B4FA8] transition-colors cursor-pointer"
+                  className="no-ornament inline-flex h-9 items-center justify-center gap-1 rounded-xl bg-[#6C60B8] px-3.5 text-xs font-extrabold text-white hover:bg-[#5B4FA8] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
                   <span>Kelola Nilai</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
+                  <ChevronRight className="h-3.5 w-3.5 shrink-0" />
                 </button>
               </div>
 
@@ -2033,14 +2029,14 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                     onClick={() => handleNavigate('grading')}
                     className="rounded-[18px] border border-[#ECEBF5] bg-[#FAF9FE] p-3.5 transition-all hover:border-[#6C60B8] cursor-pointer"
                   >
-                    <div className="flex items-center justify-between text-xs mb-1.5">
-                      <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs mb-1.5">
+                      <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                         <span className="font-extrabold text-[#3E385B]">{sub.name}</span>
-                        <span className="ml-2 rounded-full bg-[#F0EEFA] px-2.5 py-0.5 text-[10px] font-bold text-[#6C60B8]">
+                        <span className="rounded-full bg-[#F0EEFA] px-2.5 py-0.5 text-[10px] font-bold text-[#6C60B8]">
                           {sub.code} &bull; KKM {sub.kkm}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 font-extrabold">
+                      <div className="flex items-center gap-3 font-extrabold shrink-0">
                         <span className="text-[#6C60B8]">
                           Rata-rata: {sub.avgScore}
                         </span>
@@ -2323,17 +2319,17 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-[#ECEBF5] flex items-center justify-between text-xs">
+              <div className="mt-4 pt-3 border-t border-[#ECEBF5] flex flex-wrap items-center justify-between gap-2 text-xs">
                 <span className="text-[#9694A8] font-semibold">
                   Dewan Guru Aktif: <strong className="text-[#3E385B]">{teachers.length} Pengajar</strong>
                 </span>
                 <button
                   type="button"
                   onClick={() => handleNavigate('master-data')}
-                  className="no-ornament inline-flex items-center gap-1 font-extrabold text-[#6C60B8] hover:underline cursor-pointer"
+                  className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-xl bg-[#F0EEFA] hover:bg-[#E4E1F6] px-3 text-xs font-extrabold text-[#6C60B8] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
                   <span>Buka Master Data</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
+                  <ChevronRight className="h-3.5 w-3.5 shrink-0" />
                 </button>
               </div>
             </OrnateCard>
@@ -2369,8 +2365,8 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                           : 'border-[#ECEBF5] bg-[#FAF9FE] hover:border-[#D0CBEF]'
                       }`}
                     >
-                      <div className="flex items-center justify-between text-xs mb-1.5">
-                        <div className="flex items-center gap-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs mb-1.5">
+                        <div className="flex flex-wrap items-center gap-2 min-w-0">
                           <span className="rounded-lg bg-[#6C60B8] text-white px-2.5 py-0.5 text-xs font-extrabold">
                             {cls.name}
                           </span>
@@ -2378,7 +2374,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                             {cls.studentCount} Siswa ({cls.maleCount} L / {cls.femaleCount} P)
                           </span>
                         </div>
-                        <span className="font-extrabold text-[#139A4C]">
+                        <span className="font-extrabold text-[#139A4C] shrink-0">
                           {sharePct}% dari Total Sekolah
                         </span>
                       </div>
@@ -2400,8 +2396,8 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
       {/* ============================================================ */}
       {/* JRPG TACTICAL TABLE: MATRIKS PERSENTASE & PERFORMA ROMBEL    */}
       {/* ============================================================ */}
-      <OrnateCard boxId="dashboard_class_matrix" className="p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pr-14">
+      <OrnateCard boxId="dashboard_class_matrix" className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pr-10">
           <OrnateSectionHeader
             title="Matriks Persentase Kehadiran & Capaian Akademik Per Kelas"
             subtitle="Arahkan kursor pada baris tabel untuk melihat sorotan indikator performa akademik secara interaktif"
@@ -2409,10 +2405,10 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           <button
             type="button"
             onClick={() => handleNavigate('reports')}
-            className="no-ornament inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#4F46E5] to-[#7C3AED] border border-[#D3BC8E]/70 px-4 py-2 text-xs font-extrabold text-white shadow-md hover:brightness-110 transition-all cursor-pointer shrink-0"
+            className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] hover:bg-[#5B4FA8] px-4 text-xs font-extrabold text-white shadow-sm whitespace-nowrap shrink-0 transition-all cursor-pointer"
           >
-            <PrimogemIcon className="h-3.5 w-3.5" />
-            <span>Buka Laporan &amp; Leger Lengkap</span>
+            <OrbitaMenuIcon variant="reports" className="h-3.5 w-3.5 shrink-0" />
+            <span>Buka Laporan &amp; Leger</span>
           </button>
         </div>
 

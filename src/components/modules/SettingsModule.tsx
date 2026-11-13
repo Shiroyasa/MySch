@@ -633,58 +633,63 @@ export const SettingsModule: React.FC = () => {
         rightContent={
           <div className="flex flex-wrap items-center gap-1.5 rounded-[18px] border border-[#E6E8F2] bg-[#F5F6FA] p-1.5 shadow-xs">
             <button
+              type="button"
               onClick={() => setActiveSection('backgrounds')}
-              className={`no-ornament flex items-center gap-1.5 rounded-[12px] px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
                 activeSection === 'backgrounds'
                   ? 'bg-[#685BC7] text-white shadow-xs'
                   : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
               }`}
             >
-              <Palette className="h-3.5 w-3.5" />
+              <Palette className="h-3.5 w-3.5 shrink-0" />
               <span>Logo &amp; Background</span>
             </button>
             <button
+              type="button"
               onClick={() => setActiveSection('profile')}
-              className={`no-ornament flex items-center gap-1.5 rounded-[12px] px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
                 activeSection === 'profile'
                   ? 'bg-[#685BC7] text-white shadow-xs'
                   : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
               }`}
             >
-              <User className="h-3.5 w-3.5" />
-              <span>Profil ({currentUser.displayName.split(' ')[0]})</span>
+              <User className="h-3.5 w-3.5 shrink-0" />
+              <span className="max-w-[120px] truncate">Profil ({currentUser.displayName.split(' ')[0]})</span>
             </button>
             <button
+              type="button"
               onClick={() => setActiveSection('school')}
-              className={`no-ornament flex items-center gap-1.5 rounded-[12px] px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
                 activeSection === 'school'
                   ? 'bg-[#685BC7] text-white shadow-xs'
                   : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
               }`}
             >
-              <School className="h-3.5 w-3.5" />
+              <School className="h-3.5 w-3.5 shrink-0" />
               <span>Profil Lembaga</span>
             </button>
             <button
+              type="button"
               onClick={() => setActiveSection('backup')}
-              className={`no-ornament flex items-center gap-1.5 rounded-[12px] px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
                 activeSection === 'backup'
                   ? 'bg-[#685BC7] text-white shadow-xs'
                   : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
               }`}
             >
-              <ShieldCheck className="h-3.5 w-3.5" />
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
               <span>Cadangan Data</span>
             </button>
             <button
+              type="button"
               onClick={() => setActiveSection('cloud-sync')}
-              className={`no-ornament flex items-center gap-1.5 rounded-[12px] px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
                 activeSection === 'cloud-sync'
                   ? 'bg-[#685BC7] text-white shadow-xs'
                   : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
               }`}
             >
-              <Cloud className="h-3.5 w-3.5" />
+              <Cloud className="h-3.5 w-3.5 shrink-0" />
               <span>Cloud Sync</span>
             </button>
           </div>
@@ -795,35 +800,35 @@ export const SettingsModule: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => appLogoInputRef.current?.click()}
-                    className="flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 px-3 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition-colors cursor-pointer"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-amber-600 px-3 text-xs font-bold text-white shadow-sm hover:bg-amber-700 transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
                   >
-                    <ImagePlus className="h-4 w-4 text-[#FEF08A]" />
+                    <ImagePlus className="h-4 w-4 text-[#FEF08A] shrink-0" />
                     <span>Upload Logo File</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setShowLogoUrlModal(!showLogoUrlModal)}
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs font-bold text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200 transition-colors cursor-pointer"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 text-xs font-bold text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200 transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
                   >
-                    <Link2 className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    <Link2 className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
                     <span>Input URL Logo</span>
                   </button>
                 </div>
 
                 {/* Logo Fit Toggle */}
-                <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/60">
-                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                <div className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/60">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                     Kerapian Bingkai (Fit):
                   </span>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
                       type="button"
                       onClick={() => {
                         updateVisualSettings({ appLogoFit: 'contain' });
                         showBgToast('Mode tampilan logo: Proporsional Utuh (Contain)');
                       }}
-                      className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all cursor-pointer ${
+                      className={`inline-flex h-7 items-center justify-center rounded-lg px-2.5 text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap leading-none ${
                         visualSettings?.appLogoFit !== 'cover'
                           ? 'bg-[#2563EB] text-white shadow-xs'
                           : 'text-slate-500 hover:text-slate-800 dark:text-slate-400'
@@ -837,7 +842,7 @@ export const SettingsModule: React.FC = () => {
                         updateVisualSettings({ appLogoFit: 'cover' });
                         showBgToast('Mode tampilan logo: Penuh Bingkai (Cover)');
                       }}
-                      className={`rounded-lg px-2 py-1 text-[11px] font-bold transition-all cursor-pointer ${
+                      className={`inline-flex h-7 items-center justify-center rounded-lg px-2.5 text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap leading-none ${
                         visualSettings?.appLogoFit === 'cover'
                           ? 'bg-[#2563EB] text-white shadow-xs'
                           : 'text-slate-500 hover:text-slate-800 dark:text-slate-400'
@@ -855,9 +860,9 @@ export const SettingsModule: React.FC = () => {
                       updateVisualSettings({ appLogoUrl: null });
                       showBgToast('Logo aplikasi dikembalikan ke lambang mahkota default.');
                     }}
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 transition-colors cursor-pointer"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 transition-colors cursor-pointer whitespace-nowrap leading-none"
                   >
-                    <RotateCcw className="h-3.5 w-3.5" />
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
                     <span>Reset Logo ke Default</span>
                   </button>
                 )}
@@ -872,7 +877,7 @@ export const SettingsModule: React.FC = () => {
                   value={inputLogoUrl}
                   onChange={e => setInputLogoUrl(e.target.value)}
                   placeholder="https://contoh-domain.sch.id/assets/logo-sekolah.png"
-                  className="flex-1 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs text-slate-900 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-9 flex-1 rounded-xl border border-slate-300 bg-white px-3.5 text-xs text-slate-900 focus:border-amber-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 />
                 <button
                   type="button"
@@ -884,7 +889,7 @@ export const SettingsModule: React.FC = () => {
                       setInputLogoUrl('');
                     }
                   }}
-                  className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-4 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0 leading-none"
                 >
                   Terapkan URL
                 </button>
@@ -1053,11 +1058,11 @@ export const SettingsModule: React.FC = () => {
                   disabled={!visualSettings?.appLogoUrl}
                   className="group flex items-center justify-between gap-3 rounded-2xl border-2 border-[#D4AF37] bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 p-3.5 text-white shadow-md hover:from-amber-600 hover:to-amber-800 disabled:opacity-50 transition-all cursor-pointer"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20 shadow-inner">
                       <Wand2 className="h-5 w-5 text-amber-200 group-hover:rotate-12 transition-transform" />
                     </div>
-                    <div className="text-left">
+                    <div className="text-left min-w-0">
                       <p className="text-xs font-black uppercase tracking-wide">
                         Gunakan Logo Aplikasi Saat Ini
                       </p>
@@ -1066,16 +1071,16 @@ export const SettingsModule: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-amber-200" />
+                  <ChevronRight className="h-5 w-5 text-amber-200 shrink-0" />
                 </button>
 
                 {/* Custom Favicon Upload Button */}
                 <button
                   type="button"
                   onClick={() => faviconInputRef.current?.click()}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap leading-none"
                 >
-                  <Upload className="h-4 w-4 text-blue-200" />
+                  <Upload className="h-4 w-4 text-blue-200 shrink-0" />
                   <span>Upload Favicon Kustom (.ICO / .PNG / .SVG)</span>
                 </button>
 
@@ -1087,9 +1092,9 @@ export const SettingsModule: React.FC = () => {
                       updateVisualSettings({ faviconUrl: null });
                       showBgToast('Favicon browser dikembalikan ke ikon mahkota default.');
                     }}
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 transition-colors cursor-pointer"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 transition-colors cursor-pointer whitespace-nowrap leading-none"
                   >
-                    <RotateCcw className="h-3.5 w-3.5" />
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
                     <span>Reset Favicon ke Default</span>
                   </button>
                 )}
@@ -1204,9 +1209,9 @@ export const SettingsModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => loginBgInputRef.current?.click()}
-                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                  className="min-w-[200px] flex-1 inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white shadow-sm hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap leading-none"
                 >
-                  <Film className="h-4 w-4 text-[#FDE047]" />
+                  <Film className="h-4 w-4 text-[#FDE047] shrink-0" />
                   <span>Upload Gambar / Video Live Login</span>
                 </button>
 
@@ -1220,9 +1225,9 @@ export const SettingsModule: React.FC = () => {
                       });
                       showBgToast('Background Login dikembalikan ke ilustrasi Skyborne Academy.');
                     }}
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 transition-colors cursor-pointer"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
                   >
-                    <RotateCcw className="h-3.5 w-3.5" />
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
                     <span>Reset Default</span>
                   </button>
                 )}
@@ -1246,13 +1251,13 @@ export const SettingsModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={toggleDarkMode}
-                  className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold border transition-all cursor-pointer ${
+                  className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-xl px-3.5 text-xs font-bold border transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
                     darkMode
                       ? 'border-amber-400/60 bg-slate-950 text-amber-300 shadow-sm'
                       : 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  {darkMode ? <Moon className="h-3.5 w-3.5 text-amber-400" /> : <Sun className="h-3.5 w-3.5 text-amber-500" />}
+                  {darkMode ? <Moon className="h-3.5 w-3.5 text-amber-400 shrink-0" /> : <Sun className="h-3.5 w-3.5 text-amber-500 shrink-0" />}
                   <span>{darkMode ? 'Dark Mode: Aktif' : 'Light Mode: Aktif'}</span>
                 </button>
               </div>
@@ -1372,9 +1377,9 @@ export const SettingsModule: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => menuBgInputRef.current?.click()}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition-colors cursor-pointer"
+                    className="min-w-[200px] flex-1 inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition-colors cursor-pointer whitespace-nowrap leading-none"
                   >
-                    <Film className="h-4 w-4 text-[#FDE047]" />
+                    <Film className="h-4 w-4 text-[#FDE047] shrink-0" />
                     <span>Upload Gambar / Video Live Menu</span>
                   </button>
 
@@ -1388,9 +1393,9 @@ export const SettingsModule: React.FC = () => {
                         });
                         showBgToast('Background Menu Utama dikembalikan ke pengaturan default.');
                       }}
-                      className="flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 transition-colors cursor-pointer"
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
                     >
-                      <RotateCcw className="h-3.5 w-3.5" />
+                      <RotateCcw className="h-3.5 w-3.5 shrink-0" />
                       <span>Reset Menu BG</span>
                     </button>
                   )}
@@ -1421,9 +1426,9 @@ export const SettingsModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => globalBannerBgInputRef.current?.click()}
-                  className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0 leading-none"
                 >
-                  <ImagePlus className="h-3.5 w-3.5 text-[#FDE047]" />
+                  <ImagePlus className="h-3.5 w-3.5 text-[#FDE047] shrink-0" />
                   <span>Upload BG Semua Kotak Header</span>
                 </button>
                 {(visualSettings?.globalBannerBgUrl || visualSettings?.moduleBannerBgUrl) && (
@@ -1433,9 +1438,9 @@ export const SettingsModule: React.FC = () => {
                       updateVisualSettings({ globalBannerBgUrl: null, moduleBannerBgUrl: null });
                       showBgToast('Background kotak header global berhasil direset.');
                     }}
-                    className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 cursor-pointer"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 text-xs font-bold text-rose-600 hover:bg-rose-100 cursor-pointer whitespace-nowrap shrink-0 leading-none"
                   >
-                    <RotateCcw className="h-3.5 w-3.5" />
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
                     <span>Reset Global</span>
                   </button>
                 )}
@@ -1446,9 +1451,9 @@ export const SettingsModule: React.FC = () => {
                       updateVisualSettings({ boxBgs: {} });
                       showBgToast('Seluruh background kustom per-kotak berhasil direset ke default.');
                     }}
-                    className="flex items-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200 cursor-pointer"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3.5 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200 cursor-pointer whitespace-nowrap shrink-0 leading-none"
                   >
-                    <RotateCcw className="h-3.5 w-3.5" />
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
                     <span>Reset Semua BG Kotak ({Object.keys(visualSettings.boxBgs).length})</span>
                   </button>
                 )}
@@ -1512,9 +1517,9 @@ export const SettingsModule: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => perModuleInputRefs.current[mod.key]?.click()}
-                        className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-white border border-slate-300 py-1.5 px-2.5 text-xs font-bold text-slate-800 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+                        className="flex-1 inline-flex h-8 items-center justify-center gap-1.5 rounded-xl bg-white border border-slate-300 px-2.5 text-xs font-bold text-slate-800 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200 transition-colors cursor-pointer whitespace-nowrap leading-none"
                       >
-                        <ImagePlus className="h-3.5 w-3.5 text-blue-600" />
+                        <ImagePlus className="h-3.5 w-3.5 text-blue-600 shrink-0" />
                         <span>Pilih Gambar</span>
                       </button>
 
@@ -1522,7 +1527,7 @@ export const SettingsModule: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleResetPerModuleBg(mod.key, mod.label)}
-                          className="rounded-xl border border-rose-200 bg-rose-50 p-1.5 text-rose-600 hover:bg-rose-100 cursor-pointer"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 cursor-pointer shrink-0"
                           title="Reset ke background global"
                         >
                           <RotateCcw className="h-3.5 w-3.5" />
@@ -1544,9 +1549,9 @@ export const SettingsModule: React.FC = () => {
                 type="button"
                 onClick={handleExplicitSaveVisualSettings}
                 disabled={isSavingVisuals}
-                className="no-ornament inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#7266C4] to-[#5D51B2] px-6 py-3 text-xs font-extrabold text-white shadow-md hover:brightness-105 transition-all cursor-pointer disabled:opacity-50"
+                className="no-ornament inline-flex h-10 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#7266C4] to-[#5D51B2] px-6 text-xs font-extrabold text-white shadow-md hover:brightness-105 transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap shrink-0 leading-none"
               >
-                <Save className="h-4 w-4 text-white" />
+                <Save className="h-4 w-4 text-white shrink-0" />
                 <span>
                   {isSavingVisuals
                     ? 'Menyimpan Pengaturan...'
@@ -1734,9 +1739,9 @@ export const SettingsModule: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSavingProfile}
-                  className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/25 hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-md shadow-blue-500/25 hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer whitespace-nowrap shrink-0 leading-none"
                 >
-                  <Save className="h-4 w-4" />
+                  <Save className="h-4 w-4 shrink-0" />
                   <span>
                     {isSavingProfile ? 'Menyimpan Profil...' : 'Simpan Perubahan Profil Admin'}
                   </span>
@@ -1833,9 +1838,10 @@ export const SettingsModule: React.FC = () => {
             <div className="flex justify-end pt-2">
               <button
                 type="submit"
-                className="rounded-xl bg-blue-600 px-5 py-2.5 font-bold text-white shadow-xs hover:bg-blue-700 transition-colors"
+                className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
               >
-                Simpan Perubahan Lembaga
+                <Save className="h-4 w-4 shrink-0" />
+                <span>Simpan Perubahan Lembaga</span>
               </button>
             </div>
           </form>
@@ -1875,10 +1881,12 @@ export const SettingsModule: React.FC = () => {
 
           <div className="pt-2 flex flex-wrap items-center gap-3">
             <button
+              type="button"
               onClick={handleExportBackup}
-              className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors"
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-xs font-bold text-white shadow-md hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
             >
-              <Download className="h-4 w-4" /> Unduh Cadangan Lengkap (JSON Snapshot)
+              <Download className="h-4 w-4 shrink-0" />
+              <span>Unduh Cadangan Lengkap (JSON Snapshot)</span>
             </button>
           </div>
         </div>
@@ -1991,15 +1999,16 @@ export const SettingsModule: React.FC = () => {
               </p>
             </div>
             <button
+              type="button"
               onClick={async () => {
                 setSyncFeedback(null);
                 await forceCloudResync();
                 setSyncFeedback('Basis data Cloud Firestore berhasil disinkronkan ke seluruh peramban dan perangkat!');
               }}
               disabled={isSyncing}
-              className="flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+              className="inline-flex h-9 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50 transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
             >
-              <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 shrink-0 ${isSyncing ? 'animate-spin' : ''}`} />
               <span>{isSyncing ? 'Sedang Menyinkronkan...' : 'Sinkronkan Database Sekarang'}</span>
             </button>
           </div>

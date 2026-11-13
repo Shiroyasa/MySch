@@ -20,13 +20,8 @@ import {
   X,
   Filter,
   CheckCircle2,
-  Gem,
-  Crown,
-  Castle,
-  Swords,
-  Scroll,
-  Hourglass,
-  Sparkles,
+  Layers,
+  UserCheck,
   Clock,
 } from 'lucide-react';
 import { exportToExcel } from '../../utils/exportUtils';
@@ -727,31 +722,32 @@ export const MasterDataModule: React.FC = () => {
         kicker="GRAND CODEX • BASIS DATA POKOK SEKOLAH"
         title="MASTER DATA MANAJEMEN SEKOLAH"
         subtitle="Pengelolaan terpusat data siswa aktif, tenaga pendidik, rombongan belajar, kompetensi keahlian (jurusan), mata pelajaran, jadwal pelajaran, dan tahun ajaran."
-        icon={Gem}
+        icon={GraduationCap}
         rightContent={
-          <div className="flex flex-wrap gap-1.5 rounded-xl border border-[#E4E2F2] bg-[#F4F3FA] p-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5">
             {[
-              { id: 'students', label: `Siswa (${students.length})`, icon: Gem },
-              { id: 'teachers', label: `Guru (${teachers.length})`, icon: Crown },
-              { id: 'classes', label: `Kelas (${classes.length})`, icon: Castle },
-              { id: 'majors', label: `Jurusan (${majors.length})`, icon: Swords },
-              { id: 'subjects', label: `Mapel (${subjects.length})`, icon: Scroll },
-              { id: 'schedules', label: `Jadwal Pelajaran (${lessonSchedules.length})`, icon: Calendar },
-              { id: 'years', label: 'Tahun Ajaran', icon: Hourglass },
+              { id: 'students', label: `Siswa (${students.length})`, icon: Users },
+              { id: 'teachers', label: `Guru (${teachers.length})`, icon: UserCheck },
+              { id: 'classes', label: `Kelas (${classes.length})`, icon: School },
+              { id: 'majors', label: `Jurusan (${majors.length})`, icon: Layers },
+              { id: 'subjects', label: `Mapel (${subjects.length})`, icon: BookOpen },
+              { id: 'schedules', label: `Jadwal (${lessonSchedules.length})`, icon: Calendar },
+              { id: 'years', label: 'Tahun Ajaran', icon: Clock },
             ].map(tab => {
               const Icon = tab.icon;
               const isAct = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
+                  type="button"
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                  className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 rounded-[10px] px-3 text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     isAct
                       ? 'bg-[#6C60B8] text-white shadow-sm'
                       : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
                   }`}
                 >
-                  <Icon className={`h-3.5 w-3.5 ${isAct ? 'text-[#FFE680]' : 'text-[#6C60B8]'}`} />
+                  <Icon className={`h-3.5 w-3.5 shrink-0 ${isAct ? 'text-white' : 'text-[#6C60B8]'}`} />
                   <span>{tab.label}</span>
                 </button>
               );
@@ -765,22 +761,22 @@ export const MasterDataModule: React.FC = () => {
         <div className="space-y-4">
           {/* Controls Bar */}
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
-              <div className="relative flex-1 max-w-xs">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:flex-1 sm:min-w-[240px]">
+              <div className="relative w-full sm:flex-1 sm:min-w-[180px] sm:max-w-xs">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Cari nama, NISN, atau NIS..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-1.5 pl-8 pr-3 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
+                  className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <select
                 value={filterClass}
                 onChange={e => setFilterClass(e.target.value)}
-                className="rounded-xl border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
                 <option value="ALL">Semua Kelas</option>
                 {classes.map(c => (
@@ -793,7 +789,7 @@ export const MasterDataModule: React.FC = () => {
               <select
                 value={filterStatus}
                 onChange={e => setFilterStatus(e.target.value)}
-                className="rounded-xl border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
                 <option value="ALL">Semua Status</option>
                 <option value="aktif">Aktif</option>
@@ -804,27 +800,33 @@ export const MasterDataModule: React.FC = () => {
               <SortByControl value={sortBy} onChange={setSortBy} />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
+                type="button"
                 onClick={handleSimulateImport}
-                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
                 title="Impor format spreadsheet Excel atau CSV"
               >
-                <Upload className="h-3.5 w-3.5 text-blue-600" /> Impor Excel/CSV
+                <Upload className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                <span>Impor Excel/CSV</span>
               </button>
 
               <button
+                type="button"
                 onClick={handleExportStudentsExcel}
-                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
               >
-                <Download className="h-3.5 w-3.5 text-emerald-600" /> Ekspor XLSX
+                <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                <span>Ekspor XLSX</span>
               </button>
 
               <button
+                type="button"
                 onClick={openAddStudentModal}
-                className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-colors"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
               >
-                <Plus className="h-4 w-4" /> Tambah Siswa
+                <Plus className="h-4 w-4 shrink-0" />
+                <span>Tambah Siswa</span>
               </button>
             </div>
           </div>
@@ -884,24 +886,27 @@ export const MasterDataModule: React.FC = () => {
                           </span>
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <div className="flex items-center justify-center gap-1">
+                          <div className="inline-flex items-center justify-center gap-1">
                             <button
+                              type="button"
                               onClick={() => setDetailStudent(std)}
-                              className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shrink-0"
                               title="Lihat Detail Siswa"
                             >
                               <Eye className="h-3.5 w-3.5" />
                             </button>
                             <button
+                              type="button"
                               onClick={() => openEditStudentModal(std)}
-                              className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/60"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/60 cursor-pointer shrink-0"
                               title="Edit Data Siswa"
                             >
                               <Edit2 className="h-3.5 w-3.5" />
                             </button>
                             <button
+                              type="button"
                               onClick={() => handleDeleteStudentClick(std)}
-                              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60 cursor-pointer shrink-0"
                               title="Hapus Siswa Permanen"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -921,16 +926,18 @@ export const MasterDataModule: React.FC = () => {
       {/* TAB 2: DATA GURU */}
       {activeTab === 'teachers' && (
         <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden dark:border-slate-800 dark:bg-slate-900">
-          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">Daftar Tenaga Pendidik &amp; Kependidikan ({teachers.length})</h2>
               <p className="text-xs text-slate-500">Data dewan guru pengampu mata pelajaran dan wali kelas</p>
             </div>
             <button
+              type="button"
               onClick={openAddTeacherModal}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-colors"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
             >
-              <Plus className="h-4 w-4" /> Tambah Guru Baru
+              <Plus className="h-4 w-4 shrink-0" />
+              <span>Tambah Guru Baru</span>
             </button>
           </div>
           <div className="overflow-x-auto">
@@ -969,17 +976,19 @@ export const MasterDataModule: React.FC = () => {
                       <div>{t.phone}</div>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center gap-1">
+                      <div className="inline-flex items-center justify-center gap-1">
                         <button
+                          type="button"
                           onClick={() => openEditTeacherModal(t)}
-                          className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/60"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/60 cursor-pointer shrink-0"
                           title="Edit Guru"
                         >
                           <Edit2 className="h-3.5 w-3.5" />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDeleteTeacherClick(t)}
-                          className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60 cursor-pointer shrink-0"
                           title="Hapus Guru"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -1003,10 +1012,12 @@ export const MasterDataModule: React.FC = () => {
               <p className="text-xs text-slate-500">Manajemen struktur kelas dan penugasan wali kelas</p>
             </div>
             <button
+              type="button"
               onClick={openAddClassModal}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
             >
-              <Plus className="h-4 w-4" /> Tambah Rombel Kelas
+              <Plus className="h-4 w-4 shrink-0" />
+              <span>Tambah Rombel Kelas</span>
             </button>
           </div>
 
@@ -1029,17 +1040,19 @@ export const MasterDataModule: React.FC = () => {
 
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                   <span className="text-[11px] text-slate-400">ORBITA</span>
-                  <div className="flex items-center gap-1">
+                  <div className="inline-flex items-center gap-1">
                     <button
+                      type="button"
                       onClick={() => openEditClassModal(c)}
-                      className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/60"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/60 cursor-pointer shrink-0"
                       title="Edit Kelas"
                     >
                       <Edit2 className="h-3.5 w-3.5" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDeleteClassClick(c)}
-                      className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60 cursor-pointer shrink-0"
                       title="Hapus Kelas"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -1061,10 +1074,12 @@ export const MasterDataModule: React.FC = () => {
               <p className="text-xs text-slate-500">Program kejuruan vokasi ORBITA Terakreditasi A</p>
             </div>
             <button
+              type="button"
               onClick={openAddMajorModal}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
             >
-              <Plus className="h-4 w-4" /> Tambah Jurusan Baru
+              <Plus className="h-4 w-4 shrink-0" />
+              <span>Tambah Jurusan Baru</span>
             </button>
           </div>
 
@@ -1072,22 +1087,24 @@ export const MasterDataModule: React.FC = () => {
             {majors.map(m => (
               <div key={m.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-xl bg-blue-600 px-2.5 py-1 text-xs font-black text-white">{m.code}</span>
-                      <h3 className="font-extrabold text-sm text-slate-900 dark:text-white">{m.name}</h3>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="rounded-xl bg-blue-600 px-2.5 py-1 text-xs font-black text-white shrink-0">{m.code}</span>
+                      <h3 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">{m.name}</h3>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="inline-flex items-center gap-1 shrink-0">
                       <button
+                        type="button"
                         onClick={() => openEditMajorModal(m)}
-                        className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/60"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/60 cursor-pointer shrink-0"
                         title="Edit Jurusan"
                       >
                         <Edit2 className="h-3.5 w-3.5" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleDeleteMajorClick(m)}
-                        className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60 cursor-pointer shrink-0"
                         title="Hapus Jurusan"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -1108,18 +1125,21 @@ export const MasterDataModule: React.FC = () => {
       {/* TAB 5: MATA PELAJARAN */}
       {activeTab === 'subjects' && (
         <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden dark:border-slate-800 dark:bg-slate-900">
-          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">Daftar Mata Pelajaran &amp; Standar KKM ({subjects.length})</h2>
               <p className="text-xs text-slate-500">Struktur kurikulum nasional, kewilayahan, dan peminatan kejuruan</p>
             </div>
             <button
+              type="button"
               onClick={openAddSubjectModal}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
             >
-              <Plus className="h-4 w-4" /> Tambah Mapel Baru
+              <Plus className="h-4 w-4 shrink-0" />
+              <span>Tambah Mapel Baru</span>
             </button>
           </div>
+          <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300 font-bold">
@@ -1140,17 +1160,19 @@ export const MasterDataModule: React.FC = () => {
                   <td className="py-3 px-4 text-center font-semibold text-slate-600 dark:text-slate-300">{s.gradeLevel}</td>
                   <td className="py-3 px-4 text-center font-black text-rose-600">{s.kkm}</td>
                   <td className="py-3 px-4 text-center">
-                    <div className="flex items-center justify-center gap-1">
+                    <div className="inline-flex items-center justify-center gap-1">
                       <button
+                        type="button"
                         onClick={() => openEditSubjectModal(s)}
-                        className="p-1.5 rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/60"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/60 cursor-pointer shrink-0"
                         title="Edit Mapel"
                       >
                         <Edit2 className="h-3.5 w-3.5" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleDeleteSubjectClick(s)}
-                        className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60 cursor-pointer shrink-0"
                         title="Hapus Mapel"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -1161,6 +1183,7 @@ export const MasterDataModule: React.FC = () => {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
@@ -1182,7 +1205,7 @@ export const MasterDataModule: React.FC = () => {
               <select
                 value={filterScheduleDay}
                 onChange={e => setFilterScheduleDay(e.target.value)}
-                className="rounded-xl border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
                 <option value="ALL">Semua Hari (Senin - Sabtu)</option>
                 {(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as const).map(d => (
@@ -1195,7 +1218,7 @@ export const MasterDataModule: React.FC = () => {
               <select
                 value={filterScheduleClass}
                 onChange={e => setFilterScheduleClass(e.target.value)}
-                className="rounded-xl border border-slate-200 bg-slate-50 py-1.5 px-3 text-xs font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
                 <option value="ALL">Semua Kelas</option>
                 {classes.map(c => (
@@ -1206,6 +1229,7 @@ export const MasterDataModule: React.FC = () => {
               </select>
 
               <button
+                type="button"
                 onClick={() => {
                   const rows = filteredSchedules.map((sch, i) => ({
                     No: i + 1,
@@ -1219,18 +1243,19 @@ export const MasterDataModule: React.FC = () => {
                   }));
                   exportToExcel(rows, 'Jadwal_Pelajaran_SMK_Mardi_Yuana');
                 }}
-                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
               >
-                <Download className="h-3.5 w-3.5 text-emerald-600" />
+                <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                 <span>Ekspor Excel</span>
               </button>
 
               <button
+                type="button"
                 onClick={openAddScheduleModal}
-                className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
               >
-                <Plus className="h-4 w-4" />
-                <span>Tambah Jadwal Pelajaran</span>
+                <Plus className="h-4 w-4 shrink-0" />
+                <span>Tambah Jadwal</span>
               </button>
             </div>
           </div>
@@ -1285,17 +1310,19 @@ export const MasterDataModule: React.FC = () => {
                           </span>
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <div className="flex items-center justify-center gap-1">
+                          <div className="inline-flex items-center justify-center gap-1">
                             <button
+                              type="button"
                               onClick={() => openEditScheduleModal(sch)}
-                              className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/60 cursor-pointer"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/60 cursor-pointer shrink-0"
                               title="Edit Jadwal"
                             >
                               <Edit2 className="h-3.5 w-3.5" />
                             </button>
                             <button
+                              type="button"
                               onClick={() => handleDeleteScheduleClick(sch)}
-                              className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60 cursor-pointer"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/60 cursor-pointer shrink-0"
                               title="Hapus Jadwal"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -1321,10 +1348,12 @@ export const MasterDataModule: React.FC = () => {
               <p className="text-xs text-slate-500">Tentukan periode kalender akademik aktif untuk presensi dan penginputan nilai</p>
             </div>
             <button
+              type="button"
               onClick={() => setShowYearModal(true)}
-              className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
             >
-              <Plus className="h-4 w-4" /> Tambah Tahun Ajaran
+              <Plus className="h-4 w-4 shrink-0" />
+              <span>Tambah Tahun Ajaran</span>
             </button>
           </div>
 
@@ -1332,17 +1361,17 @@ export const MasterDataModule: React.FC = () => {
             {academicYears.map(ay => (
               <div
                 key={ay.id}
-                className={`flex items-center justify-between rounded-xl border p-4 transition-all ${
+                className={`flex items-center justify-between gap-3 rounded-xl border p-4 transition-all ${
                   ay.isActive
                     ? 'border-blue-500 bg-blue-50/50 shadow-xs dark:border-blue-700 dark:bg-blue-950/30'
                     : 'border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/40'
                 }`}
               >
-                <div>
-                  <div className="flex items-center gap-2">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-extrabold text-sm text-slate-900 dark:text-white">{ay.name}</span>
                     <span
-                      className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                      className={`rounded-md px-2 py-0.5 text-[10px] font-bold whitespace-nowrap ${
                         ay.isActive
                           ? 'bg-blue-600 text-white'
                           : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
@@ -1356,25 +1385,27 @@ export const MasterDataModule: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 shrink-0">
                   {!ay.isActive && (
                     <button
+                      type="button"
                       onClick={() => {
                         setActiveAcademicYear(ay.id);
                         showToast(`Tahun ajaran ${ay.name} sekarang aktif.`);
                       }}
-                      className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300"
+                      className="inline-flex h-9 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-3 text-xs font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300 cursor-pointer whitespace-nowrap shrink-0"
                     >
                       Jadikan Aktif
                     </button>
                   )}
                   <button
+                    type="button"
                     onClick={() => handleDeleteAcademicYearClick(ay)}
                     disabled={ay.isActive}
-                    className={`p-2 rounded-xl border transition-colors ${
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border transition-colors shrink-0 ${
                       ay.isActive
                         ? 'border-slate-200 text-slate-300 dark:border-slate-800 dark:text-slate-700 cursor-not-allowed opacity-50'
-                        : 'border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400'
+                        : 'border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400 cursor-pointer'
                     }`}
                     title={ay.isActive ? 'Tahun ajaran aktif tidak dapat dihapus' : 'Hapus Tahun Ajaran'}
                   >
@@ -1522,17 +1553,17 @@ export const MasterDataModule: React.FC = () => {
                 <p className="text-[10px] text-slate-400 mt-1">Digunakan siswa untuk login ke portal web &amp; mobile.</p>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowStudentModal(false)}
-                  className="rounded-xl border border-slate-300 px-4 py-2 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 font-bold text-white shadow-md hover:bg-blue-700 transition-colors"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Data
                 </button>
@@ -1681,17 +1712,17 @@ export const MasterDataModule: React.FC = () => {
                 <p className="text-[10px] text-slate-400 mt-1">Digunakan untuk login ke sistem dengan NIP atau email guru.</p>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowTeacherModal(false)}
-                  className="rounded-xl border border-slate-300 px-4 py-2 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 font-bold text-white shadow-md hover:bg-blue-700 transition-colors"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Guru
                 </button>
@@ -1786,17 +1817,17 @@ export const MasterDataModule: React.FC = () => {
                 </select>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowClassModal(false)}
-                  className="rounded-xl border border-slate-300 px-4 py-2 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 font-bold text-white shadow-md hover:bg-blue-700 transition-colors"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Rombel
                 </button>
@@ -1821,8 +1852,8 @@ export const MasterDataModule: React.FC = () => {
             <p className="text-xs text-slate-500 mt-1 mb-4">Informasi kompetensi keahlian dan kepemimpinan program</p>
 
             <form onSubmit={handleSaveMajor} className="space-y-4 text-xs">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-1">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-1">
                   <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Kode Jurusan</label>
                   <input
                     type="text"
@@ -1833,7 +1864,7 @@ export const MasterDataModule: React.FC = () => {
                     required
                   />
                 </div>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Nama Program Keahlian</label>
                   <input
                     type="text"
@@ -1869,17 +1900,17 @@ export const MasterDataModule: React.FC = () => {
                 />
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowMajorModal(false)}
-                  className="rounded-xl border border-slate-300 px-4 py-2 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 font-bold text-white shadow-md hover:bg-blue-700 transition-colors"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Jurusan
                 </button>
@@ -1904,8 +1935,8 @@ export const MasterDataModule: React.FC = () => {
             <p className="text-xs text-slate-500 mt-1 mb-4">Pengaturan kurikulum mata pelajaran dan standar KKM</p>
 
             <form onSubmit={handleSaveSubject} className="space-y-4 text-xs">
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-1">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-1">
                   <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Kode Mapel</label>
                   <input
                     type="text"
@@ -1916,7 +1947,7 @@ export const MasterDataModule: React.FC = () => {
                     required
                   />
                 </div>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Nama Mata Pelajaran</label>
                   <input
                     type="text"
@@ -1970,17 +2001,17 @@ export const MasterDataModule: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowSubjectModal(false)}
-                  className="rounded-xl border border-slate-300 px-4 py-2 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 font-bold text-white shadow-md hover:bg-blue-700 transition-colors"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Mapel
                 </button>
@@ -2027,17 +2058,17 @@ export const MasterDataModule: React.FC = () => {
                 </select>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowYearModal(false)}
-                  className="rounded-xl border border-slate-300 px-4 py-2 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 font-bold text-white shadow-md hover:bg-blue-700 transition-colors"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Tambah Periode
                 </button>
@@ -2053,7 +2084,7 @@ export const MasterDataModule: React.FC = () => {
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 text-xs">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
               <h2 className="text-base font-extrabold text-slate-900 dark:text-white">Detail Profil Siswa</h2>
-              <button onClick={() => setDetailStudent(null)} className="text-slate-400 hover:text-slate-600">
+              <button type="button" onClick={() => setDetailStudent(null)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -2069,10 +2100,11 @@ export const MasterDataModule: React.FC = () => {
               <p><span className="text-slate-400">Status Kesiswaan:</span> <span className="font-bold uppercase text-emerald-600">{detailStudent.status}</span></p>
             </div>
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
               <button
+                type="button"
                 onClick={() => setDetailStudent(null)}
-                className="rounded-xl bg-slate-900 px-4 py-2 font-bold text-white hover:bg-slate-800"
+                className="inline-flex h-9 items-center justify-center rounded-xl bg-slate-900 px-5 text-xs font-bold text-white hover:bg-slate-800 cursor-pointer whitespace-nowrap shrink-0"
               >
                 Tutup
               </button>
@@ -2095,7 +2127,7 @@ export const MasterDataModule: React.FC = () => {
             </div>
 
             <form onSubmit={handleSaveSchedule} className="mt-4 space-y-3.5">
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 <div>
                   <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Hari KBM</label>
                   <select
@@ -2190,17 +2222,17 @@ export const MasterDataModule: React.FC = () => {
                 </select>
               </div>
 
-              <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setShowScheduleModal(false)}
-                  className="rounded-xl border border-slate-300 px-4 py-2 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="rounded-xl bg-blue-600 px-5 py-2 font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl bg-blue-600 px-5 text-xs font-bold text-white shadow-md hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Simpan Jadwal
                 </button>

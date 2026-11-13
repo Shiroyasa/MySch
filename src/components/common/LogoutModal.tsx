@@ -89,11 +89,11 @@ export const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onCon
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E6E8F2]">
+        <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-[#E6E8F2]">
           <button
             type="button"
             onClick={onClose}
-            className="no-ornament rounded-full border border-[#E6E8F2] bg-[#F5F6FA] px-4 py-2 text-xs font-bold text-[#6A6584] hover:bg-[#ECEEF7] hover:text-[#3E385B] transition-colors cursor-pointer"
+            className="no-ornament inline-flex h-9 items-center justify-center rounded-full border border-[#E6E8F2] bg-[#F5F6FA] px-4 text-xs font-bold text-[#6A6584] hover:bg-[#ECEEF7] hover:text-[#3E385B] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
           >
             Batal
           </button>
@@ -103,9 +103,9 @@ export const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onCon
             style={{
               background: 'linear-gradient(135deg, #FF7597 0%, #FF5C86 100%)',
             }}
-            className="no-ornament flex items-center gap-2 rounded-full px-5 py-2 text-xs font-bold text-white shadow-md hover:brightness-105 transition-all cursor-pointer"
+            className="no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-full px-5 text-xs font-bold text-white shadow-md hover:brightness-105 whitespace-nowrap shrink-0 transition-all cursor-pointer"
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-4 w-4 shrink-0" />
             <span>Ya, Keluar</span>
           </button>
         </div>

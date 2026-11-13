@@ -187,42 +187,43 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
         icon={MessageSquare}
         rightContent={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center rounded-xl border border-[#E4E2F2] bg-[#F4F3FA] p-1.5 text-xs">
+            <div className="inline-flex flex-wrap items-center gap-1 rounded-xl border border-[#E4E2F2] bg-[#F4F3FA] p-1 text-xs">
               <button
                 type="button"
                 onClick={() => setActiveTab('public')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                className={`inline-flex h-8 items-center justify-center gap-1.5 px-3 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
                   activeTab === 'public'
                     ? 'bg-[#6C60B8] text-white shadow-sm'
                     : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
                 }`}
               >
-                <Users className="h-3.5 w-3.5" />
+                <Users className="h-3.5 w-3.5 shrink-0" />
                 <span>Forum Publik</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('dm')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all relative cursor-pointer ${
+                className={`inline-flex h-8 items-center justify-center gap-1.5 px-3 rounded-lg font-bold transition-all relative cursor-pointer whitespace-nowrap shrink-0 leading-none ${
                   activeTab === 'dm'
                     ? 'bg-[#6C60B8] text-white shadow-sm'
                     : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
                 }`}
               >
-                <MessageCircle className="h-3.5 w-3.5" />
+                <MessageCircle className="h-3.5 w-3.5 shrink-0" />
                 <span>Chat DM Pribadi</span>
                 {directMessages.some(m => m.recipientId === currentUser.id) && (
-                  <span className="h-2 w-2 rounded-full bg-[#F25781] animate-pulse" />
+                  <span className="h-2 w-2 rounded-full bg-[#F25781] animate-pulse shrink-0" />
                 )}
               </button>
             </div>
 
             {isAdmin && activeTab === 'public' && (
               <button
+                type="button"
                 onClick={() => setShowModAnnounceForm(!showModAnnounceForm)}
-                className="flex items-center gap-1.5 rounded-xl border border-[#D8D3F2] bg-[#F4F3FA] px-3.5 py-2 text-xs font-bold text-[#5E53A8] hover:bg-[#EAE7F8] transition-colors cursor-pointer"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D8D3F2] bg-[#F4F3FA] px-3.5 text-xs font-bold text-[#5E53A8] hover:bg-[#EAE7F8] transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
               >
-                <Megaphone className="h-3.5 w-3.5 text-[#F25781]" />
+                <Megaphone className="h-3.5 w-3.5 text-[#F25781] shrink-0" />
                 <span>Pengumuman Moderator</span>
               </button>
             )}
@@ -256,18 +257,19 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
                   return (
                     <button
                       key={cat.id}
+                      type="button"
                       onClick={() => setSelectedCategory(cat.id)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+                      className={`inline-flex h-9 w-full items-center justify-between px-3 rounded-xl text-xs font-bold transition-colors cursor-pointer whitespace-nowrap leading-none ${
                         isActive
                           ? 'bg-blue-600 text-white shadow-xs'
                           : 'text-slate-600 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <Icon className="h-4 w-4" />
-                        <span dangerouslySetInnerHTML={{ __html: cat.label }} />
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span className="truncate" dangerouslySetInnerHTML={{ __html: cat.label }} />
                       </div>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${
                         isActive ? 'bg-blue-700 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                       }`}>
                         {count}
@@ -366,9 +368,9 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
               <button
                 type="submit"
                 disabled={!inputText.trim()}
-                className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-blue-700 transition-colors disabled:opacity-50 shadow-md shadow-blue-500/20"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white hover:bg-blue-700 transition-colors disabled:opacity-50 shadow-md shadow-blue-500/20 cursor-pointer whitespace-nowrap shrink-0 leading-none"
               >
-                <Send className="h-3.5 w-3.5" />
+                <Send className="h-3.5 w-3.5 shrink-0" />
                 <span className="hidden sm:inline">Kirim</span>
               </button>
             </form>
@@ -408,7 +410,7 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
                     key={r}
                     type="button"
                     onClick={() => setDmRoleFilter(r)}
-                    className={`px-2 py-0.5 rounded-full font-bold whitespace-nowrap transition-colors ${
+                    className={`inline-flex h-6 items-center justify-center px-2.5 rounded-full font-bold whitespace-nowrap shrink-0 leading-none transition-colors cursor-pointer ${
                       dmRoleFilter === r
                         ? 'bg-blue-600 text-white shadow-2xs'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
@@ -596,9 +598,9 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
                   <button
                     type="submit"
                     disabled={!dmInputText.trim()}
-                    className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-blue-700 transition-colors disabled:opacity-50 shadow-md shadow-blue-500/20"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white hover:bg-blue-700 transition-colors disabled:opacity-50 shadow-md shadow-blue-500/20 cursor-pointer whitespace-nowrap shrink-0 leading-none"
                   >
-                    <Send className="h-3.5 w-3.5" />
+                    <Send className="h-3.5 w-3.5 shrink-0" />
                     <span>Kirim DM</span>
                   </button>
                 </form>

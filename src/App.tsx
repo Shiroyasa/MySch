@@ -18,39 +18,59 @@ import { LoginPage } from './components/pages/LoginPage';
 import { LogoutModal } from './components/common/LogoutModal';
 import { AnimeBackground } from './components/common/AnimeBackground';
 
+import { MobileBottomNav } from './components/layout/MobileBottomNav';
+
 const MainContent: React.FC = () => {
   const { activeNav, showLogoutModal, setShowLogoutModal, logout } = useApp();
   // Default to collapsed = true to match the exact vertical purple icon pill in the reference image
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [rightDrawerOpen, setRightDrawerOpen] = useState(false);
+
+  const handleOpenSidebar = () => {
+    setRightDrawerOpen(false);
+    setMobileSidebarOpen(true);
+  };
+
+  const handleCloseSidebar = () => {
+    setMobileSidebarOpen(false);
+  };
+
+  const handleToggleRightDrawer = () => {
+    setMobileSidebarOpen(false);
+    setRightDrawerOpen(prev => !prev);
+  };
 
   return (
-    <div className="relative flex h-screen w-full items-center justify-center overflow-hidden p-2 sm:p-4 lg:p-6 font-sans text-[#3E385B]">
+    <div className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden p-0 sm:p-3 md:p-4 lg:p-6 font-sans text-[#3E385B]">
       {/* Outer Soft Lavender-Slate Backdrop */}
       <AnimeBackground />
 
-      {/* Outer Frosted Tablet/Desktop Bezel Frame Matching the Reference Image */}
-      <div className="relative z-10 flex h-full w-full max-w-[1560px] overflow-hidden rounded-[32px] sm:rounded-[40px] border border-white/65 bg-white/40 p-1.5 sm:p-2.5 shadow-[0_32px_80px_-12px_rgba(62,56,91,0.22)] backdrop-blur-md">
+      {/* Outer Frosted Tablet/Desktop Bezel Frame (Edge-to-Edge on Small Mobile for Max Space) */}
+      <div className="relative z-10 flex h-full w-full max-w-[1560px] overflow-hidden rounded-none sm:rounded-[34px] lg:rounded-[40px] border-0 sm:border sm:border-white/65 bg-transparent sm:bg-white/40 p-0 sm:p-2 lg:p-2.5 sm:shadow-[0_32px_80px_-12px_rgba(62,56,91,0.22)] sm:backdrop-blur-md">
         {/* Inner Crisp Snow-White Application Canvas */}
-        <div className="relative flex h-full w-full overflow-hidden rounded-[26px] sm:rounded-[32px] bg-[#F8F9FD]">
+        <div className="relative flex h-full w-full overflow-hidden rounded-none sm:rounded-[28px] lg:rounded-[32px] bg-[#F8F9FD]">
           {/* Left Floating Vertical Purple Pill Sidebar */}
           <Sidebar
             collapsed={sidebarCollapsed}
             onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
             mobileOpen={mobileSidebarOpen}
-            onCloseMobile={() => setMobileSidebarOpen(false)}
+            onCloseMobile={handleCloseSidebar}
           />
 
           {/* Center Main Content Area */}
-          <div className="relative z-10 flex flex-1 flex-col overflow-hidden bg-[#F8F9FD]">
-            {/* Top Header ("Primary / Dashboard" + Search Pill + Avatar) */}
-            <Header onToggleMobileSidebar={() => setMobileSidebarOpen(true)} />
+          <div className="relative z-10 flex min-w-0 flex-1 flex-col overflow-hidden bg-[#F8F9FD]">
+            {/* Top Header ("Primary / Dashboard" + Search Pill + Agenda/Map Drawer + Avatar) */}
+            <Header
+              onToggleMobileSidebar={handleOpenSidebar}
+              onToggleRightDrawer={handleToggleRightDrawer}
+            />
 
             {/* Scrollable Page Content with Menu Transition Animation */}
-            <main className="flex-1 overflow-y-auto px-4 pb-8 pt-2 sm:px-7">
+            <main className="flex-1 overflow-y-auto overflow-x-hidden px-3.5 pb-24 lg:pb-8 pt-1.5 sm:px-6 lg:px-7">
               <div
                 key={activeNav}
-                className="page-transition-stage animate-page-enter mx-auto max-w-6xl"
+                className="page-transition-stage animate-page-enter mx-auto max-w-6xl min-w-0"
               >
                 {/* Student Specific Views */}
                 {activeNav === 'student-profile' && <StudentModule initialTab="profile" />}
@@ -74,17 +94,30 @@ const MainContent: React.FC = () => {
                     ORBITA AKADEMI &middot; Sistem Informasi Akademik &amp; Presensi Terpadu
                   </p>
                   <p className="mt-1 text-[11px] text-[#A2A0B4]">
-                    NPSN: 20253654 &middot; Terakreditasi A (Unggul) &middot; Sukabumi, Jawa Barat
+                    Sukabumi, Jawa Barat
                   </p>
                 </footer>
               </div>
             </main>
           </div>
 
-          {/* Right Activity & Live Map Panel (Matching "Friends" & "Live map" in Reference Image) */}
-          <RightActivityPanel />
+          {/* Right Activity & Live Map Panel (Static on xl+, Interactive Slide-Over Drawer on Mobile & Tablet) */}
+          <RightActivityPanel
+            isOpenMobile={rightDrawerOpen}
+            onCloseMobile={() => setRightDrawerOpen(false)}
+          />
         </div>
       </div>
+
+      {/* Mobile & Tablet Bottom Thumb-Zone Navigation Dock (<1024px) — Auto-hides smoothly when Sidebar opens */}
+      <MobileBottomNav
+        isHidden={mobileSidebarOpen}
+        onOpenSidebar={handleOpenSidebar}
+        onCloseSidebar={handleCloseSidebar}
+        onOpenAgendaDrawer={handleToggleRightDrawer}
+        onCloseAgendaDrawer={() => setRightDrawerOpen(false)}
+        rightDrawerOpen={rightDrawerOpen}
+      />
 
       {/* Logout Confirmation Modal */}
       <LogoutModal

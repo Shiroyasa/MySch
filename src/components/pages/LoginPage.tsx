@@ -38,6 +38,7 @@ export const LoginPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [mobileSection, setMobileSection] = useState<'login' | 'overview' | 'schedule'>('login');
   const [activeMonthIdx, setActiveMonthIdx] = useState(3);
   const [selectedClassId, setSelectedClassId] = useState<string>('ALL');
 
@@ -155,15 +156,15 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-x-hidden p-2 sm:p-4 lg:p-6 font-sans text-[#3E385B] select-none">
+    <div className="relative flex min-h-[100dvh] w-full items-center justify-center overflow-x-hidden p-0 sm:p-4 lg:p-6 font-sans text-[#3E385B] select-none">
       {/* Soft Cool Lavender-Slate Outer Backdrop */}
       <AnimeBackground />
 
-      {/* Outer Frosted Tablet/Desktop Bezel Frame Matching the Reference Image */}
-      <div className="animate-login-reveal relative z-10 flex min-h-[680px] w-full max-w-[1480px] overflow-hidden rounded-[32px] sm:rounded-[40px] border border-white/65 bg-white/40 p-1.5 sm:p-2.5 shadow-[0_32px_80px_-12px_rgba(62,56,91,0.22)] backdrop-blur-md">
+      {/* Outer Frosted Tablet/Desktop Bezel Frame (Edge-to-Edge on Small Mobile) */}
+      <div className="animate-login-reveal relative z-10 flex min-h-[100dvh] sm:min-h-[680px] w-full max-w-[1480px] overflow-hidden rounded-none sm:rounded-[34px] lg:rounded-[40px] border-0 sm:border sm:border-white/65 bg-transparent sm:bg-white/40 p-0 sm:p-2 lg:p-2.5 sm:shadow-[0_32px_80px_-12px_rgba(62,56,91,0.22)] sm:backdrop-blur-md">
         {/* Inner Crisp Snow-White Application Canvas */}
-        <div className="relative flex w-full overflow-hidden rounded-[26px] sm:rounded-[32px] bg-[#F8F9FD]">
-          {/* Left Floating Vertical Purple Pill Sidebar (Exact Reference Image Sidebar) */}
+        <div className="relative flex w-full overflow-hidden rounded-none sm:rounded-[28px] lg:rounded-[32px] bg-[#F8F9FD]">
+          {/* Left Floating Vertical Purple Pill Sidebar (Desktop & Landscape Tablet) */}
           <aside
             style={{
               background: 'linear-gradient(180deg, #7468C4 0%, #6558B5 100%)',
@@ -180,7 +181,7 @@ export const LoginPage: React.FC = () => {
               )}
             </div>
 
-            {/* Center Icons */}
+            {/* Center Icons: Operational View Toggles */}
             <div className="flex flex-col items-center gap-3">
               <button
                 type="button"
@@ -207,70 +208,97 @@ export const LoginPage: React.FC = () => {
               >
                 <OrbitaMenuIcon variant="attendance" className="h-5.5 w-5.5" />
               </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setShowScheduleModal(false);
-                  setActiveMonthIdx(prev => (prev + 1) % monthsList.length);
-                }}
-                title="Statistik Kehadiran Akademik"
-                className="no-ornament flex h-12 w-12 items-center justify-center rounded-[16px] text-white/80 hover:bg-white/15 hover:text-white hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
-              >
-                <OrbitaMenuIcon variant="reports" className="h-5.5 w-5.5" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShowScheduleModal(false)}
-                title="Keamanan Sesi Terenkripsi"
-                className="no-ornament flex h-12 w-12 items-center justify-center rounded-[16px] text-white/80 hover:bg-white/15 hover:text-white hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
-              >
-                <OrbitaMenuIcon variant="audit-logs" className="h-5.5 w-5.5" />
-              </button>
             </div>
 
-            {/* Bottom Icon */}
-            <div className="flex h-11 w-11 items-center justify-center rounded-[16px] text-white/80">
-              <OrbitaMenuIcon variant="settings" className="h-5.5 w-5.5" />
+            {/* Bottom Status Indicator */}
+            <div className="flex h-11 w-11 items-center justify-center rounded-[16px] text-white/80" title="ORBITA Secure Portal">
+              <Lock className="h-4.5 w-4.5 text-white/70" />
             </div>
           </aside>
 
           {/* Center Main Area */}
-          <div className="flex flex-1 flex-col justify-between p-5 sm:p-8 overflow-y-auto">
+          <div className="flex flex-1 min-w-0 flex-col justify-between p-4 sm:p-7 lg:p-8 overflow-y-auto">
             {/* Top Header Row ("Primary / Portal Akademik" + Search Pill + Badge) */}
-            <div className="animate-stagger-1 flex flex-wrap items-center justify-between gap-4 pb-6">
-              <div>
-                <span className="block text-xs font-medium text-[#A2A0B4]">Primary</span>
-                <h1 className="text-xl sm:text-2xl font-extrabold text-[#3E385B] tracking-tight">
-                  ORBITA Akademi
-                </h1>
+            <div className="animate-stagger-1 flex flex-wrap items-center justify-between gap-3 pb-4 sm:pb-6">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex md:hidden h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[#6C60B8] text-white shadow-sm">
+                  {activeLogo ? (
+                    <img src={activeLogo} alt="ORBITA" className="h-6 w-6 rounded-full object-contain" />
+                  ) : (
+                    <OrbitaMenuIcon variant="brand" className="h-5 w-5 text-white" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <span className="block text-[11px] sm:text-xs font-medium text-[#A2A0B4]">Primary</span>
+                  <h1 className="text-lg sm:text-2xl font-extrabold text-[#3E385B] tracking-tight truncate">
+                    ORBITA Akademi
+                  </h1>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   type="button"
-                  onClick={() => setShowScheduleModal(!showScheduleModal)}
-                  className="no-ornament flex items-center gap-2.5 rounded-full bg-[#EFEFF6] hover:bg-[#E4E2F5] px-4 py-2 text-xs font-semibold text-[#3E385B] transition-colors cursor-pointer"
+                  onClick={() => {
+                    const next = !showScheduleModal;
+                    setShowScheduleModal(next);
+                    setMobileSection(next ? 'schedule' : 'login');
+                  }}
+                  className="no-ornament hidden sm:inline-flex h-9 items-center justify-center gap-2 rounded-full bg-[#EFEFF6] hover:bg-[#E4E2F5] px-4 text-xs font-semibold text-[#3E385B] transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
                 >
-                  <Search className="h-4 w-4 text-[#4A4368]" />
+                  <Search className="h-4 w-4 text-[#4A4368] shrink-0" />
                   <span>{showScheduleModal ? 'Kembali ke Login' : 'Cari Jadwal KBM...'}</span>
                 </button>
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6C60B8] text-xs font-extrabold text-white ring-2 ring-white shadow-sm">
-                  OR
+                <div
+                  title="Sistem Terverifikasi ORBITA"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6C60B8] text-white shadow-sm ring-2 ring-white"
+                >
+                  <Lock className="h-4 w-4" />
                 </div>
               </div>
             </div>
 
+            {/* Interactive Mobile Quick-View Switcher (<768px) so phone users don't fight giant scroll stacks */}
+            <div className="md:hidden grid grid-cols-3 gap-1.5 rounded-2xl bg-[#EAE9F4] p-1 mb-5">
+              {[
+                { id: 'login' as const, label: 'Masuk Akun' },
+                { id: 'overview' as const, label: 'Statistik' },
+                { id: 'schedule' as const, label: 'Jadwal KBM' },
+              ].map(tabItem => {
+                const isAct = mobileSection === tabItem.id;
+                return (
+                  <button
+                    key={tabItem.id}
+                    type="button"
+                    onClick={() => {
+                      setMobileSection(tabItem.id);
+                      setShowScheduleModal(tabItem.id === 'schedule');
+                    }}
+                    className={`no-ornament min-h-[40px] rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                      isAct
+                        ? 'bg-[#6C60B8] text-white shadow-sm'
+                        : 'text-[#6E6A86] hover:text-[#3E385B]'
+                    }`}
+                  >
+                    {tabItem.label}
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Main 12-Column Asymmetric Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-center my-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-center my-auto pb-4">
               {/* LEFT 5 COLS: CLEAN WHITE LOGIN CARD WITH FLOATING PURPLE SQUIRCLE BADGE */}
-              <div className="animate-stagger-2 lg:col-span-5 w-full max-w-[440px] mx-auto pt-4">
+              <div
+                className={`animate-stagger-2 lg:col-span-5 w-full max-w-[440px] mx-auto pt-4 ${
+                  mobileSection === 'login' ? 'block' : 'hidden md:block'
+                }`}
+              >
                 <OrbitaOrnateFrame
                   showTopCrest={true}
                   stampText="Portal Resmi"
                   characterIndex={0}
-                  contentClassName="flex flex-col justify-between gap-5 px-6 pt-11 pb-7 sm:px-8 sm:pt-12 sm:pb-8"
+                  contentClassName="flex flex-col justify-between gap-5 px-5 pt-11 pb-6 sm:px-8 sm:pt-12 sm:pb-8"
                 >
                   {/* Header inside White Card */}
                   <div className="text-center">
@@ -372,21 +400,40 @@ export const LoginPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setShowScheduleModal(!showScheduleModal)}
-                          className="no-ornament inline-flex items-center gap-1.5 rounded-full bg-[#FFE4EC] hover:bg-[#FFD4E2] px-3 py-1 text-[11px] font-bold text-[#F25781] transition-all cursor-pointer"
+                          className="no-ornament inline-flex h-7 items-center justify-center gap-1.5 rounded-full bg-[#FFE4EC] hover:bg-[#FFD4E2] px-3 text-[11px] font-bold text-[#F25781] transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none"
                         >
-                          <Calendar className="h-3 w-3" />
+                          <Calendar className="h-3 w-3 shrink-0" />
                           <span>{showScheduleModal ? 'Tutup Jadwal' : 'Jadwal KBM'}</span>
                         </button>
                       </div>
 
-                      {/* Progress Bar Style Indicator (Matching Reference Image White Cards) */}
+                      {/* Quick Interactive Role Credentials */}
                       <div className="pt-1">
                         <div className="flex items-center justify-between text-[11px] font-bold text-[#3E385B] mb-1.5">
-                          <span>Kesiapan Sistem</span>
-                          <span className="text-[#1CC865]">100%</span>
+                          <span>Pilih Akun Demo:</span>
+                          <span className="text-[10px] text-[#A2A0B4]">Klik untuk isi</span>
                         </div>
-                        <div className="h-1.5 w-full rounded-full bg-[#F0F1F6] overflow-hidden">
-                          <div className="h-full w-full rounded-full bg-[#1CC865]" />
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-1.5">
+                          {[
+                            { role: 'Admin', email: 'admin@smkmardiyuana.sch.id', pass: 'admin123', tag: 'Administrator' },
+                            { role: 'Guru', email: 'guru@smkmardiyuana.sch.id', pass: 'guru123', tag: 'Pendidik' },
+                            { role: 'Siswa', email: 'siswa@smkmardiyuana.sch.id', pass: 'siswa123', tag: 'Peserta Didik' },
+                            { role: 'Kepsek', email: 'kepsek@smkmardiyuana.sch.id', pass: 'kepsek123', tag: 'Kepala Sekolah' },
+                          ].map(acc => (
+                            <button
+                              key={acc.role}
+                              type="button"
+                              onClick={() => {
+                                setEmail(acc.email);
+                                setPassword(acc.pass);
+                                setErrorMessage(null);
+                              }}
+                              title={`Gunakan akun demo ${acc.tag}`}
+                              className="no-ornament inline-flex min-h-[40px] sm:h-8 items-center justify-center rounded-xl border border-[#E3E2F0] bg-[#F8F9FD] hover:bg-[#EDE9FE] hover:border-[#6C60B8] px-2 text-xs sm:text-[10.5px] font-bold text-[#4B436B] transition-all cursor-pointer active:scale-95 whitespace-nowrap leading-none"
+                            >
+                              {acc.role}
+                            </button>
+                          ))}
                         </div>
                       </div>
 
@@ -418,20 +465,27 @@ export const LoginPage: React.FC = () => {
                     <span className="font-medium text-[#A2A0B4]">
                       {schoolSettings?.curriculum || 'Kurikulum Merdeka'}
                     </span>
-                    <span className="rounded-full bg-[#FFE4EC] px-3 py-0.5 text-[10px] font-bold text-[#F25781]">
-                      Akreditasi {schoolSettings?.accreditation || 'A'}
+                    <span className="rounded-full bg-[#EFEFF9] px-3 py-0.5 text-[10px] font-bold text-[#6C60B8]">
+                      Tahun Ajaran 2025/2026
                     </span>
                   </div>
                 </OrbitaOrnateFrame>
               </div>
 
-              {/* RIGHT 7 COLS: SCHEDULE BOARD OR EXACT REFERENCE IMAGE OVERVIEW BENTO + PROGRESS CARDS */}
-              <div className="animate-stagger-3 lg:col-span-7 w-full">
-                {showScheduleModal ? (
+              {/* RIGHT 7 COLS: SCHEDULE BOARD OR OVERVIEW BENTO + PROGRESS CARDS */}
+              <div
+                className={`animate-stagger-3 lg:col-span-7 w-full ${
+                  mobileSection !== 'login' ? 'block' : 'hidden md:block'
+                }`}
+              >
+                {showScheduleModal || mobileSection === 'schedule' ? (
                   <div className="animate-fade-in pt-4">
                     <AcademyScheduleBoard
                       maxHeightClass="max-h-[360px]"
-                      onClose={() => setShowScheduleModal(false)}
+                      onClose={() => {
+                        setShowScheduleModal(false);
+                        setMobileSection('login');
+                      }}
                     />
                   </div>
                 ) : (
@@ -643,7 +697,7 @@ export const LoginPage: React.FC = () => {
                     </div>
 
                     {/* Bottom Row: 3 White Floating Purple-Squircle Progress Cards Synced with Real Database */}
-                    <div className="animate-stagger-4 grid grid-cols-1 sm:grid-cols-3 gap-5 pt-4">
+                    <div className="animate-stagger-4 grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-5 pt-6">
                       {[
                         {
                           el: 'hydro' as const,
@@ -672,11 +726,10 @@ export const LoginPage: React.FC = () => {
                       ].map((c, i) => (
                         <div
                           key={i}
-                          onClick={() => setShowScheduleModal(true)}
                           style={{
                             boxShadow: '0 12px 28px -6px rgba(108, 96, 184, 0.08)',
                           }}
-                          className="relative rounded-[24px] border border-[#F0F0F7] bg-white px-4 pt-9 pb-4 text-[#3E385B] cursor-pointer hover:-translate-y-1 transition-all duration-300"
+                          className="relative rounded-[24px] border border-[#F0F0F7] bg-white px-4 pt-9 pb-4 text-[#3E385B] transition-all duration-300"
                         >
                           <div className="absolute -top-5 left-1/2 -translate-x-1/2 flex h-11 w-11 items-center justify-center rounded-[16px] bg-gradient-to-br from-[#7568C6] to-[#6356B5] text-white shadow-[0_8px_18px_rgba(108,96,184,0.34)]">
                             <GenshinElementIcon element={c.el} className="h-5 w-5" />

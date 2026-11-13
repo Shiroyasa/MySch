@@ -17,15 +17,10 @@ import {
   ShieldCheck,
   Sparkles,
   QrCode,
-  Crown,
-  Swords,
-  Scroll,
-  Gem,
-  Hourglass,
   Trophy,
   Target,
-  Flame,
-  Castle,
+  BarChart2,
+  Clock,
 } from 'lucide-react';
 import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
 import { AcademyHeroBanner, OrnateCard, AcademyCornerBadge } from '../common/AcademyOrnaments';
@@ -202,63 +197,44 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
         subtitle={`NISN: ${student.nisn} • NIS: ${student.nis} • Portal Akademik Peserta Didik MyAcademy`}
         icon={GraduationCap}
         rightContent={
-          <div className="flex flex-wrap gap-2">
+          <div className="inline-flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5 shadow-xs">
             <button
+              type="button"
               onClick={() => setActiveTab('profile')}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
                 activeTab === 'profile'
-                  ? 'bg-[#2563EB] text-white border border-[#C8A44B]/60'
-                  : 'bg-[#1B2A47] text-slate-200 border border-[#C8A44B]/40 hover:bg-[#24375C]'
+                  ? 'bg-[#6C60B8] text-white shadow-sm'
+                  : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
               }`}
             >
-              <ShieldCheck className="h-4 w-4 text-[#EAB308]" />
+              <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
               <span>1. Profil Siswa</span>
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('grades')}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all shadow-md cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
                 activeTab === 'grades'
-                  ? 'bg-[#2563EB] text-white border border-[#C8A44B]/60'
-                  : 'bg-[#1B2A47] text-slate-200 border border-[#C8A44B]/40 hover:bg-[#24375C]'
+                  ? 'bg-[#6C60B8] text-white shadow-sm'
+                  : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
               }`}
             >
-              <Award className="h-4 w-4 text-[#EAB308]" />
+              <Award className="h-3.5 w-3.5 shrink-0" />
               <span>2. Nilai Siswa</span>
             </button>
           </div>
         }
       />
 
-      {/* Tabs Navigation (Hanya Profil Siswa & Nilai Siswa) */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-2 dark:border-slate-800/80">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/70 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 backdrop-blur-md">
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'profile'
-                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            <ShieldCheck className="h-3.5 w-3.5" />
-            <span>1. Profil Siswa (Status Card)</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('grades')}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
-              activeTab === 'grades'
-                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            <Swords className="h-3.5 w-3.5" />
-            <span>2. Nilai Siswa (Battle Mastery &amp; Trials)</span>
-          </button>
-        </div>
-
+      {/* Active Academic Year Info Strip */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#ECEAF6] bg-white px-4 py-2.5 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
+        <span className="text-xs font-bold text-[#3E385B] dark:text-slate-200">
+          {activeTab === 'profile'
+            ? 'Ringkasan Profil & Status Akademik Siswa'
+            : 'Rekapitulasi & Transparansi Penilaian Siswa'}
+        </span>
         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-semibold">
-          <Hourglass className="h-3.5 w-3.5 text-blue-500" />
+          <Clock className="h-3.5 w-3.5 text-[#6C60B8] shrink-0" />
           <span>Semester {activeAcademicYear.activeSemester.toUpperCase()} &bull; T.A. {activeAcademicYear.name}</span>
         </div>
       </div>
@@ -309,7 +285,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 shrink-0" /> Status Kesiswaan
                   </span>
                   <p className="mt-1.5 text-2xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                    Aktif <span className="text-amber-500 text-xs">✦ S-Tier</span>
+                    Aktif <span className="text-amber-500 text-xs">Terdaftar</span>
                   </p>
                 </div>
                 <div className="mt-2 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 space-y-1">
@@ -362,7 +338,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                 <div>
                   <AcademyCornerBadge text="EXP • KOMPETENSI" className="mb-1" />
                   <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                    <Swords className="h-3.5 w-3.5 text-blue-500 shrink-0" /> Rata-Rata Nilai
+                    <BarChart2 className="h-3.5 w-3.5 text-blue-500 shrink-0" /> Rata-Rata Nilai
                   </span>
                   <p className="mt-1.5 text-2xl font-black text-blue-600 dark:text-blue-400 font-mono tabular-nums">
                     {overallAvg}
@@ -430,7 +406,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                 <div className="mt-2 pt-2 border-t border-[#EFE2BE]/60 dark:border-slate-800/80 space-y-1">
                   <div className="flex justify-between text-[10px] font-bold text-amber-600 dark:text-amber-400">
                     <span>Semua Mapel Tuntas</span>
-                    <span>Trial Clear</span>
+                    <span>Lulus KKM</span>
                   </div>
                   <div className="jrpg-stat-bar">
                     <div
@@ -480,7 +456,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                 <div>
                   <AcademyCornerBadge text="HP • KEHADIRAN" className="mb-1" />
                   <span className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                    <Hourglass className="h-3.5 w-3.5 text-indigo-500 shrink-0" /> HP Kehadiran
+                    <Clock className="h-3.5 w-3.5 text-indigo-500 shrink-0" /> Rasio Kehadiran
                   </span>
                   <p className="mt-1.5 text-2xl font-black text-indigo-600 dark:text-indigo-400 font-mono tabular-nums">
                     {attendanceRate}%
@@ -584,7 +560,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-xs ring-1 ring-amber-400">
-                      <Crown className="h-4 w-4 text-amber-300" />
+                      <GraduationCap className="h-4 w-4 text-amber-300" />
                     </div>
                     <div>
                       <p className="text-xs font-black tracking-wider uppercase">Kartu Pelajar Siswa</p>
@@ -608,7 +584,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
-                  <span>NPSN: 20253654 &bull; Terakreditasi A (Unggul)</span>
+                  <span>ORBITA &bull; Cikembar, Sukabumi</span>
                   <QrCode className="h-5 w-5 text-blue-300" />
                 </div>
               </div>
@@ -631,11 +607,12 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                 </div>
 
                 <button
+                  type="button"
                   onClick={() => setActiveTab('grades')}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 text-xs font-bold text-white shadow-md hover:opacity-90 transition-opacity cursor-pointer"
+                  className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#6C60B8] to-[#564AA0] px-4 text-xs font-bold text-white shadow-md hover:brightness-105 transition-all cursor-pointer whitespace-nowrap leading-none"
                 >
-                  <Swords className="h-4 w-4 text-amber-300" />
-                  <span>Buka Lembar Nilai Siswa (Trials)</span>
+                  <Award className="h-4 w-4 text-white shrink-0" />
+                  <span>Buka Lembar Nilai Siswa</span>
                 </button>
               </div>
             </div>
@@ -648,10 +625,11 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
         <div className="space-y-6">
           {/* Sub-Tabs: Per Profile vs Keseluruhan */}
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <div className="inline-flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
               <button
+                type="button"
                 onClick={() => setGradesSubTab('per_profile')}
-                className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                className={`inline-flex h-8 items-center justify-center rounded-lg px-3.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
                   gradesSubTab === 'per_profile'
                     ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
@@ -661,8 +639,9 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
               </button>
 
               <button
+                type="button"
                 onClick={() => setGradesSubTab('overall')}
-                className={`rounded-lg px-4 py-2 text-xs font-bold transition-all ${
+                className={`inline-flex h-8 items-center justify-center rounded-lg px-3.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
                   gradesSubTab === 'overall'
                     ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
@@ -672,19 +651,23 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
               </button>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
+                type="button"
                 onClick={handleExportTranscriptExcel}
-                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0 leading-none"
               >
-                <Download className="h-3.5 w-3.5 text-emerald-600" /> Unduh XLSX
+                <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                <span>Unduh XLSX</span>
               </button>
 
               <button
+                type="button"
                 onClick={handleExportTranscriptPdf}
-                className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0 leading-none"
               >
-                <Printer className="h-3.5 w-3.5" /> Cetak PDF Rapor
+                <Printer className="h-3.5 w-3.5 shrink-0" />
+                <span>Cetak PDF Rapor</span>
               </button>
             </div>
           </div>

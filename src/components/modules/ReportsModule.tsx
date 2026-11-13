@@ -867,38 +867,41 @@ export const ReportsModule: React.FC = () => {
         subtitle="Ekspor dokumen resmi PDF & Excel berumus dinamis, kustomisasi kop surat & tanda tangan digital, serta sinkronisasi Google Sheets."
         icon={Scroll}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[#E4E2F2] bg-[#F4F3FA] p-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5">
             <button
+              type="button"
               onClick={() => setActiveMainTab('export')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeMainTab === 'export'
-                  ? 'bg-[#6C60B8] text-white shadow-sm'
-                  : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
+                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
               }`}
             >
-              <Download className="h-3.5 w-3.5" />
+              <Download className="h-3.5 w-3.5 shrink-0" />
               <span>Ekspor Dokumen</span>
             </button>
             <button
+              type="button"
               onClick={() => setActiveMainTab('spreadsheet')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeMainTab === 'spreadsheet'
-                  ? 'bg-[#6C60B8] text-white shadow-sm'
-                  : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
+                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
               }`}
             >
-              <Table className="h-3.5 w-3.5" />
+              <Table className="h-3.5 w-3.5 shrink-0" />
               <span>Excel Interaktif</span>
             </button>
             <button
+              type="button"
               onClick={() => setActiveMainTab('designer')}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+              className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeMainTab === 'designer'
-                  ? 'bg-[#6C60B8] text-white shadow-sm'
-                  : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
+                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
               }`}
             >
-              <Palette className={`h-3.5 w-3.5 ${activeMainTab === 'designer' ? 'text-[#FFE680]' : 'text-[#6C60B8]'}`} />
+              <Palette className={`h-3.5 w-3.5 shrink-0 ${activeMainTab === 'designer' ? 'text-[#FFE680]' : 'text-[#6C60B8]'}`} />
               <span>Desain &amp; Tata Letak PDF</span>
             </button>
           </div>
@@ -939,8 +942,8 @@ export const ReportsModule: React.FC = () => {
       {activeMainTab === 'export' && (
         <div className="space-y-6 animate-fade-in">
           {/* Filter / Generator Control Card */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                   Jenis Laporan
@@ -948,7 +951,7 @@ export const ReportsModule: React.FC = () => {
                 <select
                   value={reportType}
                   onChange={e => setReportType(e.target.value as any)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
                   <option value="attendance_class">1. Rekap Presensi per Kelas</option>
                   <option value="grade_class">2. Leger Nilai Akademik Kelas</option>
@@ -964,7 +967,7 @@ export const ReportsModule: React.FC = () => {
                 <select
                   value={selectedClassId}
                   onChange={e => setSelectedClassId(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
                   {classes.map(c => (
                     <option key={c.id} value={c.id}>
@@ -983,7 +986,7 @@ export const ReportsModule: React.FC = () => {
                   <select
                     value={selectedSubjectId}
                     onChange={e => setSelectedSubjectId(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     {subjects.map(s => (
                       <option key={s.id} value={s.id}>
@@ -1003,7 +1006,7 @@ export const ReportsModule: React.FC = () => {
                   <select
                     value={selectedStudentId}
                     onChange={e => setSelectedStudentId(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     {classStudents.map(std => (
                       <option key={std.id} value={std.id}>
@@ -1014,63 +1017,60 @@ export const ReportsModule: React.FC = () => {
                 </div>
               )}
 
-              {/* Spacer if not showing 3rd select */}
+              {/* Tahun Ajaran info if not showing 3rd select */}
               {reportType !== 'grade_subject' && reportType !== 'student_transcript' && (
-                <div className="hidden lg:block">
+                <div>
                   <label className="text-xs font-bold text-slate-500 block mb-1.5">Tahun Ajaran</label>
-                  <div className="py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <div className="h-[38px] flex items-center px-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
                     T.A. {activeAcademicYear.name} ({activeAcademicYear.activeSemester.toUpperCase()})
                   </div>
                 </div>
               )}
+            </div>
 
-              <div className="flex flex-col justify-end">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Aksi Ekspor &amp; Urutan
-                  </label>
-                  <SortByControl value={sortBy} onChange={setSortBy} compact />
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveMainTab('designer');
-                    }}
-                    className="flex-1 flex items-center justify-center gap-1 rounded-xl border border-blue-200 bg-blue-50 py-2 px-2 text-[11px] font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300 shadow-2xs cursor-pointer"
-                    title="Pratinjau Lembar Dokumen Satu per Satu"
-                  >
-                    <Eye className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-                    <span>Pratinjau</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDownloadExcel}
-                    className="flex-1 flex items-center justify-center gap-1 rounded-xl border border-slate-200 bg-white py-2 px-2 text-[11px] font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 shadow-2xs cursor-pointer"
-                    title="Ekspor file Excel (.xlsx)"
-                  >
-                    <Download className="h-3.5 w-3.5 text-emerald-600" />
-                    <span>Excel</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDownloadPdf}
-                    className="flex-1 flex items-center justify-center gap-1 rounded-xl bg-blue-600 py-2 px-2 text-[11px] font-bold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer"
-                    title="Cetak PDF Resmi Sesuai Format"
-                  >
-                    <Printer className="h-3.5 w-3.5" />
-                    <span>Cetak PDF</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleExportGoogleSheets}
-                    disabled={isExportingSheets}
-                    className="flex-1 flex items-center justify-center gap-1 rounded-xl bg-emerald-600 py-2 px-2 text-[11px] font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors disabled:opacity-50 cursor-pointer"
-                  >
-                    <Table className="h-3.5 w-3.5" />
-                    <span>{isExportingSheets ? '...' : 'Sheets'}</span>
-                  </button>
-                </div>
+            {/* Dedicated Full-Width Export & Sort Action Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <SortByControl value={sortBy} onChange={setSortBy} />
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveMainTab('designer');
+                  }}
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3.5 text-xs font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer"
+                  title="Pratinjau Lembar Dokumen Satu per Satu"
+                >
+                  <Eye className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <span>Pratinjau Dokumen</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadExcel}
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer"
+                  title="Ekspor file Excel (.xlsx)"
+                >
+                  <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                  <span>Ekspor Excel</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                  title="Cetak PDF Resmi Sesuai Format"
+                >
+                  <Printer className="h-3.5 w-3.5 shrink-0" />
+                  <span>Cetak PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportGoogleSheets}
+                  disabled={isExportingSheets}
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap shrink-0 transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  <Table className="h-3.5 w-3.5 shrink-0" />
+                  <span>{isExportingSheets ? 'Menyimpan...' : 'Google Sheets'}</span>
+                </button>
               </div>
             </div>
           </div>
@@ -1583,7 +1583,7 @@ export const ReportsModule: React.FC = () => {
                     <span className="font-bold text-slate-800 dark:text-slate-200 block mb-2">
                       Rekap Kehadiran Siswa Semester Ini:
                     </span>
-                    <div className="grid grid-cols-4 gap-2 text-center">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                       <div className="p-1.5 rounded-lg bg-emerald-100/60 dark:bg-emerald-950/40">
                         <span className="text-[10px] text-emerald-700 dark:text-emerald-300 block font-semibold">Hadir</span>
                         <strong className="text-emerald-800 dark:text-emerald-200 text-sm">{studentTranscriptData.attendance.h}</strong>
@@ -1682,9 +1682,9 @@ export const ReportsModule: React.FC = () => {
                     showToast(`Seluruh nilai ${currentSubject.name} kelas ${currentClass.name} berhasil direset menjadi 0 di database.`);
                   }
                 }}
-                className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-800/60 dark:bg-rose-950/50 dark:text-rose-300 shadow-2xs transition-colors"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-800/60 dark:bg-rose-950/50 dark:text-rose-300 shadow-2xs whitespace-nowrap shrink-0 transition-colors cursor-pointer"
               >
-                <RotateCcw className="h-3.5 w-3.5" />
+                <RotateCcw className="h-3.5 w-3.5 shrink-0" />
                 <span>Reset Nilai (0)</span>
               </button>
               <button
@@ -1730,23 +1730,25 @@ export const ReportsModule: React.FC = () => {
                   });
                   showToast(`Nilai lembar interaktif ${currentSubject.name} (${currentClass.name}) berhasil disimpan ke database & tersinkron ke semua menu.`);
                 }}
-                className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
               >
-                <Save className="h-3.5 w-3.5" />
+                <Save className="h-3.5 w-3.5 shrink-0" />
                 <span>Simpan Nilai</span>
               </button>
               <button
+                type="button"
                 onClick={handleDownloadExcel}
-                className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 shadow-2xs"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer"
               >
-                <Download className="h-4 w-4 text-emerald-600" />
+                <Download className="h-4 w-4 text-emerald-600 shrink-0" />
                 <span>Unduh File Excel</span>
               </button>
               <button
+                type="button"
                 onClick={handleDownloadPdf}
-                className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 whitespace-nowrap shrink-0 cursor-pointer"
               >
-                <Printer className="h-4 w-4" />
+                <Printer className="h-4 w-4 shrink-0" />
                 <span>Cetak Lembar PDF</span>
               </button>
             </div>
@@ -1856,25 +1858,25 @@ export const ReportsModule: React.FC = () => {
           {/* Controls Column (Left) */}
           <div className="lg:col-span-5 space-y-5">
             {/* Action Bar */}
-            <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-              <span className="font-extrabold text-xs text-slate-900 dark:text-white">
+            <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+              <span className="font-extrabold text-xs text-slate-900 dark:text-white whitespace-nowrap shrink-0">
                 Editor Desain &amp; Kop PDF
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={handleSaveDesignerToCloud}
-                  className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-blue-700 shadow-xs transition-colors"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white hover:bg-blue-700 shadow-xs whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
-                  <Save className="h-3.5 w-3.5" />
+                  <Save className="h-3.5 w-3.5 shrink-0" />
                   <span>Simpan ke Cloud</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleDownloadPdf}
-                  className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700 shadow-xs transition-colors"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white hover:bg-emerald-700 shadow-xs whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                 >
-                  <Printer className="h-3.5 w-3.5" />
+                  <Printer className="h-3.5 w-3.5 shrink-0" />
                   <span>Cetak PDF</span>
                 </button>
               </div>
@@ -2236,24 +2238,24 @@ export const ReportsModule: React.FC = () => {
                   </div>
 
                   {/* Stepper: Previous / Next Document Type */}
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     <button
                       type="button"
                       onClick={() => stepDocument(-1)}
-                      className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+                      className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-[11px] font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
                       title="Lihat jenis dokumen sebelumnya"
                     >
-                      <ChevronLeft className="h-3.5 w-3.5" />
+                      <ChevronLeft className="h-3.5 w-3.5 shrink-0" />
                       <span>Dok. Sebelumnya</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => stepDocument(1)}
-                      className="flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-[11px] font-bold text-white hover:bg-blue-700 shadow-2xs cursor-pointer"
+                      className="inline-flex h-8 items-center justify-center gap-1 rounded-lg bg-blue-600 px-2.5 text-[11px] font-bold text-white hover:bg-blue-700 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer"
                       title="Lihat jenis dokumen berikutnya"
                     >
                       <span>Dok. Berikutnya</span>
-                      <ChevronRight className="h-3.5 w-3.5" />
+                      <ChevronRight className="h-3.5 w-3.5 shrink-0" />
                     </button>
                   </div>
                 </div>
@@ -2270,7 +2272,7 @@ export const ReportsModule: React.FC = () => {
                           setReportType(docItem.type);
                           setPreviewPage(1);
                         }}
-                        className={`flex items-center justify-center gap-1.5 rounded-lg py-1.5 px-2 text-[11px] font-bold transition-all cursor-pointer ${
+                        className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-2 text-[11px] font-bold whitespace-nowrap transition-all cursor-pointer ${
                           isActive
                             ? 'bg-slate-900 text-white shadow-xs dark:bg-blue-600'
                             : 'bg-slate-100 text-slate-600 hover:bg-slate-200/80 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
@@ -2439,15 +2441,15 @@ export const ReportsModule: React.FC = () => {
                 </div>
 
                 {/* Third Row: Zoom & Fullscreen & Quick Print */}
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px]">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px]">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-slate-500 font-semibold">Skala Kertas:</span>
+                    <span className="text-slate-500 font-semibold whitespace-nowrap">Skala Kertas:</span>
                     {[85, 100, 110].map(z => (
                       <button
                         key={z}
                         type="button"
                         onClick={() => setPreviewZoom(z)}
-                        className={`px-2 py-0.5 rounded font-bold cursor-pointer ${
+                        className={`inline-flex h-7 items-center justify-center px-2.5 rounded-lg font-bold whitespace-nowrap shrink-0 cursor-pointer ${
                           previewZoom === z
                             ? 'bg-blue-600 text-white'
                             : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
@@ -2458,21 +2460,21 @@ export const ReportsModule: React.FC = () => {
                     ))}
                   </div>
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     <button
                       type="button"
                       onClick={() => setIsFullscreenPreview(true)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+                      className="inline-flex h-8 items-center justify-center gap-1 px-3 rounded-lg border border-slate-200 bg-slate-50 font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
                     >
-                      <Maximize2 className="h-3 w-3 text-blue-600" />
+                      <Maximize2 className="h-3 w-3 text-blue-600 shrink-0" />
                       <span>Layar Penuh</span>
                     </button>
                     <button
                       type="button"
                       onClick={handleDownloadPdf}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 font-bold text-white hover:bg-emerald-700 cursor-pointer"
+                      className="inline-flex h-8 items-center justify-center gap-1 px-3 rounded-lg bg-emerald-600 font-bold text-white hover:bg-emerald-700 whitespace-nowrap shrink-0 cursor-pointer"
                     >
-                      <Printer className="h-3 w-3" />
+                      <Printer className="h-3 w-3 shrink-0" />
                       <span>Cetak Dokumen Ini</span>
                     </button>
                   </div>
@@ -2931,53 +2933,53 @@ export const ReportsModule: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => stepDocument(-1)}
-                    className="no-ornament flex items-center gap-1 rounded-full border border-[#E6E8F2] bg-[#F5F6FA] hover:bg-[#ECEEF7] px-3 py-1.5 text-xs font-bold text-[#3E385B] cursor-pointer"
+                    className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-full border border-[#E6E8F2] bg-[#F5F6FA] hover:bg-[#ECEEF7] px-3 text-xs font-bold text-[#3E385B] whitespace-nowrap shrink-0 cursor-pointer"
                   >
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="h-4 w-4 shrink-0" />
                     <span>Dokumen Sebelumnya</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => stepDocument(1)}
-                    className="no-ornament flex items-center gap-1 rounded-full bg-[#685BC7] hover:bg-[#584AB8] px-3 py-1.5 text-xs font-bold text-white cursor-pointer"
+                    className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-full bg-[#685BC7] hover:bg-[#584AB8] px-3 text-xs font-bold text-white whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     <span>Dokumen Berikutnya</span>
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-4 w-4 shrink-0" />
                   </button>
                   {reportType === 'student_transcript' && (
                     <>
                       <button
                         type="button"
                         onClick={() => stepStudent(-1)}
-                        className="flex items-center gap-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 px-2.5 py-1.5 text-xs font-bold cursor-pointer"
+                        className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 px-2.5 text-xs font-bold text-white whitespace-nowrap shrink-0 cursor-pointer"
                       >
-                        <ChevronLeft className="h-3.5 w-3.5" />
+                        <ChevronLeft className="h-3.5 w-3.5 shrink-0" />
                         <span>Siswa Prev</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => stepStudent(1)}
-                        className="flex items-center gap-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 px-2.5 py-1.5 text-xs font-bold cursor-pointer"
+                        className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-lg bg-emerald-700 hover:bg-emerald-600 px-2.5 text-xs font-bold text-white whitespace-nowrap shrink-0 cursor-pointer"
                       >
                         <span>Siswa Next</span>
-                        <ChevronRight className="h-3.5 w-3.5" />
+                        <ChevronRight className="h-3.5 w-3.5 shrink-0" />
                       </button>
                     </>
                   )}
                   <button
                     type="button"
                     onClick={handleDownloadPdf}
-                    className="flex items-center gap-1 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 px-3 py-1.5 text-xs font-extrabold cursor-pointer"
+                    className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 px-3 text-xs font-extrabold whitespace-nowrap shrink-0 cursor-pointer"
                   >
-                    <Printer className="h-3.5 w-3.5" />
+                    <Printer className="h-3.5 w-3.5 shrink-0" />
                     <span>Cetak PDF</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsFullscreenPreview(false)}
-                    className="flex items-center gap-1 rounded-lg bg-rose-600 hover:bg-rose-500 px-3 py-1.5 text-xs font-bold cursor-pointer"
+                    className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-lg bg-rose-600 hover:bg-rose-500 px-3 text-xs font-bold text-white whitespace-nowrap shrink-0 cursor-pointer"
                   >
-                    <Minimize2 className="h-3.5 w-3.5" />
+                    <Minimize2 className="h-3.5 w-3.5 shrink-0" />
                     <span>Tutup</span>
                   </button>
                 </div>
