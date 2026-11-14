@@ -576,8 +576,9 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
       collection(db, 'reportTemplates'),
       snapshot => {
         if (!snapshot.empty) {
-          const docSnap = snapshot.docs[0];
-          callbacks.onReportTemplateChange?.(docSnap.data());
+          const preferred =
+            snapshot.docs.find(d => d.id === 'default_template') || snapshot.docs[0];
+          callbacks.onReportTemplateChange?.(preferred.data());
           handleUpdate();
         }
       },
@@ -659,8 +660,39 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
       const unsubPklTracers = onSnapshot(
         collection(db, 'pklTracerStudies'),
         snapshot => {
+          // Avoid overwriting local records with an empty offline-cache snapshot before server responds
+          if (snapshot.metadata.fromCache && snapshot.empty && !snapshot.metadata.hasPendingWrites) {
+            return;
+          }
           const list: AlumniTracerRecord[] = [];
-          snapshot.forEach(docSnap => list.push(docSnap.data() as AlumniTracerRecord));
+          snapshot.forEach(docSnap => {
+            const raw = docSnap.data() as Partial<AlumniTracerRecord>;
+            const normalizedMajor = String(raw.majorCode || '').trim().toUpperCase().includes('DPB')
+              ? 'DPB'
+              : 'RPL';
+            list.push({
+              ...(raw as AlumniTracerRecord),
+              id: raw.id || docSnap.id,
+              nisn: raw.nisn || '-',
+              fullName: raw.fullName || 'Alumni',
+              gender: raw.gender === 'P' ? 'P' : 'L',
+              majorCode: normalizedMajor,
+              graduationYear: raw.graduationYear || '2026',
+              careerStatus: raw.careerStatus || 'belum_bekerja',
+              institutionOrCompany: raw.institutionOrCompany || '-',
+              roleOrStudyProgram: raw.roleOrStudyProgram || '-',
+              city: raw.city || 'Sukabumi',
+              industryRelevance: raw.industryRelevance || 'sesuai',
+              waitingPeriod: raw.waitingPeriod || '< 3 Bulan',
+              verifiedBySchool: raw.verifiedBySchool !== false,
+              updatedAt: raw.updatedAt || '',
+            });
+          });
+          list.sort((a, b) => {
+            const dateCmp = (b.updatedAt || '').localeCompare(a.updatedAt || '');
+            if (dateCmp !== 0) return dateCmp;
+            return (a.fullName || '').localeCompare(b.fullName || '', 'id');
+          });
           callbacks.onPklTracersChange?.(list);
           handleUpdate();
         },
@@ -1208,10 +1240,22 @@ export async function firestoreDeleteDirectMessage(messageId: string): Promise<v
 
 export async function firestoreSaveReportTemplate(template: any): Promise<void> {
   try {
-    await setDoc(doc(db, 'reportTemplates', 'default_template'), sanitizeForFirestore({
-      ...template,
-      updatedAt: new Date().toISOString(),
-    }));
+    const [compactLogo, compactLeftSig, compactRightSig] = await Promise.all([
+      template?.logoDataUrl ? ensureCompactImageDataUrl(template.logoDataUrl, 220_000, 420) : Promise.resolve(null),
+      template?.leftSignerSignatureUrl ? ensureCompactImageDataUrl(template.leftSignerSignatureUrl, 200_000, 460) : Promise.resolve(null),
+      template?.rightSignerSignatureUrl ? ensureCompactImageDataUrl(template.rightSignerSignatureUrl, 200_000, 460) : Promise.resolve(null),
+    ]);
+
+    await setDoc(
+      doc(db, 'reportTemplates', 'default_template'),
+      sanitizeForFirestore({
+        ...template,
+        logoDataUrl: compactLogo || null,
+        leftSignerSignatureUrl: compactLeftSig || null,
+        rightSignerSignatureUrl: compactRightSig || null,
+        updatedAt: new Date().toISOString(),
+      })
+    );
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, 'reportTemplates/default_template');
   }
@@ -1374,19 +1418,33 @@ export async function firestoreDeletePklReport(reportId: string): Promise<void> 
   }
 }
 
+const toSafeTracerId = (rawId?: string): string => {
+  const cleaned = String(rawId || '')
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]/g, '_')
+    .slice(0, 120);
+  return cleaned || `trc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+};
+
 export async function firestoreSavePklTracer(tracer: AlumniTracerRecord): Promise<void> {
+  const safeId = toSafeTracerId(tracer.id);
   try {
-    await setDoc(doc(db, 'pklTracerStudies', tracer.id), sanitizeForFirestore(tracer));
+    const payload: AlumniTracerRecord = {
+      ...tracer,
+      id: safeId,
+    };
+    await setDoc(doc(db, 'pklTracerStudies', safeId), sanitizeForFirestore(payload));
   } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, `pklTracerStudies/${tracer.id}`);
+    handleFirestoreError(error, OperationType.WRITE, `pklTracerStudies/${safeId}`);
   }
 }
 
 export async function firestoreDeletePklTracer(tracerId: string): Promise<void> {
+  const safeId = toSafeTracerId(tracerId);
   try {
-    await deleteDoc(doc(db, 'pklTracerStudies', tracerId));
+    await deleteDoc(doc(db, 'pklTracerStudies', safeId));
   } catch (error) {
-    handleFirestoreError(error, OperationType.DELETE, `pklTracerStudies/${tracerId}`);
+    handleFirestoreError(error, OperationType.DELETE, `pklTracerStudies/${safeId}`);
   }
 }
 
@@ -1399,9 +1457,25 @@ export async function firestoreSavePklTracersBatch(
       | { kind: 'set'; tracer: AlumniTracerRecord }
       | { kind: 'delete'; id: string };
 
+    const activeIds = new Set<string>();
+    const setOps: BatchOp[] = [];
+    for (const tracer of tracers) {
+      const safeId = toSafeTracerId(tracer.id);
+      if (activeIds.has(safeId)) continue;
+      activeIds.add(safeId);
+      setOps.push({ kind: 'set', tracer: { ...tracer, id: safeId } });
+    }
+
+    const delIds = new Set<string>();
+    for (const rawId of deletedIds) {
+      if (!rawId) continue;
+      const safeId = toSafeTracerId(rawId);
+      if (!activeIds.has(safeId)) delIds.add(safeId);
+    }
+
     const ops: BatchOp[] = [
-      ...tracers.map(tracer => ({ kind: 'set' as const, tracer })),
-      ...deletedIds.filter(Boolean).map(id => ({ kind: 'delete' as const, id })),
+      ...setOps,
+      ...Array.from(delIds).map(id => ({ kind: 'delete' as const, id })),
     ];
 
     const chunkSize = 400;

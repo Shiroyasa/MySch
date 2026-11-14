@@ -2524,8 +2524,8 @@ export const PklModule: React.FC = () => {
               itemName: cfg.itemName,
               description: cfg.description,
               confirmLabel: 'Hapus Catatan',
-              onConfirm: () => {
-                cfg.onConfirm();
+              onConfirm: async () => {
+                await Promise.resolve(cfg.onConfirm());
                 closeDeleteModal();
               },
             })

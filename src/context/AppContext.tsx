@@ -296,7 +296,7 @@ interface AppContextType {
 
   // Custom Report Template / PDF Layout Designer
   reportTemplate: ReportCustomConfig;
-  saveReportTemplate: (template: ReportCustomConfig) => void;
+  saveReportTemplate: (template: ReportCustomConfig) => Promise<void>;
 
   // PKL & DUDI Administration (Cloud Synced)
   pklPartners: IndustryPartner[];
@@ -309,10 +309,10 @@ interface AppContextType {
   deletePklVisit: (visitId: string) => void;
   savePklReport: (report: PklStudentReportItem, isNew?: boolean) => void;
   deletePklReport: (reportId: string) => void;
-  savePklTracer: (tracer: AlumniTracerRecord, isNew?: boolean) => void;
+  savePklTracer: (tracer: AlumniTracerRecord, isNew?: boolean) => Promise<void>;
   savePklTracersBatch: (tracers: AlumniTracerRecord[], deletedIds?: string[]) => Promise<void>;
-  deletePklTracer: (tracerId: string) => void;
-  clearAllPklTracers: () => void;
+  deletePklTracer: (tracerId: string) => Promise<void>;
+  clearAllPklTracers: () => Promise<void>;
   clearAllPklData: () => void;
   loadSamplePklData: () => void;
 
@@ -698,9 +698,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [pklTracers, setPklTracers] = useState<AlumniTracerRecord[]>(() => {
     try {
-      if (localStorage.getItem('myschool_pkl_tracers_cleared_v2') !== '1') {
-        return initialAlumniTracers;
-      }
       const saved = localStorage.getItem('myschool_pkl_tracers_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -878,6 +875,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Track local mutation timestamps so in-flight Firestore snapshots never revert recent local edits
   const lastVisualUpdateRef = React.useRef<number>(0);
   const lastScheduleUpdateRef = React.useRef<number>(0);
+  const lastTracerUpdateRef = React.useRef<number>(0);
+  const isTracerWriteActiveRef = React.useRef<boolean>(false);
+  const lastReportTemplateUpdateRef = React.useRef<number>(0);
 
   // Hydrate full-fidelity VisualSettings & LessonSchedules from IndexedDB on mount
   useEffect(() => {
@@ -949,16 +949,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Mount Firestore real-time listeners for all collections
   useEffect(() => {
-    // One-time cleanup: clear pre-seeded/existing alumni tracer study data cleanly
-    try {
-      if (localStorage.getItem('myschool_pkl_tracers_cleared_v2') !== '1') {
-        localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify([]));
-        localStorage.setItem('myschool_pkl_tracers_cleared_v2', '1');
-        setPklTracers([]);
-        firestoreClearAllPklTracers().catch(() => {});
-      }
-    } catch {}
-
     // 1. Ensure Firestore is initially seeded with ORBITA data
     ensureFirestorePopulated().catch(err => {
       console.warn('Firestore initial populate notice:', err);
@@ -1027,25 +1017,48 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         localStorage.setItem('myschool_direct_messages', JSON.stringify(data));
       },
       onReportTemplateChange: data => {
-        setReportTemplate(prev => ({ ...prev, ...data }));
-        localStorage.setItem('myschool_report_template', JSON.stringify(data));
+        if (Date.now() - lastReportTemplateUpdateRef.current < 1500) {
+          return;
+        }
+        const normalized: ReportCustomConfig = {
+          ...defaultReportConfig,
+          ...data,
+          logoDataUrl: data.logoDataUrl || undefined,
+          leftSignerSignatureUrl: data.leftSignerSignatureUrl || undefined,
+          rightSignerSignatureUrl: data.rightSignerSignatureUrl || undefined,
+        };
+        setReportTemplate(normalized);
+        try {
+          localStorage.setItem('myschool_report_template', JSON.stringify(normalized));
+        } catch {}
       },
       onPklPartnersChange: data => {
         setPklPartners(data);
-        localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(data));
+        try {
+          localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(data));
+        } catch {}
       },
       onPklVisitsChange: data => {
         setPklVisits(data);
-        localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(data));
+        try {
+          localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(data));
+        } catch {}
       },
       onPklReportsChange: data => {
         setPklReports(data);
-        localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(data));
+        try {
+          localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(data));
+        } catch {}
       },
       onPklTracersChange: data => {
+        if (isTracerWriteActiveRef.current || Date.now() - lastTracerUpdateRef.current < 1500) {
+          return;
+        }
         if (Array.isArray(data)) {
           setPklTracers(data);
-          localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(data));
+          try {
+            localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(data));
+          } catch {}
         }
       },
       onVisualSettingsChange: data => {
@@ -1466,15 +1479,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Custom Report Template / PDF Layout Designer
-  const saveReportTemplate = (template: ReportCustomConfig) => {
+  const saveReportTemplate = async (template: ReportCustomConfig): Promise<void> => {
+    lastReportTemplateUpdateRef.current = Date.now();
     setReportTemplate(template);
-    localStorage.setItem('myschool_report_template', JSON.stringify(template));
-    firestoreSaveReportTemplate(template).catch(() => {});
-    pushNotification(
-      'Tata Letak Laporan PDF Disimpan',
-      'Pengaturan kop surat, logo instansi, dan tanda tangan perorangan berhasil disinkronkan ke cloud.',
-      'success'
-    );
+    try {
+      localStorage.setItem('myschool_report_template', JSON.stringify(template));
+    } catch {}
+    setIsSyncing(true);
+    try {
+      await firestoreSaveReportTemplate(template);
+      lastReportTemplateUpdateRef.current = Date.now();
+      setIsFirestoreConnected(true);
+      setLastSyncTime(new Date());
+      pushNotification(
+        'Tata Letak Laporan PDF Disimpan',
+        'Pengaturan kop surat, logo instansi, dan tanda tangan perorangan berhasil disinkronkan ke cloud.',
+        'success'
+      );
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   // Master Data Methods (Synced directly to Firestore & across all modules)
@@ -3233,62 +3257,107 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const savePklTracer = (tracer: AlumniTracerRecord, isNew = false) => {
-    localStorage.removeItem('myschool_pkl_tracers_cleared_v2');
+  const savePklTracer = async (tracer: AlumniTracerRecord, isNew = false): Promise<void> => {
+    isTracerWriteActiveRef.current = true;
+    lastTracerUpdateRef.current = Date.now();
     setPklTracers(prev => {
       const exists = prev.some(t => t.id === tracer.id);
       const next = exists ? prev.map(t => (t.id === tracer.id ? tracer : t)) : [tracer, ...prev];
-      localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(next));
+      try {
+        localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(next));
+      } catch {}
       return next;
     });
-    firestoreSavePklTracer(tracer).catch(() => {});
-    addAuditLog(
-      isNew ? 'CREATE_TRACER_STUDY' : 'UPDATE_TRACER_STUDY',
-      'Tracer Study Alumni',
-      `${isNew ? 'Menambahkan' : 'Memperbarui'} data tracer study alumni: ${tracer.fullName} (${tracer.careerStatus.toUpperCase()})`
-    );
-  };
-
-  const savePklTracersBatch = async (tracers: AlumniTracerRecord[], deletedIds: string[] = []) => {
-    if (tracers.length > 0) {
-      localStorage.removeItem('myschool_pkl_tracers_cleared_v2');
-    } else {
-      localStorage.setItem('myschool_pkl_tracers_cleared_v2', '1');
+    setIsSyncing(true);
+    try {
+      await firestoreSavePklTracer(tracer);
+      lastTracerUpdateRef.current = Date.now();
+      setIsFirestoreConnected(true);
+      setLastSyncTime(new Date());
+      addAuditLog(
+        isNew ? 'CREATE_TRACER_STUDY' : 'UPDATE_TRACER_STUDY',
+        'Tracer Study Alumni',
+        `${isNew ? 'Menambahkan' : 'Memperbarui'} data tracer study alumni: ${tracer.fullName} (${tracer.careerStatus.toUpperCase()})`
+      );
+    } finally {
+      isTracerWriteActiveRef.current = false;
+      setIsSyncing(false);
     }
-    setPklTracers(tracers);
-    localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(tracers));
-    await firestoreSavePklTracersBatch(tracers, deletedIds);
-    addAuditLog(
-      'BATCH_SYNC_TRACER_STUDY',
-      'Tracer Study Alumni',
-      `Menyimpan & menyinkronkan laporan editable tracer study (${tracers.length} catatan alumni${deletedIds.length > 0 ? `, ${deletedIds.length} dihapus` : ''}) ke Database Cloud.`
-    );
   };
 
-  const deletePklTracer = (tracerId: string) => {
+  const savePklTracersBatch = async (tracers: AlumniTracerRecord[], deletedIds: string[] = []): Promise<void> => {
+    isTracerWriteActiveRef.current = true;
+    lastTracerUpdateRef.current = Date.now();
+    setPklTracers(tracers);
+    try {
+      localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(tracers));
+    } catch {}
+    setIsSyncing(true);
+    try {
+      await firestoreSavePklTracersBatch(tracers, deletedIds);
+      lastTracerUpdateRef.current = Date.now();
+      setIsFirestoreConnected(true);
+      setLastSyncTime(new Date());
+      addAuditLog(
+        'BATCH_SYNC_TRACER_STUDY',
+        'Tracer Study Alumni',
+        `Menyimpan & menyinkronkan laporan editable tracer study (${tracers.length} catatan alumni${deletedIds.length > 0 ? `, ${deletedIds.length} dihapus` : ''}) ke Database Cloud.`
+      );
+    } finally {
+      isTracerWriteActiveRef.current = false;
+      setIsSyncing(false);
+    }
+  };
+
+  const deletePklTracer = async (tracerId: string): Promise<void> => {
     const target = pklTracers.find(t => t.id === tracerId);
+    isTracerWriteActiveRef.current = true;
+    lastTracerUpdateRef.current = Date.now();
     setPklTracers(prev => {
       const next = prev.filter(t => t.id !== tracerId);
-      localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(next));
+      try {
+        localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(next));
+      } catch {}
       return next;
     });
-    firestoreDeletePklTracer(tracerId).catch(() => {});
-    if (target) {
-      addAuditLog('DELETE_TRACER_STUDY', 'Tracer Study Alumni', `Menghapus catatan tracer study: ${target.fullName}`);
+    setIsSyncing(true);
+    try {
+      await firestoreDeletePklTracer(tracerId);
+      lastTracerUpdateRef.current = Date.now();
+      setIsFirestoreConnected(true);
+      setLastSyncTime(new Date());
+      if (target) {
+        addAuditLog('DELETE_TRACER_STUDY', 'Tracer Study Alumni', `Menghapus catatan tracer study: ${target.fullName}`);
+      }
+    } finally {
+      isTracerWriteActiveRef.current = false;
+      setIsSyncing(false);
     }
   };
 
-  const clearAllPklTracers = () => {
+  const clearAllPklTracers = async (): Promise<void> => {
     const tIds = pklTracers.map(t => t.id);
+    isTracerWriteActiveRef.current = true;
+    lastTracerUpdateRef.current = Date.now();
     setPklTracers([]);
-    localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify([]));
-    localStorage.setItem('myschool_pkl_tracers_cleared_v2', '1');
-    firestoreClearAllPklTracers(tIds).catch(() => {});
-    addAuditLog(
-      'CLEAR_TRACER_STUDY',
-      'Tracer Study Alumni',
-      'Mengosongkan seluruh data tracer study alumni dari database.'
-    );
+    try {
+      localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify([]));
+    } catch {}
+    setIsSyncing(true);
+    try {
+      await firestoreClearAllPklTracers(tIds);
+      lastTracerUpdateRef.current = Date.now();
+      setIsFirestoreConnected(true);
+      setLastSyncTime(new Date());
+      addAuditLog(
+        'CLEAR_TRACER_STUDY',
+        'Tracer Study Alumni',
+        'Mengosongkan seluruh data tracer study alumni dari database.'
+      );
+    } finally {
+      isTracerWriteActiveRef.current = false;
+      setIsSyncing(false);
+    }
   };
 
   const clearAllPklData = () => {
@@ -3297,34 +3366,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const rIds = pklReports.map(r => r.id);
     const tIds = pklTracers.map(t => t.id);
 
+    isTracerWriteActiveRef.current = true;
+    lastTracerUpdateRef.current = Date.now();
     setPklPartners([]);
     setPklVisits([]);
     setPklReports([]);
     setPklTracers([]);
-    localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify([]));
-    localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify([]));
-    localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify([]));
-    localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify([]));
-    localStorage.setItem('myschool_pkl_tracers_cleared_v2', '1');
+    try {
+      localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify([]));
+      localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify([]));
+      localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify([]));
+      localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify([]));
+    } catch {}
 
-    firestoreClearAllPklData(pIds, vIds, rIds, tIds).catch(() => {});
+    firestoreClearAllPklData(pIds, vIds, rIds, tIds)
+      .catch(err => console.error('Failed clearing PKL data:', err))
+      .finally(() => {
+        isTracerWriteActiveRef.current = false;
+        lastTracerUpdateRef.current = Date.now();
+      });
     addAuditLog('CLEAR_ALL_PKL', 'Administrasi PKL & DUDI', 'Mengosongkan seluruh data mitra DUDI, supervisi, laporan PKL, dan tracer study alumni dari database.');
   };
 
   const loadSamplePklData = () => {
+    isTracerWriteActiveRef.current = true;
+    lastTracerUpdateRef.current = Date.now();
     setPklPartners(sampleIndustryPartners);
     setPklVisits(samplePklVisits);
     setPklReports(samplePklReports);
     setPklTracers(sampleAlumniTracers);
-    localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(sampleIndustryPartners));
-    localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(samplePklVisits));
-    localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(samplePklReports));
-    localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(sampleAlumniTracers));
+    try {
+      localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(sampleIndustryPartners));
+      localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(samplePklVisits));
+      localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(samplePklReports));
+      localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(sampleAlumniTracers));
+    } catch {}
 
     sampleIndustryPartners.forEach(p => firestoreSavePklPartner(p).catch(() => {}));
     samplePklVisits.forEach(v => firestoreSavePklVisit(v).catch(() => {}));
     samplePklReports.forEach(r => firestoreSavePklReport(r).catch(() => {}));
-    sampleAlumniTracers.forEach(t => firestoreSavePklTracer(t).catch(() => {}));
+    firestoreSavePklTracersBatch(sampleAlumniTracers)
+      .catch(err => console.error('Failed seeding sample alumni tracers:', err))
+      .finally(() => {
+        isTracerWriteActiveRef.current = false;
+        lastTracerUpdateRef.current = Date.now();
+      });
     addAuditLog('SEED_PKL_SAMPLE', 'Administrasi PKL & DUDI', 'Memuat & menyinkronkan data contoh kemitraan DUDI dan Tracer Study Alumni ke Cloud Firestore.');
   };
 

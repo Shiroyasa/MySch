@@ -57,18 +57,18 @@ interface PklAlumniTracerSectionProps {
   partners: IndustryPartner[];
   majors: Major[];
   academicYearName: string;
-  onSaveTracer: (tracer: AlumniTracerRecord, isNew?: boolean) => void;
+  onSaveTracer: (tracer: AlumniTracerRecord, isNew?: boolean) => Promise<void> | void;
   onSaveTracersBatch?: (tracers: AlumniTracerRecord[], deletedIds?: string[]) => Promise<void>;
-  onDeleteTracer: (tracerId: string) => void;
-  onClearAllTracers?: () => void;
+  onDeleteTracer: (tracerId: string) => Promise<void> | void;
+  onClearAllTracers?: () => Promise<void> | void;
   reportTemplate?: ReportCustomConfig;
-  onSaveReportTemplate?: (template: ReportCustomConfig) => void;
+  onSaveReportTemplate?: (template: ReportCustomConfig) => Promise<void> | void;
   appLogoUrl?: string;
   onConfirmDelete: (config: {
     title: string;
     itemName: string;
     description: string;
-    onConfirm: () => void;
+    onConfirm: () => void | Promise<void>;
   }) => void;
   onToast: (msg: string) => void;
 }
@@ -253,6 +253,9 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
   const [deletedDraftIds, setDeletedDraftIds] = useState<string[]>([]);
   const [isDraftDirty, setIsDraftDirty] = useState(false);
   const [isSyncingDraft, setIsSyncingDraft] = useState(false);
+  const [isSavingModal, setIsSavingModal] = useState(false);
+  const [isSavingTemplate, setIsSavingTemplate] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
 
   // Paper Report & Print Customizer State (Synced with reportTemplate in AppContext/Firestore)
   const [paperConfig, setPaperConfig] = useState<ReportCustomConfig>(() => ({
@@ -277,11 +280,19 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
 
   useEffect(() => {
     if (reportTemplate) {
-      setPaperConfig(prev => ({
-        ...prev,
+      setPaperConfig({
+        ...defaultReportConfig,
         ...reportTemplate,
-        logoDataUrl: reportTemplate.logoDataUrl || prev.logoDataUrl || appLogoUrl,
-      }));
+        logoDataUrl:
+          reportTemplate.logoDataUrl !== undefined
+            ? reportTemplate.logoDataUrl || undefined
+            : appLogoUrl,
+        leftSignerHeader: reportTemplate.leftSignerHeader || 'Mengetahui,',
+        leftSignerTitle: reportTemplate.leftSignerTitle || 'Ketua BKK / Koordinator PKL,',
+        footerNote:
+          reportTemplate.footerNote ||
+          'Laporan penelusuran alumni ini disusun sesuai data resmi Bursa Kerja Khusus (BKK) dan terintegrasi ke sistem akademik ORBITA.',
+      });
     }
   }, [reportTemplate, appLogoUrl]);
 
@@ -497,16 +508,22 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isUnemployedStatus =
       formState.careerStatus === 'belum_bekerja' || formState.careerStatus === 'mencari_kerja';
-    if (!formState.fullName.trim()) return;
-    if (!isUnemployedStatus && !formState.institutionOrCompany.trim()) return;
+    if (!formState.fullName.trim()) {
+      onToast('Nama lengkap alumni wajib diisi.');
+      return;
+    }
+    if (!isUnemployedStatus && !formState.institutionOrCompany.trim()) {
+      onToast('Nama perusahaan / kampus / usaha wajib diisi.');
+      return;
+    }
 
     const chosenPartner = partners.find(p => p.id === formState.pklPartnerId);
     const payload: AlumniTracerRecord = {
-      id: editingTracerId || `trc-${Date.now()}`,
+      id: editingTracerId || `trc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       studentId: formState.studentId || undefined,
       nisn: formState.nisn.trim() || `00${Date.now().toString().slice(-8)}`,
       fullName: formState.fullName.trim(),
@@ -529,13 +546,23 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
       updatedAt: new Date().toISOString().split('T')[0],
     };
 
-    onSaveTracer(payload, !editingTracerId);
-    setShowModal(false);
-    onToast(
-      editingTracerId
-        ? `Data tracer study alumni ${payload.fullName} berhasil diperbarui & disinkronkan ke database.`
-        : `Jejak alumni ${payload.fullName} berhasil ditambahkan ke Database Cloud.`
-    );
+    setIsSavingModal(true);
+    setSyncError(null);
+    try {
+      await Promise.resolve(onSaveTracer(payload, !editingTracerId));
+      setShowModal(false);
+      onToast(
+        editingTracerId
+          ? `Data tracer study alumni ${payload.fullName} berhasil diperbarui & tersinkron ke Database.`
+          : `Jejak alumni ${payload.fullName} berhasil disimpan ke Database Cloud.`
+      );
+    } catch (err) {
+      console.error('Error saving tracer study record:', err);
+      setSyncError('Gagal menyimpan ke Database Cloud.');
+      onToast('Gagal menyimpan data tracer ke Database Cloud. Periksa koneksi lalu coba lagi.');
+    } finally {
+      setIsSavingModal(false);
+    }
   };
 
   // --- Editable Spreadsheet Helpers ---
@@ -621,15 +648,16 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     }));
 
     setIsSyncingDraft(true);
+    setSyncError(null);
     try {
       if (onSaveTracersBatch) {
         await onSaveTracersBatch(sanitizedPayload, deletedDraftIds);
       } else {
         for (const row of sanitizedPayload) {
-          onSaveTracer(row, !tracers.some(t => t.id === row.id));
+          await Promise.resolve(onSaveTracer(row, !tracers.some(t => t.id === row.id)));
         }
         for (const delId of deletedDraftIds) {
-          onDeleteTracer(delId);
+          await Promise.resolve(onDeleteTracer(delId));
         }
       }
       setDraftRows(sanitizedPayload);
@@ -638,6 +666,10 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
       onToast(
         `Berhasil menyimpan & menyinkronkan ${sanitizedPayload.length} catatan Laporan Tracer Study ke Database Cloud!`
       );
+    } catch (err) {
+      console.error('Error syncing editable tracer draft:', err);
+      setSyncError('Gagal sinkronisasi ke Database Cloud.');
+      onToast('Gagal menyimpan & menyinkronkan draf ke Database Cloud. Pastikan koneksi stabil lalu coba lagi.');
     } finally {
       setIsSyncingDraft(false);
     }
@@ -681,11 +713,20 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     e.target.value = '';
   };
 
-  const handleSaveKopTemplateToDb = () => {
-    if (onSaveReportTemplate) {
-      onSaveReportTemplate(paperConfig);
+  const handleSaveKopTemplateToDb = async () => {
+    if (!onSaveReportTemplate) return;
+    setIsSavingTemplate(true);
+    setSyncError(null);
+    try {
+      await Promise.resolve(onSaveReportTemplate(paperConfig));
+      onToast('Pengaturan Kop Surat, Logo Instansi, dan Scan TTD berhasil disimpan & disinkronkan ke Database.');
+    } catch (err) {
+      console.error('Error saving report template:', err);
+      setSyncError('Gagal menyimpan template Kop Surat ke Database.');
+      onToast('Gagal menyimpan template Kop Surat ke Database. Ukuran logo/TTD mungkin terlalu besar atau koneksi terputus.');
+    } finally {
+      setIsSavingTemplate(false);
     }
-    onToast('Pengaturan Kop Surat, Logo Instansi, dan Scan TTD berhasil disimpan & disinkronkan ke Database.');
   };
 
   const handlePrintPaperNow = () => {
@@ -1062,7 +1103,17 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
           <span className="no-ornament inline-flex items-center gap-1.5 rounded-xl border border-[#DDD8F6] bg-[#F7F5FD] px-3 py-1.5 text-[#5D51B2] dark:border-violet-800/60 dark:bg-violet-950/50 dark:text-violet-300">
             <span>Jurusan: DPB ({stats.dpbCount}) &middot; RPL ({stats.rplCount})</span>
           </span>
-          {isDraftDirty ? (
+          {syncError ? (
+            <span className="no-ornament inline-flex items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3 py-1.5 text-rose-700 dark:border-rose-800/70 dark:bg-rose-950/50 dark:text-rose-300">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              <span>{syncError}</span>
+            </span>
+          ) : isSyncingDraft || isSavingModal || isSavingTemplate ? (
+            <span className="no-ornament inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-indigo-700 dark:border-indigo-800/70 dark:bg-indigo-950/50 dark:text-indigo-300">
+              <RefreshCw className="h-3.5 w-3.5 shrink-0 animate-spin" />
+              <span>Menyimpan ke Database...</span>
+            </span>
+          ) : isDraftDirty ? (
             <span className="no-ornament inline-flex items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-1.5 text-amber-700 dark:border-amber-800/70 dark:bg-amber-950/50 dark:text-amber-300">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               <span>Draf Belum Disimpan</span>
@@ -1445,10 +1496,16 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                     itemName: `${tracers.length} Data Alumni Tracer Study`,
                     description:
                       'Seluruh catatan penelusuran alumni di menu Tracer Study akan dihapus permanen dari perangkat dan Database Cloud. Lanjutkan?',
-                    onConfirm: () => {
-                      onClearAllTracers();
-                      setIsDraftDirty(false);
-                      onToast('Seluruh data alumni pada menu Tracer Study berhasil dikosongkan.');
+                    onConfirm: async () => {
+                      try {
+                        await Promise.resolve(onClearAllTracers());
+                        setIsDraftDirty(false);
+                        setSyncError(null);
+                        onToast('Seluruh data alumni pada menu Tracer Study berhasil dikosongkan dari Database.');
+                      } catch {
+                        setSyncError('Gagal mengosongkan data di Database.');
+                        onToast('Gagal mengosongkan data Tracer Study di Database Cloud.');
+                      }
                     },
                   })
                 }
@@ -1582,18 +1639,26 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                           <td className="py-3 px-3 text-center whitespace-nowrap">
                             <button
                               type="button"
-                              onClick={() => {
-                                onSaveTracer({
-                                  ...t,
-                                  majorCode: majorDisplay,
-                                  verifiedBySchool: !t.verifiedBySchool,
-                                  updatedAt: new Date().toISOString().split('T')[0],
-                                });
-                                onToast(
-                                  !t.verifiedBySchool
-                                    ? `Data alumni ${t.fullName} ditandai Terverifikasi BKK.`
-                                    : `Status verifikasi ${t.fullName} dikembalikan ke Menunggu Review.`
-                                );
+                              onClick={async () => {
+                                try {
+                                  await Promise.resolve(
+                                    onSaveTracer({
+                                      ...t,
+                                      majorCode: majorDisplay,
+                                      verifiedBySchool: !t.verifiedBySchool,
+                                      updatedAt: new Date().toISOString().split('T')[0],
+                                    })
+                                  );
+                                  setSyncError(null);
+                                  onToast(
+                                    !t.verifiedBySchool
+                                      ? `Data alumni ${t.fullName} ditandai Terverifikasi BKK.`
+                                      : `Status verifikasi ${t.fullName} dikembalikan ke Menunggu Review.`
+                                  );
+                                } catch {
+                                  setSyncError('Gagal memperbarui verifikasi ke Database.');
+                                  onToast('Gagal menyimpan status verifikasi ke Database Cloud.');
+                                }
                               }}
                               className={`no-ornament inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[10.5px] font-extrabold cursor-pointer transition-colors ${
                                 t.verifiedBySchool
@@ -1623,9 +1688,15 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                                     title: 'Hapus Catatan Tracer Study Alumni',
                                     itemName: t.fullName,
                                     description: `Hapus jejak alumni ${t.fullName} (${t.institutionOrCompany || '-'}) dari database Tracer Study?`,
-                                    onConfirm: () => {
-                                      onDeleteTracer(t.id);
-                                      onToast(`Catatan alumni ${t.fullName} berhasil dihapus dari Database Cloud.`);
+                                    onConfirm: async () => {
+                                      try {
+                                        await Promise.resolve(onDeleteTracer(t.id));
+                                        setSyncError(null);
+                                        onToast(`Catatan alumni ${t.fullName} berhasil dihapus dari Database Cloud.`);
+                                      } catch {
+                                        setSyncError('Gagal menghapus data dari Database.');
+                                        onToast(`Gagal menghapus catatan ${t.fullName} di Database Cloud.`);
+                                      }
                                     },
                                   })
                                 }
@@ -1697,14 +1768,22 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                       <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#E6E4F2] dark:border-slate-700">
                         <button
                           type="button"
-                          onClick={() => {
-                            onSaveTracer({
-                              ...t,
-                              majorCode: majorDisplay,
-                              verifiedBySchool: !t.verifiedBySchool,
-                              updatedAt: new Date().toISOString().split('T')[0],
-                            });
-                            onToast(`Status verifikasi ${t.fullName} diperbarui.`);
+                          onClick={async () => {
+                            try {
+                              await Promise.resolve(
+                                onSaveTracer({
+                                  ...t,
+                                  majorCode: majorDisplay,
+                                  verifiedBySchool: !t.verifiedBySchool,
+                                  updatedAt: new Date().toISOString().split('T')[0],
+                                })
+                              );
+                              setSyncError(null);
+                              onToast(`Status verifikasi ${t.fullName} diperbarui di Database.`);
+                            } catch {
+                              setSyncError('Gagal memperbarui verifikasi ke Database.');
+                              onToast('Gagal menyimpan status verifikasi ke Database Cloud.');
+                            }
                           }}
                           className={`no-ornament inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[10.5px] font-extrabold cursor-pointer ${
                             t.verifiedBySchool
@@ -1732,9 +1811,15 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                                 title: 'Hapus Catatan Tracer Study Alumni',
                                 itemName: t.fullName,
                                 description: `Hapus jejak alumni ${t.fullName} dari database Tracer Study?`,
-                                onConfirm: () => {
-                                  onDeleteTracer(t.id);
-                                  onToast(`Catatan alumni ${t.fullName} dihapus.`);
+                                onConfirm: async () => {
+                                  try {
+                                    await Promise.resolve(onDeleteTracer(t.id));
+                                    setSyncError(null);
+                                    onToast(`Catatan alumni ${t.fullName} dihapus dari Database.`);
+                                  } catch {
+                                    setSyncError('Gagal menghapus data dari Database.');
+                                    onToast(`Gagal menghapus catatan ${t.fullName} di Database Cloud.`);
+                                  }
                                 },
                               })
                             }
@@ -2761,10 +2846,19 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
               <button
                 type="button"
                 onClick={handleSaveKopTemplateToDb}
-                className="no-ornament w-full inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-4 text-xs font-extrabold text-white shadow-xs hover:bg-[#5B4FA8] cursor-pointer transition-colors"
+                disabled={isSavingTemplate}
+                className="no-ornament w-full inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-4 text-xs font-extrabold text-white shadow-xs hover:bg-[#5B4FA8] disabled:opacity-60 cursor-pointer transition-colors"
               >
-                <Save className="h-3.5 w-3.5 shrink-0" />
-                <span>Simpan Template Kop, Logo &amp; TTD ke Database</span>
+                {isSavingTemplate ? (
+                  <RefreshCw className="h-3.5 w-3.5 shrink-0 animate-spin" />
+                ) : (
+                  <Save className="h-3.5 w-3.5 shrink-0" />
+                )}
+                <span>
+                  {isSavingTemplate
+                    ? 'Menyimpan Template ke Database...'
+                    : 'Simpan Template Kop, Logo & TTD ke Database'}
+                </span>
               </button>
             </div>
           </div>
@@ -3144,15 +3238,24 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="no-ornament inline-flex h-9 items-center justify-center rounded-xl border border-[#E2DFEF] px-4 text-xs font-bold text-[#555070] hover:bg-[#FAF9FE] dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap shrink-0"
+                    disabled={isSavingModal}
+                    className="no-ornament inline-flex h-9 items-center justify-center rounded-xl border border-[#E2DFEF] px-4 text-xs font-bold text-[#555070] hover:bg-[#FAF9FE] disabled:opacity-60 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap shrink-0"
                   >
                     Batal
                   </button>
                   <button
                     type="submit"
-                    className="no-ornament inline-flex h-9 items-center justify-center rounded-xl bg-[#6C60B8] px-5 text-xs font-extrabold text-white shadow-xs hover:bg-[#5B4FA8] cursor-pointer whitespace-nowrap shrink-0"
+                    disabled={isSavingModal}
+                    className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-5 text-xs font-extrabold text-white shadow-xs hover:bg-[#5B4FA8] disabled:opacity-60 cursor-pointer whitespace-nowrap shrink-0"
                   >
-                    {editingTracerId ? 'Simpan Perubahan Tracer' : 'Simpan Data Tracer Alumni'}
+                    {isSavingModal && <RefreshCw className="h-3.5 w-3.5 shrink-0 animate-spin" />}
+                    <span>
+                      {isSavingModal
+                        ? 'Menyimpan ke Database...'
+                        : editingTracerId
+                        ? 'Simpan Perubahan Tracer'
+                        : 'Simpan Data Tracer Alumni'}
+                    </span>
                   </button>
                 </div>
               </form>
