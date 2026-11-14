@@ -9,6 +9,7 @@ import {
 import {
   OrnateCard,
   OrnateSectionHeader,
+  HighlightedChartHeader,
   AcademyCornerBadge,
   BoxBgControl,
   ElectroSwirlCrest,
@@ -33,7 +34,7 @@ const JrpgFlipBox: React.FC<JrpgFlipBoxProps> = ({
   boxId,
   front,
   back,
-  minHeightClass = 'min-h-[188px]',
+  minHeightClass = 'min-h-[164px]',
   onClick,
 }) => {
   return (
@@ -514,14 +515,14 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
     const stop3 = stop2 + s;
     const stop4 = stop3 + i;
     if (attendanceAnalytics.total === 0) {
-      return 'conic-gradient(#ECEBF5 0% 100%)';
+      return 'conic-gradient(#CFCBE8 0% 100%)';
     }
     return `conic-gradient(
-      #10b981 0% ${stop1}%,
-      #a855f7 ${stop1}% ${stop2}%,
-      #3b82f6 ${stop2}% ${stop3}%,
-      #f59e0b ${stop3}% ${stop4}%,
-      #f43f5e ${stop4}% 100%
+      #1CC865 0% ${stop1}%,
+      #6C60B8 ${stop1}% ${stop2}%,
+      #3B82F6 ${stop2}% ${stop3}%,
+      #F59E0B ${stop3}% ${stop4}%,
+      #F25781 ${stop4}% 100%
     )`;
   }, [attendanceAnalytics]);
 
@@ -720,34 +721,48 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             />
           )}
 
-          {/* Top Row: "Overview" + Interactive Class, Month, Year & Dataset Filters */}
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div className="min-w-0">
-              <h1 className="text-base sm:text-xl font-extrabold text-white tracking-tight truncate">
-                Overview Real-Time Database
-              </h1>
-              <p className="text-[11px] text-white/75 font-medium truncate">
-                ORBITA Akademi &middot; T.A. {activeAcademicYear?.name || '2025/2026'}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 w-full sm:w-auto">
-              <div className="hidden sm:block opacity-0 group-hover/banner:opacity-100 transition-opacity">
-                <BoxBgControl boxKey="banner_dashboard" isBanner moduleKey="dashboard" compact />
+          {/* Top Header Block: Full-Width Highlighted Title + 4-Column Single Filter Row */}
+          <div className="relative z-10 flex flex-col gap-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="no-ornament min-w-0 flex-1 flex items-stretch gap-2.5 rounded-2xl bg-white/14 border border-white/25 px-3.5 py-2 backdrop-blur-xs">
+                <span
+                  aria-hidden="true"
+                  className="w-1.5 rounded-full bg-gradient-to-b from-[#FF85A6] to-[#FFD2E0] shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-sm sm:text-lg font-black text-white tracking-tight leading-snug truncate">
+                    Overview Real-Time Database
+                  </h1>
+                  <p className="text-[11px] text-white/85 font-semibold truncate">
+                    ORBITA Akademi &middot; T.A. {activeAcademicYear?.name || '2025/2026'}
+                  </p>
+                </div>
               </div>
 
+              <div className="shrink-0 opacity-85 sm:opacity-0 sm:group-hover/banner:opacity-100 focus-within:opacity-100 transition-opacity pt-0.5">
+                <BoxBgControl boxKey="banner_dashboard" isBanner moduleKey="dashboard" compact />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full">
               {/* Filter Kelas */}
               <select
                 value={selectedClassFilter}
                 onChange={e => setSelectedClassFilter(e.target.value)}
                 title="Filter Kelas / Rombel"
-                className="min-w-0 w-full sm:w-auto truncate rounded-full border border-white/25 bg-white/14 hover:bg-white/22 px-2.5 py-1.5 sm:py-1 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                  color: '#FFFFFF',
+                  WebkitTextFillColor: '#FFFFFF',
+                  borderColor: 'rgba(255, 255, 255, 0.28)',
+                }}
+                className="no-ornament h-8.5 min-w-0 w-full truncate rounded-full border hover:bg-white/22 px-3 text-[11px] font-bold text-white focus:outline-none cursor-pointer transition-colors"
               >
-                <option value="ALL" className="text-[#3E385B]">
-                  Semua Kelas ({students.length} Siswa)
+                <option value="ALL" className="text-[#3E385B] bg-white">
+                  Semua Kelas ({students.length})
                 </option>
                 {classes.map(cls => (
-                  <option key={cls.id} value={cls.id} className="text-[#3E385B]">
+                  <option key={cls.id} value={cls.id} className="text-[#3E385B] bg-white">
                     Kelas {cls.name} ({cls.majorCode})
                   </option>
                 ))}
@@ -764,14 +779,20 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                   }
                 }}
                 title="Filter Bulan"
-                className="min-w-0 w-full sm:w-auto truncate rounded-full border border-white/25 bg-white/14 hover:bg-white/22 px-2.5 py-1.5 sm:py-1 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                  color: '#FFFFFF',
+                  WebkitTextFillColor: '#FFFFFF',
+                  borderColor: 'rgba(255, 255, 255, 0.28)',
+                }}
+                className="no-ornament h-8.5 min-w-0 w-full truncate rounded-full border hover:bg-white/22 px-3 text-[11px] font-bold text-white focus:outline-none cursor-pointer transition-colors"
               >
-                <option value="ALL" className="text-[#3E385B]">
+                <option value="ALL" className="text-[#3E385B] bg-white">
                   Semua Bulan
                 </option>
                 {MONTH_OPTIONS.map(m => (
-                  <option key={m.value} value={m.value} className="text-[#3E385B]">
-                    Bulan {m.full}
+                  <option key={m.value} value={m.value} className="text-[#3E385B] bg-white">
+                    {m.full}
                   </option>
                 ))}
               </select>
@@ -781,13 +802,19 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                 value={selectedYearFilter}
                 onChange={e => setSelectedYearFilter(e.target.value)}
                 title="Filter Tahun"
-                className="min-w-0 w-full sm:w-auto truncate rounded-full border border-white/25 bg-white/14 hover:bg-white/22 px-2.5 py-1.5 sm:py-1 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                  color: '#FFFFFF',
+                  WebkitTextFillColor: '#FFFFFF',
+                  borderColor: 'rgba(255, 255, 255, 0.28)',
+                }}
+                className="no-ornament h-8.5 min-w-0 w-full truncate rounded-full border hover:bg-white/22 px-3 text-[11px] font-bold text-white focus:outline-none cursor-pointer transition-colors"
               >
-                <option value="ALL" className="text-[#3E385B]">
+                <option value="ALL" className="text-[#3E385B] bg-white">
                   Semua Tahun
                 </option>
                 {availableYears.map(yr => (
-                  <option key={yr} value={yr} className="text-[#3E385B]">
+                  <option key={yr} value={yr} className="text-[#3E385B] bg-white">
                     Tahun {yr}
                   </option>
                 ))}
@@ -808,9 +835,9 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                   )
                 }
                 title="Klik untuk beralih dataset grafik (Kehadiran / Nilai Akademik / PKL / Siswa)"
-                className="no-ornament inline-flex h-8 sm:h-7 w-full sm:w-auto items-center justify-center gap-1.5 rounded-full border border-white/30 bg-white/20 hover:bg-white/30 px-3 text-[11px] font-extrabold text-white whitespace-nowrap shrink-0 transition-all cursor-pointer"
+                className="no-ornament inline-flex h-8.5 w-full items-center justify-center gap-1.5 rounded-full border border-white/30 bg-white/22 hover:bg-white/30 px-3 text-[11px] font-extrabold text-white whitespace-nowrap truncate transition-all cursor-pointer"
               >
-                <span>
+                <span className="truncate">
                   {activeChartView === 'kehadiran'
                     ? 'Presensi'
                     : activeChartView === 'akademik'
@@ -819,7 +846,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                     ? 'Prakerin PKL'
                     : 'Data Siswa'}
                 </span>
-                <span className="text-[10px] opacity-85">⌄</span>
+                <span className="text-[10px] opacity-85 shrink-0">⌄</span>
               </button>
             </div>
           </div>
@@ -865,10 +892,22 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             >
               <defs>
                 <linearGradient id="overviewWaveGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#FF7597" stopOpacity="0.32" />
-                  <stop offset="100%" stopColor="#5D51B2" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor="#FF7597" stopOpacity="0.38" />
+                  <stop offset="100%" stopColor="#5D51B2" stopOpacity="0.02" />
                 </linearGradient>
               </defs>
+              {[29, 57, 85].map(yPos => (
+                <line
+                  key={yPos}
+                  x1="15"
+                  y1={yPos}
+                  x2="505"
+                  y2={yPos}
+                  stroke="rgba(255,255,255,0.16)"
+                  strokeWidth="1"
+                  strokeDasharray="4 4"
+                />
+              ))}
               <path
                 d={overviewAreaPath}
                 fill="url(#overviewWaveGrad)"
@@ -1112,7 +1151,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             title: 'Supervisi Prakerin',
             sub: `${pklAndStudentStatusStats.pklPartnerCount} mitra industri`,
             pct: Math.round(pklAndStudentStatusStats.pklCompletedPct),
-            leftMeta: `${pklAndStudentStatusStats.pklCompleted}/ ${pklAndStudentStatusStats.pklTotal} laporan`,
+            leftMeta: `${pklAndStudentStatusStats.pklCompleted} / ${pklAndStudentStatusStats.pklTotal} laporan`,
             pillText: `${pklAndStudentStatusStats.pklVisitCount} kunjungan`,
           },
         ].map(card => (
@@ -1122,9 +1161,9 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             style={{
               boxShadow: '0 14px 34px -6px rgba(108, 96, 184, 0.09)',
             }}
-            className="no-ornament group relative rounded-[26px] border border-[#F0F0F7] bg-white px-6 pt-10 pb-5 text-[#3E385B] cursor-pointer transition-all duration-200 hover:-translate-y-1 overflow-visible"
+            className="no-ornament group relative rounded-[26px] border border-[#E8E6F4] bg-white dark:bg-slate-900 dark:border-slate-800 px-5 sm:px-6 pt-10 pb-5 text-[#3E385B] dark:text-slate-100 cursor-pointer transition-all duration-200 hover:-translate-y-1 overflow-visible"
           >
-            {/* Top-Center Floating Purple Squircle Icon Badge (Exact Reference Image Detail) */}
+            {/* Top-Center Floating Purple Squircle Icon Badge */}
             <div
               className="pointer-events-none select-none absolute -top-6 left-1/2 -translate-x-1/2 z-20 flex h-13 w-13 items-center justify-center rounded-[18px] bg-gradient-to-br from-[#7568C6] to-[#6356B5] text-white shadow-[0_10px_22px_rgba(108,96,184,0.36)] transition-transform duration-300 group-hover:scale-105"
               aria-hidden="true"
@@ -1134,7 +1173,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
 
             {/* Top-Right Subtle 3-Dots Icon */}
             <span
-              className="pointer-events-none absolute top-4 right-4 text-[#C6C4D6] font-bold text-sm"
+              className="pointer-events-none absolute top-4 right-4 text-[#C6C4D6] dark:text-slate-600 font-bold text-sm"
               aria-hidden="true"
             >
               ⋮
@@ -1142,21 +1181,21 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
 
             {/* Centered Title & Subtitle */}
             <div className="text-center">
-              <h3 className="text-sm font-extrabold text-[#3E385B] group-hover:text-[#6C60B8] transition-colors">
+              <h3 className="text-sm font-extrabold text-[#3E385B] dark:text-white group-hover:text-[#6C60B8] dark:group-hover:text-indigo-300 transition-colors truncate">
                 {card.title}
               </h3>
-              <p className="text-xs font-medium text-[#A2A0B4] mt-0.5">
+              <p className="text-xs font-medium text-[#8C88A4] dark:text-slate-400 mt-0.5 truncate">
                 {card.sub}
               </p>
             </div>
 
             {/* Progress Label & Percentage */}
             <div className="mt-5">
-              <div className="flex items-center justify-between text-xs font-extrabold text-[#3E385B] mb-2">
+              <div className="flex items-center justify-between text-xs font-extrabold text-[#3E385B] dark:text-slate-200 mb-2">
                 <span>Progress</span>
                 <span className="tabular-nums">{card.pct}%</span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-[#F0F1F6] overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-[#E3E0F4] dark:bg-slate-700 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-[#1CC865] transition-all duration-500"
                   style={{ width: `${Math.min(100, Math.max(6, card.pct))}%` }}
@@ -1166,10 +1205,10 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
 
             {/* Bottom Footer Row: Left Fraction + Right Soft Pink Status Pill */}
             <div className="mt-4 flex items-center justify-between gap-2 pt-1">
-              <span className="text-[11px] font-medium text-[#A2A0B4] tabular-nums">
+              <span className="text-[11px] font-semibold text-[#8E8BA3] dark:text-slate-400 tabular-nums truncate">
                 {card.leftMeta}
               </span>
-              <span className="rounded-full bg-[#FFE4EC] px-3 py-1 text-[10px] font-bold text-[#F25781]">
+              <span className="rounded-full bg-[#FFE4EC] dark:bg-rose-950/70 px-2.5 py-0.5 text-[10px] font-bold text-[#F25781] dark:text-rose-300 whitespace-nowrap shrink-0">
                 {card.pillText}
               </span>
             </div>
@@ -1186,18 +1225,18 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           front={
             <div className="flex flex-col justify-between h-full">
               <div className="text-center">
-                <p className="text-[11px] font-bold text-[#A2A0B4] truncate">
+                <p className="text-[11px] font-bold text-[#7A7596] dark:text-slate-400 truncate">
                   Persentase Kehadiran
                 </p>
-                <h3 className="text-2xl sm:text-3xl font-black text-[#3E385B] mt-1 leading-tight tabular-nums">
+                <h3 className="text-2xl sm:text-3xl font-black text-[#3E385B] dark:text-white mt-1 leading-tight tabular-nums">
                   {attendanceAnalytics.effectiveAttendancePct}%
                 </h3>
-                <p className="text-[11px] font-medium text-[#9694A8] mt-0.5 truncate">
+                <p className="text-[11px] font-medium text-[#7A7596] dark:text-slate-400 mt-0.5 truncate">
                   {attendanceAnalytics.hadir} Hadir &middot; {attendanceAnalytics.total} Sesi
                 </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-[#F0F1F6]">
-                <div className="flex justify-between text-[11px] font-bold text-[#3E385B] mb-1.5">
+              <div className="mt-3 pt-2.5 border-t border-[#E6E4F2] dark:border-slate-700">
+                <div className="flex justify-between text-[11px] font-bold text-[#3E385B] dark:text-slate-200 mb-1.5">
                   <span>Progress</span>
                   <span className="tabular-nums">{attendanceAnalytics.effectiveAttendancePct}%</span>
                 </div>
@@ -1213,10 +1252,10 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           back={
             <div className="flex flex-col justify-between h-full">
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/90 block">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/90 block pr-9">
                   Rincian Presensi
                 </span>
-                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px] tabular-nums">
                   <div className="no-ornament rounded-xl bg-white/15 px-2.5 py-1.5">
                     <span className="text-white/80 block text-[10px]">Hadir (H)</span>
                     <span className="font-extrabold text-white text-xs block">
@@ -1258,18 +1297,18 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           front={
             <div className="flex flex-col justify-between h-full">
               <div className="text-center">
-                <p className="text-[11px] font-bold text-[#A2A0B4] truncate">
+                <p className="text-[11px] font-bold text-[#7A7596] dark:text-slate-400 truncate">
                   Rata-rata &amp; Ketuntasan
                 </p>
-                <h3 className="text-2xl sm:text-3xl font-black text-[#3E385B] mt-1 leading-tight tabular-nums">
+                <h3 className="text-2xl sm:text-3xl font-black text-[#3E385B] dark:text-white mt-1 leading-tight tabular-nums">
                   {academicAnalytics.kkmPassPct}%
                 </h3>
-                <p className="text-[11px] font-medium text-[#9694A8] mt-0.5 truncate">
+                <p className="text-[11px] font-medium text-[#7A7596] dark:text-slate-400 mt-0.5 truncate">
                   Rata-rata: {academicAnalytics.avgScore} ({academicAnalytics.passedCount} Tuntas)
                 </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-[#F0F1F6]">
-                <div className="flex justify-between text-[11px] font-bold text-[#3E385B] mb-1.5">
+              <div className="mt-3 pt-2.5 border-t border-[#E6E4F2] dark:border-slate-700">
+                <div className="flex justify-between text-[11px] font-bold text-[#3E385B] dark:text-slate-200 mb-1.5">
                   <span>Progress</span>
                   <span className="tabular-nums">{academicAnalytics.kkmPassPct}%</span>
                 </div>
@@ -1285,10 +1324,10 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           back={
             <div className="flex flex-col justify-between h-full">
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/90 block">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/90 block pr-9">
                   Distribusi Predikat
                 </span>
-                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px] tabular-nums">
                   <div className="no-ornament rounded-xl bg-white/15 px-2.5 py-1.5">
                     <span className="text-white/80 block text-[10px]">Predikat A</span>
                     <span className="font-extrabold text-white text-xs block">
@@ -1330,18 +1369,18 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           front={
             <div className="flex flex-col justify-between h-full">
               <div className="text-center">
-                <p className="text-[11px] font-bold text-[#A2A0B4] truncate">
+                <p className="text-[11px] font-bold text-[#7A7596] dark:text-slate-400 truncate">
                   Populasi Siswa &amp; Guru
                 </p>
-                <h3 className="text-2xl sm:text-3xl font-black text-[#3E385B] mt-1 leading-tight tabular-nums">
-                  {students.length} <span className="text-xs font-bold text-[#9694A8]">Siswa</span>
+                <h3 className="text-2xl sm:text-3xl font-black text-[#3E385B] dark:text-white mt-1 leading-tight tabular-nums">
+                  {students.length} <span className="text-xs font-bold text-[#7A7596] dark:text-slate-400">Siswa</span>
                 </h3>
-                <p className="text-[11px] font-medium text-[#9694A8] mt-0.5 truncate">
+                <p className="text-[11px] font-medium text-[#7A7596] dark:text-slate-400 mt-0.5 truncate">
                   {teachers.length} Guru &middot; {classes.length} Kelas
                 </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-[#F0F1F6]">
-                <div className="flex justify-between text-[11px] font-bold text-[#3E385B] mb-1.5">
+              <div className="mt-3 pt-2.5 border-t border-[#E6E4F2] dark:border-slate-700">
+                <div className="flex justify-between text-[11px] font-bold text-[#3E385B] dark:text-slate-200 mb-1.5">
                   <span>Rasio L / P</span>
                   <span className="tabular-nums">{pklAndStudentStatusStats.malePct}%</span>
                 </div>
@@ -1357,10 +1396,10 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           back={
             <div className="flex flex-col justify-between h-full">
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/90 block">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/90 block pr-9">
                   Statistik Data Pokok
                 </span>
-                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px] tabular-nums">
                   <div className="no-ornament rounded-xl bg-white/15 px-2.5 py-1.5">
                     <span className="text-white/80 block text-[10px]">Laki-laki (L)</span>
                     <span className="font-extrabold text-white text-xs block">
@@ -1402,18 +1441,18 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           front={
             <div className="flex flex-col justify-between h-full">
               <div className="text-center">
-                <p className="text-[11px] font-bold text-[#A2A0B4] truncate">
+                <p className="text-[11px] font-bold text-[#7A7596] dark:text-slate-400 truncate">
                   Administrasi Prakerin
                 </p>
-                <h3 className="text-2xl sm:text-3xl font-black text-[#3E385B] mt-1 leading-tight tabular-nums">
+                <h3 className="text-2xl sm:text-3xl font-black text-[#3E385B] dark:text-white mt-1 leading-tight tabular-nums">
                   {pklAndStudentStatusStats.pklCompletedPct}%
                 </h3>
-                <p className="text-[11px] font-medium text-[#9694A8] mt-0.5 truncate">
+                <p className="text-[11px] font-medium text-[#7A7596] dark:text-slate-400 mt-0.5 truncate">
                   {pklAndStudentStatusStats.pklVisitCount} Monitoring &middot; {pklAndStudentStatusStats.pklTotal} Laporan
                 </p>
               </div>
-              <div className="mt-4 pt-3 border-t border-[#F0F1F6]">
-                <div className="flex justify-between text-[11px] font-bold text-[#3E385B] mb-1.5">
+              <div className="mt-3 pt-2.5 border-t border-[#E6E4F2] dark:border-slate-700">
+                <div className="flex justify-between text-[11px] font-bold text-[#3E385B] dark:text-slate-200 mb-1.5">
                   <span>Progress</span>
                   <span className="tabular-nums">{pklAndStudentStatusStats.pklCompletedPct}%</span>
                 </div>
@@ -1431,10 +1470,10 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           back={
             <div className="flex flex-col justify-between h-full">
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/90 block">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/90 block pr-9">
                   Progres Prakerin (PKL)
                 </span>
-                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px]">
+                <div className="mt-2 grid grid-cols-2 gap-1.5 text-[11px] tabular-nums">
                   <div className="no-ornament rounded-xl bg-white/15 px-2.5 py-1.5">
                     <span className="text-white/80 block text-[10px]">PKL Aktif</span>
                     <span className="font-extrabold text-white text-xs block">
@@ -1472,64 +1511,120 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
 
       {/* ============================================================ */}
       {/* INTERACTIVE CHARTS & PERCENTAGE TELEMETRY HUB                */}
-      {/* (Replaces old Student Directory with full Charts & % Stats)  */}
       {/* ============================================================ */}
-      <OrnateCard boxId="dashboard_charts_hub" className="p-4 sm:p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#EFE2BE] dark:border-slate-800 pb-4 mb-6">
-          <div>
+      <OrnateCard boxId="dashboard_charts_hub" surface="tinted" className="p-4 sm:p-6">
+        <div className="space-y-4 border-b border-[#DDD8F4] dark:border-slate-800 pb-4 mb-6">
+          {/* Top Row: Hub Title & Chart Switcher Tabs */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
             <OrnateSectionHeader
               title="Pusat Grafik & Persentase Akademik ORBITA"
-              subtitle="Sinkronisasi real-time database berdasarkan Kategori Kelas, Bulan, dan Tahun (Keseluruhan vs Per Rombel)"
+              subtitle="Sinkronisasi real-time database berdasarkan Kategori Kelas, Bulan, dan Tahun"
             />
+
+            {/* Chart Category Switcher (Clean Single-Line Segmented Bar) */}
+            <div className="flex items-center gap-1 rounded-2xl border border-[#DDD8F3] dark:border-slate-700 bg-white dark:bg-slate-800/90 p-1.5 overflow-x-auto max-w-full scrollbar-none shrink-0 self-start lg:self-auto shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setActiveChartView('kehadiran')}
+                className={`no-ornament inline-flex h-8.5 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+                  activeChartView === 'kehadiran'
+                    ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                    : 'text-[#6E6A86] dark:text-slate-300 hover:bg-[#F3F1FC] dark:hover:bg-slate-700 hover:text-[#3E385B] dark:hover:text-white'
+                }`}
+              >
+                <OrbitaMenuIcon variant="attendance" className="h-3.5 w-3.5 shrink-0" />
+                <span>Presensi</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveChartView('akademik')}
+                className={`no-ornament inline-flex h-8.5 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+                  activeChartView === 'akademik'
+                    ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                    : 'text-[#6E6A86] dark:text-slate-300 hover:bg-[#F3F1FC] dark:hover:bg-slate-700 hover:text-[#3E385B] dark:hover:text-white'
+                }`}
+              >
+                <OrbitaMenuIcon variant="grading" className="h-3.5 w-3.5 shrink-0" />
+                <span>Penilaian &amp; KKM</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveChartView('pkl_bk')}
+                className={`no-ornament inline-flex h-8.5 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+                  activeChartView === 'pkl_bk'
+                    ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                    : 'text-[#6E6A86] dark:text-slate-300 hover:bg-[#F3F1FC] dark:hover:bg-slate-700 hover:text-[#3E385B] dark:hover:text-white'
+                }`}
+              >
+                <OrbitaMenuIcon variant="pkl" className="h-3.5 w-3.5 shrink-0" />
+                <span>PKL</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveChartView('siswa')}
+                className={`no-ornament inline-flex h-8.5 items-center justify-center gap-1.5 rounded-xl px-3 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+                  activeChartView === 'siswa'
+                    ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
+                    : 'text-[#6E6A86] dark:text-slate-300 hover:bg-[#F3F1FC] dark:hover:bg-slate-700 hover:text-[#3E385B] dark:hover:text-white'
+                }`}
+              >
+                <OrbitaMenuIcon variant="master-data" className="h-3.5 w-3.5 shrink-0" />
+                <span>Data Siswa</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 pr-0 sm:pr-8">
-            {/* Class Filter (Semua Kelas vs Per Kelas) */}
-            <div className="flex items-center gap-1.5 rounded-full border border-[#E4E3F0] bg-[#F4F3FA] px-3 py-1.5 shadow-2xs">
-              <OrbitaMenuIcon variant="master-data" className="h-3.5 w-3.5 text-[#6C60B8]" />
-              <select
-                value={selectedClassFilter}
-                onChange={e => setSelectedClassFilter(e.target.value)}
-                className="bg-transparent text-xs font-extrabold text-[#3E385B] focus:outline-none cursor-pointer"
-              >
-                <option value="ALL">Semua Kelas ({students.length} Siswa)</option>
-                {classes.map(cls => (
-                  <option key={cls.id} value={cls.id}>
-                    Kelas {cls.name} ({cls.majorCode})
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Dedicated Clean Filter Strip */}
+          <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-[#DFDCF2] bg-white/90 dark:bg-slate-800/80 dark:border-slate-700 px-3 py-2.5">
+            <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+              {/* Filter Kelas */}
+              <div className="relative flex items-center">
+                <OrbitaMenuIcon
+                  variant="master-data"
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6C60B8] z-10"
+                />
+                <select
+                  value={selectedClassFilter}
+                  onChange={e => setSelectedClassFilter(e.target.value)}
+                  className="h-9 w-full sm:w-auto pl-8 pr-3 text-xs font-extrabold text-[#3E385B] dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL">Semua Kelas ({students.length} Siswa)</option>
+                  {classes.map(cls => (
+                    <option key={cls.id} value={cls.id}>
+                      Kelas {cls.name} ({cls.majorCode})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Month Filter (Semua Bulan vs Jan-Des) */}
-            <div className="flex items-center gap-1.5 rounded-full border border-[#E4E3F0] bg-[#F4F3FA] px-3 py-1.5 shadow-2xs">
-              <Calendar className="h-3.5 w-3.5 text-[#6C60B8]" />
-              <select
-                value={selectedMonthFilter}
-                onChange={e => {
-                  const val = e.target.value;
-                  setSelectedMonthFilter(val);
-                  if (val !== 'ALL') {
-                    setActiveMonthIdx(Math.max(0, Number(val) - 1));
-                  }
-                }}
-                className="bg-transparent text-xs font-extrabold text-[#3E385B] focus:outline-none cursor-pointer"
-              >
-                <option value="ALL">Semua Bulan</option>
-                {MONTH_OPTIONS.map(m => (
-                  <option key={m.value} value={m.value}>
-                    Bulan {m.full}
-                  </option>
-                ))}
-              </select>
-            </div>
+              {/* Filter Bulan */}
+              <div className="relative flex items-center">
+                <Calendar className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6C60B8] z-10" />
+                <select
+                  value={selectedMonthFilter}
+                  onChange={e => {
+                    const val = e.target.value;
+                    setSelectedMonthFilter(val);
+                    if (val !== 'ALL') {
+                      setActiveMonthIdx(Math.max(0, Number(val) - 1));
+                    }
+                  }}
+                  className="h-9 w-full sm:w-auto pl-8 pr-3 text-xs font-extrabold text-[#3E385B] dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL">Semua Bulan</option>
+                  {MONTH_OPTIONS.map(m => (
+                    <option key={m.value} value={m.value}>
+                      Bulan {m.full}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Year Filter (Semua Tahun vs Tahun Akademik) */}
-            <div className="flex items-center gap-1.5 rounded-full border border-[#E4E3F0] bg-[#F4F3FA] px-3 py-1.5 shadow-2xs">
+              {/* Filter Tahun */}
               <select
                 value={selectedYearFilter}
                 onChange={e => setSelectedYearFilter(e.target.value)}
-                className="bg-transparent text-xs font-extrabold text-[#3E385B] focus:outline-none cursor-pointer"
+                className="h-9 w-full sm:w-auto px-3 text-xs font-extrabold text-[#3E385B] dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 focus:outline-none cursor-pointer"
               >
                 <option value="ALL">Semua Tahun</option>
                 {availableYears.map(yr => (
@@ -1540,7 +1635,6 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
               </select>
             </div>
 
-            {/* Reset Filter Pill when any filter is active */}
             {(selectedClassFilter !== 'ALL' ||
               selectedMonthFilter !== 'ALL' ||
               selectedYearFilter !== 'ALL') && (
@@ -1551,63 +1645,11 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                   setSelectedMonthFilter('ALL');
                   setSelectedYearFilter('ALL');
                 }}
-                className="no-ornament inline-flex h-9 items-center justify-center rounded-full bg-[#FFE4EC] hover:bg-[#FFD2E0] px-3.5 text-[11px] font-extrabold text-[#F25781] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                className="no-ornament inline-flex h-9 items-center justify-center rounded-xl bg-[#FFE4EC] hover:bg-[#FFD2E0] px-3.5 text-xs font-extrabold text-[#F25781] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
               >
                 Reset Filter
               </button>
             )}
-
-            {/* Chart Category Switcher (Soft Lavender & Royal Purple Rounded Tabs) */}
-            <div className="flex flex-wrap items-center gap-1 rounded-2xl sm:rounded-full border border-[#E4E3F0] bg-[#F4F3FA] p-1 shadow-2xs">
-              <button
-                type="button"
-                onClick={() => setActiveChartView('kehadiran')}
-                className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                  activeChartView === 'kehadiran'
-                    ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.3)]'
-                    : 'text-[#6E6A86] hover:text-[#3E385B]'
-                }`}
-              >
-                <OrbitaMenuIcon variant="attendance" className="h-3.5 w-3.5 shrink-0" />
-                <span>Presensi</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveChartView('akademik')}
-                className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                  activeChartView === 'akademik'
-                    ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.3)]'
-                    : 'text-[#6E6A86] hover:text-[#3E385B]'
-                }`}
-              >
-                <OrbitaMenuIcon variant="grading" className="h-3.5 w-3.5 shrink-0" />
-                <span>Penilaian &amp; KKM</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveChartView('pkl_bk')}
-                className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                  activeChartView === 'pkl_bk'
-                    ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.3)]'
-                    : 'text-[#6E6A86] hover:text-[#3E385B]'
-                }`}
-              >
-                <OrbitaMenuIcon variant="pkl" className="h-3.5 w-3.5 shrink-0" />
-                <span>PKL</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveChartView('siswa')}
-                className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 rounded-full px-3 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                  activeChartView === 'siswa'
-                    ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.3)]'
-                    : 'text-[#6E6A86] hover:text-[#3E385B]'
-                }`}
-              >
-                <OrbitaMenuIcon variant="master-data" className="h-3.5 w-3.5 shrink-0" />
-                <span>Data Siswa</span>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -1619,174 +1661,244 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             {/* Left: Interactive Radial Donut Chart & Detailed Breakdown */}
             <OrnateCard
               boxId="chart_kehadiran_donut"
-              className="lg:col-span-5 p-5 flex flex-col justify-between"
+              className="lg:col-span-5 p-5"
             >
-              <div>
-                <div className="flex items-center justify-between mb-4 pr-8">
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-[#6C60B8]">
-                    Distribusi Persentase Presensi
-                  </span>
-                  <span className="rounded-full bg-[#E7F9EF] px-2.5 py-0.5 text-[11px] font-extrabold text-[#139A4C]">
-                    Efektif: {attendanceAnalytics.effectiveAttendancePct}%
-                  </span>
-                </div>
+              <div className="flex flex-col justify-between h-full">
+                <div>
+                  <HighlightedChartHeader
+                    title="Distribusi Persentase Presensi"
+                    subtitle="Rincian kehadiran tepat waktu, terlambat, sakit, izin, dan alpa"
+                    accent="emerald"
+                    rightSlot={
+                      <span className="rounded-xl bg-[#E7F9EF] border border-[#BCEAD1] px-2.5 py-1 text-[11px] font-black text-[#139A4C] tabular-nums whitespace-nowrap">
+                        Efektif: {attendanceAnalytics.effectiveAttendancePct}%
+                      </span>
+                    }
+                  />
 
-                {/* Interactive Radial Donut Gauge */}
-                <div className="flex flex-col sm:flex-row items-center gap-6 my-4">
-                  <div
-                    onClick={() => setSelectedDonutSlice(null)}
-                    title="Klik item legenda untuk menyorot status presensi"
-                    className="relative h-40 w-40 shrink-0 flex items-center justify-center cursor-pointer"
-                  >
+                  {/* Interactive Radial Donut Gauge inside High-Contrast Plot Box */}
+                  <div className="no-ornament rounded-2xl border border-[#DFDAF4] bg-[#F5F3FC] dark:border-slate-700 dark:bg-slate-800/75 p-4 my-3 flex flex-col sm:flex-row items-center gap-5">
                     <div
-                      className="h-full w-full rounded-full shadow-inner transition-all duration-500"
-                      style={{ background: donutGradient }}
-                    />
-                    <div className="absolute inset-4 rounded-full bg-white border border-[#ECEBF5] flex flex-col items-center justify-center text-center shadow-[0_8px_20px_rgba(108,96,184,0.12)] px-2">
-                      <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-[#9694A8] truncate max-w-full">
-                        {selectedDonutSlice || 'Total Hadir'}
-                      </span>
-                      <span className="text-2xl font-black text-[#1CC865] tabular-nums">
-                        {selectedDonutSlice === 'Terlambat (T)'
-                          ? `${attendanceAnalytics.terlambatPct}%`
-                          : selectedDonutSlice === 'Sakit (S)'
-                          ? `${attendanceAnalytics.sakitPct}%`
-                          : selectedDonutSlice === 'Izin (I)'
-                          ? `${attendanceAnalytics.izinPct}%`
-                          : selectedDonutSlice === 'Alpa (A)'
-                          ? `${attendanceAnalytics.alpaPct}%`
-                          : `${attendanceAnalytics.hadirPct}%`}
-                      </span>
-                      <span className="text-[10px] font-bold text-[#3E385B]">
-                        {attendanceAnalytics.studentCount} Siswa
-                      </span>
+                      onClick={() => setSelectedDonutSlice(null)}
+                      title="Klik item legenda untuk menyorot status presensi"
+                      className="relative h-40 w-40 shrink-0 flex items-center justify-center cursor-pointer"
+                    >
+                      <div
+                        className="h-full w-full rounded-full shadow-md ring-4 ring-white dark:ring-slate-900 transition-all duration-500"
+                        style={{ background: donutGradient }}
+                      />
+                      <div className="absolute inset-4 rounded-full bg-white dark:bg-slate-900 border-2 border-[#DDD8F4] dark:border-slate-700 flex flex-col items-center justify-center text-center shadow-[0_8px_20px_rgba(108,96,184,0.14)] px-2">
+                        <span className="text-[9.5px] font-extrabold uppercase tracking-wider text-[#7A7596] dark:text-slate-400 truncate max-w-full">
+                          {selectedDonutSlice || 'Total Hadir'}
+                        </span>
+                        <span className="text-2xl font-black text-[#1CC865] tabular-nums">
+                          {selectedDonutSlice === 'Terlambat (T)'
+                            ? `${attendanceAnalytics.terlambatPct}%`
+                            : selectedDonutSlice === 'Sakit (S)'
+                            ? `${attendanceAnalytics.sakitPct}%`
+                            : selectedDonutSlice === 'Izin (I)'
+                            ? `${attendanceAnalytics.izinPct}%`
+                            : selectedDonutSlice === 'Alpa (A)'
+                            ? `${attendanceAnalytics.alpaPct}%`
+                            : `${attendanceAnalytics.hadirPct}%`}
+                        </span>
+                        <span className="text-[10px] font-bold text-[#3E385B] dark:text-slate-300 tabular-nums">
+                          {attendanceAnalytics.studentCount} Siswa
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Interactive Legend Bars with Percentages */}
+                    <div className="flex-1 w-full min-w-0 space-y-2">
+                      {[
+                        {
+                          shortKey: 'Hadir (H)',
+                          label: 'Hadir Tepat Waktu (H)',
+                          count: attendanceAnalytics.hadir,
+                          pct: attendanceAnalytics.hadirPct,
+                          color: 'bg-[#1CC865]',
+                          textColor: 'text-[#139A4C] dark:text-emerald-400',
+                        },
+                        {
+                          shortKey: 'Terlambat (T)',
+                          label: 'Terlambat Hadir (T)',
+                          count: attendanceAnalytics.terlambat,
+                          pct: attendanceAnalytics.terlambatPct,
+                          color: 'bg-[#6C60B8]',
+                          textColor: 'text-[#6C60B8] dark:text-indigo-400',
+                        },
+                        {
+                          shortKey: 'Sakit (S)',
+                          label: 'Sakit dengan Surat (S)',
+                          count: attendanceAnalytics.sakit,
+                          pct: attendanceAnalytics.sakitPct,
+                          color: 'bg-[#3B82F6]',
+                          textColor: 'text-[#2563EB] dark:text-blue-400',
+                        },
+                        {
+                          shortKey: 'Izin (I)',
+                          label: 'Izin Resmi (I)',
+                          count: attendanceAnalytics.izin,
+                          pct: attendanceAnalytics.izinPct,
+                          color: 'bg-[#F59E0B]',
+                          textColor: 'text-[#D97706] dark:text-amber-400',
+                        },
+                        {
+                          shortKey: 'Alpa (A)',
+                          label: 'Tanpa Keterangan / Alpa (A)',
+                          count: attendanceAnalytics.alpa,
+                          pct: attendanceAnalytics.alpaPct,
+                          color: 'bg-[#F25781]',
+                          textColor: 'text-[#F25781] dark:text-rose-400',
+                        },
+                      ].map(item => {
+                        const isHighlighted = selectedDonutSlice === item.shortKey;
+                        return (
+                          <div
+                            key={item.label}
+                            onClick={() =>
+                              setSelectedDonutSlice(prev =>
+                                prev === item.shortKey ? null : item.shortKey
+                              )
+                            }
+                            onMouseEnter={() => setSelectedDonutSlice(item.shortKey)}
+                            onMouseLeave={() => setSelectedDonutSlice(null)}
+                            className={`space-y-1 rounded-xl px-2.5 py-1.5 border transition-all cursor-pointer ${
+                              isHighlighted
+                                ? 'bg-white dark:bg-slate-900 border-[#6C60B8] shadow-xs'
+                                : 'bg-white/75 dark:bg-slate-900/50 border-[#E5E2F5] dark:border-slate-700 hover:bg-white dark:hover:bg-slate-900'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between gap-2 text-xs">
+                              <span className="font-bold text-[#3E385B] dark:text-slate-100 flex items-center gap-1.5 min-w-0">
+                                <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${item.color}`} />
+                                <span className="truncate">{item.label}</span>
+                              </span>
+                              <span className={`font-black tabular-nums whitespace-nowrap shrink-0 ${item.textColor}`}>
+                                {item.pct}%{' '}
+                                <span className="text-[10px] text-[#8E8BA3] dark:text-slate-400">({item.count})</span>
+                              </span>
+                            </div>
+                            <div className="jrpg-stat-bar">
+                              <div
+                                className={`jrpg-stat-bar-fill ${item.color}`}
+                                style={{ width: `${Math.max(item.pct > 0 ? 5 : 0, item.pct)}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-
-                  {/* Interactive Legend Bars with Percentages */}
-                  <div className="flex-1 w-full space-y-2.5">
-                    {[
-                      {
-                        shortKey: 'Hadir (H)',
-                        label: 'Hadir Tepat Waktu (H)',
-                        count: attendanceAnalytics.hadir,
-                        pct: attendanceAnalytics.hadirPct,
-                        color: 'bg-[#1CC865]',
-                        textColor: 'text-[#139A4C]',
-                      },
-                      {
-                        shortKey: 'Terlambat (T)',
-                        label: 'Terlambat Hadir (T)',
-                        count: attendanceAnalytics.terlambat,
-                        pct: attendanceAnalytics.terlambatPct,
-                        color: 'bg-[#6C60B8]',
-                        textColor: 'text-[#6C60B8]',
-                      },
-                      {
-                        shortKey: 'Sakit (S)',
-                        label: 'Sakit dengan Surat (S)',
-                        count: attendanceAnalytics.sakit,
-                        pct: attendanceAnalytics.sakitPct,
-                        color: 'bg-[#3B82F6]',
-                        textColor: 'text-[#2563EB]',
-                      },
-                      {
-                        shortKey: 'Izin (I)',
-                        label: 'Izin Resmi (I)',
-                        count: attendanceAnalytics.izin,
-                        pct: attendanceAnalytics.izinPct,
-                        color: 'bg-[#F59E0B]',
-                        textColor: 'text-[#D97706]',
-                      },
-                      {
-                        shortKey: 'Alpa (A)',
-                        label: 'Tanpa Keterangan / Alpa (A)',
-                        count: attendanceAnalytics.alpa,
-                        pct: attendanceAnalytics.alpaPct,
-                        color: 'bg-[#F25781]',
-                        textColor: 'text-[#F25781]',
-                      },
-                    ].map(item => {
-                      const isHighlighted = selectedDonutSlice === item.shortKey;
-                      return (
-                        <div
-                          key={item.label}
-                          onClick={() =>
-                            setSelectedDonutSlice(prev =>
-                              prev === item.shortKey ? null : item.shortKey
-                            )
-                          }
-                          onMouseEnter={() => setSelectedDonutSlice(item.shortKey)}
-                          onMouseLeave={() => setSelectedDonutSlice(null)}
-                          className={`space-y-1 rounded-xl p-1.5 transition-all cursor-pointer ${
-                            isHighlighted ? 'bg-[#F4F3FA] ring-1 ring-[#6C60B8]/30' : 'hover:bg-[#FAF9FE]'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-bold text-[#3E385B] flex items-center gap-1.5">
-                              <span className={`h-2.5 w-2.5 rounded-full ${item.color}`} />
-                              {item.label}
-                            </span>
-                            <span className={`font-black ${item.textColor}`}>
-                              {item.pct}%{' '}
-                              <span className="text-[10px] text-[#9694A8]">({item.count})</span>
-                            </span>
-                          </div>
-                          <div className="jrpg-stat-bar">
-                            <div
-                              className={`jrpg-stat-bar-fill ${item.color}`}
-                              style={{ width: `${Math.max(item.pct > 0 ? 4 : 0, item.pct)}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
                 </div>
-              </div>
 
-              <div className="mt-4 pt-3 border-t border-[#ECEBF5] flex flex-wrap items-center justify-between gap-2 text-xs">
-                <span className="text-[#9694A8] font-semibold">
-                  Total Sesi Presensi Tercatat: <strong className="text-[#3E385B]">{attendanceSessions.length} Sesi</strong>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleNavigate('attendance')}
-                  className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-xl bg-[#F0EEFA] hover:bg-[#E4E1F6] px-3 text-xs font-extrabold text-[#6C60B8] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
-                >
-                  <span>Buka Modul Presensi</span>
-                  <ChevronRight className="h-3.5 w-3.5 shrink-0" />
-                </button>
+                <div className="mt-4 pt-3 border-t border-[#E6E4F2] dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <span className="text-[#7A7596] dark:text-slate-400 font-semibold tabular-nums">
+                    Total Sesi Presensi Tercatat: <strong className="text-[#3E385B] dark:text-white">{attendanceSessions.length} Sesi</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('attendance')}
+                    className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-xl bg-[#F0EEFA] hover:bg-[#E4E1F6] dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 px-3 text-xs font-extrabold text-[#6C60B8] dark:text-indigo-300 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                  >
+                    <span>Buka Modul Presensi</span>
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                  </button>
+                </div>
               </div>
             </OrnateCard>
 
-            {/* Right: Interactive Class-by-Class Attendance & Academic Bar Comparison Chart */}
+            {/* Right: Interactive Class-by-Class Attendance & Academic Column + Bar Comparison Chart */}
             <OrnateCard
               boxId="chart_kehadiran_kelas"
-              className="lg:col-span-7 p-5 flex flex-col justify-between"
+              className="lg:col-span-7 p-5"
             >
               <div>
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pr-8">
-                  <div>
-                    <span className="text-xs font-extrabold uppercase tracking-wider text-[#6C60B8] block">
-                      Grafik Perbandingan Kehadiran &amp; Ketuntasan Per Kelas
-                    </span>
-                    <span className="text-[11px] text-[#9694A8]">
-                      Klik salah satu baris kelas untuk memfilter data grafik ke rombel tersebut
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 text-[11px] font-bold">
-                    <span className="flex items-center gap-1.5 text-[#139A4C]">
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#1CC865]" /> % Kehadiran
-                    </span>
-                    <span className="flex items-center gap-1.5 text-[#6C60B8]">
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#6C60B8]" /> % Lulus KKM
-                    </span>
-                  </div>
-                </div>
+                <HighlightedChartHeader
+                  title="Grafik Perbandingan Kehadiran & Ketuntasan Per Kelas"
+                  subtitle="Klik batang grafik atau baris kelas untuk memfilter data ke rombel tersebut"
+                  accent="purple"
+                  rightSlot={
+                    <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold">
+                      <span className="flex items-center gap-1.5 text-[#139A4C] dark:text-emerald-400 whitespace-nowrap">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#1CC865]" /> % Kehadiran
+                      </span>
+                      <span className="flex items-center gap-1.5 text-[#6C60B8] dark:text-indigo-300 whitespace-nowrap">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#6C60B8]" /> % Lulus KKM
+                      </span>
+                    </div>
+                  }
+                />
 
-                {/* Interactive Horizontal Multi-Bar Chart per Class */}
-                <div className="space-y-3.5 mt-2">
+                {/* Visual Grouped Vertical Column Chart with Gridlines */}
+                {classComparisonData.length > 0 && (
+                  <div className="no-ornament rounded-2xl border border-[#DFDAF4] bg-[#F5F3FC] dark:border-slate-700 dark:bg-slate-800/75 p-4 mb-4">
+                    <div className="relative flex gap-2 items-stretch">
+                      <div className="hidden sm:flex flex-col justify-between h-32 text-[9.5px] font-bold text-[#8E8BA3] dark:text-slate-400 tabular-nums py-0.5 select-none">
+                        <span>100%</span>
+                        <span>50%</span>
+                        <span>0%</span>
+                      </div>
+                      <div className="relative flex-1 overflow-x-auto scrollbar-none">
+                        <div className="relative h-32 min-w-[320px] flex items-end gap-2 sm:gap-3 border-b border-[#D7D2EE] dark:border-slate-600 px-1 pb-1">
+                          <div className="pointer-events-none absolute inset-x-0 top-0 border-t border-dashed border-[#DFDAF4] dark:border-slate-700" />
+                          <div className="pointer-events-none absolute inset-x-0 top-1/2 border-t border-dashed border-[#DFDAF4] dark:border-slate-700" />
+                          {classComparisonData.map(cls => {
+                            const isSel = selectedClassFilter === cls.id;
+                            return (
+                              <button
+                                key={`col-${cls.id}`}
+                                type="button"
+                                onClick={() =>
+                                  setSelectedClassFilter(prev => (prev === cls.id ? 'ALL' : cls.id))
+                                }
+                                className={`no-ornament relative z-10 flex-1 min-w-[46px] h-full flex flex-col items-center justify-end rounded-xl px-1 pt-1 transition-all cursor-pointer ${
+                                  isSel
+                                    ? 'bg-white dark:bg-slate-900 ring-1 ring-[#6C60B8]/40 shadow-2xs'
+                                    : 'hover:bg-white/60 dark:hover:bg-slate-900/40'
+                                }`}
+                                title={`${cls.name}: Hadir ${cls.attendancePct}% · Lulus KKM ${cls.kkmPct}%`}
+                              >
+                                <div className="w-full h-full flex items-end justify-center gap-1 px-1">
+                                  <div className="w-3 sm:w-3.5 h-full rounded-t-md bg-[#E1DCF4] dark:bg-slate-700 flex items-end overflow-hidden">
+                                    <div
+                                      className="w-full rounded-t-md bg-gradient-to-t from-[#139A4C] to-[#1CC865] transition-all duration-500"
+                                      style={{ height: `${Math.max(cls.attendancePct > 0 ? 8 : 3, cls.attendancePct)}%` }}
+                                    />
+                                  </div>
+                                  <div className="w-3 sm:w-3.5 h-full rounded-t-md bg-[#E1DCF4] dark:bg-slate-700 flex items-end overflow-hidden">
+                                    <div
+                                      className="w-full rounded-t-md bg-gradient-to-t from-[#584BA8] to-[#7D71CB] transition-all duration-500"
+                                      style={{ height: `${Math.max(cls.kkmPct > 0 ? 8 : 3, cls.kkmPct)}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <div className="min-w-[320px] flex items-center gap-2 sm:gap-3 px-1 pt-1.5">
+                          {classComparisonData.map(cls => {
+                            const isSel = selectedClassFilter === cls.id;
+                            return (
+                              <span
+                                key={`lbl-${cls.id}`}
+                                className={`flex-1 min-w-[46px] text-center text-[10px] font-extrabold truncate ${
+                                  isSel ? 'text-[#6C60B8] dark:text-indigo-300' : 'text-[#4B456B] dark:text-slate-300'
+                                }`}
+                              >
+                                {cls.name}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Interactive Horizontal Multi-Bar List per Class */}
+                <div className="space-y-2.5 max-h-[260px] overflow-y-auto pr-1">
                   {classComparisonData.map(cls => {
                     const isClassSelected = selectedClassFilter === cls.id;
                     return (
@@ -1797,32 +1909,32 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                         }
                         className={`rounded-[18px] border p-3.5 transition-all cursor-pointer ${
                           isClassSelected
-                            ? 'border-[#6C60B8] bg-[#F4F2FC] shadow-sm'
-                            : 'border-[#ECEBF5] bg-[#FAF9FE] hover:border-[#D0CBEF]'
+                            ? 'border-[#6C60B8] bg-[#F1EEFC] dark:bg-indigo-950/50 dark:border-indigo-500 shadow-sm'
+                            : 'border-[#E3E0F4] bg-[#F8F7FD] dark:bg-slate-800/60 dark:border-slate-700 hover:border-[#C5BEEB] hover:bg-white dark:hover:bg-slate-800'
                         }`}
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="rounded-lg bg-[#6C60B8] text-white px-2.5 py-1 text-xs font-extrabold">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-lg bg-[#6C60B8] text-white px-2.5 py-1 text-xs font-extrabold whitespace-nowrap">
                               {cls.name}
                             </span>
-                            <span className="text-xs font-bold text-[#3E385B]">
+                            <span className="text-xs font-bold text-[#3E385B] dark:text-slate-200 tabular-nums">
                               {cls.studentCount} Siswa ({cls.maleCount}L / {cls.femaleCount}P)
                             </span>
                             {isClassSelected && (
-                              <span className="rounded-full bg-[#FFE4EC] px-2 py-0.5 text-[10px] font-extrabold text-[#F25781]">
+                              <span className="rounded-full bg-[#FFE4EC] px-2 py-0.5 text-[10px] font-extrabold text-[#F25781] whitespace-nowrap">
                                 Filter Aktif
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-3 text-xs font-extrabold">
-                            <span className="text-[#139A4C]">
+                          <div className="flex flex-wrap items-center gap-3 text-xs font-extrabold tabular-nums">
+                            <span className="text-[#139A4C] dark:text-emerald-400 whitespace-nowrap">
                               Hadir: {cls.attendancePct}%
                             </span>
-                            <span className="text-[#6C60B8]">
+                            <span className="text-[#6C60B8] dark:text-indigo-300 whitespace-nowrap">
                               Rata-rata: {cls.avgGrade}
                             </span>
-                            <span className="text-[#F25781]">
+                            <span className="text-[#F25781] dark:text-rose-400 whitespace-nowrap">
                               KKM: {cls.kkmPct}%
                             </span>
                           </div>
@@ -1859,204 +1971,303 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
         {/* ============================================================ */}
         {/* VIEW 2: ACADEMIC GRADE DISTRIBUTION & SUBJECT CHARTS         */}
         {/* ============================================================ */}
-        {activeChartView === 'akademik' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left: Interactive Vertical Bar Chart of Predicate Distribution (A/B/C/D) */}
-            <OrnateCard
-              boxId="chart_akademik_predikat"
-              className="lg:col-span-5 p-5 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4 pr-8">
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-[#6C60B8]">
-                    Chart Distribusi Predikat Nilai
-                  </span>
-                  <span className="rounded-full bg-[#F0EEFA] px-3 py-0.5 text-[11px] font-extrabold text-[#6C60B8]">
-                    Rata-rata: {academicAnalytics.avgScore}
-                  </span>
-                </div>
+        {activeChartView === 'akademik' && (() => {
+          const predicateCols = [
+            {
+              grade: 'A',
+              desc: '90–100',
+              pct: academicAnalytics.predAPct,
+              count: academicAnalytics.predA,
+              barClass: 'bg-[#1CC865]',
+              badgeClass: 'text-[#139A4C]',
+            },
+            {
+              grade: 'B',
+              desc: '80–89',
+              pct: academicAnalytics.predBPct,
+              count: academicAnalytics.predB,
+              barClass: 'bg-[#6C60B8]',
+              badgeClass: 'text-[#6C60B8]',
+            },
+            {
+              grade: 'C',
+              desc: '75–79',
+              pct: academicAnalytics.predCPct,
+              count: academicAnalytics.predC,
+              barClass: 'bg-[#F59E0B]',
+              badgeClass: 'text-[#D97706]',
+            },
+            {
+              grade: 'D',
+              desc: '< 75',
+              pct: academicAnalytics.predDPct,
+              count: academicAnalytics.predD,
+              barClass: 'bg-[#F25781]',
+              badgeClass: 'text-[#F25781]',
+            },
+          ];
+          const activePred =
+            predicateCols.find(c => c.grade === selectedPredicateGrade) || predicateCols[0];
 
-                {/* Interactive Vertical Columns Chart */}
-                <div className="grid grid-cols-4 gap-1.5 sm:gap-3 items-end h-48 pt-6 px-1 sm:px-2 border-b border-[#ECEBF5]">
-                  {[
-                    {
-                      grade: 'A',
-                      desc: '90 - 100',
-                      pct: academicAnalytics.predAPct,
-                      count: academicAnalytics.predA,
-                      barClass: 'bg-[#1CC865]',
-                      badgeClass: 'text-[#139A4C]',
-                    },
-                    {
-                      grade: 'B',
-                      desc: '80 - 89',
-                      pct: academicAnalytics.predBPct,
-                      count: academicAnalytics.predB,
-                      barClass: 'bg-[#6C60B8]',
-                      badgeClass: 'text-[#6C60B8]',
-                    },
-                    {
-                      grade: 'C',
-                      desc: '75 - 79',
-                      pct: academicAnalytics.predCPct,
-                      count: academicAnalytics.predC,
-                      barClass: 'bg-[#F59E0B]',
-                      badgeClass: 'text-[#D97706]',
-                    },
-                    {
-                      grade: 'D',
-                      desc: '< 75',
-                      pct: academicAnalytics.predDPct,
-                      count: academicAnalytics.predD,
-                      barClass: 'bg-[#F25781]',
-                      badgeClass: 'text-[#F25781]',
-                    },
-                  ].map(col => {
-                    const isSelectedCol = selectedPredicateGrade === col.grade;
-                    return (
-                      <div
-                        key={col.grade}
-                        onClick={() => setSelectedPredicateGrade(col.grade)}
-                        onMouseEnter={() => setSelectedPredicateGrade(col.grade)}
-                        className={`flex flex-col items-center h-full justify-end group cursor-pointer rounded-2xl p-1.5 transition-all ${
-                          isSelectedCol ? 'bg-[#F4F3FA]' : 'hover:bg-[#FAF9FE]'
-                        }`}
-                      >
-                        <span className={`text-xs font-black mb-1 ${col.badgeClass}`}>
-                          {col.pct}%
-                        </span>
-                        <div className="w-full max-w-[54px] bg-[#ECEBF5] rounded-t-xl h-32 flex items-end p-1 overflow-hidden">
-                          <div
-                            className={`w-full rounded-t-lg ${col.barClass} transition-all duration-500 group-hover:brightness-105`}
-                            style={{ height: `${Math.max(col.pct > 0 ? 12 : 6, col.pct)}%` }}
-                          />
-                        </div>
-                        <span className="mt-2 text-xs sm:text-sm font-extrabold text-[#3E385B]">
-                          Predikat {col.grade}
-                        </span>
-                        <span className="text-[10px] text-[#9694A8] font-semibold">
-                          {col.count} Siswa ({col.desc})
-                        </span>
+          return (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              {/* Left: Interactive Vertical Bar Chart of Predicate Distribution (A/B/C/D) */}
+              <OrnateCard
+                boxId="chart_akademik_predikat"
+                className="lg:col-span-5 p-5 flex flex-col justify-between"
+              >
+                <div>
+                  <HighlightedChartHeader
+                    title="Distribusi Predikat Nilai"
+                    subtitle="Sebaran capaian nilai siswa berdasarkan KKM"
+                    accent="purple"
+                    rightSlot={
+                      <span className="rounded-xl bg-[#F0EEFA] border border-[#DDD8F6] px-3 py-1 text-xs font-black text-[#6C60B8] tabular-nums whitespace-nowrap">
+                        Rata-rata: {academicAnalytics.avgScore}
+                      </span>
+                    }
+                  />
+
+                  {/* Interactive Vertical Columns Chart — Uniform Baseline Grid */}
+                  <div className="no-ornament rounded-2xl border border-[#DDD8F4] bg-[#F2EFFC] dark:border-slate-700 dark:bg-slate-800/80 px-3 sm:px-4 pt-4 pb-3">
+                    <div className="flex gap-2 items-stretch">
+                      <div className="hidden sm:flex flex-col justify-between h-32 text-[9.5px] font-bold text-[#8E8BA3] dark:text-slate-400 tabular-nums py-1 select-none">
+                        <span>100%</span>
+                        <span>50%</span>
+                        <span>0%</span>
                       </div>
-                    );
-                  })}
+                      <div className="relative flex-1 grid grid-cols-4 gap-2 sm:gap-3 items-end border-b border-[#D7D2EE] dark:border-slate-600 pb-2">
+                        <div className="pointer-events-none absolute inset-x-0 top-1 border-t border-dashed border-[#DFDAF4] dark:border-slate-700" />
+                        <div className="pointer-events-none absolute inset-x-0 top-1/2 border-t border-dashed border-[#DFDAF4] dark:border-slate-700" />
+                        {predicateCols.map(col => {
+                          const isSelectedCol = selectedPredicateGrade === col.grade;
+                          return (
+                            <button
+                              key={col.grade}
+                              type="button"
+                              onClick={() => setSelectedPredicateGrade(col.grade)}
+                              onMouseEnter={() => setSelectedPredicateGrade(col.grade)}
+                              className={`no-ornament relative z-10 flex flex-col items-center justify-end group cursor-pointer rounded-xl p-1.5 transition-all ${
+                                isSelectedCol
+                                  ? 'bg-white dark:bg-slate-900 shadow-xs ring-1 ring-[#6C60B8]/30'
+                                  : 'hover:bg-white/70 dark:hover:bg-slate-900/50'
+                              }`}
+                            >
+                              <span className={`text-[11px] sm:text-xs font-black tabular-nums mb-1.5 whitespace-nowrap ${col.badgeClass}`}>
+                                {col.pct}%
+                              </span>
+                              <div className="w-full max-w-[46px] bg-[#E0DCF3] dark:bg-slate-700 rounded-t-xl h-28 flex items-end p-1 overflow-hidden">
+                                <div
+                                  className={`w-full rounded-t-lg ${col.barClass} transition-all duration-500 group-hover:brightness-105`}
+                                  style={{ height: `${Math.max(col.pct > 0 ? 12 : 6, col.pct)}%` }}
+                                />
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Uniform Aligned Axis Labels Beneath Every Column */}
+                    <div className="grid grid-cols-4 gap-2 sm:gap-3 pt-2.5 text-center sm:pl-8">
+                      {predicateCols.map(col => {
+                        const isSelectedCol = selectedPredicateGrade === col.grade;
+                        return (
+                          <div
+                            key={`${col.grade}-label`}
+                            onClick={() => setSelectedPredicateGrade(col.grade)}
+                            className="cursor-pointer min-w-0"
+                          >
+                            <span
+                              className={`block text-xs font-extrabold whitespace-nowrap ${
+                                isSelectedCol ? 'text-[#6C60B8] dark:text-indigo-300' : 'text-[#3E385B] dark:text-slate-200'
+                              }`}
+                            >
+                              Pred. {col.grade}
+                            </span>
+                            <span className="block text-[11px] font-bold text-[#6E6A86] dark:text-slate-400 tabular-nums whitespace-nowrap mt-0.5">
+                              {col.count} siswa
+                            </span>
+                            <span className="block text-[10px] font-medium text-[#8E8BA3] dark:text-slate-500 tabular-nums whitespace-nowrap">
+                              ({col.desc})
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Selected Predicate Detail Line */}
+                    <div className="mt-3 pt-2.5 border-t border-[#DFDAF4] dark:border-slate-700 flex items-center justify-between gap-2 text-[11px]">
+                      <span className="font-bold text-[#5A537A] dark:text-slate-300 truncate">
+                        Sorotan Predikat {activePred.grade} ({activePred.desc})
+                      </span>
+                      <span className={`font-extrabold tabular-nums whitespace-nowrap shrink-0 ${activePred.badgeClass}`}>
+                        {activePred.count} siswa &middot; {activePred.pct}%
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Pass vs Remedial Split Flipcards */}
-                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <JrpgFlipBox
                     boxId="flip_tuntas_kkm"
-                    minHeightClass="min-h-[115px]"
+                    minHeightClass="min-h-[152px]"
                     onClick={() => handleNavigate('grading')}
                     front={
-                      <div>
-                        <span className="text-[10px] font-bold uppercase text-[#139A4C] block">
-                          Tuntas KKM (&ge; 75)
-                        </span>
-                        <span className="text-xl font-black text-[#1CC865] mt-1 block">
-                          {academicAnalytics.kkmPassPct}% ({academicAnalytics.passedCount} Siswa)
-                        </span>
+                      <div className="flex flex-col justify-between h-full text-center">
+                        <div>
+                          <span className="text-[11px] font-extrabold uppercase tracking-wide text-[#139A4C] dark:text-emerald-400 block">
+                            Tuntas KKM (&ge; 75)
+                          </span>
+                          <span className="text-2xl font-black text-[#1CC865] tabular-nums mt-1.5 block leading-tight">
+                            {academicAnalytics.kkmPassPct}%
+                          </span>
+                          <span className="text-[11px] font-semibold text-[#6E6A86] dark:text-slate-400 tabular-nums block mt-0.5">
+                            {academicAnalytics.passedCount} Siswa Tuntas
+                          </span>
+                        </div>
+                        <div className="mt-3 pt-2 border-t border-[#E6E4F2] dark:border-slate-800">
+                          <div className="jrpg-stat-bar">
+                            <div
+                              className="jrpg-stat-bar-fill bg-[#1CC865]"
+                              style={{ width: `${Math.min(100, academicAnalytics.kkmPassPct)}%` }}
+                            />
+                          </div>
+                        </div>
                       </div>
                     }
                     back={
-                      <div className="text-xs">
-                        <span className="text-[10px] font-black uppercase text-white block">
-                          Capaian Kompetensi
-                        </span>
-                        <p className="mt-1 text-white/90">
-                          {academicAnalytics.passedCount} siswa melampaui batas KKM dengan rata-rata {academicAnalytics.avgScore}.
-                        </p>
+                      <div className="flex flex-col justify-between h-full text-xs">
+                        <div>
+                          <span className="text-[10px] font-black uppercase tracking-wider text-white block pr-9">
+                            Capaian Kompetensi
+                          </span>
+                          <p className="mt-2 text-white/90 leading-relaxed">
+                            {academicAnalytics.passedCount} siswa melampaui batas KKM dengan rata-rata {academicAnalytics.avgScore}.
+                          </p>
+                        </div>
+                        <div className="mt-2 pt-1.5 border-t border-white/20 flex items-center justify-between text-[11px] font-bold text-white">
+                          <span>Buka Penilaian</span>
+                          <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                        </div>
                       </div>
                     }
                   />
                   <JrpgFlipBox
                     boxId="flip_remedial_kkm"
-                    minHeightClass="min-h-[115px]"
+                    minHeightClass="min-h-[152px]"
                     onClick={() => handleNavigate('grading')}
                     front={
-                      <div>
-                        <span className="text-[10px] font-bold uppercase text-[#F25781] block">
-                          Perlu Remedial / 0
-                        </span>
-                        <span className="text-xl font-black text-[#F25781] mt-1 block">
-                          {academicAnalytics.remedialPct}% ({academicAnalytics.remedialCount} Siswa)
-                        </span>
+                      <div className="flex flex-col justify-between h-full text-center">
+                        <div>
+                          <span className="text-[11px] font-extrabold uppercase tracking-wide text-[#F25781] block">
+                            Perlu Remedial
+                          </span>
+                          <span className="text-2xl font-black text-[#F25781] tabular-nums mt-1.5 block leading-tight">
+                            {academicAnalytics.remedialPct}%
+                          </span>
+                          <span className="text-[11px] font-semibold text-[#6E6A86] dark:text-slate-400 tabular-nums block mt-0.5">
+                            {academicAnalytics.remedialCount} Siswa Evaluasi
+                          </span>
+                        </div>
+                        <div className="mt-3 pt-2 border-t border-[#E6E4F2] dark:border-slate-800">
+                          <div className="jrpg-stat-bar">
+                            <div
+                              className="jrpg-stat-bar-fill bg-[#F25781]"
+                              style={{ width: `${Math.min(100, academicAnalytics.remedialPct)}%` }}
+                            />
+                          </div>
+                        </div>
                       </div>
                     }
                     back={
-                      <div className="text-xs">
-                        <span className="text-[10px] font-black uppercase text-white block">
-                          Evaluasi Remedial
-                        </span>
-                        <p className="mt-1 text-white/90">
-                          {academicAnalytics.remedialCount} siswa memerlukan pengayaan atau belum dinilai.
-                        </p>
+                      <div className="flex flex-col justify-between h-full text-xs">
+                        <div>
+                          <span className="text-[10px] font-black uppercase tracking-wider text-white block pr-9">
+                            Evaluasi Remedial
+                          </span>
+                          <p className="mt-2 text-white/90 leading-relaxed">
+                            {academicAnalytics.remedialCount} siswa memerlukan pengayaan atau belum dinilai.
+                          </p>
+                        </div>
+                        <div className="mt-2 pt-1.5 border-t border-white/20 flex items-center justify-between text-[11px] font-bold text-white">
+                          <span>Tindak Lanjut</span>
+                          <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                        </div>
                       </div>
                     }
                   />
                 </div>
-              </div>
-            </OrnateCard>
+              </OrnateCard>
 
-            {/* Right: Subject Mastery & Pass Rate Bars */}
-            <OrnateCard
-              boxId="chart_akademik_mapel"
-              className="lg:col-span-7 p-5"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pr-8">
-                <div>
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-[#6C60B8] block">
-                    Persentase Ketuntasan &amp; Rata-rata Nilai Per Mata Pelajaran
-                  </span>
-                  <span className="text-[11px] text-[#9694A8]">
-                    Sinkron otomatis dari database Penilaian Akademik
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleNavigate('grading')}
-                  className="no-ornament inline-flex h-9 items-center justify-center gap-1 rounded-xl bg-[#6C60B8] px-3.5 text-xs font-extrabold text-white hover:bg-[#5B4FA8] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
-                >
-                  <span>Kelola Nilai</span>
-                  <ChevronRight className="h-3.5 w-3.5 shrink-0" />
-                </button>
-              </div>
+              {/* Right: Subject Mastery & Pass Rate Bars */}
+              <OrnateCard
+                boxId="chart_akademik_mapel"
+                className="lg:col-span-7 p-5 flex flex-col"
+              >
+                <HighlightedChartHeader
+                  title="Ketuntasan & Nilai Per Mata Pelajaran"
+                  subtitle={`Sinkron otomatis dari database Penilaian Akademik (${subjectComparisonData.length} mapel)`}
+                  accent="purple"
+                  rightSlot={
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate('grading')}
+                      className="no-ornament inline-flex h-8.5 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-3.5 text-xs font-extrabold text-white hover:bg-[#5B4FA8] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                    >
+                      <span>Kelola Nilai</span>
+                      <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                    </button>
+                  }
+                />
 
-              <div className="space-y-3 max-h-[340px] overflow-y-auto pr-1">
-                {subjectComparisonData.map(sub => (
-                  <div
-                    key={sub.id}
-                    onClick={() => handleNavigate('grading')}
-                    className="rounded-[18px] border border-[#ECEBF5] bg-[#FAF9FE] p-3.5 transition-all hover:border-[#6C60B8] cursor-pointer"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs mb-1.5">
-                      <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-                        <span className="font-extrabold text-[#3E385B]">{sub.name}</span>
-                        <span className="rounded-full bg-[#F0EEFA] px-2.5 py-0.5 text-[10px] font-bold text-[#6C60B8]">
-                          {sub.code} &bull; KKM {sub.kkm}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 font-extrabold shrink-0">
-                        <span className="text-[#6C60B8]">
-                          Rata-rata: {sub.avgScore}
-                        </span>
-                        <span className="text-[#139A4C]">
-                          Lulus: {sub.passRatePct}%
-                        </span>
-                      </div>
+                <div className="no-ornament rounded-2xl border border-[#DFDAF4] bg-[#F5F3FC] dark:border-slate-700 dark:bg-slate-800/75 p-3 space-y-2.5 flex-1 max-h-[385px] overflow-y-auto">
+                  {subjectComparisonData.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-[#D5CFF0] bg-white/80 dark:border-slate-700 dark:bg-slate-900/60 p-8 text-center text-xs text-[#7A7596] dark:text-slate-400">
+                      Belum ada data penilaian mata pelajaran untuk filter yang dipilih.
                     </div>
-                    <div className="jrpg-stat-bar">
+                  ) : (
+                    subjectComparisonData.map(sub => (
                       <div
-                        className="jrpg-stat-bar-fill bg-[#6C60B8]"
-                        style={{ width: `${Math.min(100, sub.avgScore)}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </OrnateCard>
-          </div>
-        )}
+                        key={sub.id}
+                        onClick={() => handleNavigate('grading')}
+                        className="rounded-[18px] border border-[#E3E0F4] bg-white dark:border-slate-700 dark:bg-slate-900 p-3.5 transition-all hover:border-[#6C60B8] shadow-2xs cursor-pointer"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs mb-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-extrabold text-[#3E385B] dark:text-slate-100 truncate">
+                              {sub.name}
+                            </span>
+                            <span className="text-[11px] font-semibold text-[#7A7596] dark:text-slate-400 whitespace-nowrap shrink-0">
+                              {sub.code} &middot; KKM {sub.kkm}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs font-extrabold tabular-nums whitespace-nowrap shrink-0">
+                            <span className="text-[#6C60B8] dark:text-indigo-300">
+                              Rata-rata: {sub.avgScore}
+                            </span>
+                            <span className={sub.passRatePct >= 75 ? 'text-[#139A4C] dark:text-emerald-400' : 'text-[#F25781] dark:text-rose-400'}>
+                              Lulus: {sub.passRatePct}%
+                            </span>
+                          </div>
+                        </div>
+                        <div className="jrpg-stat-bar">
+                          <div
+                            className={`jrpg-stat-bar-fill ${
+                              sub.passRatePct >= 75 ? 'bg-[#1CC865]' : 'bg-[#6C60B8]'
+                            }`}
+                            style={{ width: `${Math.min(100, Math.max(sub.avgScore > 0 ? 6 : 0, sub.avgScore))}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </OrnateCard>
+            </div>
+          );
+        })()}
 
         {/* ============================================================ */}
         {/* VIEW 3: PKL, CORRECTIONS & MAJOR DISTRIBUTION FLIPCARDS      */}
@@ -2066,20 +2277,22 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             {/* Flipcard 1: PKL Placement Breakdown (No duplicate inner icon) */}
             <JrpgFlipBox
               boxId="chart_pkl_progres"
-              minHeightClass="min-h-[230px]"
+              minHeightClass="min-h-[250px]"
               onClick={() => handleNavigate('pkl')}
               front={
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between pr-6">
-                    <span className="text-xs font-extrabold uppercase tracking-wider text-[#6C60B8]">
-                      Persentase Administrasi Prakerin (PKL)
-                    </span>
-                  </div>
-                  <div className="space-y-3">
+                  <HighlightedChartHeader
+                    title="Administrasi Prakerin (PKL)"
+                    subtitle="Status laporan dan verifikasi PKL"
+                    accent="emerald"
+                    compact
+                    className="mb-2"
+                  />
+                  <div className="space-y-3 tabular-nums">
                     <div>
-                      <div className="flex justify-between text-xs font-bold mb-1">
-                        <span>Laporan PKL Aktif</span>
-                        <span className="text-[#139A4C]">
+                      <div className="flex justify-between gap-2 text-xs font-bold mb-1">
+                        <span className="truncate">Laporan PKL Aktif</span>
+                        <span className="text-[#139A4C] whitespace-nowrap shrink-0">
                           {pklAndStudentStatusStats.pklActivePct}% ({pklAndStudentStatusStats.pklActive})
                         </span>
                       </div>
@@ -2091,9 +2304,9 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                       </div>
                     </div>
                     <div>
-                      <div className="flex justify-between text-xs font-bold mb-1">
-                        <span>Disetujui &amp; Terverifikasi</span>
-                        <span className="text-[#6C60B8]">
+                      <div className="flex justify-between gap-2 text-xs font-bold mb-1">
+                        <span className="truncate">Disetujui &amp; Terverifikasi</span>
+                        <span className="text-[#6C60B8] whitespace-nowrap shrink-0">
                           {pklAndStudentStatusStats.pklCompletedPct}% ({pklAndStudentStatusStats.pklCompleted})
                         </span>
                       </div>
@@ -2105,9 +2318,9 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                       </div>
                     </div>
                     <div>
-                      <div className="flex justify-between text-xs font-bold mb-1">
-                        <span>Menunggu Review / Revisi</span>
-                        <span className="text-[#F25781]">
+                      <div className="flex justify-between gap-2 text-xs font-bold mb-1">
+                        <span className="truncate">Menunggu Review / Revisi</span>
+                        <span className="text-[#F25781] whitespace-nowrap shrink-0">
                           {pklAndStudentStatusStats.pklPendingPct}% ({pklAndStudentStatusStats.pklPending})
                         </span>
                       </div>
@@ -2124,7 +2337,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
               back={
                 <div className="flex flex-col justify-between h-full">
                   <div>
-                    <span className="text-xs font-black uppercase tracking-wider text-white">
+                    <span className="text-xs font-black uppercase tracking-wider text-white block pr-9">
                       Ringkasan Praktik Kerja Lapangan
                     </span>
                     <p className="text-xs text-white/90 mt-2 leading-relaxed">
@@ -2134,7 +2347,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                   </div>
                   <div className="flex items-center justify-between text-xs font-bold text-white pt-3 border-t border-white/20">
                     <span>Klik untuk Buka Administrasi PKL</span>
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-4 w-4 shrink-0" />
                   </div>
                 </div>
               }
@@ -2143,20 +2356,22 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             {/* Flipcard 2: Attendance Corrections & Supervision Visits */}
             <JrpgFlipBox
               boxId="chart_pkl_koreksi"
-              minHeightClass="min-h-[230px]"
+              minHeightClass="min-h-[250px]"
               onClick={() => handleNavigate('attendance')}
               front={
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between pr-6">
-                    <span className="text-xs font-extrabold uppercase tracking-wider text-[#6C60B8]">
-                      Verifikasi Koreksi &amp; Kunjungan Supervisi
-                    </span>
-                  </div>
-                  <div className="space-y-3">
+                  <HighlightedChartHeader
+                    title="Koreksi & Supervisi"
+                    subtitle="Penyelesaian koreksi & monitoring DUDI"
+                    accent="coral"
+                    compact
+                    className="mb-2"
+                  />
+                  <div className="space-y-3 tabular-nums">
                     <div>
-                      <div className="flex justify-between text-xs font-bold mb-1">
-                        <span>Rasio Penyelesaian Koreksi Presensi</span>
-                        <span className="text-[#139A4C]">
+                      <div className="flex justify-between gap-2 text-xs font-bold mb-1">
+                        <span className="truncate">Penyelesaian Koreksi</span>
+                        <span className="text-[#139A4C] dark:text-emerald-400 whitespace-nowrap shrink-0">
                           {pklAndStudentStatusStats.corrResolvedPct}% ({pklAndStudentStatusStats.corrResolved}/{pklAndStudentStatusStats.corrTotal})
                         </span>
                       </div>
@@ -2168,16 +2383,16 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2.5 pt-2">
-                      <div className="rounded-xl border border-[#ECEBF5] p-3 bg-[#FAF9FE]">
-                        <span className="text-[10px] font-bold text-[#9694A8] block">Mitra Industri</span>
-                        <span className="text-lg font-black text-[#6C60B8]">
+                      <div className="no-ornament rounded-xl border border-[#DFDAF4] p-3 bg-[#F4F2FC] dark:border-slate-700 dark:bg-slate-800/75">
+                        <span className="text-[10px] font-bold text-[#7A7596] dark:text-slate-400 block">Mitra Industri</span>
+                        <span className="text-base sm:text-lg font-black text-[#6C60B8] dark:text-indigo-300 whitespace-nowrap">
                           {pklAndStudentStatusStats.pklPartnerCount} Mitra
                         </span>
                       </div>
-                      <div className="rounded-xl border border-[#ECEBF5] p-3 bg-[#FAF9FE]">
-                        <span className="text-[10px] font-bold text-[#9694A8] block">Kunjungan Monitoring</span>
-                        <span className="text-lg font-black text-[#F25781]">
-                          {pklAndStudentStatusStats.pklVisitCount} Kunjungan
+                      <div className="no-ornament rounded-xl border border-[#F5D0DC] p-3 bg-[#FFF2F6] dark:border-rose-900/50 dark:bg-rose-950/30">
+                        <span className="text-[10px] font-bold text-[#9C5C70] dark:text-rose-300 block">Supervisi</span>
+                        <span className="text-base sm:text-lg font-black text-[#F25781] whitespace-nowrap">
+                          {pklAndStudentStatusStats.pklVisitCount} Kali
                         </span>
                       </div>
                     </div>
@@ -2187,10 +2402,10 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
               back={
                 <div className="flex flex-col justify-between h-full">
                   <div>
-                    <span className="text-xs font-black uppercase tracking-wider text-white">
+                    <span className="text-xs font-black uppercase tracking-wider text-white block pr-9">
                       Detail Koreksi &amp; Supervisi
                     </span>
-                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs tabular-nums">
                       <div className="rounded-lg bg-white/15 p-2.5">
                         <span className="text-[10px] text-white/80 block">Koreksi Selesai</span>
                         <span className="font-black text-white">{pklAndStudentStatusStats.corrResolved} Berkas</span>
@@ -2203,7 +2418,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                   </div>
                   <div className="flex items-center justify-between text-xs font-bold text-white pt-3 border-t border-white/20">
                     <span>Klik untuk Buka Modul Presensi</span>
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-4 w-4 shrink-0" />
                   </div>
                 </div>
               }
@@ -2212,28 +2427,30 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             {/* Flipcard 3: Major / Department Distribution */}
             <JrpgFlipBox
               boxId="chart_pkl_jurusan"
-              minHeightClass="min-h-[230px]"
+              minHeightClass="min-h-[250px]"
               onClick={() => handleNavigate('master-data')}
               front={
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between pr-6">
-                    <span className="text-xs font-extrabold uppercase tracking-wider text-[#6C60B8]">
-                      Proporsi Siswa Per Kompetensi Keahlian
-                    </span>
-                  </div>
-                  <div className="space-y-3">
+                  <HighlightedChartHeader
+                    title="Proporsi Kompetensi Keahlian"
+                    subtitle="Sebaran siswa aktif per jurusan"
+                    accent="purple"
+                    compact
+                    className="mb-2"
+                  />
+                  <div className="space-y-3 tabular-nums">
                     {majors.map(mj => {
                       const mjCount = students.filter(s => s.majorCode === mj.code).length;
                       const mjPct =
                         students.length > 0 ? Number(((mjCount / students.length) * 100).toFixed(1)) : 0;
                       return (
                         <div key={mj.id}>
-                          <div className="flex justify-between text-xs font-bold mb-1">
-                            <span>
+                          <div className="flex justify-between gap-2 text-xs font-bold mb-1">
+                            <span className="truncate">
                               {mj.name} ({mj.code})
                             </span>
-                            <span className="text-[#6C60B8]">
-                              {mjPct}% ({mjCount} Siswa)
+                            <span className="text-[#6C60B8] dark:text-indigo-300 whitespace-nowrap shrink-0">
+                              {mjPct}% ({mjCount})
                             </span>
                           </div>
                           <div className="jrpg-stat-bar">
@@ -2251,7 +2468,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
               back={
                 <div className="flex flex-col justify-between h-full">
                   <div>
-                    <span className="text-xs font-black uppercase tracking-wider text-white">
+                    <span className="text-xs font-black uppercase tracking-wider text-white block pr-9">
                       Detail Kompetensi Keahlian
                     </span>
                     <p className="text-xs text-white/90 mt-2 leading-relaxed">
@@ -2275,78 +2492,95 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
         {/* ============================================================ */}
         {activeChartView === 'siswa' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <OrnateCard boxId="chart_siswa_gender" className="lg:col-span-5 p-5 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-4 pr-8">
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-[#6C60B8]">
-                    Proporsi Siswa &amp; Gender ({selectedClassFilter === 'ALL' ? 'Semua Kelas' : 'Per Kelas'})
-                  </span>
-                  <span className="rounded-full bg-[#E7F9EF] px-2.5 py-0.5 text-[11px] font-extrabold text-[#139A4C]">
-                    {filteredStudents.length} Siswa
-                  </span>
-                </div>
-
-                <div className="space-y-4 my-3">
-                  <div className="rounded-2xl border border-[#ECEBF5] bg-[#FAF9FE] p-4">
-                    <div className="flex items-center justify-between text-xs font-extrabold mb-1.5">
-                      <span className="text-[#3E385B]">Siswa Laki-laki (L)</span>
-                      <span className="text-[#6C60B8]">
-                        {pklAndStudentStatusStats.maleStudents} Siswa ({pklAndStudentStatusStats.malePct}%)
+            <OrnateCard boxId="chart_siswa_gender" className="lg:col-span-5 p-5">
+              <div className="flex flex-col justify-between h-full">
+                <div>
+                  <HighlightedChartHeader
+                    title={`Proporsi Siswa & Gender (${selectedClassFilter === 'ALL' ? 'Semua Kelas' : 'Per Kelas'})`}
+                    subtitle="Komposisi siswa laki-laki dan perempuan aktif"
+                    accent="coral"
+                    rightSlot={
+                      <span className="rounded-xl bg-[#E7F9EF] border border-[#BCEAD1] px-2.5 py-1 text-[11px] font-black text-[#139A4C] tabular-nums whitespace-nowrap">
+                        {filteredStudents.length} Siswa
                       </span>
+                    }
+                  />
+
+                  <div className="no-ornament rounded-2xl border border-[#DFDAF4] bg-[#F5F3FC] dark:border-slate-700 dark:bg-slate-800/75 p-4 my-3 space-y-3.5">
+                    {/* Combined Ratio Bar */}
+                    <div>
+                      <div className="flex items-center justify-between text-[11px] font-extrabold text-[#5A537A] dark:text-slate-300 mb-1.5 tabular-nums">
+                        <span>Laki-laki {pklAndStudentStatusStats.malePct}%</span>
+                        <span>Perempuan {pklAndStudentStatusStats.femalePct}%</span>
+                      </div>
+                      <div className="h-3.5 w-full rounded-full bg-[#E1DCF4] dark:bg-slate-700 overflow-hidden flex">
+                        <div
+                          className="h-full bg-[#6C60B8] transition-all duration-500"
+                          style={{ width: `${pklAndStudentStatusStats.malePct}%` }}
+                        />
+                        <div
+                          className="h-full bg-[#FF7597] transition-all duration-500"
+                          style={{ width: `${pklAndStudentStatusStats.femalePct}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="jrpg-stat-bar">
-                      <div
-                        className="jrpg-stat-bar-fill bg-[#6C60B8]"
-                        style={{ width: `${pklAndStudentStatusStats.malePct}%` }}
-                      />
+
+                    <div className="rounded-2xl border border-[#E3E0F4] bg-white dark:border-slate-700 dark:bg-slate-900 p-3.5">
+                      <div className="flex items-center justify-between gap-2 text-xs font-extrabold mb-1.5">
+                        <span className="text-[#3E385B] dark:text-slate-100">Siswa Laki-laki (L)</span>
+                        <span className="text-[#6C60B8] dark:text-indigo-300 tabular-nums whitespace-nowrap">
+                          {pklAndStudentStatusStats.maleStudents} Siswa ({pklAndStudentStatusStats.malePct}%)
+                        </span>
+                      </div>
+                      <div className="jrpg-stat-bar">
+                        <div
+                          className="jrpg-stat-bar-fill bg-[#6C60B8]"
+                          style={{ width: `${pklAndStudentStatusStats.malePct}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-[#E3E0F4] bg-white dark:border-slate-700 dark:bg-slate-900 p-3.5">
+                      <div className="flex items-center justify-between gap-2 text-xs font-extrabold mb-1.5">
+                        <span className="text-[#3E385B] dark:text-slate-100">Siswa Perempuan (P)</span>
+                        <span className="text-[#F25781] tabular-nums whitespace-nowrap">
+                          {pklAndStudentStatusStats.femaleStudents} Siswa ({pklAndStudentStatusStats.femalePct}%)
+                        </span>
+                      </div>
+                      <div className="jrpg-stat-bar">
+                        <div
+                          className="jrpg-stat-bar-fill bg-[#FF7597]"
+                          style={{ width: `${pklAndStudentStatusStats.femalePct}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
-
-                  <div className="rounded-2xl border border-[#ECEBF5] bg-[#FAF9FE] p-4">
-                    <div className="flex items-center justify-between text-xs font-extrabold mb-1.5">
-                      <span className="text-[#3E385B]">Siswa Perempuan (P)</span>
-                      <span className="text-[#F25781]">
-                        {pklAndStudentStatusStats.femaleStudents} Siswa ({pklAndStudentStatusStats.femalePct}%)
-                      </span>
-                    </div>
-                    <div className="jrpg-stat-bar">
-                      <div
-                        className="jrpg-stat-bar-fill bg-[#FF7597]"
-                        style={{ width: `${pklAndStudentStatusStats.femalePct}%` }}
-                      />
-                    </div>
-                  </div>
                 </div>
-              </div>
 
-              <div className="mt-4 pt-3 border-t border-[#ECEBF5] flex flex-wrap items-center justify-between gap-2 text-xs">
-                <span className="text-[#9694A8] font-semibold">
-                  Dewan Guru Aktif: <strong className="text-[#3E385B]">{teachers.length} Pengajar</strong>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => handleNavigate('master-data')}
-                  className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-xl bg-[#F0EEFA] hover:bg-[#E4E1F6] px-3 text-xs font-extrabold text-[#6C60B8] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
-                >
-                  <span>Buka Master Data</span>
-                  <ChevronRight className="h-3.5 w-3.5 shrink-0" />
-                </button>
+                <div className="mt-4 pt-3 border-t border-[#E6E4F2] dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <span className="text-[#7A7596] dark:text-slate-400 font-semibold tabular-nums">
+                    Dewan Guru Aktif: <strong className="text-[#3E385B] dark:text-white">{teachers.length} Pengajar</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate('master-data')}
+                    className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-xl bg-[#F0EEFA] hover:bg-[#E4E1F6] dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 px-3 text-xs font-extrabold text-[#6C60B8] dark:text-indigo-300 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                  >
+                    <span>Buka Master Data</span>
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                  </button>
+                </div>
               </div>
             </OrnateCard>
 
             <OrnateCard boxId="chart_siswa_rombel" className="lg:col-span-7 p-5">
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-4 pr-8">
-                <div>
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-[#6C60B8] block">
-                    Distribusi Populasi Siswa &amp; Rasio Gender Per Kelas
-                  </span>
-                  <span className="text-[11px] text-[#9694A8]">
-                    Klik kelas untuk memisahkan data keseluruhan dengan data per kelas
-                  </span>
-                </div>
-              </div>
+              <HighlightedChartHeader
+                title="Distribusi Populasi Siswa & Rasio Gender Per Kelas"
+                subtitle="Klik kelas untuk memisahkan data keseluruhan dengan data per kelas"
+                accent="purple"
+              />
 
-              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+              <div className="no-ornament rounded-2xl border border-[#DFDAF4] bg-[#F5F3FC] dark:border-slate-700 dark:bg-slate-800/75 p-3 space-y-2.5 max-h-[320px] overflow-y-auto">
                 {classComparisonData.map(cls => {
                   const isSel = selectedClassFilter === cls.id;
                   const sharePct =
@@ -2361,20 +2595,20 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                       }
                       className={`rounded-[18px] border p-3.5 transition-all cursor-pointer ${
                         isSel
-                          ? 'border-[#6C60B8] bg-[#F4F2FC] shadow-xs'
-                          : 'border-[#ECEBF5] bg-[#FAF9FE] hover:border-[#D0CBEF]'
+                          ? 'border-[#6C60B8] bg-[#EDE9FB] dark:bg-indigo-950/60 dark:border-indigo-500 shadow-xs'
+                          : 'border-[#E3E0F4] bg-white dark:bg-slate-900 dark:border-slate-700 hover:border-[#6C60B8]'
                       }`}
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs mb-1.5">
                         <div className="flex flex-wrap items-center gap-2 min-w-0">
-                          <span className="rounded-lg bg-[#6C60B8] text-white px-2.5 py-0.5 text-xs font-extrabold">
+                          <span className="rounded-lg bg-[#6C60B8] text-white px-2.5 py-0.5 text-xs font-extrabold whitespace-nowrap">
                             {cls.name}
                           </span>
-                          <span className="font-bold text-[#3E385B]">
+                          <span className="font-bold text-[#3E385B] dark:text-slate-100 tabular-nums">
                             {cls.studentCount} Siswa ({cls.maleCount} L / {cls.femaleCount} P)
                           </span>
                         </div>
-                        <span className="font-extrabold text-[#139A4C] shrink-0">
+                        <span className="font-extrabold text-[#139A4C] dark:text-emerald-400 tabular-nums whitespace-nowrap shrink-0">
                           {sharePct}% dari Total Sekolah
                         </span>
                       </div>
@@ -2397,102 +2631,102 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
       {/* JRPG TACTICAL TABLE: MATRIKS PERSENTASE & PERFORMA ROMBEL    */}
       {/* ============================================================ */}
       <OrnateCard boxId="dashboard_class_matrix" className="p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pr-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pr-8">
           <OrnateSectionHeader
             title="Matriks Persentase Kehadiran & Capaian Akademik Per Kelas"
-            subtitle="Arahkan kursor pada baris tabel untuk melihat sorotan indikator performa akademik secara interaktif"
+            subtitle="Ringkasan performa kehadiran, rata-rata nilai, dan ketuntasan KKM tiap rombongan belajar"
           />
           <button
             type="button"
             onClick={() => handleNavigate('reports')}
-            className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] hover:bg-[#5B4FA8] px-4 text-xs font-extrabold text-white shadow-sm whitespace-nowrap shrink-0 transition-all cursor-pointer"
+            className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] hover:bg-[#5B4FA8] px-4 text-xs font-extrabold text-white shadow-sm whitespace-nowrap shrink-0 transition-all cursor-pointer self-start sm:self-auto"
           >
             <OrbitaMenuIcon variant="reports" className="h-3.5 w-3.5 shrink-0" />
             <span>Buka Laporan &amp; Leger</span>
           </button>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-[#EFE2BE] dark:border-slate-800">
-          <table className="w-full text-left text-xs">
+        <div className="overflow-x-auto rounded-2xl border border-[#DFDCF2] dark:border-slate-700">
+          <table className="w-full text-left text-xs tabular-nums">
             <thead>
               <tr>
-                <th className="py-3 px-4">Kelas / Rombel</th>
-                <th className="py-3 px-4 text-center">Jurusan</th>
-                <th className="py-3 px-4 text-center">Populasi Siswa</th>
-                <th className="py-3 px-4 text-center">Rincian H / S / I / A</th>
-                <th className="py-3 px-4">Persentase Kehadiran</th>
-                <th className="py-3 px-4 text-center">Rata-rata Nilai</th>
-                <th className="py-3 px-4">Persentase Lulus KKM</th>
-                <th className="py-3 px-4 text-center">Rank Status</th>
+                <th className="py-3 px-4 whitespace-nowrap">Kelas / Rombel</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Jurusan</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Populasi</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Rincian H / S / I / A</th>
+                <th className="py-3 px-4 whitespace-nowrap">Kehadiran</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Rata-rata</th>
+                <th className="py-3 px-4 whitespace-nowrap">Lulus KKM</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-[#ECEBF5] dark:divide-slate-800">
               {classComparisonData.map(row => (
                 <tr key={row.id}>
-                  <td className="py-3 px-4 font-black text-slate-900 dark:text-white">
+                  <td className="py-3 px-4 font-extrabold text-[#3E385B] dark:text-slate-100 whitespace-nowrap">
                     {row.name}
                   </td>
-                  <td className="py-3 px-4 text-center">
-                    <span className="rounded-lg bg-blue-500/15 px-2.5 py-0.5 text-[11px] font-extrabold text-blue-700 dark:text-cyan-300">
+                  <td className="py-3 px-4 text-center whitespace-nowrap">
+                    <span className="rounded-lg bg-[#F0EEFA] dark:bg-indigo-950/70 px-2.5 py-0.5 text-[11px] font-extrabold text-[#6C60B8] dark:text-indigo-300">
                       {row.majorCode}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-center font-bold">
+                  <td className="py-3 px-4 text-center font-bold text-[#3E385B] dark:text-slate-200 whitespace-nowrap">
                     {row.studentCount} Siswa{' '}
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-[10px] font-semibold text-[#7A7596] dark:text-slate-400">
                       ({row.maleCount}L/{row.femaleCount}P)
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-center font-mono text-[11px]">
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">{row.hCount}H</span> •{' '}
-                    <span className="text-blue-500 font-bold">{row.sCount}S</span> •{' '}
-                    <span className="text-amber-500 font-bold">{row.iCount}I</span> •{' '}
-                    <span className="text-rose-500 font-bold">{row.aCount}A</span>
+                  <td className="py-3 px-4 text-center font-mono text-[11px] whitespace-nowrap">
+                    <span className="text-[#139A4C] dark:text-emerald-400 font-bold">{row.hCount}H</span> &middot;{' '}
+                    <span className="text-[#2563EB] dark:text-blue-400 font-bold">{row.sCount}S</span> &middot;{' '}
+                    <span className="text-[#D97706] dark:text-amber-400 font-bold">{row.iCount}I</span> &middot;{' '}
+                    <span className="text-[#F25781] dark:text-rose-400 font-bold">{row.aCount}A</span>
                   </td>
-                  <td className="py-3 px-4 w-48">
-                    <div className="flex items-center justify-between text-[11px] font-black mb-1">
-                      <span className="text-emerald-600 dark:text-emerald-400">{row.attendancePct}%</span>
-                      <span className="text-[10px] text-slate-400">Target 90%</span>
+                  <td className="py-3 px-4 min-w-[165px]">
+                    <div className="flex items-center justify-between text-[11px] font-extrabold mb-1">
+                      <span className="text-[#139A4C] dark:text-emerald-400">{row.attendancePct}%</span>
+                      <span className="text-[10px] font-semibold text-[#7A7596] dark:text-slate-400">Target 90%</span>
                     </div>
                     <div className="jrpg-stat-bar">
                       <div
-                        className="jrpg-stat-bar-fill bg-gradient-to-r from-emerald-500 to-teal-400"
+                        className="jrpg-stat-bar-fill bg-[#1CC865]"
                         style={{ width: `${Math.min(100, row.attendancePct)}%` }}
                       />
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-center">
-                    <span className="text-sm font-black text-blue-600 dark:text-cyan-400">
+                  <td className="py-3 px-4 text-center whitespace-nowrap">
+                    <span className="text-sm font-black text-[#6C60B8] dark:text-indigo-300">
                       {row.avgGrade}
                     </span>
                   </td>
-                  <td className="py-3 px-4 w-48">
-                    <div className="flex items-center justify-between text-[11px] font-black mb-1">
-                      <span className="text-blue-600 dark:text-cyan-400">{row.kkmPct}%</span>
-                      <span className="text-[10px] text-slate-400">KKM &ge; 75</span>
+                  <td className="py-3 px-4 min-w-[165px]">
+                    <div className="flex items-center justify-between text-[11px] font-extrabold mb-1">
+                      <span className="text-[#6C60B8] dark:text-indigo-300">{row.kkmPct}%</span>
+                      <span className="text-[10px] font-semibold text-[#7A7596] dark:text-slate-400">KKM &ge; 75</span>
                     </div>
                     <div className="jrpg-stat-bar">
                       <div
-                        className="jrpg-stat-bar-fill bg-gradient-to-r from-blue-600 to-cyan-400"
+                        className="jrpg-stat-bar-fill bg-[#6C60B8]"
                         style={{ width: `${Math.min(100, row.kkmPct)}%` }}
                       />
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-center">
+                  <td className="py-3 px-4 text-center whitespace-nowrap">
                     <span
-                      className={`rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${
+                      className={`inline-flex items-center justify-center rounded-lg px-2.5 py-1 text-[10.5px] font-extrabold whitespace-nowrap ${
                         row.attendancePct >= 90 && row.avgGrade >= 80
-                          ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                          ? 'bg-[#E7F9EF] text-[#139A4C] border border-[#BCEAD1] dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800'
                           : row.avgGrade >= 75
-                          ? 'bg-blue-500/15 text-blue-700 dark:text-cyan-300 border border-blue-500/30'
-                          : 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30'
+                          ? 'bg-[#F0EEFA] text-[#6C60B8] border border-[#DFDCF2] dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800'
+                          : 'bg-[#FFE4EC] text-[#F25781] border border-[#FFCCD9] dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800'
                       }`}
                     >
                       {row.attendancePct >= 90 && row.avgGrade >= 80
-                        ? 'RANK S • OPTIMAL'
+                        ? 'Optimal'
                         : row.avgGrade >= 75
-                        ? 'RANK A • STABIL'
-                        : 'RANK B • EVALUASI'}
+                        ? 'Stabil'
+                        : 'Perlu Evaluasi'}
                     </span>
                   </td>
                 </tr>

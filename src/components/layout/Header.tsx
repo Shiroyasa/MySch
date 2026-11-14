@@ -114,7 +114,7 @@ export const Header: React.FC<{
 
   return (
     <>
-      <header className="relative md:sticky top-0 z-30 w-full bg-[#F8F9FD]/95 backdrop-blur-md px-3.5 sm:px-6 lg:px-8 pt-1.5 sm:pt-2">
+      <header className="relative md:sticky top-0 z-30 w-full bg-[#F8F9FD]/95 dark:bg-slate-950/90 backdrop-blur-md px-3.5 sm:px-6 lg:px-8 pt-1.5 sm:pt-2">
         <div className="flex h-14 sm:h-18 w-full items-center justify-between gap-2.5">
           {/* Left: Mobile/Tablet Menu Button + Title */}
           <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
@@ -128,10 +128,10 @@ export const Header: React.FC<{
             </button>
 
             <div className="min-w-0">
-              <span className="block text-[10.5px] sm:text-xs font-medium text-[#A2A0B4] leading-tight truncate">
+              <span className="block text-[10.5px] sm:text-xs font-medium text-[#A2A0B4] dark:text-slate-400 leading-tight truncate">
                 {currentMeta.kicker}
               </span>
-              <h2 className="text-base sm:text-xl lg:text-2xl font-extrabold text-[#3E385B] tracking-tight leading-tight truncate">
+              <h2 className="text-base sm:text-xl lg:text-2xl font-extrabold text-[#3E385B] dark:text-white tracking-tight leading-tight truncate">
                 {currentMeta.title}
               </h2>
             </div>
@@ -141,8 +141,8 @@ export const Header: React.FC<{
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Tablet & Desktop Search Pill (hidden on <640px so title has breathing room) */}
             <div className="relative hidden sm:block">
-              <div className="flex items-center gap-2 rounded-full bg-[#EFEFF6] px-3.5 py-2 text-[#3E385B] w-44 md:w-56 lg:w-60 transition-all focus-within:ring-2 focus-within:ring-[#6C60B8]/30">
-                <Search className="h-4 w-4 text-[#4A4368] shrink-0 stroke-[2.4]" />
+              <div className="flex items-center gap-2 rounded-full bg-[#EFEFF6] dark:bg-slate-800/90 px-3.5 py-2 text-[#3E385B] dark:text-slate-100 w-44 md:w-56 lg:w-60 transition-all focus-within:ring-2 focus-within:ring-[#6C60B8]/30">
+                <Search className="h-4 w-4 text-[#4A4368] dark:text-indigo-300 shrink-0 stroke-[2.4]" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -153,14 +153,14 @@ export const Header: React.FC<{
                     setShowSearchDropdown(true);
                   }}
                   placeholder="Cari menu..."
-                  className="w-full bg-transparent text-xs font-medium text-[#3E385B] placeholder:text-[#A2A0B4] focus:outline-none"
+                  className="w-full bg-transparent text-xs font-medium text-[#3E385B] dark:text-slate-100 placeholder:text-[#A2A0B4] dark:placeholder:text-slate-400 focus:outline-none"
                 />
               </div>
 
               {showSearchDropdown && searchQuery.trim().length > 0 && (
-                <div className="absolute right-0 mt-2 w-72 rounded-[20px] border border-[#ECEBF5] bg-white p-2 text-[#3E385B] shadow-[0_18px_40px_rgba(108,96,184,0.16)] z-50">
+                <div className="absolute right-0 mt-2 w-72 rounded-[20px] border border-[#ECEBF5] bg-white dark:border-slate-800 dark:bg-slate-900 p-2 text-[#3E385B] dark:text-slate-100 shadow-[0_18px_40px_rgba(108,96,184,0.16)] z-50">
                   {filteredMenus.length === 0 ? (
-                    <p className="px-3 py-2 text-xs text-[#9694A8]">Menu tidak ditemukan.</p>
+                    <p className="px-3 py-2 text-xs text-[#9694A8] dark:text-slate-400">Menu tidak ditemukan.</p>
                   ) : (
                     filteredMenus.map(item => (
                       <button
@@ -171,7 +171,7 @@ export const Header: React.FC<{
                           setSearchQuery('');
                           setShowSearchDropdown(false);
                         }}
-                        className="no-ornament flex w-full items-center justify-between rounded-[12px] px-3 py-2 text-left text-xs font-bold text-[#3E385B] hover:bg-[#F3F2FA] hover:text-[#6C60B8] transition-colors cursor-pointer"
+                        className="no-ornament flex w-full items-center justify-between rounded-[12px] px-3 py-2 text-left text-xs font-bold text-[#3E385B] dark:text-slate-200 hover:bg-[#F3F2FA] dark:hover:bg-slate-800 hover:text-[#6C60B8] dark:hover:text-indigo-300 transition-colors cursor-pointer"
                       >
                         <span>{item.label}</span>
                       </button>
@@ -188,7 +188,7 @@ export const Header: React.FC<{
               className={`no-ornament sm:hidden flex h-10 w-10 items-center justify-center rounded-full transition-colors cursor-pointer ${
                 mobileSearchOpen
                   ? 'bg-[#6C60B8] text-white'
-                  : 'bg-[#EFEFF6] text-[#3E385B] hover:bg-[#E4E2F5]'
+                  : 'bg-[#EFEFF6] text-[#3E385B] hover:bg-[#E4E2F5] dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
               }`}
               title="Cari Menu"
             >
@@ -200,7 +200,7 @@ export const Header: React.FC<{
               <button
                 type="button"
                 onClick={onToggleRightDrawer}
-                className="no-ornament relative xl:hidden inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-[#EFEFF6] hover:bg-[#E4E2F5] px-2.5 sm:px-3.5 text-xs font-extrabold text-[#6C60B8] transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                className="no-ornament relative xl:hidden inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-[#EFEFF6] hover:bg-[#E4E2F5] dark:bg-slate-800 dark:hover:bg-slate-700 px-2.5 sm:px-3.5 text-xs font-extrabold text-[#6C60B8] dark:text-indigo-300 transition-colors cursor-pointer whitespace-nowrap shrink-0"
                 title="Buka Agenda KBM & Live Map GPS"
               >
                 <MapPin className="h-4 w-4 text-[#F25781] shrink-0" />
@@ -215,7 +215,7 @@ export const Header: React.FC<{
 
             {/* Cloud Sync Pill (xl+ desktop) */}
             <div
-              className="hidden xl:flex items-center gap-1.5 rounded-full bg-[#EFEFF6] px-3 py-1.5 text-[11px] font-bold text-[#3E385B]"
+              className="hidden xl:flex items-center gap-1.5 rounded-full bg-[#EFEFF6] dark:bg-slate-800 px-3 py-1.5 text-[11px] font-bold text-[#3E385B] dark:text-slate-200"
               title={
                 lastSyncTime
                   ? `Basis Data Cloud Terhubung • T.A. ${activeAcademicYear.name} (${lastSyncTime.toLocaleTimeString()})`
@@ -229,7 +229,7 @@ export const Header: React.FC<{
                 onClick={() => forceCloudResync()}
                 disabled={isSyncing}
                 title="Sinkronkan basis data cloud sekarang"
-                className="no-ornament ml-0.5 text-[#6C60B8] hover:text-[#4E42A1] disabled:opacity-50 transition-colors cursor-pointer"
+                className="no-ornament ml-0.5 text-[#6C60B8] hover:text-[#4E42A1] dark:text-indigo-300 dark:hover:text-indigo-200 disabled:opacity-50 transition-colors cursor-pointer"
               >
                 <RefreshCw className={`h-3 w-3 ${isSyncing ? 'animate-spin' : ''}`} />
               </button>
@@ -240,7 +240,7 @@ export const Header: React.FC<{
               <button
                 type="button"
                 onClick={() => setShowBroadcastModal(true)}
-                className="no-ornament hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-[#EFEFF6] text-[#6C60B8] hover:bg-[#E4E2F5] transition-colors cursor-pointer"
+                className="no-ornament hidden md:flex h-10 w-10 items-center justify-center rounded-full bg-[#EFEFF6] text-[#6C60B8] hover:bg-[#E4E2F5] dark:bg-slate-800 dark:text-indigo-300 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                 title="Kirim Pengumuman ke Semua Pengguna"
               >
                 <Megaphone className="h-4 w-4" />
@@ -252,7 +252,7 @@ export const Header: React.FC<{
               <button
                 type="button"
                 onClick={() => setShowNotifMenu(!showNotifMenu)}
-                className="no-ornament relative flex h-10 w-10 items-center justify-center rounded-full bg-[#EFEFF6] text-[#3E385B] hover:bg-[#E4E2F5] transition-colors cursor-pointer"
+                className="no-ornament relative flex h-10 w-10 items-center justify-center rounded-full bg-[#EFEFF6] text-[#3E385B] hover:bg-[#E4E2F5] dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                 title="Pemberitahuan"
               >
                 <Bell className="h-4 w-4" />
@@ -272,12 +272,12 @@ export const Header: React.FC<{
               )}
 
               {showNotifMenu && (
-                <div className="fixed inset-x-3 top-16 sm:absolute sm:inset-auto sm:right-0 sm:mt-2 sm:w-96 rounded-[24px] border border-[#ECEBF5] bg-white p-4 text-[#3E385B] shadow-[0_22px_50px_rgba(62,56,91,0.18)] z-50 animate-scale-up origin-top-right">
-                  <div className="flex items-center justify-between border-b border-[#F0F1F6] pb-2.5 px-1">
+                <div className="fixed inset-x-3 top-16 sm:absolute sm:inset-auto sm:right-0 sm:mt-2 sm:w-96 rounded-[24px] border border-[#ECEBF5] bg-white dark:border-slate-800 dark:bg-slate-900 p-4 text-[#3E385B] dark:text-slate-100 shadow-[0_22px_50px_rgba(62,56,91,0.18)] z-50 animate-scale-up origin-top-right">
+                  <div className="flex items-center justify-between border-b border-[#F0F1F6] dark:border-slate-800 pb-2.5 px-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-extrabold text-xs text-[#3E385B]">Pemberitahuan</span>
+                      <span className="font-extrabold text-xs text-[#3E385B] dark:text-white">Pemberitahuan</span>
                       {isAdmin && (
-                        <span className="rounded-full px-2 py-0.5 text-[9px] font-bold bg-[#F0EEFA] text-[#6C60B8]">
+                        <span className="rounded-full px-2 py-0.5 text-[9px] font-bold bg-[#F0EEFA] text-[#6C60B8] dark:bg-indigo-950 dark:text-indigo-300">
                           Admin
                         </span>
                       )}
@@ -287,7 +287,7 @@ export const Header: React.FC<{
                       <button
                         type="button"
                         onClick={markAllNotificationsRead}
-                        className="no-ornament inline-flex items-center text-xs text-[#6C60B8] hover:underline font-semibold whitespace-nowrap shrink-0 cursor-pointer"
+                        className="no-ornament inline-flex items-center text-xs text-[#6C60B8] dark:text-indigo-300 hover:underline font-semibold whitespace-nowrap shrink-0 cursor-pointer"
                       >
                         Baca Semua
                       </button>
@@ -305,14 +305,14 @@ export const Header: React.FC<{
                 </div>
 
                 {isAdmin && (
-                  <div className="flex flex-wrap items-center gap-1.5 pt-2.5 pb-2 border-b border-[#F0F1F6] text-[10px]">
+                  <div className="flex flex-wrap items-center gap-1.5 pt-2.5 pb-2 border-b border-[#F0F1F6] dark:border-slate-800 text-[10px]">
                     <button
                       type="button"
                       onClick={() => setAdminNotifTab('all')}
                       className={`no-ornament inline-flex items-center justify-center h-7 px-2.5 rounded-full font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
                         adminNotifTab === 'all'
                           ? 'bg-[#6C60B8] text-white'
-                          : 'bg-[#F0F1F6] text-[#9694A8] hover:text-[#3E385B]'
+                          : 'bg-[#F0F1F6] text-[#9694A8] hover:text-[#3E385B] dark:bg-slate-800 dark:text-slate-400 dark:hover:text-white'
                       }`}
                     >
                       Semua ({notifications.length})
@@ -323,7 +323,7 @@ export const Header: React.FC<{
                       className={`no-ornament inline-flex items-center justify-center h-7 px-2.5 rounded-full font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
                         adminNotifTab === 'mine'
                           ? 'bg-[#6C60B8] text-white'
-                          : 'bg-[#F0F1F6] text-[#9694A8] hover:text-[#3E385B]'
+                          : 'bg-[#F0F1F6] text-[#9694A8] hover:text-[#3E385B] dark:bg-slate-800 dark:text-slate-400 dark:hover:text-white'
                       }`}
                     >
                       Profil ({notifications.filter(n => n.recipientId === currentUser.id).length})
@@ -334,7 +334,7 @@ export const Header: React.FC<{
                       className={`no-ornament inline-flex items-center justify-center h-7 px-2.5 rounded-full font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
                         adminNotifTab === 'broadcast'
                           ? 'bg-[#6C60B8] text-white'
-                          : 'bg-[#F0F1F6] text-[#9694A8] hover:text-[#3E385B]'
+                          : 'bg-[#F0F1F6] text-[#9694A8] hover:text-[#3E385B] dark:bg-slate-800 dark:text-slate-400 dark:hover:text-white'
                       }`}
                     >
                       Broadcast ({notifications.filter(n => n.isBroadcast || n.targetRole === 'all').length})
@@ -344,7 +344,7 @@ export const Header: React.FC<{
 
                 <div className="mt-2 max-h-80 overflow-y-auto space-y-2 pr-1">
                   {visibleNotifs.length === 0 ? (
-                    <div className="py-6 text-center text-xs text-[#9694A8]">
+                    <div className="py-6 text-center text-xs text-[#9694A8] dark:text-slate-400">
                       <p>Tidak ada pemberitahuan pada profil ini.</p>
                     </div>
                   ) : (
@@ -353,8 +353,8 @@ export const Header: React.FC<{
                         key={n.id}
                         className={`group flex items-start justify-between gap-2 rounded-[16px] border p-3 transition-colors ${
                           n.isRead
-                            ? 'border-[#F0F1F6] bg-[#FAF9FE] opacity-80'
-                            : 'border-[#E2DFF5] bg-[#F5F4FC]'
+                            ? 'border-[#F0F1F6] bg-[#FAF9FE] dark:border-slate-800 dark:bg-slate-800/40 opacity-80'
+                            : 'border-[#E2DFF5] bg-[#F5F4FC] dark:border-indigo-900/60 dark:bg-indigo-950/35'
                         }`}
                       >
                         <div
@@ -363,13 +363,13 @@ export const Header: React.FC<{
                         >
                           <div
                             className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${
-                              n.isRead ? 'bg-[#C2C0D1]' : 'bg-[#6C60B8]'
+                              n.isRead ? 'bg-[#C2C0D1] dark:bg-slate-600' : 'bg-[#6C60B8]'
                             }`}
                           />
                           <div className="space-y-1 flex-1">
-                            <span className="text-xs font-bold text-[#3E385B] block">{n.title}</span>
-                            <p className="text-xs text-[#7E7898] leading-snug">{n.message}</p>
-                            <span className="text-[10px] text-[#A2A0B4] block">
+                            <span className="text-xs font-bold text-[#3E385B] dark:text-white block">{n.title}</span>
+                            <p className="text-xs text-[#7E7898] dark:text-slate-300 leading-snug">{n.message}</p>
+                            <span className="text-[10px] text-[#A2A0B4] dark:text-slate-400 block">
                               {new Date(n.createdAt).toLocaleTimeString('id-ID', {
                                 hour: '2-digit',
                                 minute: '2-digit',
@@ -398,7 +398,7 @@ export const Header: React.FC<{
           {/* Circular User Profile Avatar (Exact Top-Right Avatar from Reference Image) */}
           <button
             onClick={() => setShowProfileModal(true)}
-            className="no-ornament group relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E6E4F4] ring-2 ring-white shadow-[0_6px_16px_rgba(62,56,91,0.14)] cursor-pointer"
+            className="no-ornament group relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E6E4F4] dark:bg-slate-800 ring-2 ring-white dark:ring-slate-700 shadow-[0_6px_16px_rgba(62,56,91,0.14)] cursor-pointer"
             title={`${currentUser.displayName} • Klik untuk buka profil`}
           >
             {currentUser.photoURL ? (
@@ -408,7 +408,7 @@ export const Header: React.FC<{
                 className="h-full w-full object-cover"
               />
             ) : (
-              <span className="text-xs font-extrabold text-[#6C60B8]">
+              <span className="text-xs font-extrabold text-[#6C60B8] dark:text-indigo-300">
                 {(currentUser.displayName || 'OR').slice(0, 2).toUpperCase()}
               </span>
             )}
@@ -423,15 +423,15 @@ export const Header: React.FC<{
         {mobileSearchOpen && (
           <div className="sm:hidden pb-3 pt-1 animate-slide-down">
             <div className="relative">
-              <div className="flex items-center gap-2 rounded-2xl border border-[#E4E3F0] bg-white px-3.5 py-2.5 text-[#3E385B] shadow-sm focus-within:border-[#6C60B8]">
-                <Search className="h-4 w-4 text-[#6C60B8] shrink-0" />
+              <div className="flex items-center gap-2 rounded-2xl border border-[#E4E3F0] bg-white dark:border-slate-700 dark:bg-slate-800 px-3.5 py-2.5 text-[#3E385B] dark:text-slate-100 shadow-sm focus-within:border-[#6C60B8]">
+                <Search className="h-4 w-4 text-[#6C60B8] dark:text-indigo-300 shrink-0" />
                 <input
                   type="text"
                   autoFocus
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Cari menu akademik, presensi, nilai..."
-                  className="w-full bg-transparent text-xs font-semibold text-[#3E385B] placeholder:text-[#A2A0B4] focus:outline-none"
+                  className="w-full bg-transparent text-xs font-semibold text-[#3E385B] dark:text-slate-100 placeholder:text-[#A2A0B4] dark:placeholder:text-slate-400 focus:outline-none"
                 />
                 {searchQuery && (
                   <button
@@ -445,9 +445,9 @@ export const Header: React.FC<{
               </div>
 
               {searchQuery.trim().length > 0 && (
-                <div className="mt-1.5 rounded-[18px] border border-[#ECEBF5] bg-white p-1.5 shadow-lg">
+                <div className="mt-1.5 rounded-[18px] border border-[#ECEBF5] bg-white dark:border-slate-800 dark:bg-slate-900 p-1.5 shadow-lg">
                   {filteredMenus.length === 0 ? (
-                    <p className="px-3 py-2 text-xs text-[#9694A8]">Menu tidak ditemukan.</p>
+                    <p className="px-3 py-2 text-xs text-[#9694A8] dark:text-slate-400">Menu tidak ditemukan.</p>
                   ) : (
                     filteredMenus.map(item => (
                       <button
@@ -458,7 +458,7 @@ export const Header: React.FC<{
                           setSearchQuery('');
                           setMobileSearchOpen(false);
                         }}
-                        className="no-ornament flex min-h-[40px] w-full items-center rounded-xl px-3 py-2 text-left text-xs font-bold text-[#3E385B] active:bg-[#F3F2FA]"
+                        className="no-ornament flex min-h-[40px] w-full items-center rounded-xl px-3 py-2 text-left text-xs font-bold text-[#3E385B] dark:text-slate-200 active:bg-[#F3F2FA] dark:active:bg-slate-800"
                       >
                         {item.label}
                       </button>

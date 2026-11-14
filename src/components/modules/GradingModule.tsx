@@ -784,7 +784,7 @@ export const GradingModule: React.FC = () => {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-[16px] border border-[#6C60B8]/25 bg-white px-4 py-3 text-xs font-extrabold text-[#3E385B] shadow-[0_16px_36px_-8px_rgba(108,96,184,0.28)] animate-in slide-in-from-bottom-3">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 rounded-[16px] border border-[#6C60B8]/25 bg-white px-4 py-3 text-xs font-extrabold text-[#3E385B] shadow-[0_16px_36px_-8px_rgba(108,96,184,0.28)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 animate-in slide-in-from-bottom-3">
           <Check className="h-4 w-4 text-[#1CC865] shrink-0" />
           <span>{toastMessage}</span>
         </div>
@@ -798,14 +798,14 @@ export const GradingModule: React.FC = () => {
         subtitle="Pengelolaan bobot penilaian dinamis, kalkulasi leger nilai akhir otomatis, dan penyusunan transkrip rapor siswa yang tersinkron ke Cloud Firestore."
         icon={GraduationCap}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5 dark:border-slate-700/80 dark:bg-slate-800/80">
             <button
               type="button"
               onClick={() => setActiveTab('input')}
-              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'input'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
               Input Nilai
@@ -813,10 +813,10 @@ export const GradingModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('leger')}
-              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'leger'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
               Rekap &amp; Leger Kelas
@@ -824,10 +824,10 @@ export const GradingModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('reportCard')}
-              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'reportCard'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
               Draf Rapor Siswa
@@ -842,14 +842,14 @@ export const GradingModule: React.FC = () => {
           {/* Filter Bar */}
           <OrnateCard className="p-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                   Rombel / Kelas
                 </label>
                 <select
                   value={selectedClassId}
                   onChange={e => setSelectedClassId(e.target.value)}
-                  className="w-full rounded-xl border border-[#DEC896] bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-[38px] w-full rounded-xl border border-[#DEC896] bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
                   {classes.map(c => (
                     <option key={c.id} value={c.id}>
@@ -859,14 +859,14 @@ export const GradingModule: React.FC = () => {
                 </select>
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                   Mata Pelajaran
                 </label>
                 <select
                   value={selectedSubjectId}
                   onChange={e => setSelectedSubjectId(e.target.value)}
-                  className="w-full rounded-xl border border-[#DEC896] bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-[38px] w-full rounded-xl border border-[#DEC896] bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
                   {subjects.map(s => (
                     <option key={s.id} value={s.id}>
@@ -876,14 +876,14 @@ export const GradingModule: React.FC = () => {
                 </select>
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                   Komponen Penilaian
                 </label>
                 <select
                   value={activeAssessment?.id || ''}
                   onChange={e => handleSelectAssessment(e.target.value)}
-                  className="w-full rounded-xl border border-[#DEC896] bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  className="h-[38px] w-full rounded-xl border border-[#DEC896] bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
                   {currentAssessments.length === 0 ? (
                     <option value="">-- Belum Ada Komponen (Otomatis Dibuat Saat Simpan) --</option>
@@ -897,7 +897,7 @@ export const GradingModule: React.FC = () => {
                 </select>
               </div>
 
-              <div className="flex items-end gap-2">
+              <div className="flex items-end gap-2 min-w-0">
                 <button
                   type="button"
                   onClick={openCreateAssessmentModal}
@@ -921,22 +921,19 @@ export const GradingModule: React.FC = () => {
           </OrnateCard>
 
           {/* Assessment Header Info & Action Buttons */}
-          <OrnateCard className="p-4">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
+          <OrnateCard className="p-4 sm:p-5">
+            <div className="flex flex-col gap-3.5">
+              <div className="pr-8">
                 <div className="flex flex-wrap items-center gap-2">
                   <Sparkles className="h-4 w-4 text-amber-500 shrink-0" />
-                  <h2
-                    className="text-sm font-extrabold text-slate-900 dark:text-white"
-                    style={{ fontFamily: "'Cinzel', 'Plus Jakarta Sans', serif" }}
-                  >
+                  <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white tracking-tight">
                     {activeAssessment
                       ? activeAssessment.title
                       : `Penilaian ${currentSubject.name} — ${currentClass.name}`}
                   </h2>
                   {activeAssessment && (
                     <span
-                      className={`px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider ${
+                      className={`px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider whitespace-nowrap ${
                         activeAssessment.status === 'dipublikasikan'
                           ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300'
                           : 'bg-amber-100 text-amber-800 dark:bg-amber-950/70 dark:text-amber-300'
@@ -946,7 +943,7 @@ export const GradingModule: React.FC = () => {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 tabular-nums">
                   Tipe:{' '}
                   <span className="font-semibold capitalize text-slate-700 dark:text-slate-200">
                     {activeAssessment?.type || 'formatif'}
@@ -963,110 +960,120 @@ export const GradingModule: React.FC = () => {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
                 <SortByControl value={sortBy} onChange={setSortBy} />
 
-                <button
-                  type="button"
-                  onClick={handleResetScoresClick}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-700/70 dark:bg-amber-950/60 dark:text-amber-300 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
-                  title="Reset seluruh nilai komponen ini ke 0 dan simpan ke database"
-                >
-                  <RotateCcw className="h-3.5 w-3.5 shrink-0" />
-                  <span>Reset Nilai</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleResetAllSubjectScoresClick}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3.5 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-800/70 dark:bg-rose-950/60 dark:text-rose-300 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
-                  title="Reset semua komponen nilai mata pelajaran ini ke 0"
-                >
-                  <RotateCcw className="h-3.5 w-3.5 shrink-0" />
-                  <span>Reset Semua Mapel</span>
-                </button>
-
-                {activeAssessment && (
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => handleDeleteAssessmentClick(activeAssessment)}
-                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
-                    title="Hapus Komponen Penilaian ini"
+                    onClick={handleResetScoresClick}
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-700/70 dark:bg-amber-950/60 dark:text-amber-300 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                    title="Reset seluruh nilai komponen ini ke 0 dan simpan ke database"
                   >
-                    <Trash2 className="h-3.5 w-3.5 shrink-0" />
-                    <span>Hapus</span>
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                    <span>Reset Nilai</span>
                   </button>
-                )}
 
-                <button
-                  type="button"
-                  onClick={handleSaveScores}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D4AF37] bg-white px-3.5 text-xs font-bold text-slate-900 hover:bg-amber-50 dark:bg-slate-800 dark:text-white whitespace-nowrap shrink-0 cursor-pointer"
-                >
-                  <Save className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-                  <span>Simpan Nilai</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={handleResetAllSubjectScoresClick}
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3 text-xs font-bold text-rose-700 hover:bg-rose-100 dark:border-rose-800/70 dark:bg-rose-950/60 dark:text-rose-300 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                    title="Reset semua komponen nilai mata pelajaran ini ke 0"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                    <span>Reset Semua Mapel</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={handlePublish}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap shrink-0 cursor-pointer"
-                >
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
-                  <span>Publikasikan Nilai</span>
-                </button>
+                  {activeAssessment && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteAssessmentClick(activeAssessment)}
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 text-xs font-bold text-rose-600 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-400 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                      title="Hapus Komponen Penilaian ini"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 shrink-0" />
+                      <span>Hapus</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleSaveScores}
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D4AF37] bg-white px-3.5 text-xs font-bold text-slate-900 hover:bg-amber-50 dark:bg-slate-800 dark:text-white whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    <Save className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                    <span>Simpan Nilai</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handlePublish}
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    <span>Publikasikan Nilai</span>
+                  </button>
+                </div>
               </div>
             </div>
           </OrnateCard>
 
           {/* Live Session Analytics Banner */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <OrnateCard className="p-3.5 flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300">
-                <TrendingUp className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Rata-rata Nilai</p>
-                <p className="text-lg font-black text-slate-900 dark:text-white">{avgScore}</p>
-              </div>
-            </OrnateCard>
-
-            <OrnateCard className="p-3.5 flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300">
-                <CheckCheck className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Ketuntasan (≥{kkmVal})</p>
-                <div className="flex items-baseline gap-1">
-                  <p className="text-lg font-black text-emerald-600 dark:text-emerald-400">
-                    {passedStudentsCount}/{totalScored}
-                  </p>
-                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">({passedRate}%)</span>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <OrnateCard className="p-3.5">
+              <div className="flex items-center gap-3 pr-5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300">
+                  <TrendingUp className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">Rata-rata Nilai</p>
+                  <p className="text-lg font-black text-slate-900 dark:text-white tabular-nums">{avgScore}</p>
                 </div>
               </div>
             </OrnateCard>
 
-            <OrnateCard className="p-3.5 flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300">
-                <Award className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Tertinggi / Terendah</p>
-                <p className="text-lg font-black text-indigo-600 dark:text-indigo-400">
-                  {maxScore} <span className="text-xs font-normal text-slate-400">/</span> {minScore}
-                </p>
+            <OrnateCard className="p-3.5">
+              <div className="flex items-center gap-3 pr-5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300">
+                  <CheckCheck className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate tabular-nums">Ketuntasan (≥{kkmVal})</p>
+                  <div className="flex items-baseline gap-1 tabular-nums">
+                    <p className="text-lg font-black text-emerald-600 dark:text-emerald-400">
+                      {passedStudentsCount}/{totalScored}
+                    </p>
+                    <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">({passedRate}%)</span>
+                  </div>
+                </div>
               </div>
             </OrnateCard>
 
-            <OrnateCard className="p-3.5 flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-700 dark:bg-rose-900/60 dark:text-rose-300">
-                <RotateCcw className="h-5 w-5" />
+            <OrnateCard className="p-3.5">
+              <div className="flex items-center gap-3 pr-5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300">
+                  <Award className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">Tertinggi / Terendah</p>
+                  <p className="text-lg font-black text-indigo-600 dark:text-indigo-400 tabular-nums">
+                    {maxScore} <span className="text-xs font-normal text-slate-400">/</span> {minScore}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Siswa Remedial</p>
-                <p className="text-lg font-black text-rose-600 dark:text-rose-400">
-                  {remedialStudentsCount} <span className="text-xs font-medium text-slate-400">siswa</span>
-                </p>
+            </OrnateCard>
+
+            <OrnateCard className="p-3.5">
+              <div className="flex items-center gap-3 pr-5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-700 dark:bg-rose-900/60 dark:text-rose-300">
+                  <RotateCcw className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 truncate">Siswa Remedial</p>
+                  <p className="text-lg font-black text-rose-600 dark:text-rose-400 tabular-nums">
+                    {remedialStudentsCount} <span className="text-xs font-medium text-slate-400">siswa</span>
+                  </p>
+                </div>
               </div>
             </OrnateCard>
           </div>
@@ -1181,13 +1188,13 @@ export const GradingModule: React.FC = () => {
           <OrnateCard className="overflow-hidden animate-fade-in">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead>
+                <thead className="whitespace-nowrap">
                   <tr>
                     <th className="py-3.5 px-4 w-12 text-center">No</th>
                     <th className="py-3.5 px-4">NISN / NIS</th>
-                    <th className="py-3.5 px-4">Nama Siswa (Cadet)</th>
+                    <th className="py-3.5 px-4">Nama Siswa</th>
                     <th className="py-3.5 px-4 text-center w-28">Nilai (0-100)</th>
-                    <th className="py-3.5 px-4 text-center w-24">Rank / Predikat</th>
+                    <th className="py-3.5 px-4 text-center w-24">Predikat</th>
                     <th className="py-3.5 px-4 text-center w-28">Status KKM</th>
                     <th className="py-3.5 px-4 min-w-[280px]">Catatan / Umpan Balik Guru</th>
                   </tr>
@@ -1336,46 +1343,45 @@ export const GradingModule: React.FC = () => {
       {/* TAB 2: LEGER & REKAP NILAI KELAS */}
       {activeTab === 'leger' && (
         <div className="space-y-4 animate-fade-in">
-          <OrnateCard className="p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2
-                  className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white"
-                  style={{ fontFamily: "'Cinzel', 'Plus Jakarta Sans', serif" }}
-                >
+          <OrnateCard className="p-4 sm:p-5">
+            <div className="flex flex-col gap-3.5">
+              <div className="pr-8">
+                <h2 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white tracking-tight">
                   Leger Nilai: {currentClass.name} &bull; {currentSubject.name}
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 tabular-nums">
                   Kalkulasi otomatis nilai akhir terbobot dan predikat kelulusan KKM ({currentSubject.kkm})
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
                 <SortByControl value={sortBy} onChange={setSortBy} compact />
-                <button
-                  type="button"
-                  onClick={handleResetAllSubjectScoresClick}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-700/70 dark:bg-amber-950/60 dark:text-amber-300 whitespace-nowrap shrink-0 cursor-pointer"
-                >
-                  <RotateCcw className="h-3.5 w-3.5 shrink-0" />
-                  <span>Reset Leger (0)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleExportLegerExcel}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D4AF37] bg-white px-3.5 text-xs font-bold text-slate-800 hover:bg-amber-50 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
-                >
-                  <Download className="h-4 w-4 text-emerald-600 shrink-0" />
-                  <span>Unduh Leger Excel</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleExportLegerPdf}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 whitespace-nowrap shrink-0 cursor-pointer"
-                >
-                  <Printer className="h-4 w-4 shrink-0" />
-                  <span>Cetak PDF Resmi</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleResetAllSubjectScoresClick}
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3.5 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:border-amber-700/70 dark:bg-amber-950/60 dark:text-amber-300 whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                    <span>Reset Leger (0)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExportLegerExcel}
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D4AF37] bg-white px-3.5 text-xs font-bold text-slate-800 hover:bg-amber-50 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    <Download className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <span>Unduh Leger Excel</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExportLegerPdf}
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    <Printer className="h-4 w-4 shrink-0" />
+                    <span>Cetak PDF Resmi</span>
+                  </button>
+                </div>
               </div>
             </div>
           </OrnateCard>
@@ -1383,7 +1389,7 @@ export const GradingModule: React.FC = () => {
           <OrnateCard className="overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead>
+                <thead className="whitespace-nowrap">
                   <tr>
                     <th className="py-3.5 px-3 text-center">No</th>
                     <th className="py-3.5 px-3">NISN</th>
@@ -1391,7 +1397,7 @@ export const GradingModule: React.FC = () => {
                     {currentAssessments.map(asm => (
                       <th key={asm.id} className="py-3.5 px-3 text-center">
                         <div>{asm.title.split(':')[0]}</div>
-                        <div className="text-[10px] font-normal text-amber-200/80">({asm.weight}%)</div>
+                        <div className="text-[10px] font-bold text-[#6E6A86] tabular-nums">({asm.weight}%)</div>
                       </th>
                     ))}
                     <th className="py-3.5 px-3 text-center font-extrabold">Nilai Akhir</th>
@@ -1399,7 +1405,7 @@ export const GradingModule: React.FC = () => {
                     <th className="py-3.5 px-3 text-center">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 tabular-nums">
                   {legerData.map(r => (
                     <tr key={r.studentId}>
                       <td className="py-2.5 px-3 text-center text-slate-400">{r.no}</td>
@@ -1445,11 +1451,11 @@ export const GradingModule: React.FC = () => {
       {activeTab === 'reportCard' && (
         <div className="space-y-4 animate-fade-in">
           {/* Top Bar: Per-Class Selector, Student Selector, Edit Mode, Reset, and Print */}
-          <OrnateCard className="p-4">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+          <OrnateCard className="p-4 sm:p-5">
+            <div className="flex flex-col gap-3.5">
+              <div className="flex flex-wrap items-center gap-3 pr-8">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                     Pilih Kelas:
                   </label>
                   <select
@@ -1465,7 +1471,7 @@ export const GradingModule: React.FC = () => {
                         setSelectedStudentId(classStds[0].id);
                       }
                     }}
-                    className="rounded-xl border border-[#DEC896] bg-slate-50 py-1.5 px-3 text-xs font-bold text-blue-600 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-amber-300"
+                    className="h-9 rounded-xl border border-[#DEC896] bg-slate-50 px-3 text-xs font-bold text-blue-600 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-amber-300"
                   >
                     {classes.map(c => (
                       <option key={c.id} value={c.id}>
@@ -1475,14 +1481,14 @@ export const GradingModule: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                <div className="flex items-center gap-1.5 min-w-0 flex-1 sm:flex-initial">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                     Siswa:
                   </label>
                   <select
                     value={selectedStudentId}
                     onChange={e => setSelectedStudentId(e.target.value)}
-                    className="rounded-xl border border-[#DEC896] bg-slate-50 py-1.5 px-3 text-xs font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="h-9 min-w-0 max-w-full rounded-xl border border-[#DEC896] bg-slate-50 px-3 text-xs font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     {reportClassStudents.map(s => (
                       <option key={s.id} value={s.id}>
@@ -1493,7 +1499,7 @@ export const GradingModule: React.FC = () => {
                 </div>
 
                 {/* Prev / Next Student Quick Buttons */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => {
@@ -1507,7 +1513,7 @@ export const GradingModule: React.FC = () => {
                     disabled={
                       reportClassStudents.findIndex(s => s.id === selectedStudentId) <= 0
                     }
-                    className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:hover:bg-slate-800 shrink-0 cursor-pointer"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:hover:bg-slate-800 shrink-0 cursor-pointer"
                     title="Siswa Sebelumnya"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -1529,7 +1535,7 @@ export const GradingModule: React.FC = () => {
                       reportClassStudents.findIndex(s => s.id === selectedStudentId) >=
                       reportClassStudents.length - 1
                     }
-                    className="inline-flex h-[34px] w-[34px] items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:hover:bg-slate-800 shrink-0 cursor-pointer"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:hover:bg-slate-800 shrink-0 cursor-pointer"
                     title="Siswa Berikutnya"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -1538,7 +1544,7 @@ export const GradingModule: React.FC = () => {
               </div>
 
               {/* Actions: Edit Mode Toggle, Reset, Sync, Print, Export PDF */}
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2 flex-wrap">
                 <button
                   type="button"
                   onClick={handleSyncReportFromAcademicClick}
@@ -2160,10 +2166,7 @@ export const GradingModule: React.FC = () => {
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4 animate-in fade-in">
           <div className="w-full max-w-md rounded-2xl border-2 border-[#D4AF37] bg-white p-6 shadow-2xl dark:bg-[#0B162C]">
-            <h2
-              className="text-base font-extrabold text-slate-900 dark:text-white mb-1"
-              style={{ fontFamily: "'Cinzel', 'Plus Jakarta Sans', serif" }}
-            >
+            <h2 className="text-base font-extrabold text-slate-900 dark:text-white mb-1 tracking-tight">
               {editingAssessmentId ? 'Edit Komponen Penilaian' : 'Buat Komponen Penilaian Baru'}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">

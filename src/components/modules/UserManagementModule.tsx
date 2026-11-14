@@ -486,24 +486,24 @@ export const UserManagementModule: React.FC = () => {
                       text={`ROLE • ${preset.role.replace('_', ' ').toUpperCase()}`}
                       className="mb-0"
                     />
-                    <span className="no-ornament rounded-full bg-[#EFEAFC] border border-[#DDD4F6] px-2.5 py-0.5 text-[10px] font-black text-[#6C60B8] shrink-0">
+                    <span className="no-ornament rounded-full bg-[#EFEAFC] border border-[#DDD4F6] px-2.5 py-0.5 text-[10px] font-black text-[#6C60B8] dark:border-violet-800/70 dark:bg-violet-950/60 dark:text-violet-300 shrink-0 tabular-nums">
                       {count} Akun
                     </span>
                   </div>
                   <div className="mt-2.5">
-                    <h3 className="font-extrabold text-sm text-[#262833] truncate">
+                    <h3 className="font-extrabold text-sm text-[#262833] dark:text-white truncate">
                       {preset.title}
                     </h3>
-                    <p className="text-[11px] text-[#6E7287] line-clamp-2 mt-1 leading-snug">
+                    <p className="text-[11px] text-[#6E7287] dark:text-slate-400 line-clamp-2 mt-1 leading-snug">
                       {preset.description}
                     </p>
                   </div>
                 </div>
-                <div className="mt-2.5 pt-2 border-t border-[#EFEFF7] flex items-center justify-between text-[11px]">
-                  <span className="font-bold text-[#6C60B8]">
+                <div className="mt-2.5 pt-2 border-t border-[#EFEFF7] dark:border-slate-800 flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-[#6C60B8] dark:text-violet-300">
                     {preset.defaultPermissions.length} Modul Terotorisasi
                   </span>
-                  <span className="text-[10px] font-bold text-[#F25781]">
+                  <span className="text-[10px] font-bold text-[#F25781] dark:text-rose-400">
                     Detail Akses ✦
                   </span>
                 </div>

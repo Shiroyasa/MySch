@@ -494,11 +494,16 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
 
           {/* Graphical Comparison Bar per Subject vs KKM */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <div>
-              <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
-                Grafik Perbandingan Nilai Mata Pelajaran Terhadap Garis KKM (75)
-              </h2>
-              <p className="text-xs text-slate-500">Visualisasi capaian kompetensi per mata pelajaran semester aktif</p>
+            <div className="flex items-stretch gap-3 rounded-2xl border border-[#E6E2F8] bg-gradient-to-r from-[#F3F0FC] via-[#FAF9FE] to-white px-4 py-3 dark:border-indigo-900/60 dark:from-indigo-950/50 dark:via-slate-800/70 dark:to-transparent">
+              <span className="w-1.5 rounded-full bg-gradient-to-b from-[#6C60B8] to-[#FF7597] shrink-0" />
+              <div>
+                <h2 className="text-sm sm:text-base font-black text-[#241F3F] dark:text-white tracking-tight">
+                  Grafik Perbandingan Nilai Mata Pelajaran Terhadap Garis KKM (75)
+                </h2>
+                <p className="text-xs font-medium text-[#6B6686] dark:text-slate-400 mt-0.5">
+                  Visualisasi capaian kompetensi per mata pelajaran semester aktif
+                </p>
+              </div>
             </div>
 
             <div className="space-y-4 pt-2">

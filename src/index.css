@@ -4,14 +4,18 @@
 
 @layer base {
   html,
-  html.dark,
   body {
-    background-color: #C8D0E0 !important;
-    color: #3E385B !important;
-    color-scheme: light !important;
+    background-color: #C8D0E0;
+    color: #3E385B;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: contain;
+  }
+
+  html.dark,
+  html.dark body {
+    background-color: #0f172a;
+    color: #f1f5f9;
   }
 
   button, [role="button"], a.btn, select, input {
@@ -210,7 +214,7 @@
 /* CORAL PINK ACCENTS & EMERALD PROGRESS BARS ACROSS ALL PAGES                */
 /* ========================================================================== */
 
-.jrpg-glass {
+html:not(.dark) .jrpg-glass {
   background: #FFFFFF !important;
   border: 1px solid #F0F0F7 !important;
   border-radius: 26px !important;
@@ -219,9 +223,18 @@
   overflow: visible !important;
 }
 
+html.dark .jrpg-glass {
+  background: #0f172a !important;
+  border: 1px solid #1e293b !important;
+  border-radius: 26px !important;
+  box-shadow: 0 14px 34px -6px rgba(2, 6, 23, 0.45) !important;
+  color: #f1f5f9 !important;
+  overflow: visible !important;
+}
+
 /* Top-level Module Cards & OrnateCards: preserve scrollability on overflow-x-auto / overflow-y-auto */
-main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):not(.overflow-x-auto):not(.overflow-y-auto):not(.overflow-hidden),
-main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):not(.overflow-x-auto):not(.overflow-y-auto):not(.overflow-hidden),
+main div.rounded-2xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):not(.overflow-x-auto):not(.overflow-y-auto):not(.overflow-hidden),
+main div.rounded-3xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):not(.overflow-x-auto):not(.overflow-y-auto):not(.overflow-hidden),
 main .jrpg-glass:not(.academy-ornate-card):not(.jrpg-flip-card),
 .academy-ornate-card:not(.jrpg-flip-card) {
   position: relative;
@@ -231,11 +244,11 @@ main .jrpg-glass:not(.academy-ornate-card):not(.jrpg-flip-card),
               border-color 0.2s ease;
 }
 
-/* Top-level module cards -> Reference Image Crisp Soft White Cards (#FFFFFF) */
-main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back),
-main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back),
-.fixed div.rounded-2xl[class*="bg-white"]:not(.no-ornament),
-.fixed div.rounded-3xl[class*="bg-white"]:not(.no-ornament) {
+/* Top-level module cards -> Reference Image Crisp Soft White Cards (#FFFFFF) in Light Mode */
+html:not(.dark) main div.rounded-2xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back),
+html:not(.dark) main div.rounded-3xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back),
+html:not(.dark) .fixed div.rounded-2xl[class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament),
+html:not(.dark) .fixed div.rounded-3xl[class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament) {
   border-width: 1px !important;
   border-color: #EFEFF7 !important;
   border-radius: 26px !important;
@@ -244,8 +257,8 @@ main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.academy-ornate-car
   color: #3E385B !important;
 }
 
-/* Nested rounded-xl sub-cards inside modules -> Soft Lavender-Tinted White Sub-Panels */
-main div.rounded-xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back) {
+/* Nested rounded-xl sub-cards inside modules -> Soft Lavender-Tinted White Sub-Panels in Light Mode */
+html:not(.dark) main div.rounded-xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back) {
   border-width: 1px !important;
   border-color: #EFEFF7 !important;
   border-radius: 18px !important;
@@ -256,10 +269,10 @@ main div.rounded-xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card
 
 /* Interactive Hover Effect on Top-Level Cards (Desktop Pointer Only) */
 @media (hover: hover) and (pointer: fine) {
-  main div.rounded-2xl[class*="border"][class*="bg-white"]:not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):hover,
-  main div.rounded-3xl[class*="border"][class*="bg-white"]:not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):hover,
-  main .jrpg-glass:not(.jrpg-flip-card):hover,
-  .academy-ornate-card:not(.jrpg-flip-card):hover {
+  html:not(.dark) main div.rounded-2xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):hover,
+  html:not(.dark) main div.rounded-3xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):hover,
+  html:not(.dark) main .jrpg-glass:not(.jrpg-flip-card):hover,
+  html:not(.dark) .academy-ornate-card:not(.jrpg-flip-card):hover {
     transform: translateY(-2px);
     border-color: #DFDCF2 !important;
     box-shadow: 0 18px 40px -6px rgba(108, 96, 184, 0.14) !important;
@@ -270,7 +283,7 @@ main div.rounded-xl[class*="border"][class*="bg-white"]:not(.academy-ornate-card
 /* REFERENCE IMAGE CLEAN LAVENDER & WHITE TABLE DESIGN                        */
 /* ========================================================================== */
 
-main table {
+main table:not(.paper-table) {
   border-collapse: separate;
   border-spacing: 0;
   border: 1px solid #EFEFF7;
@@ -279,13 +292,18 @@ main table {
   background: #FFFFFF;
 }
 
-main table thead tr {
+html.dark main table:not(.paper-table) {
+  border-color: #1e293b;
+  background: #0f172a;
+}
+
+html:not(.dark) main table:not(.paper-table) thead tr {
   background: #F4F3FA !important;
   color: #3E385B !important;
   border-bottom: 1px solid #E6E4F2 !important;
 }
 
-main table thead th {
+html:not(.dark) main table:not(.paper-table) thead th {
   color: #6C60B8 !important;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -294,17 +312,17 @@ main table thead th {
   border-bottom: 1px solid #E6E4F2 !important;
 }
 
-main table tbody tr {
+html:not(.dark) main table:not(.paper-table) tbody tr {
   transition: background-color 0.15s ease;
   background-color: #FFFFFF !important;
   color: #3E385B !important;
 }
 
-main table tbody tr:nth-child(even) {
+html:not(.dark) main table:not(.paper-table) tbody tr:nth-child(even) {
   background-color: #FAF9FE !important;
 }
 
-main table tbody tr:hover {
+html:not(.dark) main table:not(.paper-table) tbody tr:hover {
   background: #F2F0FC !important;
 }
 
@@ -312,69 +330,69 @@ main table tbody tr:hover {
 /* UNIVERSAL LIGHT SURFACE & INPUT HARMONIZATION ACROSS ALL MODULES           */
 /* ========================================================================== */
 
-main .bg-slate-950,
-main .bg-slate-950\/80,
-main .bg-slate-950\/75,
-main .bg-slate-950\/55,
-main .bg-slate-900,
-main .bg-slate-900\/90,
-main .bg-slate-900\/80,
-main .bg-slate-800,
-main .bg-slate-800\/60,
-main .bg-slate-800\/40,
-main .bg-\[\#151D3B\],
-main .bg-\[\#1B2A47\],
-main .bg-\[\#1E2952\],
-main .bg-\[\#121936\],
-main .bg-\[\#0F1E3A\],
-main .bg-\[\#0F1E3A\]\/90,
-main .bg-\[\#0B162C\],
-main .bg-\[\#0B1528\],
-main .bg-\[\#132550\],
-main .bg-\[\#232F5C\],
-.fixed .bg-slate-900:not([class*="inset-0"]),
-.fixed .bg-slate-800 {
+html:not(.dark) main .bg-slate-950,
+html:not(.dark) main .bg-slate-950\/80,
+html:not(.dark) main .bg-slate-950\/75,
+html:not(.dark) main .bg-slate-950\/55,
+html:not(.dark) main .bg-slate-900,
+html:not(.dark) main .bg-slate-900\/90,
+html:not(.dark) main .bg-slate-900\/80,
+html:not(.dark) main .bg-slate-800,
+html:not(.dark) main .bg-slate-800\/60,
+html:not(.dark) main .bg-slate-800\/40,
+html:not(.dark) main .bg-\[\#151D3B\],
+html:not(.dark) main .bg-\[\#1B2A47\],
+html:not(.dark) main .bg-\[\#1E2952\],
+html:not(.dark) main .bg-\[\#121936\],
+html:not(.dark) main .bg-\[\#0F1E3A\],
+html:not(.dark) main .bg-\[\#0F1E3A\]\/90,
+html:not(.dark) main .bg-\[\#0B162C\],
+html:not(.dark) main .bg-\[\#0B1528\],
+html:not(.dark) main .bg-\[\#132550\],
+html:not(.dark) main .bg-\[\#232F5C\],
+html:not(.dark) .fixed .bg-slate-900:not([class*="inset-0"]),
+html:not(.dark) .fixed .bg-slate-800 {
   background-color: #F4F3FA !important;
   color: #3E385B !important;
   border-color: #E4E2F2 !important;
 }
 
-main .bg-rose-950,
-main .bg-rose-950\/70 {
+html:not(.dark) main .bg-rose-950,
+html:not(.dark) main .bg-rose-950\/70 {
   background-color: #FFE4EC !important;
   color: #F25781 !important;
   border-color: #FFCCD9 !important;
 }
 
-main .bg-emerald-950,
-main .bg-emerald-950\/70 {
+html:not(.dark) main .bg-emerald-950,
+html:not(.dark) main .bg-emerald-950\/70 {
   background-color: #E7F9EF !important;
   color: #139A4C !important;
   border-color: #BCEAD1 !important;
 }
 
-main .bg-slate-50,
-main .bg-slate-50\/90,
-main .bg-slate-50\/80,
-main .bg-slate-50\/70,
-main .bg-slate-50\/60,
-main .bg-slate-50\/50,
-main .bg-slate-100,
-main .bg-slate-100\/80,
-.fixed .bg-slate-50,
-.fixed .bg-slate-100 {
+html:not(.dark) main .bg-slate-50,
+html:not(.dark) main .bg-slate-50\/90,
+html:not(.dark) main .bg-slate-50\/80,
+html:not(.dark) main .bg-slate-50\/70,
+html:not(.dark) main .bg-slate-50\/60,
+html:not(.dark) main .bg-slate-50\/50,
+html:not(.dark) main .bg-slate-100,
+html:not(.dark) main .bg-slate-100\/80,
+html:not(.dark) .fixed .bg-slate-50,
+html:not(.dark) .fixed .bg-slate-100 {
   background-color: #F5F5FA !important;
   border-color: #ECEBF5 !important;
   color: #3E385B !important;
 }
 
 /* Soft Lavender-Gray Pill/Rounded Inputs, Selects, and Textareas (Matching Search Bar in Reference Image) */
-main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
-main select,
-main textarea,
-.fixed input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
-.fixed select,
-.fixed textarea {
+html:not(.dark) main input:not(.no-ornament):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+html:not(.dark) main select:not(.no-ornament),
+html:not(.dark) main textarea:not(.no-ornament),
+html:not(.dark) .fixed input:not(.no-ornament):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+html:not(.dark) .fixed select:not(.no-ornament),
+html:not(.dark) .fixed textarea:not(.no-ornament) {
   background-color: #F0F1F6 !important;
   border: 1.5px solid #E4E3F0 !important;
   border-radius: 14px !important;
@@ -385,21 +403,21 @@ main textarea,
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
-main input::placeholder,
-main textarea::placeholder,
-.fixed input::placeholder,
-.fixed textarea::placeholder {
+html:not(.dark) main input:not(.no-ornament)::placeholder,
+html:not(.dark) main textarea:not(.no-ornament)::placeholder,
+html:not(.dark) .fixed input:not(.no-ornament)::placeholder,
+html:not(.dark) .fixed textarea:not(.no-ornament)::placeholder {
   color: #A2A0B4 !important;
   -webkit-text-fill-color: #A2A0B4 !important;
   opacity: 1;
 }
 
-main input:focus:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-main select:focus,
-main textarea:focus,
-.fixed input:focus:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-.fixed select:focus,
-.fixed textarea:focus {
+html:not(.dark) main input:not(.no-ornament):focus:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html:not(.dark) main select:not(.no-ornament):focus,
+html:not(.dark) main textarea:not(.no-ornament):focus,
+html:not(.dark) .fixed input:not(.no-ornament):focus:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html:not(.dark) .fixed select:not(.no-ornament):focus,
+html:not(.dark) .fixed textarea:not(.no-ornament):focus {
   background-color: #FFFFFF !important;
   border-color: #6C60B8 !important;
   box-shadow: 0 0 0 3px rgba(108, 96, 184, 0.16) !important;
@@ -407,12 +425,12 @@ main textarea:focus,
 }
 
 /* Autofill protection */
-main input:-webkit-autofill,
-main input:-webkit-autofill:hover,
-main input:-webkit-autofill:focus,
-.fixed input:-webkit-autofill,
-.fixed input:-webkit-autofill:hover,
-.fixed input:-webkit-autofill:focus {
+html:not(.dark) main input:-webkit-autofill,
+html:not(.dark) main input:-webkit-autofill:hover,
+html:not(.dark) main input:-webkit-autofill:focus,
+html:not(.dark) .fixed input:-webkit-autofill,
+html:not(.dark) .fixed input:-webkit-autofill:hover,
+html:not(.dark) .fixed input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0px 1000px #F0F1F6 inset !important;
   box-shadow: 0 0 0px 1000px #F0F1F6 inset !important;
   -webkit-text-fill-color: #3E385B !important;
@@ -420,75 +438,79 @@ main input:-webkit-autofill:focus,
   caret-color: #6C60B8 !important;
 }
 
-/* Crisp Slate-Indigo Typography inside White Cards across all modules */
-main .academy-ornate-card .text-slate-900,
-main .academy-ornate-card .text-slate-800,
-main .academy-ornate-card .text-white:not(button *):not(button),
-main div[class*="rounded-"][class*="border"][class*="bg-white"] .text-slate-900,
-main div[class*="rounded-"][class*="border"][class*="bg-white"] .text-slate-800,
-.fixed .text-slate-900,
-.fixed .text-slate-800,
-.fixed .text-white:not(button *):not(button) {
+/* Crisp Slate-Indigo Typography inside White Cards across all modules in Light Mode */
+html:not(.dark) main .academy-ornate-card .text-slate-900,
+html:not(.dark) main .academy-ornate-card .text-slate-800,
+html:not(.dark) main .academy-ornate-card .text-white:not(button *):not(button),
+html:not(.dark) main div[class*="rounded-"][class*="border"][class*="bg-white"]:not([class*="bg-white/"]) .text-slate-900,
+html:not(.dark) main div[class*="rounded-"][class*="border"][class*="bg-white"]:not([class*="bg-white/"]) .text-slate-800,
+html:not(.dark) .fixed .text-slate-900,
+html:not(.dark) .fixed .text-slate-800,
+html:not(.dark) .fixed .text-white:not(button *):not(button) {
   color: #3E385B !important;
 }
 
-main .academy-ornate-card .text-slate-700,
-main .academy-ornate-card .text-slate-600,
-main .academy-ornate-card .text-\[\#C7D2FE\],
-main .academy-ornate-card .text-\[\#DCE6FF\],
-main div[class*="rounded-"][class*="border"][class*="bg-white"] .text-slate-700,
-main div[class*="rounded-"][class*="border"][class*="bg-white"] .text-slate-600,
-.fixed .text-slate-700,
-.fixed .text-slate-600 {
+html:not(.dark) main .academy-ornate-card .text-slate-700,
+html:not(.dark) main .academy-ornate-card .text-slate-600,
+html:not(.dark) main .academy-ornate-card .text-\[\#C7D2FE\],
+html:not(.dark) main .academy-ornate-card .text-\[\#DCE6FF\],
+html:not(.dark) main div[class*="rounded-"][class*="border"][class*="bg-white"]:not([class*="bg-white/"]) .text-slate-700,
+html:not(.dark) main div[class*="rounded-"][class*="border"][class*="bg-white"]:not([class*="bg-white/"]) .text-slate-600,
+html:not(.dark) .fixed .text-slate-700,
+html:not(.dark) .fixed .text-slate-600 {
   color: #5A537A !important;
 }
 
-main .academy-ornate-card .text-slate-500,
-main .academy-ornate-card .text-slate-400,
-main .academy-ornate-card .text-\[\#BAC7EC\],
-main div[class*="rounded-"][class*="border"][class*="bg-white"] .text-slate-500,
-main div[class*="rounded-"][class*="border"][class*="bg-white"] .text-slate-400,
-.fixed .text-slate-500,
-.fixed .text-slate-400 {
+html:not(.dark) main .academy-ornate-card .text-slate-500,
+html:not(.dark) main .academy-ornate-card .text-slate-400,
+html:not(.dark) main .academy-ornate-card .text-\[\#BAC7EC\],
+html:not(.dark) main div[class*="rounded-"][class*="border"][class*="bg-white"]:not([class*="bg-white/"]) .text-slate-500,
+html:not(.dark) main div[class*="rounded-"][class*="border"][class*="bg-white"]:not([class*="bg-white/"]) .text-slate-400,
+html:not(.dark) .fixed .text-slate-500,
+html:not(.dark) .fixed .text-slate-400 {
   color: #9694A8 !important;
 }
 
-main .text-\[\#9A7314\],
-main .text-\[\#8A6410\],
-main .text-\[\#FDE68A\]:not(button *):not(button),
-main .text-\[\#F3D77D\] {
+html:not(.dark) main .text-\[\#9A7314\],
+html:not(.dark) main .text-\[\#8A6410\],
+html:not(.dark) main .text-\[\#FDE68A\]:not(button *):not(button),
+html:not(.dark) main .text-\[\#F3D77D\] {
   color: #6C60B8 !important;
 }
 
-main .border-slate-300,
-main .border-slate-200,
-main .border-slate-100,
-main .border-slate-800,
-main .border-slate-700,
-main .border-\[\#EFE2BE\],
-main .border-\[\#DEC896\],
-.fixed .border-slate-200,
-.fixed .border-slate-100 {
+html:not(.dark) main .border-slate-300,
+html:not(.dark) main .border-slate-200,
+html:not(.dark) main .border-slate-100,
+html:not(.dark) main .border-slate-800,
+html:not(.dark) main .border-slate-700,
+html:not(.dark) main .border-\[\#EFE2BE\],
+html:not(.dark) main .border-\[\#DEC896\],
+html:not(.dark) .fixed .border-slate-200,
+html:not(.dark) .fixed .border-slate-100 {
   border-color: #ECEBF5 !important;
 }
 
-main .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
-main .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
-main .divide-slate-800 > :not([hidden]) ~ :not([hidden]) {
+html:not(.dark) main .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+html:not(.dark) main .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+html:not(.dark) main .divide-slate-800 > :not([hidden]) ~ :not([hidden]) {
   border-color: #F0F1F6 !important;
 }
 
 /* ========================================================================== */
-/* STAT PROGRESS BAR (EMERALD GREEN #1CC865 ON #F0F1F6 TRACK) & 3D FLIPCARD   */
+/* STAT PROGRESS BAR (EMERALD GREEN #1CC865 ON #E3E0F4 TRACK) & 3D FLIPCARD   */
 /* ========================================================================== */
 
 .jrpg-stat-bar {
   position: relative;
   width: 100%;
-  height: 6px;
+  height: 7px;
   border-radius: 9999px;
-  background-color: #F0F1F6;
+  background-color: #E3E0F4;
   overflow: hidden;
+}
+
+html.dark .jrpg-stat-bar {
+  background-color: #334155;
 }
 
 .jrpg-stat-bar-fill {
@@ -586,15 +608,64 @@ main .divide-slate-800 > :not([hidden]) ~ :not([hidden]) {
 ::-webkit-scrollbar-track {
   background: #F0F1F6;
 }
+html.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
 ::-webkit-scrollbar-thumb {
   background: #C5C0E2;
   border-radius: 9999px;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #6C60B8;
 }
 
+/* Paper preview must stay bright paper-white even inside Dark Mode */
+.paper-surface,
+html.dark .paper-surface {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
 @media print {
+  html,
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body:has(#tracer-print-portal) #root {
+    display: none !important;
+  }
+
+  #tracer-print-portal {
+    display: block !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  #tracer-print-portal table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  #tracer-print-portal thead {
+    display: table-header-group !important;
+  }
+
+  #tracer-print-portal tr,
+  #tracer-print-portal .print-keep-together {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
   header, aside, nav, footer, button, .no-print {
     display: none !important;
   }

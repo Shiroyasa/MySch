@@ -867,14 +867,14 @@ export const ReportsModule: React.FC = () => {
         subtitle="Ekspor dokumen resmi PDF & Excel berumus dinamis, kustomisasi kop surat & tanda tangan digital, serta sinkronisasi Google Sheets."
         icon={Scroll}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5 dark:border-slate-700/80 dark:bg-slate-800/80">
             <button
               type="button"
               onClick={() => setActiveMainTab('export')}
-              className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeMainTab === 'export'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
               <Download className="h-3.5 w-3.5 shrink-0" />
@@ -883,10 +883,10 @@ export const ReportsModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveMainTab('spreadsheet')}
-              className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeMainTab === 'spreadsheet'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
               <Table className="h-3.5 w-3.5 shrink-0" />
@@ -895,13 +895,13 @@ export const ReportsModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveMainTab('designer')}
-              className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeMainTab === 'designer'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
-              <Palette className={`h-3.5 w-3.5 shrink-0 ${activeMainTab === 'designer' ? 'text-[#FFE680]' : 'text-[#6C60B8]'}`} />
+              <Palette className={`h-3.5 w-3.5 shrink-0 ${activeMainTab === 'designer' ? 'text-[#FFE680]' : 'text-[#6C60B8] dark:text-violet-300'}`} />
               <span>Desain &amp; Tata Letak PDF</span>
             </button>
           </div>
@@ -944,7 +944,7 @@ export const ReportsModule: React.FC = () => {
           {/* Filter / Generator Control Card */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                   Jenis Laporan
                 </label>
@@ -960,7 +960,7 @@ export const ReportsModule: React.FC = () => {
                 </select>
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                   Kelas / Rombel
                 </label>
@@ -979,7 +979,7 @@ export const ReportsModule: React.FC = () => {
 
               {/* Show Subject selector if grade_subject */}
               {reportType === 'grade_subject' && (
-                <div>
+                <div className="min-w-0">
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
                     Mata Pelajaran
                   </label>

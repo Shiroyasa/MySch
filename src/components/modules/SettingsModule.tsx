@@ -631,14 +631,14 @@ export const SettingsModule: React.FC = () => {
         subtitle="Kelola Logo Aplikasi (Login & Sidebar), Background Menu & Halaman Login (termasuk Live Wallpaper), Ambience Dark Mode, serta Sinkronisasi Cloud Firestore."
         icon={Settings}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-[18px] border border-[#E6E8F2] bg-[#F5F6FA] p-1.5 shadow-xs">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[18px] border border-[#E6E8F2] bg-[#F5F6FA] p-1.5 shadow-xs dark:border-slate-700/80 dark:bg-slate-800/80">
             <button
               type="button"
               onClick={() => setActiveSection('backgrounds')}
               className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
                 activeSection === 'backgrounds'
                   ? 'bg-[#685BC7] text-white shadow-xs'
-                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
+                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'
               }`}
             >
               <Palette className="h-3.5 w-3.5 shrink-0" />
@@ -650,7 +650,7 @@ export const SettingsModule: React.FC = () => {
               className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
                 activeSection === 'profile'
                   ? 'bg-[#685BC7] text-white shadow-xs'
-                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
+                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'
               }`}
             >
               <User className="h-3.5 w-3.5 shrink-0" />
@@ -662,7 +662,7 @@ export const SettingsModule: React.FC = () => {
               className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
                 activeSection === 'school'
                   ? 'bg-[#685BC7] text-white shadow-xs'
-                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
+                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'
               }`}
             >
               <School className="h-3.5 w-3.5 shrink-0" />
@@ -674,7 +674,7 @@ export const SettingsModule: React.FC = () => {
               className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
                 activeSection === 'backup'
                   ? 'bg-[#685BC7] text-white shadow-xs'
-                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
+                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'
               }`}
             >
               <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
@@ -686,7 +686,7 @@ export const SettingsModule: React.FC = () => {
               className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
                 activeSection === 'cloud-sync'
                   ? 'bg-[#685BC7] text-white shadow-xs'
-                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white'
+                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'
               }`}
             >
               <Cloud className="h-3.5 w-3.5 shrink-0" />
@@ -709,7 +709,7 @@ export const SettingsModule: React.FC = () => {
                 <h2 className="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">
                   1. Ganti Logo Aplikasi (Halaman Login, Sidebar &amp; Laporan Rapor)
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Logo yang diunggah akan langsung diterapkan secara proporsional dan estetik pada lambang utama Halaman Login, bagian atas Sidebar di seluruh menu, serta tersinkron ke dokumen laporan sekolah.
                 </p>
               </div>
@@ -722,7 +722,7 @@ export const SettingsModule: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
               {/* Preview 1: Login Crest Frame */}
-              <div className="flex items-center gap-4 rounded-2xl border border-[#E6E8F2] bg-[#F5F6FA] p-4 text-[#3E385B]">
+              <div className="flex items-center gap-4 rounded-2xl border border-[#E6E8F2] bg-[#F5F6FA] p-4 text-[#3E385B] dark:border-slate-800 dark:bg-slate-800/70 dark:text-slate-100">
                 <div
                   style={{
                     background: 'linear-gradient(145deg, #7468C4 0%, #5D51B2 100%)',

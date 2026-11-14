@@ -500,11 +500,11 @@ export const BoxBgControl: React.FC<{
           fileInputRef.current?.click();
         }}
         title="Ganti Background Gambar Kotak Ini"
-        className={`no-ornament inline-flex items-center gap-1 rounded-full border border-[#E4E3F0] bg-white hover:bg-[#F4F3FA] text-[#6C60B8] font-bold tracking-wide shadow-sm transition-all cursor-pointer ${
+        className={`no-ornament inline-flex items-center gap-1 rounded-full border border-[#E4E3F0] bg-white hover:bg-[#F4F3FA] text-[#6C60B8] dark:border-slate-700 dark:bg-slate-800 dark:text-indigo-300 dark:hover:bg-slate-700 font-bold tracking-wide shadow-sm transition-all cursor-pointer ${
           compact ? 'px-2.5 py-0.5 text-[9px]' : 'px-3 py-1 text-[10px]'
         }`}
       >
-        <ImagePlus className={compact ? 'h-2.5 w-2.5 text-[#6C60B8]' : 'h-3 w-3 text-[#6C60B8]'} />
+        <ImagePlus className={compact ? 'h-2.5 w-2.5 text-[#6C60B8] dark:text-indigo-300' : 'h-3 w-3 text-[#6C60B8] dark:text-indigo-300'} />
         <span>BG</span>
       </button>
       {currentBg && (
@@ -512,7 +512,7 @@ export const BoxBgControl: React.FC<{
           type="button"
           onClick={handleReset}
           title="Reset Background Kotak"
-          className={`no-ornament inline-flex items-center justify-center rounded-full border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold shadow-sm transition-all cursor-pointer ${
+          className={`no-ornament inline-flex items-center justify-center rounded-full border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-600 dark:border-rose-900 dark:bg-rose-950/70 dark:text-rose-300 dark:hover:bg-rose-900/60 font-bold shadow-sm transition-all cursor-pointer ${
             compact ? 'p-1 text-[9px]' : 'px-2 py-1 text-[10px]'
           }`}
         >
@@ -540,7 +540,7 @@ export const LoginStyleOrnateCorners: React.FC<{
     <>
       {/* Top-Right Subtle Vertical 3-Dots Icon (Matching Reference Image White Cards) */}
       <div
-        className="pointer-events-none select-none absolute top-4 right-4 z-[10] text-[#C6C4D6]"
+        className="pointer-events-none select-none absolute top-4 right-4 z-[10] text-[#C6C4D6] dark:text-slate-600"
         aria-hidden="true"
       >
         <MoreVertical className="h-4 w-4" />
@@ -548,7 +548,7 @@ export const LoginStyleOrnateCorners: React.FC<{
 
       {showTopCrest && (
         <div
-          className="pointer-events-none select-none absolute -top-3 left-6 z-[15] inline-flex items-center gap-1.5 rounded-full bg-[#FFE4EC] border border-[#FFCCD9] px-3 py-0.5 text-[10px] font-bold text-[#F25781] shadow-xs"
+          className="pointer-events-none select-none absolute -top-3 left-6 z-[15] inline-flex items-center gap-1.5 rounded-full bg-[#FFE4EC] border border-[#FFCCD9] px-3 py-0.5 text-[10px] font-bold text-[#F25781] dark:bg-rose-950/80 dark:border-rose-900 dark:text-rose-300 shadow-xs"
           aria-hidden="true"
         >
           <span>{stampText}</span>
@@ -568,6 +568,7 @@ interface OrnateCardProps {
   minFlipHeight?: string;
   showTopCrest?: boolean;
   popoutCharacterIndex?: number;
+  surface?: 'white' | 'tinted';
 }
 
 export const OrnateCard: React.FC<OrnateCardProps> = ({
@@ -580,6 +581,7 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({
   minFlipHeight = 'min-h-[196px]',
   showTopCrest = false,
   popoutCharacterIndex,
+  surface = 'white',
 }) => {
   const { visualSettings, activeNav } = useApp();
   const cardRef = React.useRef<HTMLDivElement>(null);
@@ -613,11 +615,15 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({
   const customBoxBg = visualSettings?.boxBgs?.[resolvedKey] || null;
   const charIdx = popoutCharacterIndex !== undefined ? popoutCharacterIndex : cardIndex;
 
-  // Reference Image Crisp Soft White Card with Lavender Diffused Shadow
-  const cleanWhiteCardStyle: React.CSSProperties = {
-    background: '#FFFFFF',
+  // Soft diffused shadow (surface background controlled via Tailwind classes for light/dark/tinted parity)
+  const cardShadowStyle: React.CSSProperties = {
     boxShadow: '0 14px 34px -6px rgba(108, 96, 184, 0.09)',
   };
+
+  const surfaceClasses =
+    surface === 'tinted'
+      ? 'bg-[#F3F1FC] border-[#DFDCF2] text-[#3E385B] dark:bg-slate-900/95 dark:border-slate-800 dark:text-slate-100'
+      : 'bg-white border-[#E8E6F4] text-[#3E385B] dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100';
 
   if (flipBack) {
     return (
@@ -630,10 +636,10 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({
         } ${onClick ? 'cursor-pointer' : ''} ${minFlipHeight}`}
       >
         <div className={`jrpg-flip-inner no-ornament w-full h-full ${minFlipHeight}`}>
-          {/* FRONT FACE: Reference Image White Card with Top Centered Floating Purple Squircle Badge */}
+          {/* FRONT FACE: Crisp Soft Card with Top Centered Floating Purple Squircle Badge */}
           <div
-            style={cleanWhiteCardStyle}
-            className={`jrpg-flip-front no-ornament ${minFlipHeight} rounded-[24px] sm:rounded-[26px] border border-[#F0F0F7] text-[#3E385B] flex flex-col justify-between !overflow-visible pt-8 px-4 sm:px-5 pb-4 sm:pb-5 ${className}`}
+            style={cardShadowStyle}
+            className={`jrpg-flip-front no-ornament ${minFlipHeight} rounded-[24px] sm:rounded-[26px] border ${surfaceClasses} flex flex-col justify-between !overflow-visible pt-8 px-4 sm:px-5 pb-4 sm:pb-5 ${className}`}
           >
             {customBoxBg && (
               <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[24px] sm:rounded-[26px]">
@@ -665,7 +671,7 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({
               }}
               aria-label="Balik kartu detail"
               title="Tap untuk balik rincian"
-              className="no-ornament xl:pointer-events-none absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#F4F3FA] text-[#6C60B8] hover:bg-[#EAE7F8] xl:bg-transparent xl:text-[#C6C4D6] cursor-pointer"
+              className="no-ornament xl:pointer-events-none absolute top-3 right-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#F4F3FA] text-[#6C60B8] hover:bg-[#EAE7F8] dark:bg-slate-800 dark:text-indigo-300 dark:hover:bg-slate-700 xl:bg-transparent xl:dark:bg-transparent xl:text-[#C6C4D6] xl:dark:text-slate-600 cursor-pointer"
             >
               <RotateCcw className="h-3.5 w-3.5 xl:hidden" />
               <MoreVertical className="hidden xl:block h-4 w-4" />
@@ -714,8 +720,8 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({
     <div
       ref={cardRef}
       onClick={onClick}
-      style={cleanWhiteCardStyle}
-      className={`group/jrpg academy-ornate-card relative !overflow-visible rounded-[26px] border border-[#F0F0F7] text-[#3E385B] transition-all duration-200 mt-3 ${className}`}
+      style={cardShadowStyle}
+      className={`group/jrpg academy-ornate-card relative !overflow-visible rounded-[26px] border ${surfaceClasses} transition-all duration-200 mt-3 ${className}`}
     >
       {customBoxBg && (
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-[26px]">
@@ -1151,34 +1157,42 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
             />
           )}
 
-          {/* Top Header Row: Title + Interactive Class / Year / Metric Filter Controls */}
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div className="min-w-0">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-white/75 block">
-                {kicker}
-              </span>
-              <h1 className="text-base sm:text-xl font-extrabold text-white tracking-tight truncate">
-                {title}
-              </h1>
-            </div>
-
-            <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center gap-1.5 w-full sm:w-auto shrink-0">
-              <div className="hidden sm:block opacity-0 group-hover/banner:opacity-100 transition-opacity">
-                <BoxBgControl boxKey={bannerBoxKey} isBanner moduleKey={targetKey} compact />
+          {/* Top Header Block: Full-Width Highlighted Title Row + Clean Filter Strip Below */}
+          <div className="relative z-10 flex flex-col gap-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="no-ornament min-w-0 flex-1 flex items-stretch gap-2.5 rounded-2xl bg-white/14 border border-white/25 px-3.5 py-2 backdrop-blur-xs">
+                <span
+                  aria-hidden="true"
+                  className="w-1.5 rounded-full bg-gradient-to-b from-[#FF85A6] to-[#FFD2E0] shrink-0"
+                />
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-white/85 block leading-snug">
+                    {kicker}
+                  </span>
+                  <h1 className="text-sm sm:text-lg font-black text-white tracking-tight leading-snug mt-0.5 break-words">
+                    {title}
+                  </h1>
+                </div>
               </div>
 
+              <div className="shrink-0 opacity-85 sm:opacity-0 sm:group-hover/banner:opacity-100 focus-within:opacity-100 transition-opacity pt-0.5">
+                <BoxBgControl boxKey={bannerBoxKey} isBanner moduleKey={targetKey} compact />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
               {/* Filter Kelas: Keseluruhan vs Per Kelas */}
               <select
                 value={selectedClassId}
                 onChange={e => setSelectedClassId(e.target.value)}
                 title="Filter Data Keseluruhan atau Per Kelas"
                 style={{
-                  backgroundColor: 'rgba(255,255,255,0.14)',
+                  backgroundColor: 'rgba(255,255,255,0.16)',
                   color: '#FFFFFF',
                   WebkitTextFillColor: '#FFFFFF',
                   borderColor: 'rgba(255,255,255,0.28)',
                 }}
-                className="no-ornament min-w-0 w-full sm:w-auto truncate rounded-full border px-2.5 py-1.5 sm:py-1 text-[10.5px] sm:text-[11px] font-bold text-white focus:outline-none cursor-pointer"
+                className="no-ornament h-8.5 min-w-0 w-full truncate rounded-full border px-3 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
               >
                 <option value="ALL" className="text-[#3E385B] bg-white">
                   Semua Kelas ({students.length})
@@ -1196,12 +1210,12 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
                 onChange={e => setSelectedYear(e.target.value)}
                 title="Filter Tahun Data Database"
                 style={{
-                  backgroundColor: 'rgba(255,255,255,0.14)',
+                  backgroundColor: 'rgba(255,255,255,0.16)',
                   color: '#FFFFFF',
                   WebkitTextFillColor: '#FFFFFF',
                   borderColor: 'rgba(255,255,255,0.28)',
                 }}
-                className="no-ornament min-w-0 w-full sm:w-auto truncate rounded-full border px-2.5 py-1.5 sm:py-1 text-[10.5px] sm:text-[11px] font-bold text-white focus:outline-none cursor-pointer"
+                className="no-ornament h-8.5 min-w-0 w-full truncate rounded-full border px-3 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
               >
                 <option value="ALL" className="text-[#3E385B] bg-white">
                   Semua Tahun
@@ -1219,12 +1233,12 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
                 onChange={e => setMetricMode(e.target.value as any)}
                 title="Pilih Kategori Data Grafik"
                 style={{
-                  backgroundColor: 'rgba(255,255,255,0.18)',
+                  backgroundColor: 'rgba(255,255,255,0.2)',
                   color: '#FFFFFF',
                   WebkitTextFillColor: '#FFFFFF',
-                  borderColor: 'rgba(255,255,255,0.32)',
+                  borderColor: 'rgba(255,255,255,0.34)',
                 }}
-                className="no-ornament min-w-0 w-full sm:w-auto truncate rounded-full border px-2.5 py-1.5 sm:py-1 text-[10.5px] sm:text-[11px] font-bold text-white focus:outline-none cursor-pointer"
+                className="no-ornament h-8.5 min-w-0 w-full truncate rounded-full border px-3 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
               >
                 <option value="kehadiran" className="text-[#3E385B] bg-white">
                   {metricLabelMap.kehadiran}
@@ -1498,12 +1512,11 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
       {rightContent && (
         <div
           style={{
-            background: '#FFFFFF',
             boxShadow: '0 10px 26px -6px rgba(108, 96, 184, 0.08)',
           }}
-          className="rounded-[22px] border border-[#ECEBF5] px-4 py-3 flex flex-col xl:flex-row xl:items-center justify-between gap-3"
+          className="rounded-[22px] border border-[#ECEBF5] bg-white dark:bg-slate-900 dark:border-slate-800 px-4 py-3 flex flex-col xl:flex-row xl:items-center justify-between gap-3"
         >
-          <div className="flex items-center gap-2 text-xs font-bold text-[#6C60B8] whitespace-nowrap shrink-0">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#6C60B8] dark:text-indigo-300 whitespace-nowrap shrink-0">
             <OrbitaMenuIcon variant="brand" className="h-4 w-4 shrink-0" />
             <span>Navigasi &amp; Aksi Modul</span>
           </div>
@@ -1534,28 +1547,93 @@ export const GoldCompassRose: React.FC<{ className?: string }> = ({ className = 
   return <ElectroSwirlCrest className={className} />;
 };
 
+export const HighlightedChartHeader: React.FC<{
+  title: string;
+  subtitle?: string;
+  rightSlot?: React.ReactNode;
+  accent?: 'purple' | 'emerald' | 'coral' | 'amber';
+  compact?: boolean;
+  className?: string;
+}> = ({ title, subtitle, rightSlot, accent = 'purple', compact = false, className = 'mb-4' }) => {
+  const accentClasses = {
+    purple: {
+      wrap: 'border-[#E6E2F8] bg-gradient-to-r from-[#F3F0FC] via-[#F9F8FE] to-white/70 dark:border-indigo-900/60 dark:from-indigo-950/50 dark:via-slate-900/40 dark:to-transparent',
+      bar: 'from-[#6C60B8] to-[#9B8CE8]',
+      title: 'text-[#241F3F] dark:text-white',
+    },
+    emerald: {
+      wrap: 'border-[#CBEFE0] bg-gradient-to-r from-[#ECFBF3] via-[#F5FCF8] to-white/70 dark:border-emerald-900/60 dark:from-emerald-950/50 dark:via-slate-900/40 dark:to-transparent',
+      bar: 'from-[#1CC865] to-[#0EA56B]',
+      title: 'text-[#163829] dark:text-white',
+    },
+    coral: {
+      wrap: 'border-[#FAD8E2] bg-gradient-to-r from-[#FFF0F4] via-[#FFF7F9] to-white/70 dark:border-rose-900/60 dark:from-rose-950/50 dark:via-slate-900/40 dark:to-transparent',
+      bar: 'from-[#F25781] to-[#FF85A6]',
+      title: 'text-[#3F1E2D] dark:text-white',
+    },
+    amber: {
+      wrap: 'border-[#F7E3BE] bg-gradient-to-r from-[#FFF8EB] via-[#FFFDF7] to-white/70 dark:border-amber-900/60 dark:from-amber-950/50 dark:via-slate-900/40 dark:to-transparent',
+      bar: 'from-[#F59E0B] to-[#FBBF24]',
+      title: 'text-[#3B2A14] dark:text-white',
+    },
+  }[accent];
+
+  return (
+    <div
+      className={`flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border ${accentClasses.wrap} ${
+        compact ? 'px-3 py-2 pr-8' : 'px-3.5 py-2.5 pr-9'
+      } ${className}`}
+    >
+      <div className="flex items-stretch gap-2.5 min-w-0 flex-1">
+        <span
+          aria-hidden="true"
+          className={`w-1.5 rounded-full bg-gradient-to-b ${accentClasses.bar} shrink-0`}
+        />
+        <div className="min-w-0">
+          <h3
+            className={`${
+              compact ? 'text-[13px]' : 'text-sm sm:text-[15px]'
+            } font-black tracking-tight leading-snug ${accentClasses.title}`}
+          >
+            {title}
+          </h3>
+          {subtitle && (
+            <p className="text-[11px] font-medium text-[#6B6686] dark:text-slate-400 leading-snug mt-0.5">
+              {subtitle}
+            </p>
+          )}
+        </div>
+      </div>
+      {rightSlot && <div className="shrink-0 flex items-center gap-2 flex-wrap">{rightSlot}</div>}
+    </div>
+  );
+};
+
 export const OrnateSectionHeader: React.FC<{
   title: string;
   subtitle?: string;
 }> = ({ title, subtitle }) => {
   return (
-    <div className="space-y-1 pr-8">
-      <div className="flex items-center gap-2.5 flex-wrap">
-        <span className="inline-flex h-7 w-7 items-center justify-center rounded-[10px] bg-[#F0EEFA] text-[#6C60B8]">
-          <PrimogemIcon className="h-4 w-4" />
-        </span>
-        <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-[#3E385B]">
-          {title}
-        </h2>
-        <span className="rounded-full bg-[#FFE4EC] px-2.5 py-0.5 text-[10px] font-bold text-[#F25781]">
-          Aktif
-        </span>
+    <div className="flex items-stretch gap-3 rounded-2xl border border-[#DDD8F4] bg-gradient-to-r from-[#EDE9FB] via-[#F7F5FE] to-white px-3.5 py-2.5 pr-8 dark:border-indigo-900/60 dark:from-indigo-950/60 dark:via-slate-900/60 dark:to-slate-900">
+      <span
+        aria-hidden="true"
+        className="w-1.5 rounded-full bg-gradient-to-b from-[#6C60B8] via-[#8E7FE0] to-[#FF7597] shrink-0"
+      />
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[#6C60B8] text-white shadow-2xs">
+            <PrimogemIcon className="h-3.5 w-3.5" />
+          </span>
+          <h2 className="text-sm sm:text-lg font-black tracking-tight text-[#241F3F] dark:text-white leading-snug">
+            {title}
+          </h2>
+        </div>
+        {subtitle && (
+          <p className="text-[11.5px] font-medium text-[#6B6686] dark:text-slate-400 leading-relaxed mt-1">
+            {subtitle}
+          </p>
+        )}
       </div>
-      {subtitle && (
-        <p className="text-xs font-medium text-[#9694A8] leading-relaxed">
-          {subtitle}
-        </p>
-      )}
     </div>
   );
 };
@@ -1566,7 +1644,7 @@ export const AcademyCornerBadge: React.FC<{ text: string; className?: string }> 
 }) => {
   return (
     <div
-      className={`inline-flex items-center gap-1.5 rounded-full bg-[#FFE4EC] px-3 py-0.5 text-[10px] font-bold text-[#F25781] ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full bg-[#FFE4EC] px-3 py-0.5 text-[10px] font-bold text-[#F25781] dark:bg-rose-950/60 dark:text-rose-300 ${className}`}
     >
       <span>{text}</span>
     </div>
@@ -1576,9 +1654,9 @@ export const AcademyCornerBadge: React.FC<{ text: string; className?: string }> 
 export const OrnateDivider: React.FC = () => {
   return (
     <div className="my-4 flex items-center gap-3">
-      <div className="h-[1px] flex-1 bg-[#ECEBF5]" />
-      <span className="h-2 w-2 rounded-full bg-[#6C60B8]/40" />
-      <div className="h-[1px] flex-1 bg-[#ECEBF5]" />
+      <div className="h-[1px] flex-1 bg-[#ECEBF5] dark:bg-slate-800" />
+      <span className="h-2 w-2 rounded-full bg-[#6C60B8]/40 dark:bg-indigo-400/50" />
+      <div className="h-[1px] flex-1 bg-[#ECEBF5] dark:bg-slate-800" />
     </div>
   );
 };

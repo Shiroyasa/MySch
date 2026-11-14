@@ -171,6 +171,7 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
     <div className="space-y-4">
       {/* Royal Academy Banner / Header */}
       <AcademyHeroBanner
+        moduleKey="student-chat"
         kicker="FORUM KOMUNIKASI & DISKUSI AKADEMIK"
         title={
           activeTab === 'public'
@@ -187,14 +188,14 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
         icon={MessageSquare}
         rightContent={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex flex-wrap items-center gap-1 rounded-xl border border-[#E4E2F2] bg-[#F4F3FA] p-1 text-xs">
+            <div className="inline-flex flex-wrap items-center gap-1 rounded-xl border border-[#E4E2F2] bg-[#F4F3FA] p-1 text-xs dark:border-slate-700/80 dark:bg-slate-800/80">
               <button
                 type="button"
                 onClick={() => setActiveTab('public')}
-                className={`inline-flex h-8 items-center justify-center gap-1.5 px-3 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
+                className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 px-3 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
                   activeTab === 'public'
                     ? 'bg-[#6C60B8] text-white shadow-sm'
-                    : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
+                    : 'text-[#6E7287] hover:bg-white hover:text-[#262833] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
                 }`}
               >
                 <Users className="h-3.5 w-3.5 shrink-0" />
@@ -203,10 +204,10 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
               <button
                 type="button"
                 onClick={() => setActiveTab('dm')}
-                className={`inline-flex h-8 items-center justify-center gap-1.5 px-3 rounded-lg font-bold transition-all relative cursor-pointer whitespace-nowrap shrink-0 leading-none ${
+                className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 px-3 rounded-lg font-bold transition-all relative cursor-pointer whitespace-nowrap shrink-0 leading-none ${
                   activeTab === 'dm'
                     ? 'bg-[#6C60B8] text-white shadow-sm'
-                    : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
+                    : 'text-[#6E7287] hover:bg-white hover:text-[#262833] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
                 }`}
               >
                 <MessageCircle className="h-3.5 w-3.5 shrink-0" />
@@ -221,7 +222,7 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
               <button
                 type="button"
                 onClick={() => setShowModAnnounceForm(!showModAnnounceForm)}
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D8D3F2] bg-[#F4F3FA] px-3.5 text-xs font-bold text-[#5E53A8] hover:bg-[#EAE7F8] transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
+                className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#D8D3F2] bg-[#F4F3FA] px-3.5 text-xs font-bold text-[#5E53A8] hover:bg-[#EAE7F8] dark:border-violet-800/60 dark:bg-violet-950/50 dark:text-violet-300 dark:hover:bg-violet-900/60 transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
               >
                 <Megaphone className="h-3.5 w-3.5 text-[#F25781] shrink-0" />
                 <span>Pengumuman Moderator</span>

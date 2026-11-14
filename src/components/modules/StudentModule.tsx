@@ -194,17 +194,17 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
         moduleKey="student-portal"
         kicker={`STATUS: SISWA AKTIF • KELAS ${student.className} (${student.majorCode})`}
         title={student.fullName.toUpperCase()}
-        subtitle={`NISN: ${student.nisn} • NIS: ${student.nis} • Portal Akademik Peserta Didik MyAcademy`}
+        subtitle={`NISN: ${student.nisn} • NIS: ${student.nis} • Portal Akademik Peserta Didik ORBITA`}
         icon={GraduationCap}
         rightContent={
-          <div className="inline-flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5 shadow-xs">
+          <div className="inline-flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5 shadow-xs dark:border-slate-700/80 dark:bg-slate-800/80">
             <button
               type="button"
               onClick={() => setActiveTab('profile')}
               className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
                 activeTab === 'profile'
                   ? 'bg-[#6C60B8] text-white shadow-sm'
-                  : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
+                  : 'text-[#6E7287] hover:bg-white hover:text-[#262833] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
               <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
@@ -216,7 +216,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
               className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
                 activeTab === 'grades'
                   ? 'bg-[#6C60B8] text-white shadow-sm'
-                  : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
+                  : 'text-[#6E7287] hover:bg-white hover:text-[#262833] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
               <Award className="h-3.5 w-3.5 shrink-0" />

@@ -575,7 +575,7 @@ export const AttendanceModule: React.FC = () => {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-[16px] border border-[#6C60B8]/25 bg-white px-4 py-3 text-xs font-extrabold text-[#3E385B] shadow-[0_16px_36px_-8px_rgba(108,96,184,0.28)] animate-in slide-in-from-bottom-3">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-[16px] border border-[#6C60B8]/25 bg-white px-4 py-3 text-xs font-extrabold text-[#3E385B] shadow-[0_16px_36px_-8px_rgba(108,96,184,0.28)] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 animate-in slide-in-from-bottom-3">
           <CheckCircle2 className="h-4 w-4 text-[#1CC865] shrink-0" />
           <span>{toastMessage}</span>
         </div>
@@ -589,14 +589,14 @@ export const AttendanceModule: React.FC = () => {
         subtitle="Pencatatan kehadiran jam pelajaran, rekapitulasi laporan presensi interaktif (editable), riwayat sesi, dan verifikasi koreksi absensi tersinkron langsung ke Cloud Database."
         icon={CalendarCheck}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5 dark:border-slate-700/80 dark:bg-slate-800/80">
             <button
               type="button"
               onClick={() => setActiveTab('input')}
-              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'input'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
               Input Presensi
@@ -604,10 +604,10 @@ export const AttendanceModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('editable_report')}
-              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'editable_report'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
               Laporan Editable
@@ -615,10 +615,10 @@ export const AttendanceModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('history')}
-              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'history'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
               Riwayat ({attendanceSessions.length})
@@ -626,10 +626,10 @@ export const AttendanceModule: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab('correction')}
-              className={`inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
                 activeTab === 'correction'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B]'
+                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
               }`}
             >
               Koreksi ({attendanceCorrections.length})
@@ -933,27 +933,27 @@ export const AttendanceModule: React.FC = () => {
                   key={ses.id}
                   className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/40 gap-3"
                 >
-                  <div>
-                    <div className="flex items-center gap-2">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="font-extrabold text-sm text-slate-900 dark:text-white">{ses.className}</span>
-                      <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:bg-blue-950 dark:text-blue-300 capitalize">
+                      <span className="rounded-md bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-800 dark:bg-blue-950 dark:text-blue-300 capitalize whitespace-nowrap">
                         {ses.type === 'harian' ? 'Presensi Harian' : ses.subjectName}
                       </span>
-                      <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold capitalize ${
+                      <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold capitalize whitespace-nowrap ${
                         ses.status === 'final' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                       }`}>
                         {ses.status}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-slate-500 mt-1 tabular-nums">
                       Tanggal: <strong>{ses.date}</strong> &bull; Oleh: {ses.teacherName}
                     </p>
-                    <div className="flex items-center gap-3 text-xs mt-2 font-semibold">
-                      <span className="text-emerald-600">Hadir: {ses.presentCount}</span>
-                      <span className="text-amber-600">Sakit: {ses.sickCount}</span>
-                      <span className="text-blue-600">Izin: {ses.leaveCount}</span>
-                      <span className="text-rose-600">Alpa: {ses.absentCount}</span>
-                      <span className="text-purple-600">Terlambat: {ses.lateCount}</span>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs mt-2 font-semibold tabular-nums">
+                      <span className="text-emerald-600 whitespace-nowrap">Hadir: {ses.presentCount}</span>
+                      <span className="text-amber-600 whitespace-nowrap">Sakit: {ses.sickCount}</span>
+                      <span className="text-blue-600 whitespace-nowrap">Izin: {ses.leaveCount}</span>
+                      <span className="text-rose-600 whitespace-nowrap">Alpa: {ses.absentCount}</span>
+                      <span className="text-purple-600 whitespace-nowrap">Terlambat: {ses.lateCount}</span>
                     </div>
                   </div>
 

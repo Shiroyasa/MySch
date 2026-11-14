@@ -724,7 +724,7 @@ export const MasterDataModule: React.FC = () => {
         subtitle="Pengelolaan terpusat data siswa aktif, tenaga pendidik, rombongan belajar, kompetensi keahlian (jurusan), mata pelajaran, jadwal pelajaran, dan tahun ajaran."
         icon={GraduationCap}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5">
+          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5 dark:border-slate-700/80 dark:bg-slate-800/80">
             {[
               { id: 'students', label: `Siswa (${students.length})`, icon: Users },
               { id: 'teachers', label: `Guru (${teachers.length})`, icon: UserCheck },
@@ -744,10 +744,10 @@ export const MasterDataModule: React.FC = () => {
                   className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 rounded-[10px] px-3 text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     isAct
                       ? 'bg-[#6C60B8] text-white shadow-sm'
-                      : 'text-[#6E7287] hover:bg-white hover:text-[#262833]'
+                      : 'text-[#6E7287] hover:bg-white hover:text-[#262833] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
                   }`}
                 >
-                  <Icon className={`h-3.5 w-3.5 shrink-0 ${isAct ? 'text-white' : 'text-[#6C60B8]'}`} />
+                  <Icon className={`h-3.5 w-3.5 shrink-0 ${isAct ? 'text-white' : 'text-[#6C60B8] dark:text-violet-300'}`} />
                   <span>{tab.label}</span>
                 </button>
               );

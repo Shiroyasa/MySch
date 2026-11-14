@@ -378,6 +378,34 @@ export interface PklStudentReportItem {
   absorbedStatus: 'terserap_kerja' | 'melanjutkan_kuliah' | 'wirausaha' | 'mencari_kerja';
 }
 
+export type AlumniCareerStatus = 'bekerja' | 'kuliah' | 'wirausaha' | 'mencari_kerja' | 'belum_bekerja';
+export type AlumniRelevanceLevel = 'sangat_sesuai' | 'sesuai' | 'cukup_sesuai' | 'tidak_sesuai';
+export type AlumniWaitingPeriod = '< 3 Bulan' | '3 - 6 Bulan' | '6 - 12 Bulan' | '> 12 Bulan';
+
+export interface AlumniTracerRecord {
+  id: string;
+  studentId?: string;
+  nisn: string;
+  fullName: string;
+  gender: 'L' | 'P';
+  majorCode: string;
+  graduationYear: string;
+  pklPartnerId?: string;
+  pklPartnerName?: string;
+  careerStatus: AlumniCareerStatus;
+  institutionOrCompany: string;
+  roleOrStudyProgram: string;
+  city: string;
+  industryRelevance: AlumniRelevanceLevel;
+  waitingPeriod: AlumniWaitingPeriod;
+  monthlyIncomeRange?: string;
+  phone?: string;
+  email?: string;
+  testimonial?: string;
+  verifiedBySchool: boolean;
+  updatedAt: string;
+}
+
 export type LiveWallpaperPreset =
   | 'starlight_castle'
   | 'celestial_aurora'

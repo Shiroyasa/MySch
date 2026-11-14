@@ -42,14 +42,14 @@ const MainContent: React.FC = () => {
   };
 
   return (
-    <div className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden p-0 sm:p-3 md:p-4 lg:p-6 font-sans text-[#3E385B]">
+    <div className="relative flex h-[100dvh] w-full items-center justify-center overflow-hidden p-0 sm:p-3 md:p-4 lg:p-6 font-sans text-[#3E385B] dark:text-slate-100">
       {/* Outer Soft Lavender-Slate Backdrop */}
       <AnimeBackground />
 
       {/* Outer Frosted Tablet/Desktop Bezel Frame (Edge-to-Edge on Small Mobile for Max Space) */}
-      <div className="relative z-10 flex h-full w-full max-w-[1560px] overflow-hidden rounded-none sm:rounded-[34px] lg:rounded-[40px] border-0 sm:border sm:border-white/65 bg-transparent sm:bg-white/40 p-0 sm:p-2 lg:p-2.5 sm:shadow-[0_32px_80px_-12px_rgba(62,56,91,0.22)] sm:backdrop-blur-md">
+      <div className="relative z-10 flex h-full w-full max-w-[1560px] overflow-hidden rounded-none sm:rounded-[34px] lg:rounded-[40px] border-0 sm:border sm:border-white/65 sm:dark:border-slate-800/80 bg-transparent sm:bg-white/40 sm:dark:bg-slate-900/50 p-0 sm:p-2 lg:p-2.5 sm:shadow-[0_32px_80px_-12px_rgba(62,56,91,0.22)] sm:backdrop-blur-md">
         {/* Inner Crisp Snow-White Application Canvas */}
-        <div className="relative flex h-full w-full overflow-hidden rounded-none sm:rounded-[28px] lg:rounded-[32px] bg-[#F8F9FD]">
+        <div className="relative flex h-full w-full overflow-hidden rounded-none sm:rounded-[28px] lg:rounded-[32px] bg-[#F8F9FD] dark:bg-slate-950">
           {/* Left Floating Vertical Purple Pill Sidebar */}
           <Sidebar
             collapsed={sidebarCollapsed}
@@ -59,7 +59,7 @@ const MainContent: React.FC = () => {
           />
 
           {/* Center Main Content Area */}
-          <div className="relative z-10 flex min-w-0 flex-1 flex-col overflow-hidden bg-[#F8F9FD]">
+          <div className="relative z-10 flex min-w-0 flex-1 flex-col overflow-hidden bg-[#F8F9FD] dark:bg-slate-950">
             {/* Top Header ("Primary / Dashboard" + Search Pill + Agenda/Map Drawer + Avatar) */}
             <Header
               onToggleMobileSidebar={handleOpenSidebar}
@@ -89,11 +89,11 @@ const MainContent: React.FC = () => {
                 {activeNav === 'settings' && <SettingsModule />}
 
                 {/* Clean Quiet Footer */}
-                <footer className="mt-10 border-t border-[#ECEBF5] pt-5 pb-3 text-center text-xs text-[#9694A8]">
-                  <p className="font-bold text-[#3E385B]">
+                <footer className="mt-10 border-t border-[#ECEBF5] dark:border-slate-800 pt-5 pb-3 text-center text-xs text-[#9694A8] dark:text-slate-400">
+                  <p className="font-bold text-[#3E385B] dark:text-slate-200">
                     ORBITA AKADEMI &middot; Sistem Informasi Akademik &amp; Presensi Terpadu
                   </p>
-                  <p className="mt-1 text-[11px] text-[#A2A0B4]">
+                  <p className="mt-1 text-[11px] text-[#A2A0B4] dark:text-slate-500">
                     Sukabumi, Jawa Barat
                   </p>
                 </footer>

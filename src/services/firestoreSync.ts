@@ -32,6 +32,7 @@ import {
   IndustryPartner,
   PklVisitRecord,
   PklStudentReportItem,
+  AlumniTracerRecord,
   VisualSettings,
   SchoolSettings,
   LessonSchedule,
@@ -76,6 +77,7 @@ export interface SyncCallbacks {
   onPklPartnersChange?: (data: IndustryPartner[]) => void;
   onPklVisitsChange?: (data: PklVisitRecord[]) => void;
   onPklReportsChange?: (data: PklStudentReportItem[]) => void;
+  onPklTracersChange?: (data: AlumniTracerRecord[]) => void;
   onVisualSettingsChange?: (data: VisualSettings) => void;
   onSchoolSettingsChange?: (data: SchoolSettings) => void;
   onLessonSchedulesChange?: (data: LessonSchedule[]) => void;
@@ -648,6 +650,27 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
       unsubscribers.push(unsubPklReports);
     } catch (err) {
       console.error('Error attaching pklReports listener:', err);
+    }
+  }
+
+  // 20b. PKL Alumni Tracer Study Records
+  if (callbacks.onPklTracersChange) {
+    try {
+      const unsubPklTracers = onSnapshot(
+        collection(db, 'pklTracerStudies'),
+        snapshot => {
+          const list: AlumniTracerRecord[] = [];
+          snapshot.forEach(docSnap => list.push(docSnap.data() as AlumniTracerRecord));
+          callbacks.onPklTracersChange?.(list);
+          handleUpdate();
+        },
+        error => {
+          safeHandleListenerError(error, 'pklTracerStudies');
+        }
+      );
+      unsubscribers.push(unsubPklTracers);
+    } catch (err) {
+      console.error('Error attaching pklTracerStudies listener:', err);
     }
   }
 
@@ -1351,17 +1374,93 @@ export async function firestoreDeletePklReport(reportId: string): Promise<void> 
   }
 }
 
+export async function firestoreSavePklTracer(tracer: AlumniTracerRecord): Promise<void> {
+  try {
+    await setDoc(doc(db, 'pklTracerStudies', tracer.id), sanitizeForFirestore(tracer));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `pklTracerStudies/${tracer.id}`);
+  }
+}
+
+export async function firestoreDeletePklTracer(tracerId: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, 'pklTracerStudies', tracerId));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `pklTracerStudies/${tracerId}`);
+  }
+}
+
+export async function firestoreSavePklTracersBatch(
+  tracers: AlumniTracerRecord[],
+  deletedIds: string[] = []
+): Promise<void> {
+  try {
+    type BatchOp =
+      | { kind: 'set'; tracer: AlumniTracerRecord }
+      | { kind: 'delete'; id: string };
+
+    const ops: BatchOp[] = [
+      ...tracers.map(tracer => ({ kind: 'set' as const, tracer })),
+      ...deletedIds.filter(Boolean).map(id => ({ kind: 'delete' as const, id })),
+    ];
+
+    const chunkSize = 400;
+    for (let i = 0; i < ops.length; i += chunkSize) {
+      const chunk = ops.slice(i, i + chunkSize);
+      const batch = writeBatch(db);
+      chunk.forEach(op => {
+        if (op.kind === 'set') {
+          batch.set(doc(db, 'pklTracerStudies', op.tracer.id), sanitizeForFirestore(op.tracer));
+        } else {
+          batch.delete(doc(db, 'pklTracerStudies', op.id));
+        }
+      });
+      await batch.commit();
+    }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'pklTracerStudies/batchSync');
+  }
+}
+
+export async function firestoreClearAllPklTracers(tracerIds: string[] = []): Promise<void> {
+  try {
+    const idSet = new Set<string>(tracerIds.filter(Boolean));
+    try {
+      const snap = await getDocs(collection(db, 'pklTracerStudies'));
+      snap.forEach(docSnap => {
+        if (docSnap.id) idSet.add(docSnap.id);
+      });
+    } catch {
+      // Fallback to provided IDs if query fails offline
+    }
+
+    const allIds = Array.from(idSet);
+    const chunkSize = 400;
+    for (let i = 0; i < allIds.length; i += chunkSize) {
+      const chunk = allIds.slice(i, i + chunkSize);
+      const batch = writeBatch(db);
+      chunk.forEach(id => batch.delete(doc(db, 'pklTracerStudies', id)));
+      await batch.commit();
+    }
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, 'pklTracerStudies/clearAll');
+  }
+}
+
 export async function firestoreClearAllPklData(
   partnerIds: string[],
   visitIds: string[],
-  reportIds: string[]
+  reportIds: string[],
+  tracerIds: string[] = []
 ): Promise<void> {
   try {
     const batch = writeBatch(db);
     partnerIds.forEach(id => batch.delete(doc(db, 'pklPartners', id)));
     visitIds.forEach(id => batch.delete(doc(db, 'pklVisits', id)));
     reportIds.forEach(id => batch.delete(doc(db, 'pklReports', id)));
+    tracerIds.forEach(id => batch.delete(doc(db, 'pklTracerStudies', id)));
     await batch.commit();
+    await firestoreClearAllPklTracers(tracerIds);
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, 'pklData/clearAll');
   }

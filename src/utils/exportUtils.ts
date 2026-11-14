@@ -16,7 +16,8 @@ export interface ReportCustomConfig {
   showKopSurat?: boolean;
   accentColor?: [number, number, number]; // RGB, e.g. [15, 23, 42]
   fontFamily?: string;
-  // Left Signer (Guru Pengampu / Wali Kelas)
+  // Left Signer (Guru Pengampu / Wali Kelas / Ketua BKK)
+  leftSignerHeader?: string;
   leftSignerTitle: string;
   leftSignerName: string;
   leftSignerNip: string;
@@ -29,6 +30,7 @@ export interface ReportCustomConfig {
   rightSignerNip: string;
   rightSignerSignatureUrl?: string; // Base64 signature image
   watermarkText?: string;
+  footerNote?: string;
 }
 
 export const defaultReportConfig: ReportCustomConfig = {
@@ -100,6 +102,46 @@ export function exportToCsv(
   }
 }
 
+const detectPdfImageFormat = (dataUrl: string): 'PNG' | 'JPEG' | 'WEBP' => {
+  const lower = dataUrl.slice(0, 40).toLowerCase();
+  if (lower.includes('image/jpeg') || lower.includes('image/jpg')) return 'JPEG';
+  if (lower.includes('image/webp')) return 'WEBP';
+  return 'PNG';
+};
+
+const addProportionalPdfImage = (
+  doc: jsPDF,
+  dataUrl: string,
+  x: number,
+  y: number,
+  maxW: number,
+  maxH: number,
+  centerHorizontally: boolean = false
+): { width: number; height: number } => {
+  let w = maxW;
+  let h = maxH;
+  try {
+    const props = doc.getImageProperties(dataUrl);
+    if (props?.width && props?.height) {
+      const aspect = props.width / props.height;
+      if (maxW / maxH > aspect) {
+        h = maxH;
+        w = h * aspect;
+      } else {
+        w = maxW;
+        h = w / aspect;
+      }
+    }
+  } catch {
+    w = Math.min(maxW, maxH);
+    h = w;
+  }
+  const drawX = centerHorizontally ? x + Math.max(0, (maxW - w) / 2) : x;
+  const drawY = y + Math.max(0, (maxH - h) / 2);
+  doc.addImage(dataUrl, detectPdfImageFormat(dataUrl), drawX, drawY, w, h);
+  return { width: w, height: h };
+};
+
 /**
  * Enhanced PDF Exporter with Custom Kop Surat, Institution Logo Image,
  * and Individual Handwritten Signatures (TTD Gambar)
@@ -124,34 +166,13 @@ export function exportToPdf(
     let currentY = 12;
 
     // Render Kop Surat
-    if (config.showKopSurat) {
-      // 1. Logo if provided
-      // 1. Logo if provided with exact proportional aspect ratio
+    if (config.showKopSurat !== false) {
       let textLeftMargin = 14;
       if (config.logoDataUrl) {
         try {
           const maxDimension = config.logoWidth || 20;
-          let logoW = maxDimension;
-          let logoH = maxDimension;
-          try {
-            const imgProps = doc.getImageProperties(config.logoDataUrl);
-            if (imgProps && imgProps.width && imgProps.height) {
-              const aspect = imgProps.width / imgProps.height;
-              if (aspect >= 1) {
-                logoW = Math.min(24, maxDimension);
-                logoH = logoW / aspect;
-              } else {
-                logoH = Math.min(22, maxDimension);
-                logoW = logoH * aspect;
-              }
-            }
-          } catch {
-            logoW = 18;
-            logoH = 18;
-          }
-          const logoY = 10 + Math.max(0, (22 - logoH) / 2);
-          doc.addImage(config.logoDataUrl, 'PNG', 14, logoY, logoW, logoH);
-          textLeftMargin = 14 + logoW + 5;
+          const drawn = addProportionalPdfImage(doc, config.logoDataUrl, 14, 10, maxDimension, 22, false);
+          textLeftMargin = 14 + drawn.width + 5;
         } catch (imgErr) {
           console.warn('Could not render logo in PDF:', imgErr);
         }
@@ -161,8 +182,14 @@ export function exportToPdf(
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
-      doc.setTextColor(config.accentColor ? config.accentColor[0] : 15, config.accentColor ? config.accentColor[1] : 23, config.accentColor ? config.accentColor[2] : 42);
-      doc.text(config.institutionFoundation, textCenterX, 14, { align: 'center' });
+      doc.setTextColor(
+        config.accentColor ? config.accentColor[0] : 15,
+        config.accentColor ? config.accentColor[1] : 23,
+        config.accentColor ? config.accentColor[2] : 42
+      );
+      if (config.institutionFoundation) {
+        doc.text(config.institutionFoundation, textCenterX, 14, { align: 'center' });
+      }
 
       doc.setFontSize(14);
       doc.text(config.institutionName, textCenterX, 20, { align: 'center' });
@@ -170,8 +197,13 @@ export function exportToPdf(
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7.5);
       doc.setTextColor(71, 85, 105);
-      doc.text(config.institutionTagline, textCenterX, 25, { align: 'center' });
-      doc.text(`${config.institutionAddress} | ${config.institutionContact}`, textCenterX, 29, { align: 'center' });
+      if (config.institutionTagline) {
+        doc.text(config.institutionTagline, textCenterX, 25, { align: 'center' });
+      }
+      const contactLine = [config.institutionAddress, config.institutionContact].filter(Boolean).join(' | ');
+      if (contactLine) {
+        doc.text(contactLine, textCenterX, 29, { align: 'center' });
+      }
 
       // Double divider line
       const accent = config.accentColor || [37, 99, 235];
@@ -243,56 +275,70 @@ export function exportToPdf(
       },
     });
 
-    // Signature blocks
-    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    // Optional Footer Note + Signature blocks
+    const lastTableY = ((doc as any).lastAutoTable?.finalY || startTableY + 12) + 8;
     const pageHeight = doc.internal.pageSize.getHeight();
+    let finalY = lastTableY;
 
-    // Check if space for signatures or need new page
-    if (finalY + 38 > pageHeight) {
-      doc.addPage();
+    if (config.footerNote && config.footerNote.trim()) {
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(8);
+      doc.setTextColor(71, 85, 105);
+      const wrappedNote = doc.splitTextToSize(config.footerNote.trim(), pageWidth - 28);
+      if (finalY + wrappedNote.length * 4 + 38 > pageHeight) {
+        doc.addPage();
+        finalY = 20;
+      }
+      doc.text(wrappedNote, 14, finalY);
+      finalY += wrappedNote.length * 4 + 6;
     }
 
-    const sigY = finalY + 38 > pageHeight ? 20 : finalY;
+    if (finalY + 38 > pageHeight) {
+      doc.addPage();
+      finalY = 20;
+    }
 
+    const sigY = finalY;
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
     doc.setTextColor(15, 23, 42);
 
-    // Left Signature (Wali Kelas / Guru Pengampu)
-    doc.text('Mengetahui,', 20, sigY);
+    // Left Signature (Wali Kelas / Ketua BKK / Guru Pengampu)
+    doc.text(config.leftSignerHeader || 'Mengetahui,', 20, sigY);
     doc.text(config.leftSignerTitle, 20, sigY + 4.5);
 
     if (config.leftSignerSignatureUrl) {
       try {
-        doc.addImage(config.leftSignerSignatureUrl, 'PNG', 20, sigY + 6, 32, 14);
+        addProportionalPdfImage(doc, config.leftSignerSignatureUrl, 20, sigY + 6, 36, 15, false);
       } catch (e) {
         console.warn('Could not draw left signature image:', e);
       }
     }
 
-    const leftNameY = sigY + 23;
+    const leftNameY = sigY + 24;
     doc.setFont('helvetica', 'bold');
     doc.text(config.leftSignerName || '( .................................................. )', 20, leftNameY);
     doc.setFont('helvetica', 'normal');
     doc.text(`NIP. ${config.leftSignerNip || '............................................'}`, 20, leftNameY + 4.5);
 
     // Right Signature (Kepala Sekolah)
-    const rightX = pageWidth - 80;
+    const rightX = pageWidth - 82;
     doc.text(`${config.rightSignerCity}, ${config.rightSignerDate}`, rightX, sigY);
     doc.text(config.rightSignerTitle, rightX, sigY + 4.5);
 
     if (config.rightSignerSignatureUrl) {
       try {
-        doc.addImage(config.rightSignerSignatureUrl, 'PNG', rightX, sigY + 6, 32, 14);
+        addProportionalPdfImage(doc, config.rightSignerSignatureUrl, rightX, sigY + 6, 36, 15, false);
       } catch (e) {
         console.warn('Could not draw right signature image:', e);
       }
     }
 
-    const rightNameY = sigY + 23;
+    const rightNameY = sigY + 24;
     doc.setFont('helvetica', 'bold');
-    doc.text(config.rightSignerName, rightX, rightNameY);
+    doc.text(config.rightSignerName || '( .................................................. )', rightX, rightNameY);
     doc.setFont('helvetica', 'normal');
-    doc.text(`NIP. ${config.rightSignerNip}`, rightX, rightNameY + 4.5);
+    doc.text(`NIP. ${config.rightSignerNip || '............................................'}`, rightX, rightNameY + 4.5);
 
     doc.save(`${fileName}.pdf`);
   } catch (error) {

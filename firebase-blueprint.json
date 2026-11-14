@@ -292,6 +292,35 @@
         "category": { "type": "string", "enum": ["akademik", "presensi", "profil", "sistem", "pengumuman"] }
       },
       "required": ["id", "title", "message", "type", "createdAt"]
+    },
+    "pklTracerStudies": {
+      "title": "Alumni Tracer Study Record",
+      "description": "Post-graduation alumni career tracking records integrated with PKL and BKK",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "studentId": { "type": "string", "maxLength": 64 },
+        "nisn": { "type": "string", "maxLength": 20 },
+        "fullName": { "type": "string", "maxLength": 120 },
+        "gender": { "type": "string", "enum": ["L", "P"] },
+        "majorCode": { "type": "string", "enum": ["DPB", "RPL"] },
+        "graduationYear": { "type": "string", "maxLength": 10 },
+        "pklPartnerId": { "type": "string", "maxLength": 64 },
+        "pklPartnerName": { "type": "string", "maxLength": 150 },
+        "careerStatus": { "type": "string", "enum": ["bekerja", "kuliah", "wirausaha", "mencari_kerja", "belum_bekerja"] },
+        "institutionOrCompany": { "type": "string", "maxLength": 180 },
+        "roleOrStudyProgram": { "type": "string", "maxLength": 150 },
+        "city": { "type": "string", "maxLength": 100 },
+        "industryRelevance": { "type": "string", "enum": ["sangat_sesuai", "sesuai", "cukup_sesuai", "tidak_sesuai"] },
+        "waitingPeriod": { "type": "string", "enum": ["< 3 Bulan", "3 - 6 Bulan", "6 - 12 Bulan", "> 12 Bulan"] },
+        "monthlyIncomeRange": { "type": "string", "maxLength": 60 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "email": { "type": "string", "maxLength": 120 },
+        "testimonial": { "type": "string", "maxLength": 500 },
+        "verifiedBySchool": { "type": "boolean" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "nisn", "fullName", "majorCode", "graduationYear", "careerStatus", "institutionOrCompany"]
     }
   },
   "firestore": {
@@ -358,6 +387,10 @@
     "/notifications/{notificationId}": {
       "schema": "notifications",
       "description": "Per-profile targeted notifications and school-wide broadcasts"
+    },
+    "/pklTracerStudies/{tracerId}": {
+      "schema": "pklTracerStudies",
+      "description": "Alumni tracer study and post-PKL career tracking records"
     }
   }
 }

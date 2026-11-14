@@ -20,6 +20,7 @@ import {
   IndustryPartner,
   PklVisitRecord,
   PklStudentReportItem,
+  AlumniTracerRecord,
   VisualSettings,
   SchoolSettings,
   LessonSchedule,
@@ -43,9 +44,11 @@ import {
   initialLessonSchedules,
 } from '../data/seedData';
 import {
+  initialAlumniTracers,
   sampleIndustryPartners,
   samplePklVisits,
   samplePklReports,
+  sampleAlumniTracers,
 } from '../data/pklSeedData';
 import { auth, db } from '../lib/firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
@@ -96,6 +99,10 @@ import {
   firestoreDeletePklVisit,
   firestoreSavePklReport,
   firestoreDeletePklReport,
+  firestoreSavePklTracer,
+  firestoreDeletePklTracer,
+  firestoreSavePklTracersBatch,
+  firestoreClearAllPklTracers,
   firestoreClearAllPklData,
   firestoreSaveVisualSettings,
   firestoreSaveSchoolSettings,
@@ -295,12 +302,17 @@ interface AppContextType {
   pklPartners: IndustryPartner[];
   pklVisits: PklVisitRecord[];
   pklReports: PklStudentReportItem[];
+  pklTracers: AlumniTracerRecord[];
   savePklPartner: (partner: IndustryPartner, isNew?: boolean) => void;
   deletePklPartner: (partnerId: string) => void;
   savePklVisit: (visit: PklVisitRecord, isNew?: boolean) => void;
   deletePklVisit: (visitId: string) => void;
   savePklReport: (report: PklStudentReportItem, isNew?: boolean) => void;
   deletePklReport: (reportId: string) => void;
+  savePklTracer: (tracer: AlumniTracerRecord, isNew?: boolean) => void;
+  savePklTracersBatch: (tracers: AlumniTracerRecord[], deletedIds?: string[]) => Promise<void>;
+  deletePklTracer: (tracerId: string) => void;
+  clearAllPklTracers: () => void;
   clearAllPklData: () => void;
   loadSamplePklData: () => void;
 
@@ -684,6 +696,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return [];
   });
 
+  const [pklTracers, setPklTracers] = useState<AlumniTracerRecord[]>(() => {
+    try {
+      if (localStorage.getItem('myschool_pkl_tracers_cleared_v2') !== '1') {
+        return initialAlumniTracers;
+      }
+      const saved = localStorage.getItem('myschool_pkl_tracers_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {}
+    return initialAlumniTracers;
+  });
+
   // Visual Theme & Background Settings (Login & Module Header Banners)
   const [visualSettings, setVisualSettings] = useState<VisualSettings>(() => {
     try {
@@ -923,6 +949,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Mount Firestore real-time listeners for all collections
   useEffect(() => {
+    // One-time cleanup: clear pre-seeded/existing alumni tracer study data cleanly
+    try {
+      if (localStorage.getItem('myschool_pkl_tracers_cleared_v2') !== '1') {
+        localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify([]));
+        localStorage.setItem('myschool_pkl_tracers_cleared_v2', '1');
+        setPklTracers([]);
+        firestoreClearAllPklTracers().catch(() => {});
+      }
+    } catch {}
+
     // 1. Ensure Firestore is initially seeded with ORBITA data
     ensureFirestorePopulated().catch(err => {
       console.warn('Firestore initial populate notice:', err);
@@ -1005,6 +1041,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       onPklReportsChange: data => {
         setPklReports(data);
         localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(data));
+      },
+      onPklTracersChange: data => {
+        if (Array.isArray(data)) {
+          setPklTracers(data);
+          localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(data));
+        }
       },
       onVisualSettingsChange: data => {
         // Ignore stale pre-write snapshots right after a local background update
@@ -3191,34 +3233,99 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const savePklTracer = (tracer: AlumniTracerRecord, isNew = false) => {
+    localStorage.removeItem('myschool_pkl_tracers_cleared_v2');
+    setPklTracers(prev => {
+      const exists = prev.some(t => t.id === tracer.id);
+      const next = exists ? prev.map(t => (t.id === tracer.id ? tracer : t)) : [tracer, ...prev];
+      localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(next));
+      return next;
+    });
+    firestoreSavePklTracer(tracer).catch(() => {});
+    addAuditLog(
+      isNew ? 'CREATE_TRACER_STUDY' : 'UPDATE_TRACER_STUDY',
+      'Tracer Study Alumni',
+      `${isNew ? 'Menambahkan' : 'Memperbarui'} data tracer study alumni: ${tracer.fullName} (${tracer.careerStatus.toUpperCase()})`
+    );
+  };
+
+  const savePklTracersBatch = async (tracers: AlumniTracerRecord[], deletedIds: string[] = []) => {
+    if (tracers.length > 0) {
+      localStorage.removeItem('myschool_pkl_tracers_cleared_v2');
+    } else {
+      localStorage.setItem('myschool_pkl_tracers_cleared_v2', '1');
+    }
+    setPklTracers(tracers);
+    localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(tracers));
+    await firestoreSavePklTracersBatch(tracers, deletedIds);
+    addAuditLog(
+      'BATCH_SYNC_TRACER_STUDY',
+      'Tracer Study Alumni',
+      `Menyimpan & menyinkronkan laporan editable tracer study (${tracers.length} catatan alumni${deletedIds.length > 0 ? `, ${deletedIds.length} dihapus` : ''}) ke Database Cloud.`
+    );
+  };
+
+  const deletePklTracer = (tracerId: string) => {
+    const target = pklTracers.find(t => t.id === tracerId);
+    setPklTracers(prev => {
+      const next = prev.filter(t => t.id !== tracerId);
+      localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(next));
+      return next;
+    });
+    firestoreDeletePklTracer(tracerId).catch(() => {});
+    if (target) {
+      addAuditLog('DELETE_TRACER_STUDY', 'Tracer Study Alumni', `Menghapus catatan tracer study: ${target.fullName}`);
+    }
+  };
+
+  const clearAllPklTracers = () => {
+    const tIds = pklTracers.map(t => t.id);
+    setPklTracers([]);
+    localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify([]));
+    localStorage.setItem('myschool_pkl_tracers_cleared_v2', '1');
+    firestoreClearAllPklTracers(tIds).catch(() => {});
+    addAuditLog(
+      'CLEAR_TRACER_STUDY',
+      'Tracer Study Alumni',
+      'Mengosongkan seluruh data tracer study alumni dari database.'
+    );
+  };
+
   const clearAllPklData = () => {
     const pIds = pklPartners.map(p => p.id);
     const vIds = pklVisits.map(v => v.id);
     const rIds = pklReports.map(r => r.id);
+    const tIds = pklTracers.map(t => t.id);
 
     setPklPartners([]);
     setPklVisits([]);
     setPklReports([]);
+    setPklTracers([]);
     localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify([]));
     localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify([]));
     localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify([]));
+    localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify([]));
+    localStorage.setItem('myschool_pkl_tracers_cleared_v2', '1');
 
-    firestoreClearAllPklData(pIds, vIds, rIds).catch(() => {});
-    addAuditLog('CLEAR_ALL_PKL', 'Administrasi PKL & DUDI', 'Mengosongkan seluruh data mitra DUDI, supervisi, dan laporan PKL dari database.');
+    firestoreClearAllPklData(pIds, vIds, rIds, tIds).catch(() => {});
+    addAuditLog('CLEAR_ALL_PKL', 'Administrasi PKL & DUDI', 'Mengosongkan seluruh data mitra DUDI, supervisi, laporan PKL, dan tracer study alumni dari database.');
   };
 
   const loadSamplePklData = () => {
     setPklPartners(sampleIndustryPartners);
     setPklVisits(samplePklVisits);
     setPklReports(samplePklReports);
+    setPklTracers(sampleAlumniTracers);
     localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(sampleIndustryPartners));
     localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(samplePklVisits));
     localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(samplePklReports));
+    localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(sampleAlumniTracers));
 
     sampleIndustryPartners.forEach(p => firestoreSavePklPartner(p).catch(() => {}));
     samplePklVisits.forEach(v => firestoreSavePklVisit(v).catch(() => {}));
     samplePklReports.forEach(r => firestoreSavePklReport(r).catch(() => {}));
-    addAuditLog('SEED_PKL_SAMPLE', 'Administrasi PKL & DUDI', 'Memuat & menyinkronkan data contoh kemitraan DUDI ke Cloud Firestore.');
+    sampleAlumniTracers.forEach(t => firestoreSavePklTracer(t).catch(() => {}));
+    addAuditLog('SEED_PKL_SAMPLE', 'Administrasi PKL & DUDI', 'Memuat & menyinkronkan data contoh kemitraan DUDI dan Tracer Study Alumni ke Cloud Firestore.');
   };
 
   // Visual Theme & Background Settings
@@ -3449,12 +3556,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         pklPartners,
         pklVisits,
         pklReports,
+        pklTracers,
         savePklPartner,
         deletePklPartner,
         savePklVisit,
         deletePklVisit,
         savePklReport,
         deletePklReport,
+        savePklTracer,
+        savePklTracersBatch,
+        deletePklTracer,
+        clearAllPklTracers,
         clearAllPklData,
         loadSamplePklData,
         visualSettings,

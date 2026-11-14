@@ -462,14 +462,14 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
         {/* Header Row */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] bg-[#ECE9FA] text-[#6C60B8]">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[10px] bg-[#ECE9FA] text-[#6C60B8] dark:bg-indigo-950/70 dark:text-indigo-300">
               <OrbitaMenuIcon variant="attendance" className="h-4 w-4" />
             </span>
             <div className="min-w-0">
-              <h3 className="text-xs font-extrabold text-[#3E385B] tracking-tight leading-none truncate">
+              <h3 className="text-xs font-extrabold text-[#3E385B] dark:text-white tracking-tight leading-none truncate">
                 Agenda KBM &amp; Sistem
               </h3>
-              <span className="text-[10px] font-semibold text-[#9694A8] truncate block">
+              <span className="text-[10px] font-semibold text-[#9694A8] dark:text-slate-400 truncate block">
                 Sinkronisasi Database Aktif
               </span>
             </div>
@@ -488,7 +488,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                     : 'attendance'
                 )
               }
-              className="no-ornament text-[11px] font-extrabold text-[#6C60B8] hover:text-[#4E42A1] transition-colors cursor-pointer"
+              className="no-ornament text-[11px] font-extrabold text-[#6C60B8] hover:text-[#4E42A1] dark:text-indigo-300 dark:hover:text-indigo-200 transition-colors cursor-pointer"
             >
               Buka Modul
             </button>
@@ -497,7 +497,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                 type="button"
                 onClick={onCloseMobile}
                 aria-label="Tutup Agenda"
-                className="no-ornament flex h-8 w-8 items-center justify-center rounded-full bg-[#EAE9F4] text-[#3E385B] hover:bg-[#FFE4EC] hover:text-[#F25781] cursor-pointer"
+                className="no-ornament flex h-8 w-8 items-center justify-center rounded-full bg-[#EAE9F4] text-[#3E385B] hover:bg-[#FFE4EC] hover:text-[#F25781] dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-rose-950/60 dark:hover:text-rose-300 cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -506,14 +506,14 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
         </div>
 
         {/* Pill Toggle ("Jadwal KBM" / "Log & Koreksi") */}
-        <div className="mt-3.5 grid grid-cols-2 gap-1 rounded-full bg-[#EAE9F4] p-1">
+        <div className="mt-3.5 grid grid-cols-2 gap-1 rounded-full bg-[#EAE9F4] dark:bg-slate-800 p-1">
             <button
               type="button"
               onClick={() => setTab('jadwal')}
               className={`no-ornament inline-flex items-center justify-center h-8 px-2 rounded-full text-[10.5px] font-extrabold whitespace-nowrap truncate transition-all cursor-pointer ${
                 tab === 'jadwal'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_16px_rgba(108,96,184,0.34)]'
-                  : 'text-[#8E8BA3] hover:text-[#3E385B]'
+                  : 'text-[#8E8BA3] hover:text-[#3E385B] dark:text-slate-400 dark:hover:text-white'
               }`}
             >
               Jadwal KBM ({lessonSchedules.length})
@@ -524,7 +524,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
               className={`no-ornament inline-flex items-center justify-center h-8 px-2 rounded-full text-[10.5px] font-extrabold whitespace-nowrap truncate transition-all cursor-pointer ${
                 tab === 'log'
                   ? 'bg-[#6C60B8] text-white shadow-[0_6px_16px_rgba(108,96,184,0.34)]'
-                  : 'text-[#8E8BA3] hover:text-[#3E385B]'
+                  : 'text-[#8E8BA3] hover:text-[#3E385B] dark:text-slate-400 dark:hover:text-white'
               }`}
             >
               Log &amp; Koreksi ({pendingCorrCount > 0 ? `${pendingCorrCount} Baru` : systemFeedItems.length})
@@ -534,12 +534,12 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
           {/* Filter Kelas & Search Input */}
           <div className="mt-2.5 space-y-2">
             {tab === 'jadwal' && (
-              <div className="flex items-center justify-between rounded-full bg-[#ECECF4] px-3.5 py-1.5">
-                <span className="text-[10px] font-bold text-[#8E8BA3]">Filter Rombel:</span>
+              <div className="flex items-center justify-between rounded-full bg-[#ECECF4] dark:bg-slate-800 px-3.5 py-1.5">
+                <span className="text-[10px] font-bold text-[#8E8BA3] dark:text-slate-400">Filter Rombel:</span>
                 <select
                   value={selectedClassId}
                   onChange={e => setSelectedClassId(e.target.value)}
-                  className="bg-transparent text-[11px] font-extrabold text-[#6C60B8] focus:outline-none cursor-pointer"
+                  className="bg-transparent text-[11px] font-extrabold text-[#6C60B8] dark:text-indigo-300 focus:outline-none cursor-pointer"
                 >
                   <option value="ALL">Semua Kelas ({classes.length})</option>
                   {classes.map(cls => (
@@ -551,8 +551,8 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
               </div>
             )}
 
-            <div className="flex items-center gap-2 rounded-full bg-[#ECECF4] px-3.5 py-2 text-[#3E385B]">
-              <OrbitaMenuIcon variant="brand" className="h-3.5 w-3.5 text-[#6C60B8] shrink-0" />
+            <div className="flex items-center gap-2 rounded-full bg-[#ECECF4] dark:bg-slate-800 px-3.5 py-2 text-[#3E385B] dark:text-slate-100">
+              <OrbitaMenuIcon variant="brand" className="h-3.5 w-3.5 text-[#6C60B8] dark:text-indigo-300 shrink-0" />
               <input
                 type="text"
                 value={searchText}
@@ -560,7 +560,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                 placeholder={
                   tab === 'jadwal' ? 'Cari mapel, guru, kelas...' : 'Cari log koreksi atau PKL...'
                 }
-                className="w-full bg-transparent text-xs font-medium text-[#3E385B] placeholder:text-[#A2A0B4] focus:outline-none"
+                className="w-full bg-transparent text-xs font-medium text-[#3E385B] dark:text-slate-100 placeholder:text-[#A2A0B4] dark:placeholder:text-slate-400 focus:outline-none"
               />
             </div>
           </div>
@@ -570,10 +570,10 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
             {tab === 'jadwal' ? (
               filteredSchedules.slice(0, 5).map((sched, idx) => {
                 const badgeStyles = [
-                  'bg-[#E5E2FA] text-[#6C60B8]',
-                  'bg-[#FFE2EC] text-[#E64C78]',
-                  'bg-[#DFF8EC] text-[#17A858]',
-                  'bg-[#FFF1D6] text-[#D98218]',
+                  'bg-[#E5E2FA] text-[#6C60B8] dark:bg-indigo-950/70 dark:text-indigo-300',
+                  'bg-[#FFE2EC] text-[#E64C78] dark:bg-rose-950/70 dark:text-rose-300',
+                  'bg-[#DFF8EC] text-[#17A858] dark:bg-emerald-950/70 dark:text-emerald-300',
+                  'bg-[#FFF1D6] text-[#D98218] dark:bg-amber-950/70 dark:text-amber-300',
                 ];
                 const bStyle = badgeStyles[idx % badgeStyles.length];
                 return (
@@ -582,7 +582,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                     onClick={() =>
                       navigateAndClose(currentRole === 'siswa' ? 'student-profile' : 'attendance')
                     }
-                    className="group flex items-center justify-between gap-2.5 rounded-[18px] bg-white/75 p-2.5 border border-[#ECEBF5] hover:bg-white hover:border-[#6C60B8]/35 hover:shadow-[0_8px_22px_rgba(108,96,184,0.08)] transition-all cursor-pointer"
+                    className="group flex items-center justify-between gap-2.5 rounded-[18px] bg-white/75 dark:bg-slate-900/80 p-2.5 border border-[#ECEBF5] dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 hover:border-[#6C60B8]/35 hover:shadow-[0_8px_22px_rgba(108,96,184,0.08)] transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div
@@ -591,18 +591,18 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                         <span>{sched.day?.slice(0, 3).toUpperCase() || 'KBM'}</span>
                       </div>
                       <div className="min-w-0">
-                        <p className="truncate text-xs font-extrabold text-[#3E385B] group-hover:text-[#6C60B8] transition-colors">
+                        <p className="truncate text-xs font-extrabold text-[#3E385B] dark:text-white group-hover:text-[#6C60B8] dark:group-hover:text-indigo-300 transition-colors">
                           {sched.subjectName}
                         </p>
-                        <p className="truncate text-[10.5px] font-semibold text-[#6E6A86] leading-tight">
+                        <p className="truncate text-[10.5px] font-semibold text-[#6E6A86] dark:text-slate-300 leading-tight">
                           {sched.className} &bull; {sched.teacherName}
                         </p>
-                        <p className="truncate text-[10px] text-[#A2A0B4] leading-tight mt-0.5">
+                        <p className="truncate text-[10px] text-[#A2A0B4] dark:text-slate-400 leading-tight mt-0.5">
                           {sched.startTime} - {sched.endTime} &bull; {sched.room}
                         </p>
                       </div>
                     </div>
-                    <span className="shrink-0 rounded-full bg-[#F0EEFA] px-2 py-0.5 text-[9.5px] font-extrabold text-[#6C60B8]">
+                    <span className="shrink-0 rounded-full bg-[#F0EEFA] dark:bg-indigo-950/70 px-2 py-0.5 text-[9.5px] font-extrabold text-[#6C60B8] dark:text-indigo-300">
                       {sched.className}
                     </span>
                   </div>
@@ -612,21 +612,21 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
               systemFeedItems.slice(0, 5).map(item => {
                 const toneClasses =
                   item.tone === 'pink'
-                    ? 'bg-[#FFE4EC] text-[#F25781]'
+                    ? 'bg-[#FFE4EC] text-[#F25781] dark:bg-rose-950/70 dark:text-rose-300'
                     : item.tone === 'emerald'
-                    ? 'bg-[#DFF8EC] text-[#17A858]'
+                    ? 'bg-[#DFF8EC] text-[#17A858] dark:bg-emerald-950/70 dark:text-emerald-300'
                     : item.tone === 'amber'
-                    ? 'bg-[#FFF1D6] text-[#D98218]'
-                    : 'bg-[#E5E2FA] text-[#6C60B8]';
+                    ? 'bg-[#FFF1D6] text-[#D98218] dark:bg-amber-950/70 dark:text-amber-300'
+                    : 'bg-[#E5E2FA] text-[#6C60B8] dark:bg-indigo-950/70 dark:text-indigo-300';
                 return (
                   <div
                     key={item.id}
                     onClick={() => navigateAndClose(item.targetNav)}
-                    className="group flex items-center justify-between gap-2.5 rounded-[18px] bg-white/75 p-2.5 border border-[#ECEBF5] hover:bg-white hover:border-[#6C60B8]/35 hover:shadow-[0_8px_22px_rgba(108,96,184,0.08)] transition-all cursor-pointer"
+                    className="group flex items-center justify-between gap-2.5 rounded-[18px] bg-white/75 dark:bg-slate-900/80 p-2.5 border border-[#ECEBF5] dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 hover:border-[#6C60B8]/35 hover:shadow-[0_8px_22px_rgba(108,96,184,0.08)] transition-all cursor-pointer"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-1.5">
-                        <p className="truncate text-xs font-extrabold text-[#3E385B] group-hover:text-[#6C60B8] transition-colors">
+                        <p className="truncate text-xs font-extrabold text-[#3E385B] dark:text-white group-hover:text-[#6C60B8] dark:group-hover:text-indigo-300 transition-colors">
                           {item.title}
                         </p>
                         <span
@@ -635,10 +635,10 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                           {item.badge}
                         </span>
                       </div>
-                      <p className="truncate text-[10.5px] font-semibold text-[#6E6A86] leading-tight mt-0.5">
+                      <p className="truncate text-[10.5px] font-semibold text-[#6E6A86] dark:text-slate-300 leading-tight mt-0.5">
                         {item.subtitle}
                       </p>
-                      <p className="truncate text-[10px] text-[#A2A0B4] leading-tight mt-0.5">
+                      <p className="truncate text-[10px] text-[#A2A0B4] dark:text-slate-400 leading-tight mt-0.5">
                         {item.meta}
                       </p>
                     </div>
@@ -650,17 +650,17 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
         </div>
 
         {/* Bottom Section: Interactive Google Maps Coordinate & Instant Live Location Sharing */}
-        <div className="mt-5 pt-3 border-t border-[#ECEBF5]">
+        <div className="mt-5 pt-3 border-t border-[#ECEBF5] dark:border-slate-800">
           <div className="flex items-center justify-between mb-2.5">
             <div className="flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#FFE4EC] text-[#F25781]">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#FFE4EC] dark:bg-rose-950/70 text-[#F25781]">
                 <OrbitaMenuIcon variant="location" className="h-3.5 w-3.5" />
               </span>
               <div>
-                <h3 className="text-xs font-extrabold text-[#3E385B] leading-none">
+                <h3 className="text-xs font-extrabold text-[#3E385B] dark:text-white leading-none">
                   Live Map &amp; GPS
                 </h3>
-                <span className="text-[9.5px] font-semibold text-[#9694A8]">
+                <span className="text-[9.5px] font-semibold text-[#9694A8] dark:text-slate-400">
                   {selectedCoords.latitude.toFixed(4)}, {selectedCoords.longitude.toFixed(4)}
                 </span>
               </div>
@@ -669,7 +669,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
             <button
               type="button"
               onClick={() => setShowExpandedMapModal(true)}
-              className="no-ornament inline-flex items-center gap-1 rounded-full bg-[#ECE9FA] hover:bg-[#DFD9F8] px-2.5 py-1 text-[10px] font-extrabold text-[#6C60B8] transition-colors cursor-pointer"
+              className="no-ornament inline-flex items-center gap-1 rounded-full bg-[#ECE9FA] hover:bg-[#DFD9F8] dark:bg-indigo-950/70 dark:hover:bg-indigo-900/70 px-2.5 py-1 text-[10px] font-extrabold text-[#6C60B8] dark:text-indigo-300 transition-colors cursor-pointer"
               title="Perbesar Peta & Koordinat Google Maps"
             >
               <Maximize2 className="h-3 w-3" />
@@ -678,7 +678,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
           </div>
 
           {/* Interactive Google Maps Coordinate Preview Card — Clicking immediately shares Live Location */}
-          <div className="relative overflow-hidden rounded-[22px] border border-[#E4E3F0] bg-white shadow-[0_12px_28px_-6px_rgba(108,96,184,0.14)]">
+          <div className="relative overflow-hidden rounded-[22px] border border-[#E4E3F0] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_12px_28px_-6px_rgba(108,96,184,0.14)]">
             {/* Embedded Real Google Maps Coordinate Iframe */}
             <div className="relative h-40 w-full overflow-hidden bg-[#EEF0F8]">
               <iframe
@@ -729,7 +729,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
             </div>
 
             {/* Action Buttons Row Below Map (Proportional Button Sizing) */}
-            <div className="p-2.5 bg-white space-y-2">
+            <div className="p-2.5 bg-white dark:bg-slate-900 space-y-2">
               <div className="grid grid-cols-2 gap-1.5">
                 <button
                   type="button"
@@ -750,7 +750,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                 <button
                   type="button"
                   onClick={handleShareOrCopyCoordinateLink}
-                  className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#FFE4EC] hover:bg-[#FFD4E2] px-2.5 text-[10.5px] font-extrabold text-[#F25781] whitespace-nowrap transition-all cursor-pointer"
+                  className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#FFE4EC] hover:bg-[#FFD4E2] dark:bg-rose-950/60 dark:hover:bg-rose-900/60 px-2.5 text-[10.5px] font-extrabold text-[#F25781] dark:text-rose-300 whitespace-nowrap transition-all cursor-pointer"
                 >
                   {copiedLink ? (
                     <>
@@ -766,12 +766,12 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                 </button>
               </div>
 
-              <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-[#F0F1F6]">
+              <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-[#F0F1F6] dark:border-slate-800">
                 <a
                   href={googleMapsPinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[10px] font-bold text-[#6C60B8] hover:underline whitespace-nowrap shrink-0"
+                  className="inline-flex items-center gap-1 text-[10px] font-bold text-[#6C60B8] dark:text-indigo-300 hover:underline whitespace-nowrap shrink-0"
                 >
                   <ExternalLink className="h-3 w-3 shrink-0" />
                   <span>Buka Google Maps</span>
@@ -786,7 +786,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                     Matikan Live
                   </button>
                 ) : (
-                  <span className="text-[9.5px] font-medium text-[#A2A0B4] whitespace-nowrap shrink-0">
+                  <span className="text-[9.5px] font-medium text-[#A2A0B4] dark:text-slate-400 whitespace-nowrap shrink-0">
                     {pklPartners.length} Mitra DUDI
                   </span>
                 )}
@@ -800,7 +800,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
   return (
     <>
       {/* Desktop Right Static Rail (xl+) */}
-      <aside className="hidden xl:flex w-[304px] shrink-0 flex-col justify-between border-l border-[#ECEBF5] bg-[#F5F6FB]/75 px-5 py-6 overflow-y-auto select-none">
+      <aside className="hidden xl:flex w-[304px] shrink-0 flex-col justify-between border-l border-[#ECEBF5] bg-[#F5F6FB]/75 dark:border-slate-800 dark:bg-slate-900/70 px-5 py-6 overflow-y-auto select-none">
         {panelBody(false)}
       </aside>
 
@@ -812,7 +812,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
             className="fixed inset-0 bg-[#3E385B]/45 backdrop-blur-xs animate-fade-in"
             aria-hidden="true"
           />
-          <aside className="relative z-10 flex h-full w-full max-w-[360px] flex-col justify-between border-l border-[#ECEBF5] bg-[#F8F9FD] px-4 py-5 pb-24 lg:pb-6 overflow-y-auto shadow-2xl animate-drawer-right select-none">
+          <aside className="relative z-10 flex h-full w-full max-w-[360px] flex-col justify-between border-l border-[#ECEBF5] bg-[#F8F9FD] dark:border-slate-800 dark:bg-slate-950 px-4 py-5 pb-24 lg:pb-6 overflow-y-auto shadow-2xl animate-drawer-right select-none">
             {panelBody(true)}
           </aside>
         </div>
@@ -826,19 +826,19 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
         >
           <div
             onClick={e => e.stopPropagation()}
-            className="w-full max-w-3xl rounded-[24px] sm:rounded-[28px] border border-[#ECEBF5] bg-white p-4 sm:p-6 text-[#3E385B] shadow-[0_28px_70px_rgba(62,56,91,0.28)] space-y-4 animate-scale-up max-h-[90dvh] overflow-y-auto"
+            className="w-full max-w-3xl rounded-[24px] sm:rounded-[28px] border border-[#ECEBF5] bg-white dark:border-slate-800 dark:bg-slate-900 p-4 sm:p-6 text-[#3E385B] dark:text-slate-100 shadow-[0_28px_70px_rgba(62,56,91,0.28)] space-y-4 animate-scale-up max-h-[90dvh] overflow-y-auto"
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between gap-3 border-b border-[#F0F1F6] pb-3.5">
+            <div className="flex items-center justify-between gap-3 border-b border-[#F0F1F6] dark:border-slate-800 pb-3.5">
               <div className="flex items-center gap-3">
                 <span className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-[#6C60B8] text-white shadow-sm">
                   <OrbitaMenuIcon variant="location" className="h-5 w-5" />
                 </span>
                 <div>
-                  <h3 className="text-base sm:text-lg font-extrabold text-[#3E385B]">
+                  <h3 className="text-base sm:text-lg font-extrabold text-[#3E385B] dark:text-white">
                     Live Location &amp; Titik Koordinat Google Maps
                   </h3>
-                  <p className="text-xs text-[#9694A8]">
+                  <p className="text-xs text-[#9694A8] dark:text-slate-400">
                     Sinkronisasi otomatis lintas perangkat (Smartphone, Tablet &amp; Laptop) saat login ke ORBITA
                   </p>
                 </div>
@@ -846,14 +846,14 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
               <button
                 type="button"
                 onClick={() => setShowExpandedMapModal(false)}
-                className="no-ornament flex h-9 w-9 items-center justify-center rounded-full bg-[#F0F1F6] text-[#3E385B] hover:bg-[#FFE4EC] hover:text-[#F25781] transition-colors cursor-pointer"
+                className="no-ornament flex h-9 w-9 items-center justify-center rounded-full bg-[#F0F1F6] text-[#3E385B] hover:bg-[#FFE4EC] hover:text-[#F25781] dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-rose-950/60 dark:hover:text-rose-300 transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
 
             {/* Large Interactive Google Maps Iframe */}
-            <div className="relative h-72 sm:h-80 w-full overflow-hidden rounded-[22px] border border-[#E4E3F0] bg-[#F4F3FA]">
+            <div className="relative h-72 sm:h-80 w-full overflow-hidden rounded-[22px] border border-[#E4E3F0] dark:border-slate-800 bg-[#F4F3FA] dark:bg-slate-800">
               <iframe
                 title="Google Maps Full Coordinate View"
                 src={googleMapsEmbedUrl}
@@ -861,11 +861,11 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
-              <div className="pointer-events-none absolute top-3 left-3 rounded-2xl bg-white/95 backdrop-blur-md border border-[#ECEBF5] px-3.5 py-2 shadow-md">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#6C60B8] block">
+              <div className="pointer-events-none absolute top-3 left-3 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-[#ECEBF5] dark:border-slate-700 px-3.5 py-2 shadow-md">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#6C60B8] dark:text-indigo-300 block">
                   Titik Koordinat Aktif
                 </span>
-                <span className="text-xs font-extrabold text-[#3E385B] block">
+                <span className="text-xs font-extrabold text-[#3E385B] dark:text-white block">
                   {selectedCoords.label}
                 </span>
                 <span className="text-[11px] font-mono font-semibold text-[#F25781]">
@@ -875,9 +875,9 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
             </div>
 
             {/* Primary Live Location Controls */}
-            <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-[20px] bg-[#F8F7FC] border border-[#ECEBF5] p-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-[20px] bg-[#F8F7FC] dark:bg-slate-800/60 border border-[#ECEBF5] dark:border-slate-800 p-3.5">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FFE4EC] text-[#F25781]">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FFE4EC] dark:bg-rose-950/60 text-[#F25781]">
                   {detectDeviceName().includes('Phone') || detectDeviceName().includes('Android') ? (
                     <Smartphone className="h-4.5 w-4.5" />
                   ) : (
@@ -885,10 +885,10 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                   )}
                 </div>
                 <div>
-                  <span className="text-xs font-extrabold text-[#3E385B] block">
+                  <span className="text-xs font-extrabold text-[#3E385B] dark:text-white block">
                     Perangkat Anda: {detectDeviceName()} ({currentUser.displayName})
                   </span>
-                  <span className="text-[11px] text-[#9694A8]">
+                  <span className="text-[11px] text-[#9694A8] dark:text-slate-400">
                     {isSharingLive
                       ? 'Sedang membagikan titik koordinat secara real-time'
                       : 'Klik Share Live Location untuk membagikan titik GPS perangkat Anda'}
@@ -910,7 +910,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                 <button
                   type="button"
                   onClick={handleShareOrCopyCoordinateLink}
-                  className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#FFE4EC] hover:bg-[#FFD4E2] px-3.5 text-xs font-extrabold text-[#F25781] whitespace-nowrap shrink-0 transition-all cursor-pointer"
+                  className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#FFE4EC] hover:bg-[#FFD4E2] dark:bg-rose-950/60 dark:hover:bg-rose-900/60 px-3.5 text-xs font-extrabold text-[#F25781] dark:text-rose-300 whitespace-nowrap shrink-0 transition-all cursor-pointer"
                 >
                   <Copy className="h-3.5 w-3.5 shrink-0" />
                   <span>Salin / Share Link</span>
@@ -920,7 +920,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                   href={googleMapsPinUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#E7F9EF] hover:bg-[#D2F4E1] px-3.5 text-xs font-extrabold text-[#139A4C] whitespace-nowrap shrink-0 transition-all"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#E7F9EF] hover:bg-[#D2F4E1] dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 px-3.5 text-xs font-extrabold text-[#139A4C] dark:text-emerald-300 whitespace-nowrap shrink-0 transition-all"
                 >
                   <ExternalLink className="h-3.5 w-3.5 shrink-0" />
                   <span>Buka Google Maps</span>
@@ -933,33 +933,33 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
               {/* Left: Manual / Custom Coordinate Setter */}
               <form
                 onSubmit={handleApplyManualCoords}
-                className="rounded-[20px] border border-[#ECEBF5] bg-[#FAF9FE] p-4 space-y-3"
+                className="rounded-[20px] border border-[#ECEBF5] dark:border-slate-800 bg-[#FAF9FE] dark:bg-slate-800/40 p-4 space-y-3"
               >
-                <span className="text-xs font-extrabold text-[#3E385B] block">
+                <span className="text-xs font-extrabold text-[#3E385B] dark:text-white block">
                   Atur Titik Koordinat Presisi (Latitude / Longitude)
                 </span>
                 <div className="grid grid-cols-2 gap-2.5">
                   <div>
-                    <label className="text-[10px] font-bold text-[#9694A8] block mb-1">
+                    <label className="text-[10px] font-bold text-[#9694A8] dark:text-slate-400 block mb-1">
                       Latitude
                     </label>
                     <input
                       type="text"
                       value={manualLatInput}
                       onChange={e => setManualLatInput(e.target.value)}
-                      className="w-full rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                      className="w-full rounded-xl px-3 py-1.5 text-xs font-mono font-bold dark:bg-slate-900 dark:border-slate-700 dark:text-white"
                       placeholder="-6.98262"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-[#9694A8] block mb-1">
+                    <label className="text-[10px] font-bold text-[#9694A8] dark:text-slate-400 block mb-1">
                       Longitude
                     </label>
                     <input
                       type="text"
                       value={manualLngInput}
                       onChange={e => setManualLngInput(e.target.value)}
-                      className="w-full rounded-xl px-3 py-1.5 text-xs font-mono font-bold"
+                      className="w-full rounded-xl px-3 py-1.5 text-xs font-mono font-bold dark:bg-slate-900 dark:border-slate-700 dark:text-white"
                       placeholder="106.83254"
                     />
                   </div>
@@ -978,7 +978,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                       setManualLatInput(String(DEFAULT_SCHOOL_COORDS.latitude));
                       setManualLngInput(String(DEFAULT_SCHOOL_COORDS.longitude));
                     }}
-                    className="no-ornament inline-flex h-9 items-center justify-center rounded-xl bg-[#F0F1F6] hover:bg-[#E4E3F0] px-3.5 text-xs font-bold text-[#3E385B] whitespace-nowrap shrink-0 cursor-pointer"
+                    className="no-ornament inline-flex h-9 items-center justify-center rounded-xl bg-[#F0F1F6] hover:bg-[#E4E3F0] dark:bg-slate-800 dark:hover:bg-slate-700 px-3.5 text-xs font-bold text-[#3E385B] dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     Kampus ORBITA
                   </button>
@@ -986,8 +986,8 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
               </form>
 
               {/* Right: Active Live Devices & Partner Coordinates */}
-              <div className="rounded-[20px] border border-[#ECEBF5] bg-[#FAF9FE] p-4 space-y-2.5 max-h-48 overflow-y-auto">
-                <span className="text-xs font-extrabold text-[#3E385B] block">
+              <div className="rounded-[20px] border border-[#ECEBF5] dark:border-slate-800 bg-[#FAF9FE] dark:bg-slate-800/40 p-4 space-y-2.5 max-h-48 overflow-y-auto">
+                <span className="text-xs font-extrabold text-[#3E385B] dark:text-white block">
                   Perangkat Live &amp; Titik Lokasi Mitra ({activeSharedList.length + 1})
                 </span>
 
@@ -1003,17 +1003,17 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                         deviceName: entry.deviceName,
                       });
                     }}
-                    className="flex items-center justify-between gap-2 rounded-xl border border-[#ECEBF5] bg-white p-2.5 text-xs hover:border-[#6C60B8] cursor-pointer transition-colors"
+                    className="flex items-center justify-between gap-2 rounded-xl border border-[#ECEBF5] dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 text-xs hover:border-[#6C60B8] cursor-pointer transition-colors"
                   >
                     <div className="min-w-0">
-                      <p className="font-extrabold text-[#3E385B] truncate">
+                      <p className="font-extrabold text-[#3E385B] dark:text-white truncate">
                         {entry.userName} ({entry.deviceName})
                       </p>
-                      <p className="text-[10px] font-mono text-[#6C60B8]">
+                      <p className="text-[10px] font-mono text-[#6C60B8] dark:text-indigo-300">
                         {entry.latitude.toFixed(5)}, {entry.longitude.toFixed(5)}
                       </p>
                     </div>
-                    <span className="rounded-full bg-[#E7F9EF] px-2.5 py-0.5 text-[10px] font-extrabold text-[#139A4C] shrink-0">
+                    <span className="rounded-full bg-[#E7F9EF] dark:bg-emerald-950/60 px-2.5 py-0.5 text-[10px] font-extrabold text-[#139A4C] dark:text-emerald-300 shrink-0">
                       LIVE
                     </span>
                   </div>
@@ -1021,20 +1021,20 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
 
                 <div
                   onClick={() => setSelectedCoords(DEFAULT_SCHOOL_COORDS)}
-                  className="flex items-center justify-between gap-2 rounded-xl border border-[#ECEBF5] bg-white p-2.5 text-xs hover:border-[#6C60B8] cursor-pointer transition-colors"
+                  className="flex items-center justify-between gap-2 rounded-xl border border-[#ECEBF5] dark:border-slate-700 bg-white dark:bg-slate-900 p-2.5 text-xs hover:border-[#6C60B8] cursor-pointer transition-colors"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <MapPin className="h-3.5 w-3.5 text-[#F25781] shrink-0" />
                     <div className="min-w-0">
-                      <p className="font-extrabold text-[#3E385B] truncate">
+                      <p className="font-extrabold text-[#3E385B] dark:text-white truncate">
                         Kampus Utama ORBITA Sukabumi
                       </p>
-                      <p className="text-[10px] font-mono text-[#9694A8]">
+                      <p className="text-[10px] font-mono text-[#9694A8] dark:text-slate-400">
                         {DEFAULT_SCHOOL_COORDS.latitude}, {DEFAULT_SCHOOL_COORDS.longitude}
                       </p>
                     </div>
                   </div>
-                  <span className="rounded-full bg-[#F0EEFA] px-2 py-0.5 text-[10px] font-bold text-[#6C60B8]">
+                  <span className="rounded-full bg-[#F0EEFA] dark:bg-indigo-950/70 px-2 py-0.5 text-[10px] font-bold text-[#6C60B8] dark:text-indigo-300">
                     Pusat
                   </span>
                 </div>
