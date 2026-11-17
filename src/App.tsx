@@ -129,7 +129,7 @@ const MainContent: React.FC = () => {
 const AppRouter: React.FC = () => {
   const { pageView } = useApp();
 
-  if (pageView === 'login') {
+  if (pageView !== 'app') {
     return <LoginPage />;
   }
 

@@ -405,8 +405,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveNavState(nav);
     try {
       localStorage.setItem('myschool_active_nav', nav);
-      if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
-        window.history.replaceState(null, '', `#${nav}`);
+      if (
+        typeof window !== 'undefined' &&
+        window.history &&
+        window.history.replaceState &&
+        localStorage.getItem('myschool_page_view') === 'app'
+      ) {
+        window.history.replaceState(null, '', `/dashboard#${nav}`);
       }
     } catch (e) {}
   };
@@ -430,9 +435,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Logout confirmation modal state
   const [showLogoutModal, setShowLogoutModal] = useState<boolean>(false);
 
-  // Page Routing State (login, app)
+  // Page Routing State (login, app) — Root URL (/) automatically redirects to /login first
   const [pageView, setPageView] = useState<'landing' | 'login' | 'app'>(() => {
     try {
+      if (typeof window !== 'undefined') {
+        const path = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
+        const hasHash = Boolean(window.location.hash && window.location.hash !== '#');
+        const cached = localStorage.getItem('myschool_page_view');
+
+        if (path === '/' && !hasHash) {
+          localStorage.setItem('myschool_page_view', 'login');
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', '/login');
+          }
+          return 'login';
+        }
+
+        if (path === '/login') {
+          localStorage.setItem('myschool_page_view', 'login');
+          return 'login';
+        }
+
+        if ((path === '/dashboard' || path.startsWith('/dashboard/')) && cached === 'app') {
+          return 'app';
+        }
+
+        localStorage.setItem('myschool_page_view', 'login');
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', '/login');
+        }
+        return 'login';
+      }
       const cached = localStorage.getItem('myschool_page_view');
       return cached === 'app' ? 'app' : 'login';
     } catch (e) {
@@ -445,8 +478,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setPageView(nextView);
     try {
       localStorage.setItem('myschool_page_view', nextView);
+      if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
+        if (nextView === 'login') {
+          window.history.replaceState(null, '', '/login');
+        } else if (nextView === 'app') {
+          const targetNav = localStorage.getItem('myschool_active_nav') || activeNav || 'dashboard';
+          window.history.replaceState(null, '', `/dashboard#${targetNav}`);
+        }
+      }
     } catch (e) {}
   };
+
+  // Enforce /login redirect on browser navigation (popstate) to root or unauthenticated paths
+  useEffect(() => {
+    const handlePopState = () => {
+      try {
+        const path = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
+        const hasHash = Boolean(window.location.hash && window.location.hash !== '#');
+        const cached = localStorage.getItem('myschool_page_view');
+
+        if ((path === '/' && !hasHash) || path === '/login' || cached !== 'app') {
+          localStorage.setItem('myschool_page_view', 'login');
+          setPageView('login');
+          if (path !== '/login' && window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', '/login');
+          }
+        }
+      } catch (e) {}
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Users & Role state
   const [users, setUsers] = useState<User[]>(() => {
@@ -463,45 +526,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const currentRole = currentUser?.role || 'super_admin';
 
-  // Sync Firebase Auth if signed in via Google
+  // Sync Firebase Auth only when already inside an active app session (e.g. Google Sheets export)
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (fbUser: FirebaseUser | null) => {
       if (fbUser) {
-        // User logged in with Firebase Google Auth
+        let isActiveSession = false;
+        try {
+          isActiveSession = localStorage.getItem('myschool_page_view') === 'app';
+        } catch (e) {}
+        if (!isActiveSession) {
+          return;
+        }
+
         const existing = users.find(u => u.email === fbUser.email);
         if (existing) {
           setCurrentUser(existing);
           try {
             localStorage.setItem('myschool_current_user', JSON.stringify(existing));
-            localStorage.setItem('myschool_page_view', 'app');
           } catch (e) {}
-          setPageView('app');
-        } else {
-          // If it matches the authorized email kkaito447@gmail.com, make super_admin
-          const isOwner = fbUser.email === 'kkaito447@gmail.com';
-          const newUser: User = {
-            id: fbUser.uid,
-            email: fbUser.email || 'user@smkmy-cikembar.sch.id',
-            displayName: fbUser.displayName || 'Pengguna Terverifikasi',
-            role: isOwner ? 'super_admin' : 'guru',
-            photoURL: fbUser.photoURL || undefined,
-            isActive: true,
-            createdAt: new Date().toISOString(),
-          };
-          setUsers(prev => [newUser, ...prev]);
-          setCurrentUser(newUser);
-          try {
-            localStorage.setItem('myschool_current_user', JSON.stringify(newUser));
-            localStorage.setItem('myschool_page_view', 'app');
-          } catch (e) {}
-          setPageView('app');
-
-          // Sync to Firestore
-          try {
-            setDoc(doc(db, 'users', fbUser.uid), sanitizeForFirestore(newUser)).catch(() => {});
-          } catch (e) {
-            // Non blocking
-          }
         }
       }
     });
@@ -520,10 +562,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const loginWithRole = (role: UserRole) => {
     const targetUser = users.find(u => u.role === role) || initialUsers.find(u => u.role === role) || users[0];
+    const targetNav = role === 'siswa' ? 'student-profile' : 'dashboard';
     setCurrentUser(targetUser);
     localStorage.setItem('myschool_current_user', JSON.stringify(targetUser));
+    localStorage.setItem('myschool_active_nav', targetNav);
     handleSetPageView('app');
-    setActiveNav(role === 'siswa' ? 'student-profile' : 'dashboard');
+    setActiveNav(targetNav);
     addAuditLog('USER_LOGIN', 'Otentikasi', `Login berhasil sebagai: ${role.toUpperCase()} (${targetUser.displayName})`);
     pushNotification('Selamat Datang!', `Berhasil masuk ke portal ORBITA sebagai ${targetUser.displayName} (${role.toUpperCase()}).`, 'success');
   };
@@ -552,10 +596,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return false;
     }
 
+    const targetNav = found.role === 'siswa' ? 'student-profile' : 'dashboard';
     setCurrentUser(found);
     localStorage.setItem('myschool_current_user', JSON.stringify(found));
+    localStorage.setItem('myschool_active_nav', targetNav);
     handleSetPageView('app');
-    setActiveNav(found.role === 'siswa' ? 'student-profile' : 'dashboard');
+    setActiveNav(targetNav);
     addAuditLog('USER_LOGIN', 'Otentikasi', `Login berhasil: ${found.displayName} (${found.role.toUpperCase()})`);
     pushNotification(
       'Selamat Datang Kembali!',
@@ -578,13 +624,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       // ignore
     }
-    handleSetPageView('login');
     try {
       localStorage.removeItem('myschool_active_nav');
-      if (typeof window !== 'undefined' && window.history && window.history.replaceState) {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
     } catch (e) {}
+    handleSetPageView('login');
     pushNotification('Sesi Berakhir', 'Anda telah berhasil keluar dari sistem.', 'info');
   };
 

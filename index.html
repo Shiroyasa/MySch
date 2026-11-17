@@ -16,6 +16,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
       try {
+        var curPath = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
+        var curHash = window.location.hash || '';
+        if ((curPath === '/' && (!curHash || curHash === '#')) || (curPath !== '/login' && localStorage.getItem('myschool_page_view') !== 'app')) {
+          localStorage.setItem('myschool_page_view', 'login');
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', '/login');
+          }
+        }
+      } catch (e) {}
+      try {
         if (localStorage.getItem('myschool_theme') === 'dark') {
           document.documentElement.classList.add('dark');
         } else {
