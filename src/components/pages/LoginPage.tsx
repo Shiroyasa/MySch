@@ -25,6 +25,7 @@ import { GenshinElementIcon, OrbitaMenuIcon, buildSmoothWavePath } from '../comm
 import { AnimeBackground } from '../common/AnimeBackground';
 import { LiquidNavBar } from '../common/LiquidNavBar';
 import { ThemeFlipToggle } from '../common/ThemeFlipToggle';
+import { LiquidDigitalClock } from '../common/LiquidDigitalClock';
 import { SqueezeLineIndicator } from '../common/CarouselTablePagination';
 import { AccordionExpandAllBar, AccordionSection, useAccordionGroup } from '../common/AccordionExpandGroup';
 
@@ -448,6 +449,7 @@ export const LoginPage: React.FC = () => {
                     </button>
                   ) : null}
 
+                  <LiquidDigitalClock size="md" />
                   <ThemeFlipToggle showLabel size="md" />
                 </div>
               </div>

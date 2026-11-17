@@ -1863,4 +1863,87 @@ html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#7A7596\]:not(.pape
   color: #B9B4D4 !important;
 }
 
+/* ========================================================================== */
+/* LIQUID DIGITAL CLOCK ANIMATIONS                                            */
+/* ========================================================================== */
+
+@keyframes liquidClockWaveFlow {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes liquidClockWaveCounter {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes liquidDigitMorph {
+  0% {
+    opacity: 0.45;
+    transform: translateY(-3px) scaleY(1.12) scaleX(0.94);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(1px) scaleY(0.96) scaleX(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1) scaleX(1);
+  }
+}
+
+@keyframes liquidColonPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.42;
+    transform: scaleY(0.86);
+  }
+}
+
+.orbita-liquid-clock-wave-back {
+  animation: liquidClockWaveFlow 5.4s linear infinite;
+  will-change: transform;
+}
+
+.orbita-liquid-clock-wave-front {
+  animation: liquidClockWaveCounter 3.8s linear infinite;
+  will-change: transform;
+}
+
+.orbita-liquid-digit {
+  animation: liquidDigitMorph 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.orbita-liquid-colon {
+  animation: liquidColonPulse 1s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.orbita-liquid-clock-ripple {
+  animation: liquidSheenWave 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbita-liquid-clock-wave-back,
+  .orbita-liquid-clock-wave-front,
+  .orbita-liquid-digit,
+  .orbita-liquid-colon,
+  .orbita-liquid-clock-ripple {
+    animation: none !important;
+  }
+}
+
+
 

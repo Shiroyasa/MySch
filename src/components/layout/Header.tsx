@@ -16,6 +16,7 @@ import { BroadcastAnnouncementModal } from '../common/BroadcastAnnouncementModal
 import { ProfileModal } from '../common/ProfileModal';
 import { LiquidNavBar } from '../common/LiquidNavBar';
 import { ThemeFlipToggle } from '../common/ThemeFlipToggle';
+import { LiquidDigitalClock } from '../common/LiquidDigitalClock';
 
 export const Header: React.FC<{
   onToggleMobileSidebar: () => void;
@@ -260,7 +261,8 @@ export const Header: React.FC<{
               </button>
             )}
 
-            {/* Theme Flip Light / Dark Mode Toggle */}
+            {/* Liquid Digital Clock + Theme Flip Light / Dark Mode Toggle */}
+            <LiquidDigitalClock size="sm" />
             <ThemeFlipToggle size="sm" />
 
             {/* Notifications Popover */}
