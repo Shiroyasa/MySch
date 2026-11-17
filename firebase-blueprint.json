@@ -326,6 +326,29 @@
         "updatedAt": { "type": "string" }
       },
       "required": ["id", "nisn", "fullName", "majorCode", "graduationYear", "careerStatus", "institutionOrCompany"]
+    },
+    "galleryPhotos": {
+      "title": "Activity Documentation Photo",
+      "description": "School activity documentation photos uploaded by admins and displayed in the Login Gallery carousel",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 160 },
+        "caption": { "type": "string", "maxLength": 600 },
+        "category": { "type": "string", "enum": ["Kegiatan Sekolah", "PKL & Industri", "Prestasi & Lomba", "Ekstrakurikuler", "Akademik"] },
+        "activityDate": { "type": "string", "maxLength": 30 },
+        "location": { "type": "string", "maxLength": 140 },
+        "imageUrl": { "type": "string", "maxLength": 850000 },
+        "aspectRatioOverride": { "type": "string", "enum": ["inherit", "16:9", "4:3", "1:1", "21:9"] },
+        "imageFitOverride": { "type": "string", "enum": ["inherit", "cover", "contain"] },
+        "isFeatured": { "type": "boolean" },
+        "isPublished": { "type": "boolean" },
+        "order": { "type": "number" },
+        "uploadedBy": { "type": "string", "maxLength": 120 },
+        "createdAt": { "type": "string", "maxLength": 50 },
+        "updatedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "title", "category", "activityDate", "imageUrl", "isPublished", "order", "createdAt", "updatedAt"]
     }
   },
   "firestore": {
@@ -396,6 +419,10 @@
     "/pklTracerStudies/{tracerId}": {
       "schema": "pklTracerStudies",
       "description": "Alumni tracer study and post-PKL career tracking records"
+    },
+    "/galleryPhotos/{photoId}": {
+      "schema": "galleryPhotos",
+      "description": "Activity documentation photos managed by admins for the main Login Gallery carousel"
     }
   }
 }

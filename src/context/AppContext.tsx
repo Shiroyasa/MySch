@@ -24,6 +24,8 @@ import {
   VisualSettings,
   SchoolSettings,
   LessonSchedule,
+  GalleryPhoto,
+  GalleryViewSettings,
 } from '../types';
 import {
   initialUsers,
@@ -112,12 +114,16 @@ import {
   firestoreResetAssessmentScoresToZero,
   firestoreDeleteAssessmentAndScores,
   firestoreSaveCustomStudentReports,
+  firestoreSaveGalleryPhoto,
+  firestoreDeleteGalleryPhoto,
+  firestoreSaveGalleryViewSettings,
   forceReseedFirestore,
   sanitizeForFirestore,
 } from '../services/firestoreSync';
 import { ReportCustomConfig, defaultReportConfig } from '../utils/exportUtils';
 import {
   idbGet,
+  idbSet,
   saveVisualSettingsLocally,
   saveLessonSchedulesLocally,
 } from '../utils/persistentStorage';
@@ -156,6 +162,20 @@ export const defaultSchoolSettings: SchoolSettings = {
   defaultKkm: 75,
   maxAlphaWarning: 3,
   lateToleranceMinutes: 15,
+};
+
+export const defaultGalleryViewSettings: GalleryViewSettings = {
+  displayPreset: 'spotlight_carousel',
+  aspectRatio: '16:9',
+  imageFit: 'cover',
+  autoPlay: true,
+  autoPlaySeconds: 5,
+  showCaption: true,
+  showCategoryBadge: true,
+  showDateBadge: true,
+  showThumbnails: true,
+  cardsPerSlide: 3,
+  transitionStyle: 'slide',
 };
 
 interface AppContextType {
@@ -329,6 +349,13 @@ interface AppContextType {
   lessonSchedules: LessonSchedule[];
   saveLessonSchedule: (schedule: LessonSchedule, isNew?: boolean) => void;
   deleteLessonSchedule: (scheduleId: string) => void;
+
+  // Activity Gallery Documentation & Carousel View Settings (Admin -> Login Page Gallery)
+  galleryPhotos: GalleryPhoto[];
+  galleryViewSettings: GalleryViewSettings;
+  saveGalleryPhoto: (photo: GalleryPhoto, isNew?: boolean) => Promise<void>;
+  deleteGalleryPhoto: (photoId: string) => Promise<void>;
+  updateGalleryViewSettings: (updates: Partial<GalleryViewSettings>) => Promise<void>;
 
   // Realtime Cloud Database Sync (Firestore)
   isFirestoreConnected: boolean;
@@ -915,12 +942,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return initialLessonSchedules;
   });
 
+  // Activity Gallery Photos & View Settings (Admin Documentation -> Login Carousel Gallery)
+  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>(() => {
+    return safeGetLocalStorage<GalleryPhoto[]>('myschool_gallery_photos', [], Array.isArray);
+  });
+
+  const [galleryViewSettings, setGalleryViewSettings] = useState<GalleryViewSettings>(() => {
+    const saved = safeGetLocalStorage<Partial<GalleryViewSettings>>(
+      'myschool_gallery_view_settings',
+      {},
+      val => Boolean(val && typeof val === 'object')
+    );
+    return { ...defaultGalleryViewSettings, ...saved };
+  });
+
   // Track local mutation timestamps so in-flight Firestore snapshots never revert recent local edits
   const lastVisualUpdateRef = React.useRef<number>(0);
   const lastScheduleUpdateRef = React.useRef<number>(0);
   const lastTracerUpdateRef = React.useRef<number>(0);
   const isTracerWriteActiveRef = React.useRef<boolean>(false);
   const lastReportTemplateUpdateRef = React.useRef<number>(0);
+  const lastGalleryUpdateRef = React.useRef<number>(0);
+  const lastGalleryViewUpdateRef = React.useRef<number>(0);
 
   // Hydrate full-fidelity VisualSettings & LessonSchedules from IndexedDB on mount
   useEffect(() => {
@@ -980,6 +1023,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           try {
             localStorage.setItem('myschool_lesson_schedules', JSON.stringify(idbSchedules));
           } catch {}
+        }
+      })
+      .catch(() => {});
+
+    idbGet<GalleryPhoto[]>('myschool_gallery_photos_full')
+      .then(idbPhotos => {
+        if (Array.isArray(idbPhotos) && idbPhotos.length > 0) {
+          setGalleryPhotos(prev => (prev.length > 0 ? prev : idbPhotos));
         }
       })
       .catch(() => {});
@@ -1183,6 +1234,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       onStudentReportsMapChange: data => {
         setCustomStudentReports(data);
         localStorage.setItem('myschool_student_reports_custom', JSON.stringify(data));
+      },
+      onGalleryPhotosChange: data => {
+        if (Date.now() - lastGalleryUpdateRef.current < 2000) {
+          return;
+        }
+        setGalleryPhotos(data);
+        idbSet('myschool_gallery_photos_full', data).catch(() => {});
+        try {
+          localStorage.setItem('myschool_gallery_photos', JSON.stringify(data));
+        } catch {}
+      },
+      onGalleryViewSettingsChange: data => {
+        if (Date.now() - lastGalleryViewUpdateRef.current < 2000) {
+          return;
+        }
+        setGalleryViewSettings(prev => {
+          const next = { ...defaultGalleryViewSettings, ...prev, ...data };
+          try {
+            localStorage.setItem('myschool_gallery_view_settings', JSON.stringify(next));
+          } catch {}
+          return next;
+        });
       },
       onUsersChange: data => {
         setUsers(data);
@@ -3591,6 +3664,111 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // Activity Gallery Documentation & View Settings CRUD (Admin -> Login Carousel)
+  const saveGalleryPhoto = async (photo: GalleryPhoto, isNew = false): Promise<void> => {
+    lastGalleryUpdateRef.current = Date.now();
+    const nowIso = new Date().toISOString();
+    const normalized: GalleryPhoto = {
+      ...photo,
+      createdAt: photo.createdAt || nowIso,
+      updatedAt: nowIso,
+      uploadedBy: photo.uploadedBy || currentUser.displayName,
+    };
+    setGalleryPhotos(prev => {
+      const exists = prev.some(p => p.id === normalized.id);
+      const next = exists
+        ? prev.map(p => (p.id === normalized.id ? normalized : p))
+        : [normalized, ...prev];
+      const sorted = [...next].sort((a, b) => {
+        if (a.order !== b.order) return a.order - b.order;
+        return (b.activityDate || b.createdAt || '').localeCompare(a.activityDate || a.createdAt || '');
+      });
+      idbSet('myschool_gallery_photos_full', sorted).catch(() => {});
+      try {
+        localStorage.setItem('myschool_gallery_photos', JSON.stringify(sorted));
+      } catch {}
+      return sorted;
+    });
+
+    setIsSyncing(true);
+    try {
+      await firestoreSaveGalleryPhoto(normalized);
+      lastGalleryUpdateRef.current = Date.now();
+      setIsFirestoreConnected(true);
+      setLastSyncTime(new Date());
+      addAuditLog(
+        isNew ? 'UPLOAD_GALLERY_PHOTO' : 'UPDATE_GALLERY_PHOTO',
+        'Galeri Dokumentasi Kegiatan',
+        `${isNew ? 'Mengunggah' : 'Memperbarui'} foto kegiatan: ${normalized.title} (${normalized.category})`
+      );
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const deleteGalleryPhoto = async (photoId: string): Promise<void> => {
+    lastGalleryUpdateRef.current = Date.now();
+    const target = galleryPhotos.find(p => p.id === photoId);
+    setGalleryPhotos(prev => {
+      const next = prev.filter(p => p.id !== photoId);
+      idbSet('myschool_gallery_photos_full', next).catch(() => {});
+      try {
+        localStorage.setItem('myschool_gallery_photos', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    setIsSyncing(true);
+    try {
+      await firestoreDeleteGalleryPhoto(photoId);
+      lastGalleryUpdateRef.current = Date.now();
+      setIsFirestoreConnected(true);
+      setLastSyncTime(new Date());
+      if (target) {
+        addAuditLog(
+          'DELETE_GALLERY_PHOTO',
+          'Galeri Dokumentasi Kegiatan',
+          `Menghapus foto dokumentasi kegiatan: ${target.title}`
+        );
+      }
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const updateGalleryViewSettings = async (updates: Partial<GalleryViewSettings>): Promise<void> => {
+    lastGalleryViewUpdateRef.current = Date.now();
+    let mergedSnapshot: GalleryViewSettings = defaultGalleryViewSettings;
+    setGalleryViewSettings(prev => {
+      const next: GalleryViewSettings = {
+        ...defaultGalleryViewSettings,
+        ...prev,
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+      mergedSnapshot = next;
+      try {
+        localStorage.setItem('myschool_gallery_view_settings', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    setIsSyncing(true);
+    try {
+      await firestoreSaveGalleryViewSettings(mergedSnapshot);
+      lastGalleryViewUpdateRef.current = Date.now();
+      setIsFirestoreConnected(true);
+      setLastSyncTime(new Date());
+      addAuditLog(
+        'UPDATE_GALLERY_VIEW',
+        'Galeri Dokumentasi Kegiatan',
+        `Memperbarui setingan view Galeri Login (${mergedSnapshot.displayPreset}, rasio ${mergedSnapshot.aspectRatio}, fit ${mergedSnapshot.imageFit})`
+      );
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -3708,6 +3886,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         lessonSchedules,
         saveLessonSchedule,
         deleteLessonSchedule,
+        galleryPhotos,
+        galleryViewSettings,
+        saveGalleryPhoto,
+        deleteGalleryPhoto,
+        updateGalleryViewSettings,
         isFirestoreConnected,
         isSyncing,
         lastSyncTime,

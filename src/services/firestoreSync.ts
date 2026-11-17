@@ -36,6 +36,8 @@ import {
   VisualSettings,
   SchoolSettings,
   LessonSchedule,
+  GalleryPhoto,
+  GalleryViewSettings,
 } from '../types';
 import {
   initialStudents,
@@ -82,6 +84,8 @@ export interface SyncCallbacks {
   onSchoolSettingsChange?: (data: SchoolSettings) => void;
   onLessonSchedulesChange?: (data: LessonSchedule[]) => void;
   onStudentReportsMapChange?: (data: Record<string, any>) => void;
+  onGalleryPhotosChange?: (data: GalleryPhoto[]) => void;
+  onGalleryViewSettingsChange?: (data: GalleryViewSettings) => void;
   onSyncStatusChange?: (status: { isConnected: boolean; isSyncing: boolean; lastSync: Date; error?: string }) => void;
 }
 
@@ -940,6 +944,76 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     }
   }
 
+  // 25. Activity Gallery Photos (Managed in Admin, displayed on Login Gallery carousel)
+  if (callbacks.onGalleryPhotosChange) {
+    try {
+      const unsubGallery = onSnapshot(
+        collection(db, 'galleryPhotos'),
+        snapshot => {
+          if (snapshot.metadata.fromCache && snapshot.empty && !snapshot.metadata.hasPendingWrites) {
+            return;
+          }
+          const list: GalleryPhoto[] = [];
+          snapshot.forEach(docSnap => {
+            const raw = docSnap.data() as Partial<GalleryPhoto>;
+            if (raw && raw.imageUrl) {
+              list.push({
+                id: raw.id || docSnap.id,
+                title: raw.title || 'Dokumentasi Kegiatan',
+                caption: raw.caption || '',
+                category: raw.category || 'Kegiatan Sekolah',
+                activityDate: raw.activityDate || '',
+                location: raw.location,
+                imageUrl: raw.imageUrl,
+                aspectRatioOverride: raw.aspectRatioOverride || 'inherit',
+                imageFitOverride: raw.imageFitOverride || 'inherit',
+                isFeatured: Boolean(raw.isFeatured),
+                isPublished: raw.isPublished !== false,
+                order: typeof raw.order === 'number' ? raw.order : 0,
+                uploadedBy: raw.uploadedBy,
+                createdAt: raw.createdAt || '',
+                updatedAt: raw.updatedAt || '',
+              });
+            }
+          });
+          list.sort((a, b) => {
+            if (a.order !== b.order) return a.order - b.order;
+            return (b.activityDate || b.createdAt || '').localeCompare(a.activityDate || a.createdAt || '');
+          });
+          callbacks.onGalleryPhotosChange?.(list);
+          handleUpdate();
+        },
+        error => {
+          safeHandleListenerError(error, 'galleryPhotos');
+        }
+      );
+      unsubscribers.push(unsubGallery);
+    } catch (err) {
+      console.error('Error attaching galleryPhotos listener:', err);
+    }
+  }
+
+  // 26. Activity Gallery View Settings (Carousel layout, aspect ratio, autoplay, overlays)
+  if (callbacks.onGalleryViewSettingsChange) {
+    try {
+      const unsubGalleryView = onSnapshot(
+        doc(db, 'settings', 'gallery_view'),
+        docSnap => {
+          if (docSnap.exists()) {
+            callbacks.onGalleryViewSettingsChange?.(docSnap.data() as GalleryViewSettings);
+            handleUpdate();
+          }
+        },
+        error => {
+          safeHandleListenerError(error, 'settings/gallery_view');
+        }
+      );
+      unsubscribers.push(unsubGalleryView);
+    } catch (err) {
+      console.error('Error attaching settings/gallery_view listener:', err);
+    }
+  }
+
   return () => {
     unsubscribers.forEach(u => u());
   };
@@ -1743,3 +1817,59 @@ export async function firestoreSaveCustomStudentReports(
   }
 }
 
+export async function firestoreSaveGalleryPhoto(photo: GalleryPhoto): Promise<void> {
+  const safeId = String(photo.id || '')
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]/g, '_')
+    .slice(0, 120) || `gal-${Date.now()}`;
+  try {
+    const compactUrl = (await ensureCompactImageDataUrl(photo.imageUrl, 450_000, 1280)) || photo.imageUrl;
+    const nowIso = new Date().toISOString();
+    const payload: GalleryPhoto = {
+      id: safeId,
+      title: String(photo.title || 'Dokumentasi Kegiatan').trim().slice(0, 160),
+      caption: String(photo.caption || '').trim().slice(0, 600),
+      category: photo.category || 'Kegiatan Sekolah',
+      activityDate: String(photo.activityDate || nowIso.slice(0, 10)).slice(0, 30),
+      ...(photo.location ? { location: String(photo.location).trim().slice(0, 140) } : {}),
+      imageUrl: compactUrl,
+      aspectRatioOverride: photo.aspectRatioOverride || 'inherit',
+      imageFitOverride: photo.imageFitOverride || 'inherit',
+      isFeatured: Boolean(photo.isFeatured),
+      isPublished: photo.isPublished !== false,
+      order: typeof photo.order === 'number' ? photo.order : 0,
+      ...(photo.uploadedBy ? { uploadedBy: String(photo.uploadedBy).trim().slice(0, 120) } : {}),
+      createdAt: String(photo.createdAt || nowIso).slice(0, 50),
+      updatedAt: String(photo.updatedAt || nowIso).slice(0, 50),
+    };
+    await setDoc(doc(db, 'galleryPhotos', safeId), sanitizeForFirestore(payload));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `galleryPhotos/${safeId}`);
+  }
+}
+
+export async function firestoreDeleteGalleryPhoto(photoId: string): Promise<void> {
+  const safeId = String(photoId || '')
+    .trim()
+    .replace(/[^a-zA-Z0-9_-]/g, '_')
+    .slice(0, 120);
+  try {
+    await deleteDoc(doc(db, 'galleryPhotos', safeId));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `galleryPhotos/${safeId}`);
+  }
+}
+
+export async function firestoreSaveGalleryViewSettings(viewSettings: GalleryViewSettings): Promise<void> {
+  try {
+    await setDoc(
+      doc(db, 'settings', 'gallery_view'),
+      sanitizeForFirestore({
+        ...viewSettings,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'settings/gallery_view');
+  }
+}

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { AcademyScheduleBoard } from '../common/AcademyScheduleBoard';
 import { TracerStudyPortalForm, TracerPortalStage } from '../common/TracerStudyPortalForm';
+import { ActivityGalleryCarousel } from '../common/ActivityGalleryCarousel';
 import { OrbitaOrnateFrame } from '../common/OrbitaOrnateFrame';
 import { GenshinElementIcon, OrbitaMenuIcon, buildSmoothWavePath } from '../common/AcademyOrnaments';
 import { AnimeBackground } from '../common/AnimeBackground';
@@ -43,6 +44,8 @@ export const LoginPage: React.FC = () => {
     attendanceRecords = [],
     assessmentScores = [],
     pklTracers = [],
+    galleryPhotos = [],
+    galleryViewSettings,
   } = useApp();
 
   const [email, setEmail] = useState('');
@@ -51,8 +54,8 @@ export const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [activePortalView, setActivePortalView] = useState<'login' | 'tracer'>('login');
-  const [mobileSection, setMobileSection] = useState<'login' | 'overview' | 'tracer'>('login');
+  const [activePortalView, setActivePortalView] = useState<'login' | 'gallery' | 'tracer'>('login');
+  const [mobileSection, setMobileSection] = useState<'login' | 'overview' | 'gallery' | 'tracer'>('login');
   const [overviewSlide, setOverviewSlide] = useState<0 | 1>(0);
   const [overviewSlideDir, setOverviewSlideDir] = useState<'next' | 'prev'>('next');
   const overviewTouchStartXRef = React.useRef<number | null>(null);
@@ -60,10 +63,15 @@ export const LoginPage: React.FC = () => {
   const [resolvedTracerCategory, setResolvedTracerCategory] =
     useState<AlumniRespondentCategory | null>(null);
   const [pendingPortalExit, setPendingPortalExit] = useState<{
-    view: 'login' | 'tracer';
-    mobile: 'login' | 'overview' | 'tracer';
+    view: 'login' | 'gallery' | 'tracer';
+    mobile: 'login' | 'overview' | 'gallery' | 'tracer';
   } | null>(null);
   const [selectedClassId, setSelectedClassId] = useState<string>('ALL');
+
+  const publishedGalleryPhotos = useMemo(
+    () => galleryPhotos.filter(p => p.isPublished !== false),
+    [galleryPhotos]
+  );
 
   const overviewAccordion = useAccordionGroup(['wave-card', 'bento-cards'], true);
 
@@ -73,8 +81,8 @@ export const LoginPage: React.FC = () => {
   };
 
   const navigatePortal = (
-    nextView: 'login' | 'tracer',
-    nextMobile: 'login' | 'overview' | 'tracer'
+    nextView: 'login' | 'gallery' | 'tracer',
+    nextMobile: 'login' | 'overview' | 'gallery' | 'tracer'
   ) => {
     const inTracerPortal = activePortalView === 'tracer' || mobileSection === 'tracer';
     const isLeavingTracerPortal = nextView !== 'tracer';
@@ -91,7 +99,7 @@ export const LoginPage: React.FC = () => {
       setTracerStage('verify');
       setResolvedTracerCategory(null);
     }
-    if (nextView === 'login') {
+    if (nextView !== 'tracer') {
       setResolvedTracerCategory(null);
     }
     setActivePortalView(nextView);
@@ -272,8 +280,11 @@ export const LoginPage: React.FC = () => {
   const loginWaveAreaPath = useMemo(() => buildSmoothWavePath(loginWavePoints, 92), [loginWavePoints]);
   const activeLoginLeftPct = `${Number((((activeLoginPoint?.x ?? 210) / 420) * 100).toFixed(1))}%`;
 
+  const isInGalleryPortal = activePortalView === 'gallery' || mobileSection === 'gallery';
   const isInTracerPortal = activePortalView === 'tracer' || mobileSection === 'tracer';
-  const headerKicker = isInTracerPortal
+  const headerKicker = isInGalleryPortal
+    ? 'Dokumentasi Kegiatan Sekolah · Carousel Interaktif'
+    : isInTracerPortal
     ? tracerStage === 'verify'
       ? 'Portal Verifikasi Identitas Terdaftar ORBITA'
       : resolvedTracerCategory === 'kelas_12'
@@ -283,7 +294,9 @@ export const LoginPage: React.FC = () => {
       : 'Portal Tracer Study & Rencana Lulus'
     : 'Primary';
 
-  const headerTitle = isInTracerPortal
+  const headerTitle = isInGalleryPortal
+    ? 'Galeri Dokumentasi Kegiatan ORBITA'
+    : isInTracerPortal
     ? tracerStage === 'verify'
       ? 'Halaman Verifikasi NIS / NISN Siswa & Alumni'
       : resolvedTracerCategory === 'kelas_12'
@@ -354,14 +367,14 @@ export const LoginPage: React.FC = () => {
               <div className="h-px w-8 bg-white/20" />
             </div>
 
-            {/* Center Icons: Login & Single Tracer Study Portal Entry */}
+            {/* Center Icons: Login, Gallery Carousel & Tracer Study Portal Entry */}
             <LiquidNavBar
               orientation="vertical"
               embedded
               ariaLabel="Navigasi Portal Login"
               activeId={activePortalView}
               onSelect={id => {
-                const nextView = id as 'login' | 'tracer';
+                const nextView = id as 'login' | 'gallery' | 'tracer';
                 navigatePortal(nextView, nextView);
               }}
               items={[
@@ -370,6 +383,13 @@ export const LoginPage: React.FC = () => {
                   label: 'Login',
                   title: 'Gerbang Login & Overview ORBITA',
                   icon: <OrbitaMenuIcon variant="dashboard" className="h-5 w-5" />,
+                },
+                {
+                  id: 'gallery',
+                  label: 'Gallery',
+                  title: 'Galeri Dokumentasi Kegiatan Sekolah (Carousel)',
+                  icon: <OrbitaMenuIcon variant="gallery" className="h-5 w-5" />,
+                  dot: publishedGalleryPhotos.length > 0,
                 },
                 {
                   id: 'tracer',
@@ -417,7 +437,7 @@ export const LoginPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-                  {isInTracerPortal && tracerStage !== 'verify' ? (
+                  {isInGalleryPortal || (isInTracerPortal && tracerStage !== 'verify') ? (
                     <button
                       type="button"
                       onClick={() => navigatePortal('login', 'login')}
@@ -443,21 +463,40 @@ export const LoginPage: React.FC = () => {
                   ariaLabel="Navigasi Portal Login Mobile"
                   activeId={mobileSection}
                   onSelect={id => {
-                    const nextTab = id as 'login' | 'overview' | 'tracer';
-                    const nextView = nextTab === 'tracer' ? 'tracer' : 'login';
+                    const nextTab = id as 'login' | 'overview' | 'gallery' | 'tracer';
+                    const nextView =
+                      nextTab === 'tracer'
+                        ? 'tracer'
+                        : nextTab === 'gallery'
+                        ? 'gallery'
+                        : 'login';
                     navigatePortal(nextView, nextTab);
                   }}
                   items={[
                     { id: 'login', label: 'Login' },
-                    { id: 'overview', label: 'Overview & Jadwal' },
-                    { id: 'tracer', label: 'Tracer Study' },
+                    { id: 'overview', label: 'Overview' },
+                    {
+                      id: 'gallery',
+                      label: 'Gallery',
+                      dot: publishedGalleryPhotos.length > 0,
+                    },
+                    { id: 'tracer', label: 'Tracer' },
                   ]}
                 />
               </div>
 
               <div className="my-auto w-full">
-                {/* UNIFIED TRACER PORTAL */}
-                {isInTracerPortal ? (
+                {/* GALLERY CAROUSEL PORTAL */}
+                {isInGalleryPortal ? (
+                  <div className="pb-4">
+                    <ActivityGalleryCarousel
+                      photos={publishedGalleryPhotos}
+                      settings={galleryViewSettings}
+                      onBackToLogin={() => navigatePortal('login', 'login')}
+                    />
+                  </div>
+                ) : /* UNIFIED TRACER PORTAL */
+                isInTracerPortal ? (
                   <div className="pb-4">
                     <TracerStudyPortalForm
                       key="portal-tracer-unified"

@@ -14,6 +14,7 @@ import { AuditLogModule } from './components/modules/AuditLogModule';
 import { SettingsModule } from './components/modules/SettingsModule';
 import { StudentModule } from './components/modules/StudentModule';
 import { PklModule } from './components/modules/PklModule';
+import { GalleryModule } from './components/modules/GalleryModule';
 import { LoginPage } from './components/pages/LoginPage';
 import { LogoutModal } from './components/common/LogoutModal';
 import { AnimeBackground } from './components/common/AnimeBackground';
@@ -79,6 +80,7 @@ const MainContent: React.FC = () => {
                 {activeNav === 'grading' && <GradingModule />}
                 {activeNav === 'pkl' && <PklModule />}
                 {activeNav === 'master-data' && <MasterDataModule />}
+                {activeNav === 'gallery' && <GalleryModule />}
                 {activeNav === 'reports' && <ReportsModule />}
                 {activeNav === 'ai-studio' && <AiStudioModule />}
                 {activeNav === 'user-management' && <UserManagementModule />}

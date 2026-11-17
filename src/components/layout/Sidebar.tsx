@@ -124,6 +124,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       roles: ['super_admin', 'admin'],
     },
     {
+      id: 'gallery',
+      label: 'Galeri Kegiatan',
+      subLabel: 'Foto & View Carousel',
+      roles: ['super_admin', 'admin'],
+    },
+    {
       id: 'user-management',
       label: 'Manajemen Akun',
       subLabel: 'Otorisasi Role',

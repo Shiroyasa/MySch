@@ -482,3 +482,52 @@ export interface LessonSchedule {
   createdAt?: string;
 }
 
+export type GalleryCategory =
+  | 'Kegiatan Sekolah'
+  | 'PKL & Industri'
+  | 'Prestasi & Lomba'
+  | 'Ekstrakurikuler'
+  | 'Akademik';
+
+export type GalleryDisplayPreset =
+  | 'spotlight_carousel'
+  | 'card_carousel'
+  | 'filmstrip_carousel'
+  | 'mosaic_carousel';
+
+export type GalleryAspectRatio = '16:9' | '4:3' | '1:1' | '21:9';
+export type GalleryImageFit = 'cover' | 'contain';
+export type GalleryTransitionStyle = 'slide' | 'fade' | 'zoom';
+
+export interface GalleryPhoto {
+  id: string;
+  title: string;
+  caption: string;
+  category: GalleryCategory;
+  activityDate: string;
+  location?: string;
+  imageUrl: string;
+  aspectRatioOverride?: GalleryAspectRatio | 'inherit';
+  imageFitOverride?: GalleryImageFit | 'inherit';
+  isFeatured?: boolean;
+  isPublished: boolean;
+  order: number;
+  uploadedBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GalleryViewSettings {
+  displayPreset: GalleryDisplayPreset;
+  aspectRatio: GalleryAspectRatio;
+  imageFit: GalleryImageFit;
+  autoPlay: boolean;
+  autoPlaySeconds: number;
+  showCaption: boolean;
+  showCategoryBadge: boolean;
+  showDateBadge: boolean;
+  showThumbnails: boolean;
+  cardsPerSlide: number;
+  transitionStyle: GalleryTransitionStyle;
+  updatedAt?: string;
+}

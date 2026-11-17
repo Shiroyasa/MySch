@@ -148,6 +148,7 @@ export type OrbitaIconVariant =
   | 'master-data'
   | 'user-management'
   | 'audit-logs'
+  | 'gallery'
   | 'settings'
   | 'student-profile'
   | 'student-grades'
@@ -236,6 +237,14 @@ export const OrbitaMenuIcon: React.FC<{
             strokeLinejoin="round"
           />
           <path d="M9.3 12L11.2 13.9L15 10.1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    case 'gallery':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" className={`shrink-0 ${className}`}>
+          <rect x="3" y="4.5" width="18" height="15" rx="4" fill="currentColor" fillOpacity="0.16" stroke="currentColor" strokeWidth="1.85" />
+          <circle cx="8.5" cy="9.5" r="1.75" fill="currentColor" />
+          <path d="M4.2 17L9.4 12.2L13.1 15.4L16.2 12.6L19.8 16.5" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
     case 'settings':
@@ -762,6 +771,7 @@ const MODULE_ORDER = [
   'grading',
   'pkl',
   'master-data',
+  'gallery',
   'reports',
   'user-management',
   'audit-logs',

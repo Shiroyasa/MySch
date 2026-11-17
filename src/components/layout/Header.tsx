@@ -64,6 +64,7 @@ export const Header: React.FC<{
     grading: { kicker: 'Primary • Akademik', title: 'Penilaian & KKM' },
     pkl: { kicker: 'Primary • Industri', title: 'Administrasi PKL' },
     'master-data': { kicker: 'Primary • Basis Data', title: 'Master Data' },
+    gallery: { kicker: 'Primary • Publikasi', title: 'Galeri Kegiatan' },
     reports: { kicker: 'Primary • Dokumen', title: 'Laporan & Ekspor' },
     'user-management': { kicker: 'Primary • Otorisasi', title: 'Manajemen Akun' },
     'audit-logs': { kicker: 'Primary • Keamanan', title: 'Audit Log Sistem' },
@@ -90,6 +91,7 @@ export const Header: React.FC<{
           ...(isAdmin
             ? [
                 { id: 'master-data', label: 'Master Data Pokok Sekolah' },
+                { id: 'gallery', label: 'Galeri Foto Dokumentasi & View Carousel' },
                 { id: 'user-management', label: 'Manajemen Akun & Role' },
               ]
             : []),
