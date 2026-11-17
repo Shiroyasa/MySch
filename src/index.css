@@ -134,6 +134,118 @@
   }
 }
 
+@keyframes liquidBulgeDown {
+  0% {
+    transform: scaleX(0.92) scaleY(1.13);
+    border-radius: 15px 15px 22px 22px;
+  }
+  42% {
+    transform: scaleX(1.045) scaleY(0.94);
+    border-radius: 20px 20px 16px 16px;
+  }
+  74% {
+    transform: scaleX(0.985) scaleY(1.02);
+    border-radius: 16px;
+  }
+  100% {
+    transform: scaleX(1) scaleY(1);
+    border-radius: 16px;
+  }
+}
+
+@keyframes liquidBulgeUp {
+  0% {
+    transform: scaleX(0.92) scaleY(1.13);
+    border-radius: 22px 22px 15px 15px;
+  }
+  42% {
+    transform: scaleX(1.045) scaleY(0.94);
+    border-radius: 16px 16px 20px 20px;
+  }
+  74% {
+    transform: scaleX(0.985) scaleY(1.02);
+    border-radius: 16px;
+  }
+  100% {
+    transform: scaleX(1) scaleY(1);
+    border-radius: 16px;
+  }
+}
+
+@keyframes liquidTrailDown {
+  0% {
+    transform: translateY(-10px) scaleX(0.86) scaleY(1.22);
+    opacity: 0.72;
+  }
+  60% {
+    transform: translateY(2px) scaleX(1.02) scaleY(0.98);
+    opacity: 0.28;
+  }
+  100% {
+    transform: translateY(0) scaleX(1) scaleY(1);
+    opacity: 0;
+  }
+}
+
+@keyframes liquidTrailUp {
+  0% {
+    transform: translateY(10px) scaleX(0.86) scaleY(1.22);
+    opacity: 0.72;
+  }
+  60% {
+    transform: translateY(-2px) scaleX(1.02) scaleY(0.98);
+    opacity: 0.28;
+  }
+  100% {
+    transform: translateY(0) scaleX(1) scaleY(1);
+    opacity: 0;
+  }
+}
+
+@keyframes liquidAuraPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.25;
+  }
+  45% {
+    transform: scale(1.05);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes liquidSheenWave {
+  0% {
+    transform: translateX(-130%) skewX(-18deg);
+    opacity: 0;
+  }
+  35% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateX(190%) skewX(-18deg);
+    opacity: 0;
+  }
+}
+
+@keyframes liquidIconJelly {
+  0% {
+    transform: scale(0.88, 1.12);
+  }
+  40% {
+    transform: scale(1.15, 0.9) rotate(-3deg);
+  }
+  72% {
+    transform: scale(0.97, 1.04) rotate(1.5deg);
+  }
+  100% {
+    transform: scale(1.04, 1.04) rotate(0deg);
+  }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -164,6 +276,34 @@
 
 .animate-dock-pop {
   animation: dockIconPop 0.34s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.animate-liquid-bulge-down {
+  animation: liquidBulgeDown 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-liquid-bulge-up {
+  animation: liquidBulgeUp 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-liquid-trail-down {
+  animation: liquidTrailDown 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-liquid-trail-up {
+  animation: liquidTrailUp 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-liquid-aura {
+  animation: liquidAuraPulse 0.56s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-liquid-sheen {
+  animation: liquidSheenWave 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-liquid-icon-jelly {
+  animation: liquidIconJelly 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-stagger-1 {
@@ -199,6 +339,13 @@
   .animate-drawer-right,
   .animate-sheet-up,
   .animate-dock-pop,
+  .animate-liquid-bulge-down,
+  .animate-liquid-bulge-up,
+  .animate-liquid-trail-down,
+  .animate-liquid-trail-up,
+  .animate-liquid-aura,
+  .animate-liquid-sheen,
+  .animate-liquid-icon-jelly,
   .animate-stagger-1,
   .animate-stagger-2,
   .animate-stagger-3,

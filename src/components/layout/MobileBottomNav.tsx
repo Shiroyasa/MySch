@@ -31,7 +31,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           { id: 'student-grades', label: 'Nilai', icon: 'student-grades' },
           { id: 'pkl', label: 'PKL', icon: 'pkl' },
         ]
-      : currentRole === 'admin'
+      : currentRole === 'admin' || currentRole === 'super_admin'
       ? [
           { id: 'dashboard', label: 'Beranda', icon: 'dashboard' },
           { id: 'attendance', label: 'Presensi', icon: 'attendance' },

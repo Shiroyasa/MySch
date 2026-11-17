@@ -114,8 +114,8 @@ export const Header: React.FC<{
 
   return (
     <>
-      <header className="relative md:sticky top-0 z-30 w-full bg-[#F8F9FD]/95 dark:bg-slate-950/90 backdrop-blur-md px-3.5 sm:px-6 lg:px-8 pt-1.5 sm:pt-2">
-        <div className="flex h-14 sm:h-18 w-full items-center justify-between gap-2.5">
+      <header className="relative md:sticky top-0 z-30 w-full bg-[#F8F9FD]/95 dark:bg-slate-950/90 backdrop-blur-md px-3.5 sm:px-6 lg:px-8 pt-1.5 pb-1 sm:pt-2 sm:pb-1.5 border-b border-transparent">
+        <div className="flex h-14 sm:h-[70px] w-full items-center justify-between gap-2.5">
           {/* Left: Mobile/Tablet Menu Button + Title */}
           <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
             <button
