@@ -704,42 +704,77 @@ export const LoginPage: React.FC = () => {
                         mobileSection !== 'login' ? 'block' : 'hidden md:block'
                       }`}
                     >
-                      {/* Carousel Header Switcher & Controls */}
-                      <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-[20px] border border-[#DDD8F6]/70 dark:border-[#8D81E3]/25 bg-white/75 dark:bg-[#1E1A3E]/80 px-3.5 py-2 backdrop-blur-xl shadow-[0_8px_24px_-8px_rgba(101,88,181,0.12)]">
-                        <LiquidNavBar
-                          size="sm"
-                          pill
-                          ariaLabel="Carousel Overview dan Jadwal KBM"
-                          activeId={overviewSlide === 0 ? 'overview' : 'schedule'}
-                          onSelect={id => switchOverviewSlide(id === 'schedule' ? 1 : 0)}
-                          items={[
-                            { id: 'overview', label: 'Overview Akademik' },
-                            { id: 'schedule', label: `Jadwal KBM (${filteredSchedulesCount})` },
-                          ]}
-                        />
+                      {/* Carousel Header Switcher & Controls — Aligned with Gallery Toolbar */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 rounded-[20px] sm:rounded-[22px] border border-[#DDD8F6]/70 dark:border-[#8D81E3]/25 bg-white/82 dark:bg-[#1B173D]/86 px-3.5 py-2.5 sm:px-4 sm:py-3 backdrop-blur-xl shadow-[0_8px_24px_-8px_rgba(101,88,181,0.12)]">
+                        <div
+                          role="tablist"
+                          aria-label="Navigasi Overview dan Jadwal KBM"
+                          className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 sm:pb-0 sm:flex-wrap flex-1 min-w-0"
+                        >
+                          {[
+                            { id: 'overview' as const, label: 'Overview Akademik', slide: 0 as const },
+                            {
+                              id: 'schedule' as const,
+                              label: 'Jadwal KBM',
+                              count: filteredSchedulesCount,
+                              slide: 1 as const,
+                            },
+                          ].map(tab => {
+                            const isSelected = overviewSlide === tab.slide;
+                            return (
+                              <button
+                                key={tab.id}
+                                type="button"
+                                role="tab"
+                                aria-selected={isSelected}
+                                onClick={() => switchOverviewSlide(tab.slide)}
+                                className={`no-ornament inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap leading-none ${
+                                  isSelected
+                                    ? 'orbita-btn-violet text-white shadow-sm'
+                                    : 'border border-[#E4E2F2] bg-[#FAF9FE] text-[#5A537A] hover:bg-[#EFEBFB] dark:border-[#8D81E3]/25 dark:bg-[#231E4F]/70 dark:text-slate-200 dark:hover:bg-[#2E2866]'
+                                }`}
+                              >
+                                <span>{tab.label}</span>
+                                {typeof tab.count === 'number' && (
+                                  <span
+                                    className={`rounded-full px-1.5 py-0.5 text-[9.5px] font-extrabold tabular-nums leading-none ${
+                                      isSelected
+                                        ? 'bg-white/20 text-white'
+                                        : 'bg-[#ECE9F9] text-[#6C60B8] dark:bg-indigo-950/70 dark:text-indigo-300'
+                                    }`}
+                                  >
+                                    {tab.count}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => switchOverviewSlide(0)}
-                            disabled={overviewSlide === 0}
-                            aria-label="Slide Overview"
-                            className="no-ornament inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#DDD8F6] dark:border-slate-700 bg-[#FAF9FE] dark:bg-slate-800 hover:bg-[#EFEBFB] dark:hover:bg-slate-700 text-[#5D51B2] dark:text-indigo-300 disabled:opacity-40 cursor-pointer transition-all"
-                          >
-                            <ChevronLeft className="h-4 w-4" />
-                          </button>
-                          <span className="min-w-[36px] text-center text-[11px] font-extrabold text-[#3E385B] dark:text-slate-200 tabular-nums">
-                            {overviewSlide + 1} / 2
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => switchOverviewSlide(1)}
-                            disabled={overviewSlide === 1}
-                            aria-label="Slide Jadwal KBM"
-                            className="no-ornament inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#DDD8F6] dark:border-slate-700 bg-[#FAF9FE] dark:bg-slate-800 hover:bg-[#EFEBFB] dark:hover:bg-slate-700 text-[#5D51B2] dark:text-indigo-300 disabled:opacity-40 cursor-pointer transition-all"
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </button>
+                        <div className="flex items-center justify-end gap-2 shrink-0 border-t border-[#ECEBF5]/80 dark:border-[#8D81E3]/15 pt-2 sm:border-t-0 sm:pt-0">
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => switchOverviewSlide(0)}
+                              disabled={overviewSlide === 0}
+                              aria-label="Slide Overview"
+                              className="no-ornament inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#DDD8F6] dark:border-[#8D81E3]/28 bg-[#FAF9FE] dark:bg-[#231E4F]/80 text-[#5D51B2] dark:text-indigo-300 hover:bg-[#EFEBFB] dark:hover:bg-[#2D2664] disabled:opacity-40 cursor-pointer transition-all"
+                            >
+                              <ChevronLeft className="h-4 w-4" />
+                            </button>
+                            <span className="min-w-[42px] text-center text-[11px] font-extrabold text-[#3E385B] dark:text-slate-200 tabular-nums">
+                              {overviewSlide + 1} / 2
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => switchOverviewSlide(1)}
+                              disabled={overviewSlide === 1}
+                              aria-label="Slide Jadwal KBM"
+                              className="no-ornament inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#DDD8F6] dark:border-[#8D81E3]/28 bg-[#FAF9FE] dark:bg-[#231E4F]/80 text-[#5D51B2] dark:text-indigo-300 hover:bg-[#EFEBFB] dark:hover:bg-[#2D2664] disabled:opacity-40 cursor-pointer transition-all"
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
 
