@@ -1141,12 +1141,9 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
           <div className="rounded-[28px] border border-[#DDD8F6] dark:border-[#8D81E3]/25 bg-white/95 dark:bg-[#1E1A3E]/95 backdrop-blur-xl shadow-[0_24px_56px_-12px_rgba(93,81,178,0.22)] overflow-hidden">
             {/* Frosted Violet / Rose Header Strip */}
             <div
-              style={{
-                background: isLockedGrade12
-                  ? 'linear-gradient(135deg, rgba(226, 76, 120, 0.94) 0%, rgba(164, 70, 152, 0.94) 55%, rgba(93, 81, 178, 0.95) 100%)'
-                  : 'linear-gradient(135deg, rgba(114, 102, 196, 0.96) 0%, rgba(93, 81, 178, 0.94) 55%, rgba(75, 63, 160, 0.96) 100%)',
-              }}
-              className="p-6 sm:p-7 text-white"
+              className={`${
+                isLockedGrade12 ? 'orbita-card-coral' : 'orbita-hero-violet'
+              } p-6 sm:p-7 text-white`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-2">
@@ -1339,15 +1336,9 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
 
               <button
                 type="submit"
-                style={{
-                  background: isLockedGrade12
-                    ? 'linear-gradient(135deg, #FF7B9F 0%, #EE4D7A 100%)'
-                    : 'linear-gradient(135deg, #7468C4 0%, #5D51B2 100%)',
-                  boxShadow: isLockedGrade12
-                    ? '0 14px 28px -6px rgba(242, 87, 129, 0.38)'
-                    : '0 14px 28px -6px rgba(108, 96, 184, 0.42)',
-                }}
-                className="group flex w-full items-center justify-between rounded-[18px] px-5 py-3.5 text-xs sm:text-sm font-extrabold text-white transition-all cursor-pointer"
+                className={`${
+                  isLockedGrade12 ? 'orbita-btn-coral' : 'orbita-btn-violet'
+                } group flex w-full items-center justify-between rounded-[18px] px-5 py-3.5 text-xs sm:text-sm font-extrabold text-white transition-all cursor-pointer`}
               >
                 <span className="inline-flex items-center gap-2">
                   <UserCheck className="h-4 w-4" />
@@ -1373,15 +1364,9 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
         <div className="space-y-5">
           {/* Header Banner with Frosted Glass Tailored to Active Page */}
           <div
-            style={{
-              background: isLockedGrade12
-                ? 'linear-gradient(135deg, rgba(226, 76, 120, 0.94) 0%, rgba(164, 70, 152, 0.92) 55%, rgba(93, 81, 178, 0.95) 100%)'
-                : 'linear-gradient(135deg, rgba(114, 102, 196, 0.94) 0%, rgba(93, 81, 178, 0.92) 55%, rgba(75, 63, 160, 0.94) 100%)',
-              boxShadow: isLockedGrade12
-                ? '0 20px 44px -10px rgba(226, 76, 120, 0.34)'
-                : '0 20px 44px -10px rgba(84, 70, 172, 0.36)',
-            }}
-            className="relative overflow-hidden rounded-[26px] border border-white/30 p-5 sm:p-7 text-white backdrop-blur-xl"
+            className={`${
+              isLockedGrade12 ? 'orbita-card-coral' : 'orbita-hero-violet'
+            } relative overflow-hidden rounded-[26px] border border-white/30 dark:border-white/15 p-5 sm:p-7 text-white backdrop-blur-xl`}
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-2 max-w-2xl">
@@ -1771,7 +1756,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
               <div className="group flex flex-col justify-between rounded-[26px] border border-[#DDD8F6] dark:border-[#8D81E3]/25 bg-white/95 dark:bg-[#1E1A3E]/95 p-5 sm:p-6 shadow-[0_16px_38px_-10px_rgba(108,96,184,0.16)] backdrop-blur-xl transition-all hover:border-[#6C60B8]/50">
                 <div className="space-y-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-gradient-to-br from-[#7468C4] to-[#5D51B2] text-white shadow-[0_8px_20px_rgba(108,96,184,0.34)]">
+                    <div className="orbita-btn-violet flex h-12 w-12 items-center justify-center rounded-[18px] text-white">
                       <GenshinElementIcon element="geo" className="h-6 w-6" />
                     </div>
                     <span className="rounded-full bg-[#F0EEFA] dark:bg-indigo-950/70 border border-[#DDD8F6] dark:border-indigo-800/70 px-3 py-1 text-[10.5px] font-extrabold text-[#6C60B8] dark:text-indigo-300">
@@ -1813,11 +1798,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 <button
                   type="button"
                   onClick={() => startFreshForm('alumni')}
-                  style={{
-                    background: 'linear-gradient(135deg, #7468C4 0%, #5D51B2 100%)',
-                    boxShadow: '0 12px 24px -6px rgba(108, 96, 184, 0.40)',
-                  }}
-                  className="no-ornament mt-5 flex w-full items-center justify-between rounded-[18px] px-4 py-3 text-xs sm:text-sm font-extrabold text-white transition-all cursor-pointer"
+                  className="no-ornament orbita-btn-violet mt-5 flex w-full items-center justify-between rounded-[18px] px-4 py-3 text-xs sm:text-sm font-extrabold text-white transition-all cursor-pointer"
                 >
                   <span>Mulai Isi Form Alumni</span>
                   <ChevronRight className="h-4.5 w-4.5 transition-transform group-hover:translate-x-1" />
@@ -1830,7 +1811,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
               <div className="group flex flex-col justify-between rounded-[26px] border border-[#FFD1DF] dark:border-rose-800/50 bg-white/95 dark:bg-[#1E1A3E]/95 p-5 sm:p-6 shadow-[0_16px_38px_-10px_rgba(248,101,142,0.16)] backdrop-blur-xl transition-all hover:border-[#F8658E]/60">
                 <div className="space-y-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-gradient-to-br from-[#FF88A8] to-[#F25781] text-white shadow-[0_8px_20px_rgba(242,87,129,0.34)]">
+                    <div className="orbita-btn-coral flex h-12 w-12 items-center justify-center rounded-[18px] text-white">
                       <GenshinElementIcon element="electro" className="h-6 w-6" />
                     </div>
                     <span className="rounded-full bg-[#FFE8EF] dark:bg-rose-950/70 border border-[#FFC4D4] dark:border-rose-800/70 px-3 py-1 text-[10.5px] font-extrabold text-[#D9436D] dark:text-rose-300">
@@ -1874,11 +1855,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 <button
                   type="button"
                   onClick={() => startFreshForm('kelas_12')}
-                  style={{
-                    background: 'linear-gradient(135deg, #FF7B9F 0%, #EE4D7A 100%)',
-                    boxShadow: '0 12px 24px -6px rgba(242, 87, 129, 0.38)',
-                  }}
-                  className="no-ornament mt-5 flex w-full items-center justify-between rounded-[18px] px-4 py-3 text-xs sm:text-sm font-extrabold text-white transition-all cursor-pointer"
+                  className="no-ornament orbita-btn-coral mt-5 flex w-full items-center justify-between rounded-[18px] px-4 py-3 text-xs sm:text-sm font-extrabold text-white transition-all cursor-pointer"
                 >
                   <span>Mulai Isi Form Siswa Kelas 12</span>
                   <ChevronRight className="h-4.5 w-4.5 transition-transform group-hover:translate-x-1" />
@@ -2820,15 +2797,9 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 type="submit"
                 disabled={isSubmitting}
                 data-launching={isLaunchingPlane ? 'true' : 'false'}
-                style={{
-                  background: isGrade12
-                    ? 'linear-gradient(135deg, #FF7B9F 0%, #EE4D7A 100%)'
-                    : 'linear-gradient(135deg, #7468C4 0%, #5D51B2 100%)',
-                  boxShadow: isGrade12
-                    ? '0 14px 28px -6px rgba(242, 87, 129, 0.40)'
-                    : '0 14px 28px -6px rgba(108, 96, 184, 0.42)',
-                }}
-                className="no-ornament orbita-paper-plane-btn inline-flex h-11 items-center justify-center gap-2 rounded-[18px] px-6 text-xs sm:text-sm font-extrabold text-white disabled:opacity-75 cursor-pointer overflow-hidden"
+                className={`no-ornament orbita-paper-plane-btn ${
+                  isGrade12 ? 'orbita-btn-coral' : 'orbita-btn-violet'
+                } inline-flex h-11 items-center justify-center gap-2 rounded-[18px] px-6 text-xs sm:text-sm font-extrabold text-white disabled:opacity-75 cursor-pointer overflow-hidden`}
               >
                 <Send className="h-4 w-4 shrink-0 orbita-paper-plane-icon" />
                 <span>
@@ -2940,10 +2911,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                style={{
-                  background: 'linear-gradient(135deg, #7468C4 0%, #5D51B2 100%)',
-                }}
-                className="no-ornament inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl px-5 text-xs font-extrabold text-white cursor-pointer"
+                className="no-ornament orbita-btn-violet inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl px-5 text-xs font-extrabold text-white cursor-pointer"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <span>Selesai &amp; Kembali</span>
@@ -2973,10 +2941,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
             <div className="flex items-start justify-between border-b border-[#E6E8F2] dark:border-slate-800 pb-4">
               <div className="flex items-center gap-3">
                 <div
-                  style={{
-                    background: 'linear-gradient(145deg, #7468C4 0%, #5D51B2 100%)',
-                  }}
-                  className="flex h-11 w-11 items-center justify-center rounded-[16px] text-white shadow-sm"
+                  className="orbita-btn-violet flex h-11 w-11 items-center justify-center rounded-[16px] text-white shadow-sm"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </div>
@@ -3032,10 +2997,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                   setShowFormBackConfirm(false);
                   setStage('intro');
                 }}
-                style={{
-                  background: 'linear-gradient(135deg, #FF7597 0%, #FF5C86 100%)',
-                }}
-                className="no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-full px-5 text-xs font-bold text-white shadow-md hover:brightness-105 whitespace-nowrap shrink-0 transition-all cursor-pointer"
+                className="no-ornament orbita-btn-coral inline-flex h-9 items-center justify-center gap-2 rounded-full px-5 text-xs font-bold text-white shadow-md hover:brightness-105 whitespace-nowrap shrink-0 transition-all cursor-pointer"
               >
                 <ArrowLeft className="h-4 w-4 shrink-0" />
                 <span>Ya, Kembali</span>

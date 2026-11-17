@@ -291,11 +291,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             measureActiveButton();
           }
         }}
-        style={{
-          background: 'linear-gradient(180deg, rgba(116, 104, 196, 0.80) 0%, rgba(101, 88, 181, 0.76) 100%)',
-          boxShadow: '0 20px 44px -8px rgba(84, 70, 172, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.36)',
-        }}
-        className={`fixed top-2.5 bottom-2.5 left-2.5 z-50 flex flex-col items-center justify-between rounded-[28px] border border-white/28 backdrop-blur-2xl backdrop-saturate-150 py-4 sm:py-5 text-white transition-[transform,opacity,width] duration-300 will-change-transform lg:static lg:my-4 lg:ml-4 ${
+        className={`orbita-sidebar-glass fixed top-2.5 bottom-2.5 left-2.5 z-50 flex flex-col items-center justify-between rounded-[28px] border border-white/28 backdrop-blur-2xl backdrop-saturate-150 py-4 sm:py-5 text-white transition-[transform,opacity,width] duration-300 will-change-transform lg:static lg:my-4 lg:ml-4 ${
           showExpanded ? 'w-[268px] max-w-[84vw] lg:w-60' : 'w-[74px]'
         } ${
           mobileOpen
@@ -431,11 +427,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {/* Main Morphing Frosted Glass Liquid Capsule (Sidebar Color-Matched) */}
                 <div
                   key={`bulge-${bulgeEffect.key}`}
-                  style={{
-                    background:
-                      'linear-gradient(160deg, rgba(255, 255, 255, 0.30) 0%, rgba(192, 182, 255, 0.18) 52%, rgba(86, 70, 174, 0.34) 100%)',
-                  }}
-                  className={`relative h-full w-full overflow-hidden rounded-[16px] border border-white/40 backdrop-blur-md shadow-[0_10px_24px_-4px_rgba(48,36,120,0.34),inset_0_1px_1px_rgba(255,255,255,0.48)] ${
+                  className={`orbita-liquid-capsule relative h-full w-full overflow-hidden rounded-[16px] border border-white/40 backdrop-blur-md shadow-[0_10px_24px_-4px_rgba(48,36,120,0.34),inset_0_1px_1px_rgba(255,255,255,0.48)] ${
                     bulgeEffect.active
                       ? bulgeEffect.direction === 'up'
                         ? 'animate-liquid-bulge-up'
@@ -582,13 +574,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
             className="pointer-events-none fixed z-[70] hidden lg:flex -translate-y-1/2 items-center animate-fade-in"
           >
-            <div className="h-2.5 w-2.5 -mr-1.5 rotate-45 rounded-[2px] border-l border-b border-white/30 bg-[#6A5DB9]/90 backdrop-blur-xl" />
+            <div className="h-2.5 w-2.5 -mr-1.5 rotate-45 rounded-[2px] border-l border-b border-white/30 dark:border-[#8D81E3]/30 bg-[#6A5DB9]/90 dark:bg-[#2C255E]/95 backdrop-blur-xl" />
             <div
-              style={{
-                background:
-                  'linear-gradient(145deg, rgba(116, 104, 196, 0.88) 0%, rgba(92, 80, 170, 0.90) 100%)',
-              }}
-              className="flex flex-col rounded-[14px] border border-white/30 px-3.5 py-2 text-white shadow-[0_14px_30px_rgba(52,40,126,0.36),inset_0_1px_0_rgba(255,255,255,0.32)] backdrop-blur-xl"
+              className="orbita-sidebar-glass flex flex-col rounded-[14px] border border-white/30 px-3.5 py-2 text-white backdrop-blur-xl"
             >
               <span className="text-xs font-extrabold whitespace-nowrap leading-tight">
                 {hoveredTooltip.label}

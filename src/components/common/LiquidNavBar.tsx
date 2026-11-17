@@ -213,20 +213,10 @@ export const LiquidNavBar: React.FC<LiquidNavBarProps> = ({
     <nav
       ref={navRef}
       aria-label={ariaLabel}
-      style={
-        embedded
-          ? undefined
-          : {
-              background:
-                'linear-gradient(135deg, rgba(116, 104, 196, 0.86) 0%, rgba(101, 88, 181, 0.82) 100%)',
-              boxShadow:
-                '0 14px 32px -6px rgba(74, 62, 152, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.36)',
-            }
-      }
       className={`relative max-w-full text-white ${
         embedded
           ? 'bg-transparent border-0 p-0 shadow-none'
-          : `border border-white/30 p-1.5 backdrop-blur-2xl backdrop-saturate-150 ${containerRadius}`
+          : `orbita-sidebar-glass border border-white/30 p-1.5 backdrop-blur-2xl backdrop-saturate-150 ${containerRadius}`
       } ${
         orientation === 'horizontal'
           ? wrap
@@ -278,11 +268,7 @@ export const LiquidNavBar: React.FC<LiquidNavBarProps> = ({
             {/* Main Frosted Glass Liquid Capsule */}
             <div
               key={`bulge-${bulgeEffect.key}`}
-              style={{
-                background:
-                  'linear-gradient(160deg, rgba(255, 255, 255, 0.34) 0%, rgba(192, 182, 255, 0.20) 52%, rgba(86, 70, 174, 0.34) 100%)',
-              }}
-              className={`relative h-full w-full overflow-hidden ${capsuleRadius} border border-white/45 backdrop-blur-md shadow-[0_8px_20px_-4px_rgba(48,36,120,0.36),inset_0_1px_1px_rgba(255,255,255,0.52)] ${bulgeAnimClass}`}
+              className={`orbita-liquid-capsule relative h-full w-full overflow-hidden ${capsuleRadius} border border-white/45 backdrop-blur-md shadow-[0_8px_20px_-4px_rgba(48,36,120,0.36),inset_0_1px_1px_rgba(255,255,255,0.52)] ${bulgeAnimClass}`}
             >
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-black/10" />
               {bulgeEffect.active && (

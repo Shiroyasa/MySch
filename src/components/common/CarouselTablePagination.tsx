@@ -44,7 +44,7 @@ export const SqueezeLineIndicator: React.FC<SqueezeLineIndicatorProps> = ({
               onSelect ? 'cursor-pointer' : 'cursor-default'
             } ${
               isActive
-                ? `w-8 bg-gradient-to-r from-[#7468C4] via-[#8F83DF] to-[#FF7597] shadow-[0_2px_10px_rgba(116,104,196,0.45)] ${animClass}`
+                ? `w-8 bg-gradient-to-r from-[#7468C4] via-[#8F83DF] to-[#FF7597] dark:from-[#5D50B8] dark:via-[#7E70DB] dark:to-[#C8537C] shadow-[0_2px_10px_rgba(116,104,196,0.45)] dark:shadow-[0_2px_10px_rgba(93,80,184,0.4)] ${animClass}`
                 : 'w-2.5 bg-[#DCD7F2] hover:bg-[#B8AFEA] dark:bg-slate-700 dark:hover:bg-indigo-500/60'
             }`}
           />
@@ -229,7 +229,7 @@ export const CarouselTablePagination: React.FC<CarouselTablePaginationProps> = (
               onClick={() => onPageChange(num)}
               className={`no-ornament h-8 min-w-[32px] rounded-full px-2 text-[11px] font-extrabold tabular-nums transition-all cursor-pointer ${
                 num === page
-                  ? 'bg-gradient-to-r from-[#7468C4] to-[#5D51B2] text-white shadow-sm'
+                  ? 'orbita-btn-violet text-white'
                   : 'text-[#6A6584] hover:bg-[#EFEBFB] dark:text-slate-300 dark:hover:bg-slate-800'
               }`}
             >

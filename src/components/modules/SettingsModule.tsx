@@ -692,10 +692,7 @@ export const SettingsModule: React.FC = () => {
               {/* Preview 1: Login Crest Frame */}
               <div className="flex items-center gap-4 rounded-2xl border border-[#E6E8F2] bg-[#F5F6FA] p-4 text-[#3E385B] dark:border-slate-800 dark:bg-slate-800/70 dark:text-slate-100">
                 <div
-                  style={{
-                    background: 'linear-gradient(145deg, #7468C4 0%, #5D51B2 100%)',
-                  }}
-                  className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl p-2 shadow-md"
+                  className="orbita-btn-violet relative flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl p-2 shadow-md"
                 >
                   {visualSettings?.appLogoUrl ? (
                     <img
@@ -710,13 +707,13 @@ export const SettingsModule: React.FC = () => {
                   )}
                 </div>
                 <div>
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#685BC7]">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#685BC7] dark:text-indigo-300">
                     Pratinjau Login Page
                   </span>
-                  <p className="text-sm font-bold text-[#3E385B] mt-0.5">Emblem Gerbang Login</p>
-                  <p className="text-[11px] text-[#6A6584] mt-0.5">
+                  <p className="text-sm font-bold text-[#3E385B] dark:text-[#EAE8F5] mt-0.5">Emblem Gerbang Login</p>
+                  <p className="text-[11px] text-[#6A6584] dark:text-slate-300 mt-0.5">
                     Mode:{' '}
-                    <span className="font-semibold text-[#685BC7] uppercase">
+                    <span className="font-semibold text-[#685BC7] dark:text-indigo-300 uppercase">
                       {visualSettings?.appLogoFit === 'cover' ? 'Isi Penuh (Cover)' : 'Proporsional (Contain)'}
                     </span>
                   </p>
@@ -725,10 +722,7 @@ export const SettingsModule: React.FC = () => {
 
               {/* Preview 2: Sidebar Brand Header */}
               <div
-                style={{
-                  background: 'linear-gradient(135deg, #7468C4 0%, #6558B5 100%)',
-                }}
-                className="flex items-center gap-3.5 rounded-2xl p-4 text-white shadow-sm"
+                className="orbita-card-indigo flex items-center gap-3.5 rounded-2xl p-4 text-white shadow-sm"
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/30 bg-white/15 p-1.5">
                   {visualSettings?.appLogoUrl ? (
@@ -1506,7 +1500,7 @@ export const SettingsModule: React.FC = () => {
                 type="button"
                 onClick={handleExplicitSaveVisualSettings}
                 disabled={isSavingVisuals}
-                className="no-ornament inline-flex h-10 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#7266C4] to-[#5D51B2] px-6 text-xs font-extrabold text-white shadow-md hover:brightness-105 transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap shrink-0 leading-none"
+                className="no-ornament orbita-btn-violet inline-flex h-10 items-center justify-center gap-2 rounded-full px-6 text-xs font-extrabold text-white hover:brightness-105 transition-all cursor-pointer disabled:opacity-50 whitespace-nowrap shrink-0 leading-none"
               >
                 <Save className="h-4 w-4 text-white shrink-0" />
                 <span>

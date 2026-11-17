@@ -34,11 +34,11 @@ export const OrbitaOrnateFrame: React.FC<OrbitaOrnateFrameProps> = ({
       style={{
         boxShadow: '0 20px 44px -8px rgba(108, 96, 184, 0.14)',
       }}
-      className={`group/frame relative w-full rounded-[28px] border border-[#F0F0F7] bg-white text-[#3E385B] dark:border-[#8D81E3]/25 dark:bg-[#1E1A3E] dark:text-slate-100 transition-all duration-300 overflow-visible ${className}`}
+      className={`group/frame relative w-full rounded-[28px] border border-[#F0F0F7] bg-white text-[#3E385B] dark:border-[#8D81E3]/24 dark:bg-[#191538] dark:text-[#E6E4F4] transition-all duration-300 overflow-visible ${className}`}
     >
-      {/* Top-Center Floating Purple Squircle Icon Badge (Exact Reference Image Detail) */}
+      {/* Top-Center Floating Purple Squircle Icon Badge */}
       <div
-        className="pointer-events-none select-none absolute -top-6 left-1/2 -translate-x-1/2 z-20 flex h-13 w-13 items-center justify-center rounded-[18px] bg-gradient-to-br from-[#7568C6] to-[#6356B5] text-white shadow-[0_10px_22px_rgba(108,96,184,0.36)] transition-transform duration-300 group-hover/frame:-translate-y-0.5"
+        className="orbita-squircle-badge pointer-events-none select-none absolute -top-6 left-1/2 -translate-x-1/2 z-20 flex h-13 w-13 items-center justify-center rounded-[18px] text-white transition-transform duration-300 group-hover/frame:-translate-y-0.5"
         aria-hidden="true"
       >
         <GenshinElementIcon element={elementType} className="h-6 w-6" />

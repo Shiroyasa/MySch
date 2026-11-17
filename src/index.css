@@ -14,8 +14,8 @@
 
   html.dark,
   html.dark body {
-    background-color: #0f172a;
-    color: #f1f5f9;
+    background-color: #0C0A1C;
+    color: #E6E4F2;
   }
 
   button, [role="button"], a.btn, select, input, textarea {
@@ -1133,6 +1133,16 @@ html.dark .fixed input:-webkit-autofill:focus {
   caret-color: #A79BFF !important;
 }
 
+.orbita-white-textfield input:-webkit-autofill,
+.orbita-white-textfield input:-webkit-autofill:hover,
+.orbita-white-textfield input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #2B2548 !important;
+  color: #2B2548 !important;
+  caret-color: #6C60B8 !important;
+}
+
 /* Crisp Slate-Indigo Typography inside White Cards across all modules in Light Mode */
 html:not(.dark) main .academy-ornate-card .text-slate-900,
 html:not(.dark) main .academy-ornate-card .text-slate-800,
@@ -1621,4 +1631,171 @@ html.theme-flip-active main {
 .orbita-paper-plane-btn[data-sending="true"] .orbita-paper-plane-icon {
   animation: paperPlaneLaunch 0.52s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+/* ========================================================================== */
+/* ADAPTIVE ORBITA ORNAMENTS & EYE-COMFORT DARK MODE PALETTE                  */
+/* ========================================================================== */
+
+/* 1. Floating Frosted Violet Sidebar, LiquidNavBar & MobileBottomNav */
+.orbita-sidebar-glass {
+  background: linear-gradient(180deg, rgba(116, 104, 196, 0.84) 0%, rgba(101, 88, 181, 0.78) 100%);
+  box-shadow: 0 20px 44px -8px rgba(84, 70, 172, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.36);
+}
+
+html.dark .orbita-sidebar-glass {
+  background: linear-gradient(180deg, rgba(44, 37, 94, 0.90) 0%, rgba(24, 19, 58, 0.94) 100%) !important;
+  border-color: rgba(141, 129, 227, 0.24) !important;
+  box-shadow: 0 20px 44px -8px rgba(5, 4, 18, 0.68), inset 0 1px 0 rgba(167, 156, 255, 0.16) !important;
+}
+
+.orbita-liquid-capsule {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.32) 0%, rgba(192, 182, 255, 0.19) 52%, rgba(86, 70, 174, 0.34) 100%);
+}
+
+html.dark .orbita-liquid-capsule {
+  background: linear-gradient(160deg, rgba(141, 129, 227, 0.30) 0%, rgba(93, 81, 178, 0.28) 52%, rgba(42, 33, 96, 0.54) 100%) !important;
+  border-color: rgba(167, 156, 255, 0.34) !important;
+}
+
+/* 2. Hero Overview Wave Cards */
+.orbita-hero-violet {
+  background: linear-gradient(145deg, #7266C4 0%, #5D51B2 52%, #4B3FA0 100%);
+  box-shadow: 0 20px 42px -8px rgba(93, 81, 178, 0.34);
+}
+
+html.dark .orbita-hero-violet {
+  background: linear-gradient(145deg, #322A6B 0%, #241D52 54%, #1A143E 100%) !important;
+  border: 1px solid rgba(141, 129, 227, 0.26) !important;
+  box-shadow: 0 20px 44px -10px rgba(5, 4, 18, 0.65) !important;
+}
+
+/* 3. Secondary Indigo Cards & FlipCard Backs */
+.orbita-card-indigo {
+  background: linear-gradient(135deg, #6E62BF 0%, #7D71CB 100%);
+  box-shadow: 0 16px 32px -6px rgba(108, 96, 184, 0.28);
+}
+
+html.dark .orbita-card-indigo {
+  background: linear-gradient(135deg, #3B327B 0%, #2B235E 100%) !important;
+  border: 1px solid rgba(141, 129, 227, 0.26) !important;
+  box-shadow: 0 16px 34px -6px rgba(5, 4, 18, 0.58) !important;
+}
+
+/* 4. Coral / Rose Wave Cards & Grade-12 Accent Panels (Soft Velvety Berry Plum in Dark Mode) */
+.orbita-card-coral {
+  background: linear-gradient(145deg, #FF88A8 0%, #F8658E 100%);
+  box-shadow: 0 18px 36px -6px rgba(248, 101, 142, 0.32);
+}
+
+html.dark .orbita-card-coral {
+  background: linear-gradient(145deg, #682646 0%, #4A1932 100%) !important;
+  border: 1px solid rgba(244, 114, 152, 0.28) !important;
+  box-shadow: 0 18px 36px -6px rgba(14, 5, 11, 0.62) !important;
+}
+
+html.dark .orbita-card-coral svg path {
+  fill: rgba(176, 54, 104, 0.36);
+}
+
+/* 5. Action Buttons & Floating Squircle Ornaments */
+.orbita-btn-violet {
+  background: linear-gradient(135deg, #7468C4 0%, #5D51B2 100%);
+  box-shadow: 0 14px 28px -6px rgba(108, 96, 184, 0.40);
+}
+
+html.dark .orbita-btn-violet {
+  background: linear-gradient(135deg, #584CB0 0%, #42378F 100%) !important;
+  box-shadow: 0 14px 28px -6px rgba(8, 6, 26, 0.55) !important;
+  border: 1px solid rgba(167, 156, 255, 0.26);
+}
+
+.orbita-btn-coral {
+  background: linear-gradient(135deg, #FF7B9F 0%, #EE4D7A 100%);
+  box-shadow: 0 14px 28px -6px rgba(242, 87, 129, 0.38);
+}
+
+html.dark .orbita-btn-coral {
+  background: linear-gradient(135deg, #B53860 0%, #8E2648 100%) !important;
+  box-shadow: 0 14px 28px -6px rgba(14, 5, 11, 0.56) !important;
+  border: 1px solid rgba(251, 146, 180, 0.28);
+}
+
+.orbita-squircle-badge {
+  background: linear-gradient(135deg, #7568C6 0%, #6356B5 100%);
+  box-shadow: 0 10px 22px rgba(108, 96, 184, 0.35);
+}
+
+html.dark .orbita-squircle-badge {
+  background: linear-gradient(135deg, #4B4096 0%, #352C75 100%) !important;
+  box-shadow: 0 10px 24px rgba(5, 4, 18, 0.56) !important;
+  border: 1px solid rgba(167, 156, 255, 0.30);
+}
+
+/* 6. Eye-Friendly Dark Mode Typography & Surface Harmonization Across All Pages */
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4 {
+  color: #EAE8F6;
+}
+
+html.dark :where(main, header, .fixed, .orbita-login-shell) .dark\:text-white:not(.paper-surface *):not(.orbita-white-textfield *) {
+  color: #EAE8F6 !important;
+}
+
+html.dark .orbita-hero-violet .text-white,
+html.dark .orbita-card-indigo .text-white,
+html.dark .orbita-card-coral .text-white,
+html.dark .orbita-sidebar-glass .text-white {
+  color: #F0EEF9 !important;
+}
+
+html.dark .jrpg-stat-bar {
+  background-color: rgba(141, 129, 227, 0.18);
+}
+
+html.dark .jrpg-stat-bar-fill {
+  background-color: #25B971;
+}
+
+html.dark .orbita-field-underline::after {
+  background: linear-gradient(90deg, #D96B90 0%, #7C6FD6 50%, #9E94EC 100%);
+}
+
+/* Fallback harmonization for any pastel pills or dark-text utility classes missing explicit dark: variants */
+html.dark :where(main, .fixed, .orbita-login-shell) .bg-\[\#FFE4EC\]:not(.paper-surface *),
+html.dark :where(main, .fixed, .orbita-login-shell) .bg-\[\#FFE8EF\]:not(.paper-surface *),
+html.dark :where(main, .fixed, .orbita-login-shell) .bg-\[\#FFF5F8\]:not(.paper-surface *),
+html.dark :where(main, .fixed, .orbita-login-shell) .bg-\[\#FFF8FA\]:not(.paper-surface *) {
+  background-color: rgba(136, 40, 74, 0.28) !important;
+  border-color: rgba(244, 114, 152, 0.32) !important;
+  color: #F9B4CC !important;
+}
+
+html.dark :where(main, .fixed, .orbita-login-shell) .bg-\[\#E7F9EF\]:not(.paper-surface *) {
+  background-color: rgba(16, 112, 68, 0.28) !important;
+  border-color: rgba(52, 211, 153, 0.32) !important;
+  color: #7EE2B2 !important;
+}
+
+html.dark :where(main, .fixed, .orbita-login-shell) .bg-\[\#F0EEFA\]:not(.paper-surface *),
+html.dark :where(main, .fixed, .orbita-login-shell) .bg-\[\#F4F3FA\]:not(.paper-surface *),
+html.dark :where(main, .fixed, .orbita-login-shell) .bg-\[\#FAF9FE\]:not(.paper-surface *),
+html.dark :where(main, .fixed, .orbita-login-shell) .bg-\[\#F5F6FA\]:not(.paper-surface *) {
+  background-color: rgba(44, 38, 92, 0.62) !important;
+  border-color: rgba(141, 129, 227, 0.24) !important;
+  color: #DDD9F3 !important;
+}
+
+html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#3E385B\]:not(.paper-surface *):not(.orbita-white-textfield *) {
+  color: #E6E4F4 !important;
+}
+
+html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#5A537A\]:not(.paper-surface *):not(.orbita-white-textfield *),
+html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#6A6584\]:not(.paper-surface *):not(.orbita-white-textfield *),
+html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#6E6A86\]:not(.paper-surface *):not(.orbita-white-textfield *),
+html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#7A7596\]:not(.paper-surface *):not(.orbita-white-textfield *) {
+  color: #B9B4D4 !important;
+}
+
 

@@ -1415,7 +1415,7 @@ export const GradingModule: React.FC = () => {
                     {currentAssessments.map(asm => (
                       <th key={asm.id} className="py-3.5 px-3 text-center">
                         <div>{asm.title.split(':')[0]}</div>
-                        <div className="text-[10px] font-bold text-[#6E6A86] tabular-nums">({asm.weight}%)</div>
+                        <div className="text-[10px] font-bold text-[#6E6A86] dark:text-slate-300 tabular-nums">({asm.weight}%)</div>
                       </th>
                     ))}
                     <th className="py-3.5 px-3 text-center font-extrabold">Nilai Akhir</th>

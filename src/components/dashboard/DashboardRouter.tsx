@@ -711,11 +711,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* LEFT 7 COLS: PURPLE OVERVIEW WAVE CHART CARD */}
         <div
-          style={{
-            background: 'linear-gradient(145deg, #7266C4 0%, #5D51B2 52%, #4B3FA0 100%)',
-            boxShadow: '0 22px 44px -10px rgba(93, 81, 178, 0.36)',
-          }}
-          className="group/banner lg:col-span-7 relative rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 text-white flex flex-col justify-between overflow-hidden"
+          className="group/banner orbita-hero-violet lg:col-span-7 relative rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 text-white flex flex-col justify-between overflow-hidden"
         >
           {dashboardBannerBg && (
             <img
@@ -1049,11 +1045,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           {/* Top Purple Card (Daily Jogging style -> Presensi Harian) */}
           <div
             onClick={() => handleNavigate('attendance')}
-            style={{
-              background: 'linear-gradient(135deg, #6E62BF 0%, #7D71CB 100%)',
-              boxShadow: '0 16px 32px -6px rgba(108, 96, 184, 0.28)',
-            }}
-            className="group rounded-[26px] p-5 text-white flex items-center gap-4 cursor-pointer transition-transform hover:-translate-y-0.5"
+            className="group orbita-card-indigo rounded-[26px] p-5 text-white flex items-center gap-4 cursor-pointer transition-transform hover:-translate-y-0.5"
           >
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] bg-white/20 border border-white/30 shadow-inner">
               <GenshinElementIcon element="anemo" className="h-6 w-6 text-white" />
@@ -1071,11 +1063,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           {/* Bottom Pink-Coral Wave Card (My Jogging style -> Evaluasi & Nilai Akademik) */}
           <div
             onClick={() => handleNavigate('grading')}
-            style={{
-              background: 'linear-gradient(145deg, #FF88A8 0%, #F8658E 100%)',
-              boxShadow: '0 18px 36px -6px rgba(248, 101, 142, 0.34)',
-            }}
-            className="group relative flex-1 rounded-[28px] p-5 text-white flex flex-col justify-between overflow-hidden min-h-[190px] cursor-pointer transition-transform hover:-translate-y-0.5"
+            className="group orbita-card-coral relative flex-1 rounded-[28px] p-5 text-white flex flex-col justify-between overflow-hidden min-h-[190px] cursor-pointer transition-transform hover:-translate-y-0.5"
           >
             {/* Darker Coral Wave Overlay at Bottom */}
             <svg
@@ -1170,7 +1158,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
           >
             {/* Top-Center Floating Purple Squircle Icon Badge */}
             <div
-              className="pointer-events-none select-none absolute -top-6 left-1/2 -translate-x-1/2 z-20 flex h-13 w-13 items-center justify-center rounded-[18px] bg-gradient-to-br from-[#7568C6] to-[#6356B5] text-white shadow-[0_10px_22px_rgba(108,96,184,0.36)] transition-transform duration-300 group-hover:scale-105"
+              className="orbita-squircle-badge pointer-events-none select-none absolute -top-6 left-1/2 -translate-x-1/2 z-20 flex h-13 w-13 items-center justify-center rounded-[18px] text-white transition-transform duration-300 group-hover:scale-105"
               aria-hidden="true"
             >
               <GenshinElementIcon element={card.el} className="h-6 w-6" />
@@ -1663,7 +1651,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                       setSelectedMonthFilter('ALL');
                       setSelectedYearFilter('ALL');
                     }}
-                    className="no-ornament inline-flex h-9 items-center justify-center rounded-xl bg-[#FFE4EC] hover:bg-[#FFD2E0] px-3.5 text-xs font-extrabold text-[#F25781] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                    className="no-ornament inline-flex h-9 items-center justify-center rounded-xl bg-[#FFE4EC] hover:bg-[#FFD2E0] dark:bg-rose-950/70 dark:hover:bg-rose-900/75 px-3.5 text-xs font-extrabold text-[#F25781] dark:text-rose-300 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
                   >
                     Reset Filter
                   </button>
@@ -1690,7 +1678,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                     subtitle="Rincian kehadiran tepat waktu, terlambat, sakit, izin, dan alpa"
                     accent="emerald"
                     rightSlot={
-                      <span className="rounded-xl bg-[#E7F9EF] border border-[#BCEAD1] px-2.5 py-1 text-[11px] font-black text-[#139A4C] tabular-nums whitespace-nowrap">
+                      <span className="rounded-xl bg-[#E7F9EF] border border-[#BCEAD1] dark:bg-emerald-950/70 dark:border-emerald-800/70 px-2.5 py-1 text-[11px] font-black text-[#139A4C] dark:text-emerald-300 tabular-nums whitespace-nowrap">
                         Efektif: {attendanceAnalytics.effectiveAttendancePct}%
                       </span>
                     }

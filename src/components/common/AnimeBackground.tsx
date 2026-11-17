@@ -22,19 +22,26 @@ export const AnimeBackground: React.FC = () => {
         />
       )}
 
-      {/* Subtle Soft Ambient Lavender & Rose Highlights */}
+      {/* Subtle Soft Ambient Lavender & Rose Highlights (Calm Indigo/Plum in Dark Mode) */}
       <div
-        className="absolute -top-32 -left-32 h-[520px] w-[520px] rounded-full opacity-50"
+        className="absolute -top-32 -left-32 h-[520px] w-[520px] rounded-full opacity-50 dark:opacity-35 dark:hidden"
         style={{
           background:
             'radial-gradient(circle, rgba(255,255,255,0.65) 0%, rgba(108,96,184,0.12) 55%, transparent 75%)',
         }}
       />
       <div
-        className="absolute -bottom-32 -right-32 h-[560px] w-[560px] rounded-full opacity-45"
+        className="hidden dark:block absolute -top-32 -left-32 h-[520px] w-[520px] rounded-full opacity-40"
         style={{
           background:
-            'radial-gradient(circle, rgba(255,133,166,0.18) 0%, rgba(108,96,184,0.12) 55%, transparent 75%)',
+            'radial-gradient(circle, rgba(108,96,184,0.28) 0%, rgba(42,34,92,0.14) 55%, transparent 75%)',
+        }}
+      />
+      <div
+        className="absolute -bottom-32 -right-32 h-[560px] w-[560px] rounded-full opacity-45 dark:opacity-30"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(226,96,136,0.18) 0%, rgba(108,96,184,0.12) 55%, transparent 75%)',
         }}
       />
     </div>

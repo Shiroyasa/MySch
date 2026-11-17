@@ -202,13 +202,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
         ref={navRef}
         aria-label="Navigasi Cepat Mobile dan Tablet"
         aria-hidden={isHidden}
-        style={{
-          background:
-            'linear-gradient(135deg, rgba(116, 104, 196, 0.84) 0%, rgba(101, 88, 181, 0.80) 100%)',
-          boxShadow:
-            '0 18px 38px -6px rgba(74, 62, 152, 0.44), inset 0 1px 0 rgba(255, 255, 255, 0.34)',
-        }}
-        className={`relative flex h-14 sm:h-[60px] items-center justify-around gap-1 rounded-[22px] sm:rounded-[26px] border border-white/30 px-1.5 sm:px-2 backdrop-blur-2xl backdrop-saturate-150 transition-[transform,opacity,filter] duration-400 will-change-transform ${
+        className={`orbita-sidebar-glass relative flex h-14 sm:h-[60px] items-center justify-around gap-1 rounded-[22px] sm:rounded-[26px] border border-white/30 px-1.5 sm:px-2 backdrop-blur-2xl backdrop-saturate-150 transition-[transform,opacity,filter] duration-400 will-change-transform ${
           isHidden
             ? 'translate-y-28 scale-90 opacity-0 blur-[2px] pointer-events-none ease-[cubic-bezier(0.22,1,0.36,1)]'
             : 'translate-y-0 scale-100 opacity-100 blur-0 pointer-events-auto ease-[cubic-bezier(0.34,1.35,0.64,1)]'
@@ -246,12 +240,9 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
             <div
               key={`bulge-${bulgeEffect.key}`}
-              style={{
-                background: rightDrawerOpen
-                  ? 'linear-gradient(155deg, rgba(255, 132, 168, 0.78) 0%, rgba(242, 87, 129, 0.72) 100%)'
-                  : 'linear-gradient(160deg, rgba(255, 255, 255, 0.34) 0%, rgba(192, 182, 255, 0.20) 52%, rgba(86, 70, 174, 0.34) 100%)',
-              }}
               className={`relative h-full w-full overflow-hidden rounded-[16px] sm:rounded-[18px] border border-white/45 backdrop-blur-md shadow-[0_8px_20px_-4px_rgba(48,36,120,0.36),inset_0_1px_1px_rgba(255,255,255,0.5)] ${
+                rightDrawerOpen ? 'orbita-card-coral' : 'orbita-liquid-capsule'
+              } ${
                 bulgeEffect.active
                   ? bulgeEffect.direction === 'left'
                     ? 'animate-liquid-bulge-left'

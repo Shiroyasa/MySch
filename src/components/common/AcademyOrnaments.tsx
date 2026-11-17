@@ -367,7 +367,7 @@ export const GenshinElementIcon: React.FC<{
   if (withFrame) {
     return (
       <div
-        className={`relative inline-flex shrink-0 items-center justify-center rounded-[16px] bg-gradient-to-br from-[#7568C6] to-[#6356B5] text-white p-2.5 shadow-[0_8px_20px_rgba(108,96,184,0.32)] ${className}`}
+        className={`orbita-squircle-badge relative inline-flex shrink-0 items-center justify-center rounded-[16px] text-white p-2.5 ${className}`}
       >
         {renderGlyph()}
       </div>
@@ -399,7 +399,7 @@ export const ComicRansomTitle: React.FC<{
   className?: string;
 }> = ({ text, className = 'text-2xl sm:text-3xl' }) => {
   return (
-    <span className={`font-extrabold tracking-tight text-[#3E385B] ${className}`}>
+    <span className={`font-extrabold tracking-tight text-[#3E385B] dark:text-[#EAE8F5] ${className}`}>
       {text}
     </span>
   );
@@ -653,7 +653,7 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({
 
             {/* Single Top-Center Floating Purple Squircle Icon Badge */}
             <div
-              className="pointer-events-none select-none absolute -top-6 left-1/2 -translate-x-1/2 z-20 flex h-12 w-12 items-center justify-center rounded-[18px] bg-gradient-to-br from-[#7568C6] to-[#6356B5] text-white shadow-[0_8px_20px_rgba(108,96,184,0.35)]"
+              className="orbita-squircle-badge pointer-events-none select-none absolute -top-6 left-1/2 -translate-x-1/2 z-20 flex h-12 w-12 items-center justify-center rounded-[18px] text-white"
               aria-hidden="true"
             >
               <GenshinElementIcon
@@ -684,11 +684,7 @@ export const OrnateCard: React.FC<OrnateCardProps> = ({
 
           {/* BACK FACE: Reference Image Purple Gradient Detail Card */}
           <div
-            style={{
-              background: 'linear-gradient(135deg, #6E62BF 0%, #584CA9 100%)',
-              boxShadow: '0 18px 36px -6px rgba(94, 82, 178, 0.34)',
-            }}
-            className={`jrpg-flip-back no-ornament ${minFlipHeight} rounded-[24px] sm:rounded-[26px] border border-white/25 text-white flex flex-col justify-between !overflow-visible p-4 sm:p-5`}
+            className={`jrpg-flip-back orbita-card-indigo no-ornament ${minFlipHeight} rounded-[24px] sm:rounded-[26px] border border-white/25 dark:border-[#9E92FF]/25 text-white flex flex-col justify-between !overflow-visible p-4 sm:p-5`}
           >
             <button
               type="button"
@@ -1143,11 +1139,7 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
         {/* LEFT 7 COLS: INTERACTIVE PURPLE OVERVIEW WAVE CARD SYNCED WITH DATABASE */}
         <div
-          style={{
-            background: 'linear-gradient(145deg, #7266C4 0%, #5D51B2 52%, #4B3FA0 100%)',
-            boxShadow: '0 20px 42px -8px rgba(93, 81, 178, 0.34)',
-          }}
-          className="group/banner lg:col-span-7 relative rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 text-white flex flex-col justify-between overflow-hidden"
+          className="group/banner orbita-hero-violet lg:col-span-7 relative rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 text-white flex flex-col justify-between overflow-hidden"
         >
           {perModuleBg && (
             <img
@@ -1420,11 +1412,7 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
         <div className="lg:col-span-5 flex flex-col justify-between gap-5">
           {/* Top Purple Card (Single clean geometric emblem) */}
           <div
-            style={{
-              background: 'linear-gradient(135deg, #6E62BF 0%, #7D71CB 100%)',
-              boxShadow: '0 14px 30px -6px rgba(108, 96, 184, 0.28)',
-            }}
-            className="rounded-[26px] p-5 text-white flex items-center gap-4"
+            className="orbita-card-indigo rounded-[26px] p-5 text-white flex items-center gap-4"
           >
             <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-[18px] bg-white/20 border border-white/30 shadow-inner">
               <OrbitaMenuIcon variant={targetKey} className="h-6 w-6 text-white" />
@@ -1441,11 +1429,7 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
 
           {/* Bottom Pink-Coral Wave Card */}
           <div
-            style={{
-              background: 'linear-gradient(145deg, #FF88A8 0%, #F8658E 100%)',
-              boxShadow: '0 18px 36px -6px rgba(248, 101, 142, 0.32)',
-            }}
-            className="relative flex-1 rounded-[28px] p-5 text-white flex flex-col justify-between overflow-hidden min-h-[164px]"
+            className="orbita-card-coral relative flex-1 rounded-[28px] p-5 text-white flex flex-col justify-between overflow-hidden min-h-[164px]"
           >
             <svg
               viewBox="0 0 400 120"
@@ -1537,7 +1521,7 @@ export const CharacterMedallion: React.FC<{
     aegis: 'dendro',
   };
   return (
-    <div className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-gradient-to-br from-[#7568C6] to-[#6356B5] text-white shadow-[0_8px_18px_rgba(108,96,184,0.3)]">
+    <div className="orbita-squircle-badge relative flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] text-white">
       <GenshinElementIcon element={elMap[variant]} className="h-6 w-6" />
     </div>
   );

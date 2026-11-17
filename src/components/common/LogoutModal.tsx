@@ -34,10 +34,7 @@ export const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onCon
         <div className="flex items-start justify-between border-b border-[#E6E8F2] dark:border-slate-800 pb-4">
           <div className="flex items-center gap-3">
             <div
-              style={{
-                background: 'linear-gradient(145deg, #7468C4 0%, #5D51B2 100%)',
-              }}
-              className="flex h-11 w-11 items-center justify-center rounded-[16px] text-white shadow-sm"
+              className="orbita-btn-violet flex h-11 w-11 items-center justify-center rounded-[16px] text-white shadow-sm"
             >
               <LogOut className="h-5 w-5" />
             </div>
@@ -100,10 +97,7 @@ export const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onCon
           <button
             type="button"
             onClick={onConfirm}
-            style={{
-              background: 'linear-gradient(135deg, #FF7597 0%, #FF5C86 100%)',
-            }}
-            className="no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-full px-5 text-xs font-bold text-white shadow-md hover:brightness-105 whitespace-nowrap shrink-0 transition-all cursor-pointer"
+            className="no-ornament orbita-btn-coral inline-flex h-9 items-center justify-center gap-2 rounded-full px-5 text-xs font-bold text-white shadow-md hover:brightness-105 whitespace-nowrap shrink-0 transition-all cursor-pointer"
           >
             <LogOut className="h-4 w-4 shrink-0" />
             <span>Ya, Keluar</span>
