@@ -58,8 +58,10 @@ export interface FirestoreErrorInfo {
 }
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null): never {
+  const rawMessage = error instanceof Error ? error.message : String(error);
+  const lowerMsg = rawMessage.toLowerCase();
   const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
+    error: rawMessage,
     authInfo: {
       userId: auth.currentUser?.uid,
       email: auth.currentUser?.email,
@@ -74,6 +76,18 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     operationType,
     path,
   };
+
+  if (
+    lowerMsg.includes('no document to update') ||
+    lowerMsg.includes('quota limit exceeded') ||
+    lowerMsg.includes('quota exceeded') ||
+    lowerMsg.includes('free daily read units') ||
+    lowerMsg.includes('client is offline')
+  ) {
+    console.warn('Firestore Notice (handled via local/hub sync):', errInfo.operationType, errInfo.path);
+    throw new Error(rawMessage);
+  }
+
   console.error('Firestore Error: ', JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
 }

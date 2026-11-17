@@ -5,7 +5,6 @@ import {
   getDocs,
   setDoc,
   deleteDoc,
-  updateDoc,
   onSnapshot,
   query,
   orderBy,
@@ -1302,10 +1301,23 @@ export async function firestorePushNotification(item: NotificationItem): Promise
   }
 }
 
-export async function firestoreMarkNotificationRead(id: string): Promise<void> {
+export async function firestoreMarkNotificationRead(
+  id: string,
+  fullItem?: Partial<NotificationItem>
+): Promise<void> {
+  if (!id) return;
   try {
-    await updateDoc(doc(db, 'notifications', id), { isRead: true });
+    await setDoc(
+      doc(db, 'notifications', id),
+      sanitizeForFirestore({
+        ...(fullItem || {}),
+        id,
+        isRead: true,
+      }),
+      { merge: true }
+    );
   } catch (err) {
+    if (isFirestoreQuotaError(err)) return;
     handleFirestoreError(err, OperationType.UPDATE, `notifications/${id}`);
   }
 }

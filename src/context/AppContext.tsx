@@ -3607,14 +3607,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Notifications
   const markNotificationRead = (id: string) => {
+    const target = notifications.find(n => n.id === id);
     setNotifications(prev => prev.map(n => (n.id === id ? { ...n, isRead: true } : n)));
-    firestoreMarkNotificationRead(id).catch(() => {});
+    firestoreMarkNotificationRead(id, target).catch(() => {});
   };
 
   const markAllNotificationsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     notifications.forEach(n => {
-      firestoreMarkNotificationRead(n.id).catch(() => {});
+      if (!n.isRead) {
+        firestoreMarkNotificationRead(n.id, n).catch(() => {});
+      }
     });
   };
 
