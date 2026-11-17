@@ -29,6 +29,7 @@ import { exportToExcel, exportToPdf, exportToCsv, defaultReportConfig } from '..
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
+import { LiquidNavBar } from '../common/LiquidNavBar';
 
 interface EditableAttendanceRow {
   studentId: string;
@@ -589,52 +590,17 @@ export const AttendanceModule: React.FC = () => {
         subtitle="Pencatatan kehadiran jam pelajaran, rekapitulasi laporan presensi interaktif (editable), riwayat sesi, dan verifikasi koreksi absensi tersinkron langsung ke Cloud Database."
         icon={CalendarCheck}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5 dark:border-slate-700/80 dark:bg-slate-800/80">
-            <button
-              type="button"
-              onClick={() => setActiveTab('input')}
-              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                activeTab === 'input'
-                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
-              }`}
-            >
-              Input Presensi
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('editable_report')}
-              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                activeTab === 'editable_report'
-                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
-              }`}
-            >
-              Laporan Editable
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('history')}
-              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                activeTab === 'history'
-                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
-              }`}
-            >
-              Riwayat ({attendanceSessions.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('correction')}
-              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                activeTab === 'correction'
-                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
-              }`}
-            >
-              Koreksi ({attendanceCorrections.length})
-            </button>
-          </div>
+          <LiquidNavBar
+            ariaLabel="Navigasi Modul Presensi"
+            activeId={activeTab}
+            onSelect={id => setActiveTab(id as 'input' | 'history' | 'correction' | 'editable_report')}
+            items={[
+              { id: 'input', label: 'Input Presensi' },
+              { id: 'editable_report', label: 'Laporan Editable' },
+              { id: 'history', label: 'Riwayat', badge: attendanceSessions.length },
+              { id: 'correction', label: 'Koreksi', badge: attendanceCorrections.length },
+            ]}
+          />
         }
       />
 

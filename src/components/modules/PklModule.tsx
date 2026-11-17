@@ -61,6 +61,7 @@ import {
 } from '../common/AcademyOrnaments';
 import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 import { PklAlumniTracerSection } from './PklAlumniTracerSection';
+import { LiquidNavBar } from '../common/LiquidNavBar';
 
 export const PklModule: React.FC = () => {
   const {
@@ -1241,68 +1242,32 @@ export const PklModule: React.FC = () => {
         </OrnateCard>
       </div>
 
-      {/* Main Tabs Selection */}
-      <div className="flex items-center gap-2 rounded-2xl border border-[#ECEAF6] bg-white p-1.5 shadow-xs overflow-x-auto scrollbar-none dark:border-slate-800 dark:bg-slate-900">
-        <button
-          type="button"
-          onClick={() => setActiveTab('dudi_database')}
-          className={`no-ornament inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-            activeTab === 'dudi_database'
-              ? 'bg-[#6C60B8] text-white shadow-[0_6px_16px_rgba(108,96,184,0.28)]'
-              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833] dark:text-slate-300 dark:hover:bg-slate-800'
-          }`}
-        >
-          <Building2 className="h-4 w-4 shrink-0" />
-          <span>A. Database Instansi Mitra PKL</span>
-          <span
-            className={`rounded-lg px-1.5 py-0.5 text-[10px] font-black tabular-nums ${
-              activeTab === 'dudi_database' ? 'bg-white/20 text-white' : 'bg-[#F0EEFA] text-[#6C60B8]'
-            }`}
-          >
-            {partners.length}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('automated_reports')}
-          className={`no-ornament inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-            activeTab === 'automated_reports'
-              ? 'bg-[#6C60B8] text-white shadow-[0_6px_16px_rgba(108,96,184,0.28)]'
-              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833] dark:text-slate-300 dark:hover:bg-slate-800'
-          }`}
-        >
-          <FileSpreadsheet className="h-4 w-4 shrink-0" />
-          <span>B. Laporan &amp; Rekap Otomatis PKL</span>
-          <span
-            className={`rounded-lg px-1.5 py-0.5 text-[10px] font-black tabular-nums ${
-              activeTab === 'automated_reports' ? 'bg-white/20 text-white' : 'bg-[#F0EEFA] text-[#6C60B8]'
-            }`}
-          >
-            {studentReports.length}
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('alumni_tracer')}
-          className={`no-ornament inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-            activeTab === 'alumni_tracer'
-              ? 'bg-[#6C60B8] text-white shadow-[0_6px_16px_rgba(108,96,184,0.28)]'
-              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833] dark:text-slate-300 dark:hover:bg-slate-800'
-          }`}
-        >
-          <GraduationCap className="h-4 w-4 shrink-0" />
-          <span>C. Tracer Study Alumni</span>
-          <span
-            className={`rounded-lg px-1.5 py-0.5 text-[10px] font-black tabular-nums ${
-              activeTab === 'alumni_tracer' ? 'bg-white/20 text-white' : 'bg-[#E7F9EF] text-[#139A4C]'
-            }`}
-          >
-            {pklTracers.length}
-          </span>
-        </button>
-      </div>
+      {/* Main Tabs Selection (Sidebar Glass + Liquid Bulge + Mobile/Tablet Seesaw Tilt) */}
+      <LiquidNavBar
+        ariaLabel="Navigasi Modul Administrasi PKL"
+        activeId={activeTab}
+        onSelect={id => setActiveTab(id as 'dudi_database' | 'automated_reports' | 'alumni_tracer')}
+        items={[
+          {
+            id: 'dudi_database',
+            label: 'A. Database Instansi Mitra PKL',
+            icon: <Building2 className="h-4 w-4" />,
+            badge: partners.length,
+          },
+          {
+            id: 'automated_reports',
+            label: 'B. Laporan & Rekap Otomatis PKL',
+            icon: <FileSpreadsheet className="h-4 w-4" />,
+            badge: studentReports.length,
+          },
+          {
+            id: 'alumni_tracer',
+            label: 'C. Tracer Study Alumni',
+            icon: <GraduationCap className="h-4 w-4" />,
+            badge: pklTracers.length,
+          },
+        ]}
+      />
 
       {/* ==================================================================== */}
       {/* SECTION A: DATABASE MITRA INDUSTRI / DUDI (WITH FULL CRUD)           */}
@@ -1859,33 +1824,21 @@ export const PklModule: React.FC = () => {
               </div>
             </div>
 
-            {/* Tier 2: Balanced 6-Button Sub-Tab Segmented Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-1.5 rounded-xl border border-[#ECEAF6] bg-[#F4F3FA] p-1.5 dark:border-slate-800 dark:bg-slate-800/70">
-              {[
+            {/* Tier 2: Balanced Sub-Tab LiquidNavBar (Sidebar Glass + Liquid Bulge + Seesaw Tilt) */}
+            <LiquidNavBar
+              size="sm"
+              ariaLabel="Sub-Navigasi Laporan PKL"
+              activeId={reportSubTab}
+              onSelect={id => setReportSubTab(id as any)}
+              items={[
                 { id: 'by_class_major', label: '1. Rekap Kelas & Jurusan' },
                 { id: 'by_company', label: '2. Rekap per Perusahaan' },
                 { id: 'visits_attendance', label: '3. Absensi & Kunjungan' },
                 { id: 'pending_reports', label: '4. Laporan Belum Kumpul' },
                 { id: 'grades', label: '5. Rekap Nilai PKL' },
                 { id: 'graduate_absorption', label: '6. Penyerapan Lulusan' },
-              ].map(sub => {
-                const active = reportSubTab === sub.id;
-                return (
-                  <button
-                    key={sub.id}
-                    type="button"
-                    onClick={() => setReportSubTab(sub.id as any)}
-                    className={`no-ornament inline-flex h-9 w-full items-center justify-center rounded-[10px] px-2.5 text-[11.5px] font-extrabold transition-all cursor-pointer truncate ${
-                      active
-                        ? 'bg-[#6C60B8] text-white shadow-xs'
-                        : 'text-[#6E6A86] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700/80 dark:hover:text-white'
-                    }`}
-                  >
-                    <span className="truncate">{sub.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+              ]}
+            />
           </div>
 
           {/* SUB-VIEW 1: REKAP KELAS & JURUSAN */}

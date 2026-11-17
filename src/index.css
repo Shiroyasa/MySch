@@ -18,29 +18,81 @@
     color: #f1f5f9;
   }
 
-  button, [role="button"], a.btn, select, input {
+  button, [role="button"], a.btn, select, input, textarea {
     touch-action: manipulation;
   }
 
-  button, [role="button"], a.btn {
-    transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), 
-                box-shadow 0.16s cubic-bezier(0.16, 1, 0.3, 1), 
-                background-color 0.16s ease, 
-                color 0.16s ease, 
-                border-color 0.16s ease,
-                opacity 0.16s ease;
+  /* Universal Button Jelly Bounce + Liquid Sheen across ALL pages & ALL modes (Desktop, Mobile, Tablet) */
+  :where(button, [role="button"], a.btn):not(:disabled):not([role="checkbox"]) {
+    position: relative;
+    transition: transform 0.42s cubic-bezier(0.34, 1.68, 0.64, 1),
+                box-shadow 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+                background-color 0.2s ease,
+                color 0.2s ease,
+                border-color 0.2s ease,
+                opacity 0.2s ease,
+                filter 0.22s ease;
+    transform-origin: center center;
+  }
+
+  :where(button, [role="button"], a.btn):not(:disabled):not([role="checkbox"]):not(.no-liquid)::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background-image: linear-gradient(
+      112deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.30) 44%,
+      rgba(198, 188, 255, 0.24) 54%,
+      transparent 76%
+    );
+    background-size: 235% 100%;
+    background-position: 145% 0;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: background-position 0.62s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease;
   }
 
   @media (hover: hover) and (pointer: fine) {
-    main button:not(.no-ornament):not([role="checkbox"]):hover:not(:disabled),
-    .fixed button:not(.no-ornament):hover:not(:disabled) {
-      transform: translateY(-1px);
+    :where(button, [role="button"], a.btn):not(:disabled):not([role="checkbox"]):hover {
+      animation: buttonJellyBounce 0.56s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    :where(button, [role="button"], a.btn):not(:disabled):not([role="checkbox"]):not(.no-liquid):hover::after {
+      opacity: 1;
+      background-position: -125% 0;
     }
   }
 
-  main button:not(.no-ornament):not([role="checkbox"]):active:not(:disabled),
-  .fixed button:not(.no-ornament):active:not(:disabled) {
-    transform: scale(0.97);
+  :where(button, [role="button"], a.btn):not(:disabled):not([role="checkbox"]):active {
+    animation: none;
+    transform: scale(0.91, 1.08) translateY(1px);
+  }
+
+  :where(button, [role="button"], a.btn):not(:disabled):not([role="checkbox"]):not(.no-liquid):active::after {
+    opacity: 1;
+    background-position: -45% 0;
+  }
+
+  /* Universal Text Field Underline Grow Effect across every page & menu */
+  #root input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not(.bg-transparent):not(.no-underline-grow),
+  #root textarea:not(.bg-transparent):not(.no-underline-grow) {
+    background-image: linear-gradient(90deg, #FF7597 0%, #7468C4 50%, #A79CFF 100%);
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    background-size: 0% 2.5px;
+    transition: background-size 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background-color 0.2s ease;
+  }
+
+  #root input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]):not(.bg-transparent):not(.no-underline-grow):focus,
+  #root textarea:not(.bg-transparent):not(.no-underline-grow):focus {
+    background-size: 100% 2.5px;
+    outline: none;
   }
 }
 
@@ -246,6 +298,162 @@
   }
 }
 
+@keyframes liquidBulgeRight {
+  0% {
+    transform: scaleX(1.13) scaleY(0.90);
+    border-radius: 18px 13px 13px 18px;
+  }
+  42% {
+    transform: scaleX(0.94) scaleY(1.05);
+    border-radius: 13px 18px 18px 13px;
+  }
+  74% {
+    transform: scaleX(1.02) scaleY(0.985);
+    border-radius: 14px;
+  }
+  100% {
+    transform: scaleX(1) scaleY(1);
+    border-radius: 14px;
+  }
+}
+
+@keyframes liquidBulgeLeft {
+  0% {
+    transform: scaleX(1.13) scaleY(0.90);
+    border-radius: 13px 18px 18px 13px;
+  }
+  42% {
+    transform: scaleX(0.94) scaleY(1.05);
+    border-radius: 18px 13px 13px 18px;
+  }
+  74% {
+    transform: scaleX(1.02) scaleY(0.985);
+    border-radius: 14px;
+  }
+  100% {
+    transform: scaleX(1) scaleY(1);
+    border-radius: 14px;
+  }
+}
+
+@keyframes liquidTrailRight {
+  0% {
+    transform: translateX(-12px) scaleX(1.2) scaleY(0.86);
+    opacity: 0.72;
+  }
+  60% {
+    transform: translateX(3px) scaleX(0.98) scaleY(1.02);
+    opacity: 0.28;
+  }
+  100% {
+    transform: translateX(0) scaleX(1) scaleY(1);
+    opacity: 0;
+  }
+}
+
+@keyframes liquidTrailLeft {
+  0% {
+    transform: translateX(12px) scaleX(1.2) scaleY(0.86);
+    opacity: 0.72;
+  }
+  60% {
+    transform: translateX(-3px) scaleX(0.98) scaleY(1.02);
+    opacity: 0.28;
+  }
+  100% {
+    transform: translateX(0) scaleX(1) scaleY(1);
+    opacity: 0;
+  }
+}
+
+@keyframes seesawTiltLeft {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  24% {
+    transform: rotate(-2.8deg) scale(1.012, 0.988);
+  }
+  56% {
+    transform: rotate(1.5deg) scale(0.995, 1.006);
+  }
+  80% {
+    transform: rotate(-0.6deg) scale(1.002, 0.998);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes seesawTiltRight {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  24% {
+    transform: rotate(2.8deg) scale(1.012, 0.988);
+  }
+  56% {
+    transform: rotate(-1.5deg) scale(0.995, 1.006);
+  }
+  80% {
+    transform: rotate(0.6deg) scale(1.002, 0.998);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes seesawTiltCenter {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  28% {
+    transform: rotate(-1.6deg) scale(1.015, 0.985);
+  }
+  60% {
+    transform: rotate(1.2deg) scale(0.994, 1.008);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes buttonJellyBounce {
+  0% {
+    transform: scale(1, 1) translateY(0);
+  }
+  28% {
+    transform: scale(1.055, 0.945) translateY(-1.5px);
+  }
+  54% {
+    transform: scale(0.97, 1.035) translateY(-2px);
+  }
+  78% {
+    transform: scale(1.018, 0.986) translateY(-1px);
+  }
+  100% {
+    transform: scale(1.01, 1.01) translateY(-1px);
+  }
+}
+
+@keyframes searchIconExpandPop {
+  0% {
+    scale: 1;
+    rotate: 0deg;
+  }
+  45% {
+    scale: 1.38;
+    rotate: -14deg;
+  }
+  75% {
+    scale: 1.2;
+    rotate: 6deg;
+  }
+  100% {
+    scale: 1.28;
+    rotate: -8deg;
+  }
+}
+
 @keyframes liquidWipeIn {
   0% {
     opacity: 0.18;
@@ -381,6 +589,109 @@
   animation: liquidIconJelly 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.animate-liquid-bulge-left {
+  animation: liquidBulgeLeft 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-liquid-bulge-right {
+  animation: liquidBulgeRight 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-liquid-trail-left {
+  animation: liquidTrailLeft 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-liquid-trail-right {
+  animation: liquidTrailRight 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Mobile & Tablet Seesaw Tilt on Tab Bars (<1280px covering phones & portrait/landscape tablets) */
+@media (max-width: 1279.98px) {
+  .animate-seesaw-left {
+    animation: seesawTiltLeft 0.54s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform-origin: center center;
+  }
+
+  .animate-seesaw-right {
+    animation: seesawTiltRight 0.54s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform-origin: center center;
+  }
+
+  .animate-seesaw-center {
+    animation: seesawTiltCenter 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform-origin: center center;
+  }
+}
+
+/* Text Field Underline Grow Wrapper (for transparent inputs inside rounded containers) */
+.orbita-field-underline {
+  position: relative;
+}
+
+.orbita-field-underline::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 0;
+  height: 2.5px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #FF7597 0%, #7468C4 50%, #A79CFF 100%);
+  transform: scaleX(0);
+  transform-origin: center center;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+}
+
+.orbita-field-underline:focus-within::after {
+  transform: scaleX(1);
+  opacity: 1;
+}
+
+/* Searchbar Icon Expand Effect (Desktop hover, Tablet & Mobile focus-within/tap, preserves CSS translate) */
+.orbita-searchbar svg.lucide-search,
+.orbita-searchbar .orbita-search-icon,
+div:has(> input[placeholder*="Cari" i]) svg.lucide-search,
+div:has(> input[type="search"]) svg.lucide-search {
+  transition: scale 0.38s cubic-bezier(0.34, 1.65, 0.64, 1),
+              rotate 0.38s cubic-bezier(0.34, 1.65, 0.64, 1),
+              color 0.22s ease,
+              filter 0.24s ease;
+  transform-origin: center center;
+}
+
+.orbita-searchbar:hover svg.lucide-search,
+.orbita-searchbar:active svg.lucide-search,
+.orbita-searchbar:hover .orbita-search-icon,
+.orbita-searchbar:active .orbita-search-icon,
+div:has(> input[placeholder*="Cari" i]):hover svg.lucide-search,
+div:has(> input[type="search"]):hover svg.lucide-search {
+  scale: 1.28;
+  rotate: -10deg;
+  color: #6C60B8;
+  filter: drop-shadow(0 0 6px rgba(116, 104, 196, 0.42));
+}
+
+.orbita-searchbar:focus-within svg.lucide-search,
+.orbita-searchbar:focus-within .orbita-search-icon,
+div:has(> input[placeholder*="Cari" i]):focus-within svg.lucide-search,
+div:has(> input[type="search"]):focus-within svg.lucide-search {
+  animation: searchIconExpandPop 0.46s cubic-bezier(0.34, 1.65, 0.64, 1) forwards;
+  color: #6C60B8;
+  filter: drop-shadow(0 0 8px rgba(116, 104, 196, 0.52));
+}
+
+html.dark .orbita-searchbar:hover svg.lucide-search,
+html.dark .orbita-searchbar:focus-within svg.lucide-search,
+html.dark .orbita-searchbar:hover .orbita-search-icon,
+html.dark .orbita-searchbar:focus-within .orbita-search-icon,
+html.dark div:has(> input[placeholder*="Cari" i]):hover svg.lucide-search,
+html.dark div:has(> input[placeholder*="Cari" i]):focus-within svg.lucide-search {
+  color: #B4A8FF;
+  filter: drop-shadow(0 0 8px rgba(167, 156, 255, 0.55));
+}
+
 .animate-stagger-1 {
   animation: elementRise 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
 }
@@ -420,11 +731,18 @@
   .animate-dock-pop,
   .animate-liquid-bulge-down,
   .animate-liquid-bulge-up,
+  .animate-liquid-bulge-left,
+  .animate-liquid-bulge-right,
   .animate-liquid-trail-down,
   .animate-liquid-trail-up,
+  .animate-liquid-trail-left,
+  .animate-liquid-trail-right,
   .animate-liquid-aura,
   .animate-liquid-sheen,
   .animate-liquid-icon-jelly,
+  .animate-seesaw-left,
+  .animate-seesaw-right,
+  .animate-seesaw-center,
   .animate-stagger-1,
   .animate-stagger-2,
   .animate-stagger-3,
@@ -433,6 +751,10 @@
   .fixed.inset-0.flex.items-center.justify-center > div:not(.no-wobble),
   [role="dialog"],
   .page-transition-stage > div > * {
+    animation: none !important;
+  }
+
+  :where(button, [role="button"], a.btn):hover {
     animation: none !important;
   }
 }
@@ -669,7 +991,7 @@ html:not(.dark) .fixed textarea:not(.no-ornament) {
   -webkit-text-fill-color: #3E385B !important;
   caret-color: #6C60B8 !important;
   color-scheme: light !important;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  transition: background-size 0.34s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
 html:not(.dark) main input:not(.no-ornament)::placeholder,

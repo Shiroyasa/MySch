@@ -15,6 +15,7 @@ import {
   Play,
 } from 'lucide-react';
 import { runPedagogicalThinkingAnalysis, generateVeoSchoolVideo, checkVeoVideoStatus } from '../../services/aiService';
+import { LiquidNavBar } from '../common/LiquidNavBar';
 
 export const AiStudioModule: React.FC = () => {
   const { students, classes, subjects, assessments, assessmentScores } = useApp();
@@ -160,32 +161,24 @@ export const AiStudioModule: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100/70 p-1.5 dark:border-slate-800 dark:bg-slate-800/60">
-          <button
-            type="button"
-            onClick={() => setActiveTab('thinking')}
-            className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
-              activeTab === 'thinking'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            <BrainCircuit className="h-4 w-4 text-purple-600 shrink-0" />
-            <span>Analisis Pedagogik Cerdas (Gemini 4 Argon)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab('veo')}
-            className={`inline-flex h-8 items-center justify-center gap-1.5 rounded-lg px-3.5 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
-              activeTab === 'veo'
-                ? 'bg-white text-blue-600 shadow-xs dark:bg-slate-900 dark:text-white'
-                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400'
-            }`}
-          >
-            <Video className="h-4 w-4 text-cyan-500 shrink-0" />
-            <span>Studio Animasi Video Sekolah (Veo)</span>
-          </button>
-        </div>
+        <LiquidNavBar
+          size="sm"
+          ariaLabel="Navigasi Studio AI"
+          activeId={activeTab}
+          onSelect={id => setActiveTab(id as 'thinking' | 'veo')}
+          items={[
+            {
+              id: 'thinking',
+              label: 'Analisis Pedagogik Cerdas (Gemini 4 Argon)',
+              icon: <BrainCircuit className="h-4 w-4" />,
+            },
+            {
+              id: 'veo',
+              label: 'Studio Animasi Video Sekolah (Veo)',
+              icon: <Video className="h-4 w-4" />,
+            },
+          ]}
+        />
       </div>
 
       {/* TAB 1: GEMINI 4 ARGON HIGH-THINKING PEDAGOGICAL ANALYSIS */}

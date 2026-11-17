@@ -20,6 +20,7 @@ import {
 import { exportToPdf } from '../../utils/exportUtils';
 import { AttendanceStatus } from '../../types';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
+import { LiquidNavBar } from '../common/LiquidNavBar';
 
 interface StudentPortalModuleProps {
   initialTab?: 'profile' | 'grades' | 'summary' | 'attendance';
@@ -194,60 +195,34 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
         }
       />
 
-      {/* Navigation Tabs tailored to Siswa Role */}
-      <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-[#ECEAF6] bg-white p-1.5 shadow-xs">
-        <button
-          type="button"
-          onClick={() => setActiveTab('profile')}
-          className={`no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
-            activeTab === 'profile'
-              ? 'bg-[#6C60B8] text-white shadow-sm'
-              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
-          }`}
-        >
-          <User className="h-4 w-4 shrink-0" />
-          <span>Profil Siswa</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('grades')}
-          className={`no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
-            activeTab === 'grades'
-              ? 'bg-[#6C60B8] text-white shadow-sm'
-              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
-          }`}
-        >
-          <GraduationCap className="h-4 w-4 shrink-0" />
-          <span>Nilai Siswa Per Mata Pelajaran</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('summary')}
-          className={`no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
-            activeTab === 'summary'
-              ? 'bg-[#6C60B8] text-white shadow-sm'
-              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
-          }`}
-        >
-          <Award className="h-4 w-4 shrink-0" />
-          <span>Nilai Siswa Keseluruhan &amp; Rekap</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('attendance')}
-          className={`no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-xl px-4 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
-            activeTab === 'attendance'
-              ? 'bg-[#6C60B8] text-white shadow-sm'
-              : 'text-[#6E7287] hover:bg-[#F4F3FA] hover:text-[#262833]'
-          }`}
-        >
-          <CalendarCheck className="h-4 w-4 shrink-0" />
-          <span>Kehadiran &amp; Koreksi Presensi</span>
-        </button>
-      </div>
+      {/* Navigation Tabs tailored to Siswa Role (Sidebar Glass + Liquid Bulge + Seesaw Tilt) */}
+      <LiquidNavBar
+        ariaLabel="Navigasi Portal Siswa Lengkap"
+        activeId={activeTab}
+        onSelect={id => setActiveTab(id as 'profile' | 'grades' | 'summary' | 'attendance')}
+        items={[
+          {
+            id: 'profile',
+            label: 'Profil Siswa',
+            icon: <User className="h-4 w-4" />,
+          },
+          {
+            id: 'grades',
+            label: 'Nilai Siswa Per Mata Pelajaran',
+            icon: <GraduationCap className="h-4 w-4" />,
+          },
+          {
+            id: 'summary',
+            label: 'Nilai Siswa Keseluruhan & Rekap',
+            icon: <Award className="h-4 w-4" />,
+          },
+          {
+            id: 'attendance',
+            label: 'Kehadiran & Koreksi Presensi',
+            icon: <CalendarCheck className="h-4 w-4" />,
+          },
+        ]}
+      />
 
       {/* ==================== TAB 1: PROFIL SISWA ==================== */}
       {activeTab === 'profile' && (

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { BroadcastAnnouncementModal } from '../common/BroadcastAnnouncementModal';
 import { ProfileModal } from '../common/ProfileModal';
+import { LiquidNavBar } from '../common/LiquidNavBar';
 
 export const Header: React.FC<{
   onToggleMobileSidebar: () => void;
@@ -141,7 +142,7 @@ export const Header: React.FC<{
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Tablet & Desktop Search Pill (hidden on <640px so title has breathing room) */}
             <div className="relative hidden sm:block">
-              <div className="flex items-center gap-2 rounded-full bg-[#EFEFF6] dark:bg-slate-800/90 px-3.5 py-2 text-[#3E385B] dark:text-slate-100 w-44 md:w-56 lg:w-60 transition-all focus-within:ring-2 focus-within:ring-[#6C60B8]/30">
+              <div className="orbita-searchbar orbita-field-underline flex items-center gap-2 rounded-full bg-[#EFEFF6] dark:bg-slate-800/90 px-3.5 py-2 text-[#3E385B] dark:text-slate-100 w-44 md:w-56 lg:w-60 transition-all focus-within:bg-white dark:focus-within:bg-slate-800 focus-within:ring-2 focus-within:ring-[#6C60B8]/25">
                 <Search className="h-4 w-4 text-[#4A4368] dark:text-indigo-300 shrink-0 stroke-[2.4]" />
                 <input
                   type="text"
@@ -185,7 +186,7 @@ export const Header: React.FC<{
             <button
               type="button"
               onClick={() => setMobileSearchOpen(prev => !prev)}
-              className={`no-ornament sm:hidden flex h-10 w-10 items-center justify-center rounded-full transition-colors cursor-pointer ${
+              className={`orbita-searchbar no-ornament sm:hidden flex h-10 w-10 items-center justify-center rounded-full transition-colors cursor-pointer ${
                 mobileSearchOpen
                   ? 'bg-[#6C60B8] text-white'
                   : 'bg-[#EFEFF6] text-[#3E385B] hover:bg-[#E4E2F5] dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
@@ -305,40 +306,28 @@ export const Header: React.FC<{
                 </div>
 
                 {isAdmin && (
-                  <div className="flex flex-wrap items-center gap-1.5 pt-2.5 pb-2 border-b border-[#F0F1F6] dark:border-slate-800 text-[10px]">
-                    <button
-                      type="button"
-                      onClick={() => setAdminNotifTab('all')}
-                      className={`no-ornament inline-flex items-center justify-center h-7 px-2.5 rounded-full font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
-                        adminNotifTab === 'all'
-                          ? 'bg-[#6C60B8] text-white'
-                          : 'bg-[#F0F1F6] text-[#9694A8] hover:text-[#3E385B] dark:bg-slate-800 dark:text-slate-400 dark:hover:text-white'
-                      }`}
-                    >
-                      Semua ({notifications.length})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAdminNotifTab('mine')}
-                      className={`no-ornament inline-flex items-center justify-center h-7 px-2.5 rounded-full font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
-                        adminNotifTab === 'mine'
-                          ? 'bg-[#6C60B8] text-white'
-                          : 'bg-[#F0F1F6] text-[#9694A8] hover:text-[#3E385B] dark:bg-slate-800 dark:text-slate-400 dark:hover:text-white'
-                      }`}
-                    >
-                      Profil ({notifications.filter(n => n.recipientId === currentUser.id).length})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAdminNotifTab('broadcast')}
-                      className={`no-ornament inline-flex items-center justify-center h-7 px-2.5 rounded-full font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
-                        adminNotifTab === 'broadcast'
-                          ? 'bg-[#6C60B8] text-white'
-                          : 'bg-[#F0F1F6] text-[#9694A8] hover:text-[#3E385B] dark:bg-slate-800 dark:text-slate-400 dark:hover:text-white'
-                      }`}
-                    >
-                      Broadcast ({notifications.filter(n => n.isBroadcast || n.targetRole === 'all').length})
-                    </button>
+                  <div className="pt-2.5 pb-2 border-b border-[#F0F1F6] dark:border-slate-800">
+                    <LiquidNavBar
+                      size="sm"
+                      pill
+                      fullWidth
+                      ariaLabel="Filter Pemberitahuan"
+                      activeId={adminNotifTab}
+                      onSelect={id => setAdminNotifTab(id as 'all' | 'mine' | 'broadcast')}
+                      items={[
+                        { id: 'all', label: `Semua (${notifications.length})` },
+                        {
+                          id: 'mine',
+                          label: `Profil (${notifications.filter(n => n.recipientId === currentUser.id).length})`,
+                        },
+                        {
+                          id: 'broadcast',
+                          label: `Broadcast (${
+                            notifications.filter(n => n.isBroadcast || n.targetRole === 'all').length
+                          })`,
+                        },
+                      ]}
+                    />
                   </div>
                 )}
 
@@ -423,7 +412,7 @@ export const Header: React.FC<{
         {mobileSearchOpen && (
           <div className="sm:hidden pb-3 pt-1 animate-slide-down">
             <div className="relative">
-              <div className="flex items-center gap-2 rounded-2xl border border-[#E4E3F0] bg-white dark:border-slate-700 dark:bg-slate-800 px-3.5 py-2.5 text-[#3E385B] dark:text-slate-100 shadow-sm focus-within:border-[#6C60B8]">
+              <div className="orbita-searchbar orbita-field-underline flex items-center gap-2 rounded-2xl border border-[#E4E3F0] bg-white dark:border-slate-700 dark:bg-slate-800 px-3.5 py-2.5 text-[#3E385B] dark:text-slate-100 shadow-sm focus-within:border-[#6C60B8]">
                 <Search className="h-4 w-4 text-[#6C60B8] dark:text-indigo-300 shrink-0" />
                 <input
                   type="text"

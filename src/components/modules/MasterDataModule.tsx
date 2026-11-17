@@ -28,6 +28,7 @@ import { exportToExcel } from '../../utils/exportUtils';
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
+import { LiquidNavBar } from '../common/LiquidNavBar';
 
 export const MasterDataModule: React.FC = () => {
   const {
@@ -724,35 +725,21 @@ export const MasterDataModule: React.FC = () => {
         subtitle="Pengelolaan terpusat data siswa aktif, tenaga pendidik, rombongan belajar, kompetensi keahlian (jurusan), mata pelajaran, jadwal pelajaran, dan tahun ajaran."
         icon={GraduationCap}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5 dark:border-slate-700/80 dark:bg-slate-800/80">
-            {[
-              { id: 'students', label: `Siswa (${students.length})`, icon: Users },
-              { id: 'teachers', label: `Guru (${teachers.length})`, icon: UserCheck },
-              { id: 'classes', label: `Kelas (${classes.length})`, icon: School },
-              { id: 'majors', label: `Jurusan (${majors.length})`, icon: Layers },
-              { id: 'subjects', label: `Mapel (${subjects.length})`, icon: BookOpen },
-              { id: 'schedules', label: `Jadwal (${lessonSchedules.length})`, icon: Calendar },
-              { id: 'years', label: 'Tahun Ajaran', icon: Clock },
-            ].map(tab => {
-              const Icon = tab.icon;
-              const isAct = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 rounded-[10px] px-3 text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-                    isAct
-                      ? 'bg-[#6C60B8] text-white shadow-sm'
-                      : 'text-[#6E7287] hover:bg-white hover:text-[#262833] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
-                  }`}
-                >
-                  <Icon className={`h-3.5 w-3.5 shrink-0 ${isAct ? 'text-white' : 'text-[#6C60B8] dark:text-violet-300'}`} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
+          <LiquidNavBar
+            size="sm"
+            ariaLabel="Navigasi Master Data"
+            activeId={activeTab}
+            onSelect={id => setActiveTab(id as any)}
+            items={[
+              { id: 'students', label: 'Siswa', badge: students.length, icon: <Users className="h-3.5 w-3.5" /> },
+              { id: 'teachers', label: 'Guru', badge: teachers.length, icon: <UserCheck className="h-3.5 w-3.5" /> },
+              { id: 'classes', label: 'Kelas', badge: classes.length, icon: <School className="h-3.5 w-3.5" /> },
+              { id: 'majors', label: 'Jurusan', badge: majors.length, icon: <Layers className="h-3.5 w-3.5" /> },
+              { id: 'subjects', label: 'Mapel', badge: subjects.length, icon: <BookOpen className="h-3.5 w-3.5" /> },
+              { id: 'schedules', label: 'Jadwal', badge: lessonSchedules.length, icon: <Calendar className="h-3.5 w-3.5" /> },
+              { id: 'years', label: 'Tahun Ajaran', icon: <Clock className="h-3.5 w-3.5" /> },
+            ]}
+          />
         }
       />
 

@@ -27,6 +27,7 @@ import { exportToExcel, exportToPdf, exportLegerExcelWithFormulas } from '../../
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
 import { AcademyHeroBanner, OrnateCard } from '../common/AcademyOrnaments';
 import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
+import { LiquidNavBar } from '../common/LiquidNavBar';
 
 export const GradingModule: React.FC = () => {
   const {
@@ -798,41 +799,16 @@ export const GradingModule: React.FC = () => {
         subtitle="Pengelolaan bobot penilaian dinamis, kalkulasi leger nilai akhir otomatis, dan penyusunan transkrip rapor siswa yang tersinkron ke Cloud Firestore."
         icon={GraduationCap}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-[16px] border border-[#E4E1F4] bg-[#F4F3FA] p-1.5 dark:border-slate-700/80 dark:bg-slate-800/80">
-            <button
-              type="button"
-              onClick={() => setActiveTab('input')}
-              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                activeTab === 'input'
-                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
-              }`}
-            >
-              Input Nilai
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('leger')}
-              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                activeTab === 'leger'
-                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
-              }`}
-            >
-              Rekap &amp; Leger Kelas
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('reportCard')}
-              className={`no-ornament inline-flex h-9 items-center justify-center rounded-[12px] px-3.5 text-xs font-extrabold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                activeTab === 'reportCard'
-                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_14px_rgba(108,96,184,0.28)]'
-                  : 'text-[#5A537A] hover:bg-white hover:text-[#3E385B] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
-              }`}
-            >
-              Draf Rapor Siswa
-            </button>
-          </div>
+          <LiquidNavBar
+            ariaLabel="Navigasi Modul Penilaian"
+            activeId={activeTab}
+            onSelect={id => setActiveTab(id as 'input' | 'leger' | 'reportCard')}
+            items={[
+              { id: 'input', label: 'Input Nilai' },
+              { id: 'leger', label: 'Rekap & Leger Kelas' },
+              { id: 'reportCard', label: 'Draf Rapor Siswa' },
+            ]}
+          />
         }
       />
 

@@ -15,6 +15,7 @@ import { AcademyScheduleBoard } from '../common/AcademyScheduleBoard';
 import { OrbitaOrnateFrame } from '../common/OrbitaOrnateFrame';
 import { GenshinElementIcon, OrbitaMenuIcon, buildSmoothWavePath } from '../common/AcademyOrnaments';
 import { AnimeBackground } from '../common/AnimeBackground';
+import { LiquidNavBar } from '../common/LiquidNavBar';
 
 export const LoginPage: React.FC = () => {
   const {
@@ -164,16 +165,18 @@ export const LoginPage: React.FC = () => {
       <div className="animate-login-reveal relative z-10 flex min-h-[100dvh] sm:min-h-[680px] w-full max-w-[1480px] overflow-hidden rounded-none sm:rounded-[34px] lg:rounded-[40px] border-0 sm:border sm:border-white/65 bg-transparent sm:bg-white/40 p-0 sm:p-2 lg:p-2.5 sm:shadow-[0_32px_80px_-12px_rgba(62,56,91,0.22)] sm:backdrop-blur-md">
         {/* Inner Crisp Snow-White Application Canvas */}
         <div className="relative flex w-full overflow-hidden rounded-none sm:rounded-[28px] lg:rounded-[32px] bg-[#F8F9FD]">
-          {/* Left Floating Vertical Purple Pill Sidebar (Desktop & Landscape Tablet) */}
+          {/* Left Floating Vertical Frosted Violet Glass Pill Sidebar (Desktop & Landscape Tablet) */}
           <aside
             style={{
-              background: 'linear-gradient(180deg, #7468C4 0%, #6558B5 100%)',
-              boxShadow: '0 18px 38px -8px rgba(101, 88, 181, 0.42)',
+              background:
+                'linear-gradient(180deg, rgba(116, 104, 196, 0.82) 0%, rgba(101, 88, 181, 0.78) 100%)',
+              boxShadow:
+                '0 20px 44px -8px rgba(84, 70, 172, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.36)',
             }}
-            className="animate-stagger-1 hidden md:flex my-4 ml-4 w-[74px] shrink-0 flex-col items-center justify-between rounded-[28px] py-5 text-white"
+            className="animate-stagger-1 hidden md:flex my-4 ml-4 w-[74px] shrink-0 flex-col items-center justify-between rounded-[28px] border border-white/28 backdrop-blur-2xl backdrop-saturate-150 py-5 text-white"
           >
             {/* Top Brand Emblem Circle */}
-            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/12">
               {activeLogo ? (
                 <img src={activeLogo} alt="ORBITA" className="h-7 w-7 rounded-full object-contain" />
               ) : (
@@ -181,34 +184,32 @@ export const LoginPage: React.FC = () => {
               )}
             </div>
 
-            {/* Center Icons: Operational View Toggles */}
-            <div className="flex flex-col items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setShowScheduleModal(false)}
-                title="Gerbang Login ORBITA"
-                className={`no-ornament flex h-12 w-12 items-center justify-center rounded-[16px] transition-all duration-300 cursor-pointer ${
-                  !showScheduleModal
-                    ? 'bg-[#4B436B] text-white shadow-[0_10px_22px_rgba(45,38,76,0.38)] scale-105'
-                    : 'text-white/80 hover:bg-white/15 hover:text-white hover:-translate-y-0.5'
-                }`}
-              >
-                <OrbitaMenuIcon variant="dashboard" className="h-5.5 w-5.5" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShowScheduleModal(true)}
-                title="Jadwal Pelajaran KBM"
-                className={`no-ornament flex h-12 w-12 items-center justify-center rounded-[16px] transition-all duration-300 cursor-pointer ${
-                  showScheduleModal
-                    ? 'bg-[#4B436B] text-white shadow-[0_10px_22px_rgba(45,38,76,0.38)] scale-105'
-                    : 'text-white/80 hover:bg-white/15 hover:text-white hover:-translate-y-0.5'
-                }`}
-              >
-                <OrbitaMenuIcon variant="attendance" className="h-5.5 w-5.5" />
-              </button>
-            </div>
+            {/* Center Icons: Vertical Liquid Bulge Toggles */}
+            <LiquidNavBar
+              orientation="vertical"
+              ariaLabel="Navigasi Portal Login"
+              className="!bg-transparent !border-0 !shadow-none !backdrop-blur-none !p-0"
+              activeId={showScheduleModal ? 'schedule' : 'login'}
+              onSelect={id => {
+                const isSched = id === 'schedule';
+                setShowScheduleModal(isSched);
+                setMobileSection(isSched ? 'schedule' : 'login');
+              }}
+              items={[
+                {
+                  id: 'login',
+                  label: 'Login',
+                  title: 'Gerbang Login ORBITA',
+                  icon: <OrbitaMenuIcon variant="dashboard" className="h-5.5 w-5.5" />,
+                },
+                {
+                  id: 'schedule',
+                  label: 'Jadwal',
+                  title: 'Jadwal Pelajaran KBM',
+                  icon: <OrbitaMenuIcon variant="attendance" className="h-5.5 w-5.5" />,
+                },
+              ]}
+            />
 
             {/* Bottom Status Indicator */}
             <div className="flex h-11 w-11 items-center justify-center rounded-[16px] text-white/80" title="ORBITA Secure Portal">
@@ -219,9 +220,9 @@ export const LoginPage: React.FC = () => {
           {/* Center Main Area */}
           <div className="flex flex-1 min-w-0 flex-col justify-between p-4 sm:p-7 lg:p-8 overflow-y-auto">
             {/* Top Header Row ("Primary / Portal Akademik" + Search Pill + Badge) */}
-            <div className="animate-stagger-1 flex flex-wrap items-center justify-between gap-3 pb-4 sm:pb-6">
+            <div className="animate-stagger-1 flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-[#7468C4]/16 bg-[#F4F3FC]/74 px-4 py-3 backdrop-blur-xl mb-4 sm:mb-6 shadow-[0_8px_24px_-6px_rgba(101,88,181,0.10)]">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="flex md:hidden h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[#6C60B8] text-white shadow-sm">
+                <div className="flex md:hidden h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-white/30 bg-gradient-to-br from-[#7468C4] to-[#6558B5] text-white shadow-sm">
                   {activeLogo ? (
                     <img src={activeLogo} alt="ORBITA" className="h-6 w-6 rounded-full object-contain" />
                   ) : (
@@ -244,46 +245,39 @@ export const LoginPage: React.FC = () => {
                     setShowScheduleModal(next);
                     setMobileSection(next ? 'schedule' : 'login');
                   }}
-                  className="no-ornament hidden sm:inline-flex h-9 items-center justify-center gap-2 rounded-full bg-[#EFEFF6] hover:bg-[#E4E2F5] px-4 text-xs font-semibold text-[#3E385B] transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
+                  className="orbita-searchbar no-ornament hidden sm:inline-flex h-9 items-center justify-center gap-2 rounded-full bg-[#EFEFF6] hover:bg-[#E4E2F5] px-4 text-xs font-semibold text-[#3E385B] transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
                 >
                   <Search className="h-4 w-4 text-[#4A4368] shrink-0" />
                   <span>{showScheduleModal ? 'Kembali ke Login' : 'Cari Jadwal KBM...'}</span>
                 </button>
                 <div
                   title="Sistem Terverifikasi ORBITA"
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6C60B8] text-white shadow-sm ring-2 ring-white"
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-gradient-to-br from-[#7468C4] to-[#6558B5] text-white shadow-sm ring-2 ring-white"
                 >
                   <Lock className="h-4 w-4" />
                 </div>
               </div>
             </div>
 
-            {/* Interactive Mobile Quick-View Switcher (<768px) so phone users don't fight giant scroll stacks */}
-            <div className="md:hidden grid grid-cols-3 gap-1.5 rounded-2xl bg-[#EAE9F4] p-1 mb-5">
-              {[
-                { id: 'login' as const, label: 'Masuk Akun' },
-                { id: 'overview' as const, label: 'Statistik' },
-                { id: 'schedule' as const, label: 'Jadwal KBM' },
-              ].map(tabItem => {
-                const isAct = mobileSection === tabItem.id;
-                return (
-                  <button
-                    key={tabItem.id}
-                    type="button"
-                    onClick={() => {
-                      setMobileSection(tabItem.id);
-                      setShowScheduleModal(tabItem.id === 'schedule');
-                    }}
-                    className={`no-ornament min-h-[40px] rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                      isAct
-                        ? 'bg-[#6C60B8] text-white shadow-sm'
-                        : 'text-[#6E6A86] hover:text-[#3E385B]'
-                    }`}
-                  >
-                    {tabItem.label}
-                  </button>
-                );
-              })}
+            {/* Interactive Mobile & Tablet Quick-View Switcher (<768px) with Sidebar Glass + Liquid Bulge + Seesaw Tilt */}
+            <div className="md:hidden mb-5">
+              <LiquidNavBar
+                pill
+                fullWidth
+                size="sm"
+                ariaLabel="Navigasi Portal Login Mobile"
+                activeId={mobileSection}
+                onSelect={id => {
+                  const nextTab = id as 'login' | 'overview' | 'schedule';
+                  setMobileSection(nextTab);
+                  setShowScheduleModal(nextTab === 'schedule');
+                }}
+                items={[
+                  { id: 'login', label: 'Masuk Akun' },
+                  { id: 'overview', label: 'Statistik' },
+                  { id: 'schedule', label: 'Jadwal KBM' },
+                ]}
+              />
             </div>
 
             {/* Main 12-Column Asymmetric Grid */}
@@ -331,7 +325,7 @@ export const LoginPage: React.FC = () => {
                           </span>
                         </div>
 
-                        <div className="relative flex items-center rounded-[16px] bg-[#F0F1F6] border border-transparent px-4 py-1 transition-all focus-within:border-[#6C60B8] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#6C60B8]/20">
+                        <div className="orbita-field-underline relative flex items-center rounded-[16px] bg-[#F0F1F6] border border-transparent px-4 py-1 transition-all focus-within:border-[#6C60B8]/50 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#6C60B8]/20">
                           <User className="h-4 w-4 text-[#6C60B8] shrink-0 mr-2.5" />
                           <input
                             type="text"
@@ -356,7 +350,7 @@ export const LoginPage: React.FC = () => {
                           </span>
                         </div>
 
-                        <div className="relative flex items-center rounded-[16px] bg-[#F0F1F6] border border-transparent px-4 py-1 transition-all focus-within:border-[#6C60B8] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#6C60B8]/20">
+                        <div className="orbita-field-underline relative flex items-center rounded-[16px] bg-[#F0F1F6] border border-transparent px-4 py-1 transition-all focus-within:border-[#6C60B8]/50 focus-within:bg-white focus-within:ring-2 focus-within:ring-[#6C60B8]/20">
                           <Lock className="h-4 w-4 text-[#6C60B8] shrink-0 mr-2.5" />
                           <input
                             type={showPassword ? 'text' : 'password'}

@@ -1520,7 +1520,7 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
             <OrbitaMenuIcon variant="brand" className="h-4 w-4 shrink-0" />
             <span>Navigasi &amp; Aksi Modul</span>
           </div>
-          <div className="flex flex-wrap items-center gap-2 xl:justify-end">{rightContent}</div>
+          <div className="min-w-0 max-w-full flex flex-wrap items-center gap-2 xl:justify-end">{rightContent}</div>
         </div>
       )}
     </div>

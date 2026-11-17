@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 import { SkyborneCastleBackground, LiveWallpaperPresetLayer } from '../common/SkyborneCastleBackground';
+import { LiquidNavBar } from '../common/LiquidNavBar';
 
 const compressUploadedImage = (file: File, maxWidth = 1440, quality = 0.8, keepAlpha = false): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -631,68 +632,38 @@ export const SettingsModule: React.FC = () => {
         subtitle="Kelola Logo Aplikasi (Login & Sidebar), Background Menu & Halaman Login (termasuk Live Wallpaper), Ambience Dark Mode, serta Sinkronisasi Cloud Firestore."
         icon={Settings}
         rightContent={
-          <div className="flex flex-wrap items-center gap-1.5 rounded-[18px] border border-[#E6E8F2] bg-[#F5F6FA] p-1.5 shadow-xs dark:border-slate-700/80 dark:bg-slate-800/80">
-            <button
-              type="button"
-              onClick={() => setActiveSection('backgrounds')}
-              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
-                activeSection === 'backgrounds'
-                  ? 'bg-[#685BC7] text-white shadow-xs'
-                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'
-              }`}
-            >
-              <Palette className="h-3.5 w-3.5 shrink-0" />
-              <span>Logo &amp; Background</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSection('profile')}
-              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
-                activeSection === 'profile'
-                  ? 'bg-[#685BC7] text-white shadow-xs'
-                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'
-              }`}
-            >
-              <User className="h-3.5 w-3.5 shrink-0" />
-              <span className="max-w-[120px] truncate">Profil ({currentUser.displayName.split(' ')[0]})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSection('school')}
-              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
-                activeSection === 'school'
-                  ? 'bg-[#685BC7] text-white shadow-xs'
-                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'
-              }`}
-            >
-              <School className="h-3.5 w-3.5 shrink-0" />
-              <span>Profil Lembaga</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSection('backup')}
-              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
-                activeSection === 'backup'
-                  ? 'bg-[#685BC7] text-white shadow-xs'
-                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'
-              }`}
-            >
-              <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
-              <span>Cadangan Data</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSection('cloud-sync')}
-              className={`no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-[12px] px-3.5 text-xs font-bold whitespace-nowrap shrink-0 leading-none transition-all cursor-pointer ${
-                activeSection === 'cloud-sync'
-                  ? 'bg-[#685BC7] text-white shadow-xs'
-                  : 'text-[#6A6584] hover:text-[#3E385B] hover:bg-white dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'
-              }`}
-            >
-              <Cloud className="h-3.5 w-3.5 shrink-0" />
-              <span>Cloud Sync</span>
-            </button>
-          </div>
+          <LiquidNavBar
+            ariaLabel="Navigasi Pengaturan"
+            activeId={activeSection}
+            onSelect={id => setActiveSection(id as 'profile' | 'backgrounds' | 'school' | 'backup' | 'cloud-sync')}
+            items={[
+              {
+                id: 'backgrounds',
+                label: 'Logo & Background',
+                icon: <Palette className="h-3.5 w-3.5" />,
+              },
+              {
+                id: 'profile',
+                label: `Profil (${currentUser.displayName.split(' ')[0]})`,
+                icon: <User className="h-3.5 w-3.5" />,
+              },
+              {
+                id: 'school',
+                label: 'Profil Lembaga',
+                icon: <School className="h-3.5 w-3.5" />,
+              },
+              {
+                id: 'backup',
+                label: 'Cadangan Data',
+                icon: <ShieldCheck className="h-3.5 w-3.5" />,
+              },
+              {
+                id: 'cloud-sync',
+                label: 'Cloud Sync',
+                icon: <Cloud className="h-3.5 w-3.5" />,
+              },
+            ]}
+          />
         }
       />
 

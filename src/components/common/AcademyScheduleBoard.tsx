@@ -14,6 +14,7 @@ import {
   GenshinElementIcon,
   GENSHIN_ELEMENTS_LIST,
 } from './AcademyOrnaments';
+import { LiquidNavBar } from './LiquidNavBar';
 
 export interface AcademyScheduleBoardProps {
   maxHeightClass?: string;
@@ -124,37 +125,23 @@ export const AcademyScheduleBoard: React.FC<AcademyScheduleBoardProps> = ({
         )}
       </div>
 
-      {/* Day Selector Tabs (Matching Purple Pill Toggle in Reference Image) */}
-      <div className="mt-3.5 flex items-center gap-1.5 overflow-x-auto pb-1.5 scrollbar-none">
-        {daysList.map(day => {
-          const isSelected = selectedDay === day;
-          const dayCount =
+      {/* Day Selector Tabs (Sidebar Frosted Violet Glass + Liquid Bulge + Seesaw Tilt) */}
+      <LiquidNavBar
+        className="mt-3.5"
+        size="sm"
+        pill
+        ariaLabel="Filter Hari KBM"
+        activeId={selectedDay}
+        onSelect={setSelectedDay}
+        items={daysList.map(day => ({
+          id: day,
+          label: day,
+          badge:
             day === 'Semua'
               ? lessonSchedules.length
-              : lessonSchedules.filter(s => s.day === day).length;
-          return (
-            <button
-              key={day}
-              type="button"
-              onClick={() => setSelectedDay(day)}
-              className={`no-ornament rounded-full px-3.5 py-1.5 text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-                isSelected
-                  ? 'bg-[#6C60B8] text-white shadow-[0_4px_12px_rgba(108,96,184,0.3)]'
-                  : 'bg-[#F0F1F6] text-[#9694A8] hover:text-[#3E385B]'
-              }`}
-            >
-              <span>{day}</span>
-              <span
-                className={`rounded-full text-[9.5px] px-1.5 py-0.2 font-extrabold ${
-                  isSelected ? 'bg-white/20 text-white' : 'bg-white text-[#6C60B8]'
-                }`}
-              >
-                {dayCount}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+              : lessonSchedules.filter(s => s.day === day).length,
+        }))}
+      />
 
       {/* Filters */}
       <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -174,7 +161,7 @@ export const AcademyScheduleBoard: React.FC<AcademyScheduleBoardProps> = ({
           </select>
         </div>
 
-        <div className="relative flex items-center rounded-full bg-[#F0F1F6] px-3.5">
+        <div className="orbita-searchbar orbita-field-underline relative flex items-center rounded-full bg-[#F0F1F6] px-3.5">
           <Search className="pointer-events-none w-3.5 h-3.5 text-[#6C60B8] mr-2 shrink-0" />
           <input
             type="text"

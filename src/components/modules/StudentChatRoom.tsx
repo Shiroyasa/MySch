@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { UserRole, User as UserType } from '../../types';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
+import { LiquidNavBar } from '../common/LiquidNavBar';
 
 interface StudentChatRoomProps {
   isAdminView?: boolean;
@@ -187,36 +188,26 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
         }
         icon={MessageSquare}
         rightContent={
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex flex-wrap items-center gap-1 rounded-xl border border-[#E4E2F2] bg-[#F4F3FA] p-1 text-xs dark:border-slate-700/80 dark:bg-slate-800/80">
-              <button
-                type="button"
-                onClick={() => setActiveTab('public')}
-                className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 px-3 rounded-lg font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
-                  activeTab === 'public'
-                    ? 'bg-[#6C60B8] text-white shadow-sm'
-                    : 'text-[#6E7287] hover:bg-white hover:text-[#262833] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
-                }`}
-              >
-                <Users className="h-3.5 w-3.5 shrink-0" />
-                <span>Forum Publik</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('dm')}
-                className={`no-ornament inline-flex h-8 items-center justify-center gap-1.5 px-3 rounded-lg font-bold transition-all relative cursor-pointer whitespace-nowrap shrink-0 leading-none ${
-                  activeTab === 'dm'
-                    ? 'bg-[#6C60B8] text-white shadow-sm'
-                    : 'text-[#6E7287] hover:bg-white hover:text-[#262833] dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white'
-                }`}
-              >
-                <MessageCircle className="h-3.5 w-3.5 shrink-0" />
-                <span>Chat DM Pribadi</span>
-                {directMessages.some(m => m.recipientId === currentUser.id) && (
-                  <span className="h-2 w-2 rounded-full bg-[#F25781] animate-pulse shrink-0" />
-                )}
-              </button>
-            </div>
+          <div className="flex flex-wrap items-center gap-2 max-w-full">
+            <LiquidNavBar
+              size="sm"
+              ariaLabel="Navigasi Ruang Diskusi"
+              activeId={activeTab}
+              onSelect={id => setActiveTab(id as 'public' | 'dm')}
+              items={[
+                {
+                  id: 'public',
+                  label: 'Forum Publik',
+                  icon: <Users className="h-3.5 w-3.5" />,
+                },
+                {
+                  id: 'dm',
+                  label: 'Chat DM Pribadi',
+                  icon: <MessageCircle className="h-3.5 w-3.5" />,
+                  dot: directMessages.some(m => m.recipientId === currentUser.id),
+                },
+              ]}
+            />
 
             {isAdmin && activeTab === 'public' && (
               <button
@@ -285,7 +276,7 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
           {/* Right: Message Window */}
           <div className="lg:col-span-3 rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden dark:border-slate-800 dark:bg-slate-900 flex flex-col h-[560px]">
             {/* Search in public chat */}
-            <div className="p-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center gap-2">
+            <div className="orbita-searchbar orbita-field-underline p-3 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex items-center gap-2">
               <Search className="h-4 w-4 text-slate-400 shrink-0" />
               <input
                 type="text"

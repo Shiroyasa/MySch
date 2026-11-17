@@ -13,10 +13,12 @@ import {
   X,
   LocateFixed,
   MapPin,
+  Search,
 } from 'lucide-react';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { OrbitaMenuIcon } from '../common/AcademyOrnaments';
+import { LiquidNavBar } from '../common/LiquidNavBar';
 
 export interface LiveDeviceLocation {
   userId: string;
@@ -505,31 +507,23 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
           </div>
         </div>
 
-        {/* Pill Toggle ("Jadwal KBM" / "Log & Koreksi") */}
-        <div className="mt-3.5 grid grid-cols-2 gap-1 rounded-full bg-[#EAE9F4] dark:bg-slate-800 p-1">
-            <button
-              type="button"
-              onClick={() => setTab('jadwal')}
-              className={`no-ornament inline-flex items-center justify-center h-8 px-2 rounded-full text-[10.5px] font-extrabold whitespace-nowrap truncate transition-all cursor-pointer ${
-                tab === 'jadwal'
-                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_16px_rgba(108,96,184,0.34)]'
-                  : 'text-[#8E8BA3] hover:text-[#3E385B] dark:text-slate-400 dark:hover:text-white'
-              }`}
-            >
-              Jadwal KBM ({lessonSchedules.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setTab('log')}
-              className={`no-ornament inline-flex items-center justify-center h-8 px-2 rounded-full text-[10.5px] font-extrabold whitespace-nowrap truncate transition-all cursor-pointer ${
-                tab === 'log'
-                  ? 'bg-[#6C60B8] text-white shadow-[0_6px_16px_rgba(108,96,184,0.34)]'
-                  : 'text-[#8E8BA3] hover:text-[#3E385B] dark:text-slate-400 dark:hover:text-white'
-              }`}
-            >
-              Log &amp; Koreksi ({pendingCorrCount > 0 ? `${pendingCorrCount} Baru` : systemFeedItems.length})
-            </button>
-          </div>
+        {/* Pill Toggle ("Jadwal KBM" / "Log & Koreksi") with Sidebar Glass + Liquid Bulge + Seesaw Tilt */}
+        <LiquidNavBar
+          className="mt-3.5"
+          size="sm"
+          pill
+          fullWidth
+          ariaLabel="Tab Agenda dan Log"
+          activeId={tab}
+          onSelect={id => setTab(id as 'jadwal' | 'log')}
+          items={[
+            { id: 'jadwal', label: `Jadwal KBM (${lessonSchedules.length})` },
+            {
+              id: 'log',
+              label: `Log (${pendingCorrCount > 0 ? `${pendingCorrCount} Baru` : systemFeedItems.length})`,
+            },
+          ]}
+        />
 
           {/* Filter Kelas & Search Input */}
           <div className="mt-2.5 space-y-2">
@@ -551,8 +545,8 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
               </div>
             )}
 
-            <div className="flex items-center gap-2 rounded-full bg-[#ECECF4] dark:bg-slate-800 px-3.5 py-2 text-[#3E385B] dark:text-slate-100">
-              <OrbitaMenuIcon variant="brand" className="h-3.5 w-3.5 text-[#6C60B8] dark:text-indigo-300 shrink-0" />
+            <div className="orbita-searchbar orbita-field-underline flex items-center gap-2 rounded-full bg-[#ECECF4] dark:bg-slate-800 px-3.5 py-2 text-[#3E385B] dark:text-slate-100">
+              <Search className="h-3.5 w-3.5 text-[#6C60B8] dark:text-indigo-300 shrink-0" />
               <input
                 type="text"
                 value={searchText}
