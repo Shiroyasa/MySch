@@ -246,12 +246,79 @@
   }
 }
 
+@keyframes liquidWipeIn {
+  0% {
+    opacity: 0.18;
+    clip-path: inset(0 100% 0 0 round 26px);
+    transform: translateX(-16px) scale(0.992);
+    filter: blur(4px);
+  }
+  58% {
+    opacity: 0.96;
+    clip-path: inset(0 6% 0 0 round 14px);
+    transform: translateX(3px) scale(1.002);
+    filter: blur(0px);
+  }
+  86% {
+    opacity: 1;
+    clip-path: inset(0 0% 0 0 round 4px);
+    transform: translateX(0) scale(1);
+    filter: none;
+  }
+  100% {
+    opacity: 1;
+    clip-path: none;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes liquidWipeCurtain {
+  0% {
+    transform: translateX(-105%) skewX(-10deg);
+    opacity: 0.92;
+  }
+  45% {
+    opacity: 0.98;
+  }
+  100% {
+    transform: translateX(118%) skewX(-10deg);
+    opacity: 0;
+  }
+}
+
+@keyframes dialogWobbleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.76) translateY(20px) rotate(-2.4deg);
+  }
+  38% {
+    opacity: 1;
+    transform: scale(1.045, 0.965) translateY(-4px) rotate(1.35deg);
+  }
+  62% {
+    transform: scale(0.98, 1.02) translateY(2px) rotate(-0.75deg);
+  }
+  82% {
+    transform: scale(1.008, 0.994) translateY(-1px) rotate(0.28deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0) rotate(0deg);
+  }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-scale-up {
-  animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: dialogWobbleIn 0.54s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-wobble-in {
+  animation: dialogWobbleIn 0.56s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: center center;
 }
 
 .animate-slide-down {
@@ -267,7 +334,15 @@
 }
 
 .animate-page-enter {
-  animation: pageEnter 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: liquidWipeIn 0.56s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-liquid-wipe-in {
+  animation: liquidWipeIn 0.56s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-liquid-wipe-curtain {
+  animation: liquidWipeCurtain 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-login-reveal {
@@ -335,6 +410,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .animate-page-enter,
+  .animate-liquid-wipe-in,
+  .animate-liquid-wipe-curtain,
+  .animate-wobble-in,
+  .animate-scale-up,
   .animate-login-reveal,
   .animate-drawer-right,
   .animate-sheet-up,
@@ -351,30 +430,35 @@
   .animate-stagger-3,
   .animate-stagger-4,
   .animate-stagger-5,
+  .fixed.inset-0.flex.items-center.justify-center > div:not(.no-wobble),
+  [role="dialog"],
   .page-transition-stage > div > * {
     animation: none !important;
   }
 }
 
 /* ========================================================================== */
-/* REFERENCE IMAGE UI SYSTEM: SOFT WHITE CARDS, FLOATING PURPLE SQUIRCLES,    */
-/* CORAL PINK ACCENTS & EMERALD PROGRESS BARS ACROSS ALL PAGES                */
+/* SIDEBAR-HARMONIZED FROSTED GLASS SYSTEM & DIALOG WOBBLE IN                 */
 /* ========================================================================== */
 
 html:not(.dark) .jrpg-glass {
-  background: #FFFFFF !important;
-  border: 1px solid #F0F0F7 !important;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.86) 0%, rgba(244, 242, 253, 0.80) 100%) !important;
+  backdrop-filter: blur(14px) saturate(145%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(145%) !important;
+  border: 1px solid rgba(116, 104, 196, 0.22) !important;
   border-radius: 26px !important;
-  box-shadow: 0 14px 34px -6px rgba(108, 96, 184, 0.09) !important;
+  box-shadow: 0 14px 34px -6px rgba(108, 96, 184, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
   color: #3E385B !important;
   overflow: visible !important;
 }
 
 html.dark .jrpg-glass {
-  background: #0f172a !important;
-  border: 1px solid #1e293b !important;
+  background: linear-gradient(155deg, rgba(35, 30, 72, 0.82) 0%, rgba(22, 19, 48, 0.86) 100%) !important;
+  backdrop-filter: blur(16px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+  border: 1px solid rgba(158, 146, 255, 0.24) !important;
   border-radius: 26px !important;
-  box-shadow: 0 14px 34px -6px rgba(2, 6, 23, 0.45) !important;
+  box-shadow: 0 14px 34px -6px rgba(8, 6, 24, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
   color: #f1f5f9 !important;
   overflow: visible !important;
 }
@@ -391,26 +475,64 @@ main .jrpg-glass:not(.academy-ornate-card):not(.jrpg-flip-card),
               border-color 0.2s ease;
 }
 
-/* Top-level module cards -> Reference Image Crisp Soft White Cards (#FFFFFF) in Light Mode */
+/* Top-level module cards -> Sidebar-Matched Translucent Lavender-White Glass in Light Mode */
 html:not(.dark) main div.rounded-2xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back),
-html:not(.dark) main div.rounded-3xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back),
-html:not(.dark) .fixed div.rounded-2xl[class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament),
-html:not(.dark) .fixed div.rounded-3xl[class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament) {
+html:not(.dark) main div.rounded-3xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back) {
   border-width: 1px !important;
-  border-color: #EFEFF7 !important;
+  border-color: rgba(116, 104, 196, 0.20) !important;
   border-radius: 26px !important;
-  background: #FFFFFF !important;
-  box-shadow: 0 14px 34px -6px rgba(108, 96, 184, 0.09) !important;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.86) 0%, rgba(244, 242, 253, 0.80) 100%) !important;
+  backdrop-filter: blur(12px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(140%) !important;
+  box-shadow: 0 14px 34px -6px rgba(108, 96, 184, 0.11), inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
   color: #3E385B !important;
 }
 
-/* Nested rounded-xl sub-cards inside modules -> Soft Lavender-Tinted White Sub-Panels in Light Mode */
+/* Harmonized Sidebar-Tinted Glass Backdrop & Wobble-In Frosted Glass Dialogs (Desktop, Mobile & Tablet) */
+.fixed.inset-0[class*="backdrop-blur"]:not(.pointer-events-none):not(.bg-transparent) {
+  background-color: rgba(66, 54, 142, 0.42) !important;
+  backdrop-filter: blur(10px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(140%) !important;
+}
+
+.fixed.inset-0.flex.items-center.justify-center > div:not(.no-wobble),
+[role="dialog"]:not(.no-wobble) {
+  animation: dialogWobbleIn 0.56s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+  transform-origin: center center;
+}
+
+html:not(.dark) .fixed.inset-0.flex.items-center.justify-center > div:not(.no-ornament):not(.paper-surface),
+html:not(.dark) .fixed div.rounded-2xl[class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament):not(.paper-surface),
+html:not(.dark) .fixed div.rounded-3xl[class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament):not(.paper-surface),
+html:not(.dark) [role="dialog"]:not(.no-ornament) {
+  border-width: 1.5px !important;
+  border-color: rgba(116, 104, 196, 0.32) !important;
+  border-radius: 28px !important;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.90) 0%, rgba(240, 237, 253, 0.86) 100%) !important;
+  backdrop-filter: blur(24px) saturate(165%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(165%) !important;
+  box-shadow: 0 28px 68px -12px rgba(64, 52, 142, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+  color: #3E385B !important;
+}
+
+html.dark .fixed.inset-0.flex.items-center.justify-center > div:not(.no-ornament):not(.paper-surface),
+html.dark [role="dialog"]:not(.no-ornament) {
+  border-width: 1.5px !important;
+  border-color: rgba(158, 146, 255, 0.30) !important;
+  border-radius: 28px !important;
+  background: linear-gradient(155deg, rgba(44, 37, 88, 0.86) 0%, rgba(25, 21, 56, 0.90) 100%) !important;
+  backdrop-filter: blur(24px) saturate(165%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(165%) !important;
+  box-shadow: 0 28px 68px -12px rgba(8, 6, 24, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+}
+
+/* Nested rounded-xl sub-cards inside modules -> Soft Lavender-Tinted Glass Sub-Panels in Light Mode */
 html:not(.dark) main div.rounded-xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back) {
   border-width: 1px !important;
-  border-color: #EFEFF7 !important;
+  border-color: rgba(116, 104, 196, 0.16) !important;
   border-radius: 18px !important;
-  background: #FAF9FE !important;
-  box-shadow: 0 6px 16px -4px rgba(108, 96, 184, 0.05) !important;
+  background: rgba(248, 247, 254, 0.82) !important;
+  box-shadow: 0 6px 16px -4px rgba(108, 96, 184, 0.06) !important;
   color: #3E385B !important;
 }
 
@@ -421,8 +543,8 @@ html:not(.dark) main div.rounded-xl[class*="border"][class*="bg-white"]:not([cla
   html:not(.dark) main .jrpg-glass:not(.jrpg-flip-card):hover,
   html:not(.dark) .academy-ornate-card:not(.jrpg-flip-card):hover {
     transform: translateY(-2px);
-    border-color: #DFDCF2 !important;
-    box-shadow: 0 18px 40px -6px rgba(108, 96, 184, 0.14) !important;
+    border-color: rgba(116, 104, 196, 0.34) !important;
+    box-shadow: 0 18px 40px -6px rgba(108, 96, 184, 0.16) !important;
   }
 }
 

@@ -3671,18 +3671,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     >
       {children}
       {globalToasts.length > 0 && (
-        <div className="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4 sm:px-0">
+        <div className="fixed bottom-20 lg:bottom-5 right-3 sm:right-5 z-[9999] flex flex-col gap-2 pointer-events-none max-w-sm w-full px-3 sm:px-0">
           {globalToasts.map(t => (
             <div
               key={t.id}
-              className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-3 text-xs font-bold shadow-[0_14px_34px_rgba(62,56,91,0.18)] backdrop-blur-md transition-all duration-300 ${
+              className={`pointer-events-auto flex items-center gap-3 rounded-2xl border px-4 py-3 text-xs font-bold shadow-[0_16px_38px_rgba(68,56,146,0.28)] backdrop-blur-xl animate-wobble-in transition-all duration-300 ${
                 t.type === 'error'
-                  ? 'border-[#FF7597]/50 bg-[#FF5C86] text-white'
+                  ? 'border-white/30 bg-[#FF5C86]/88 text-white'
                   : t.type === 'warning'
-                  ? 'border-amber-300 bg-amber-50 text-amber-900'
+                  ? 'border-amber-300/60 bg-amber-50/90 text-amber-900'
                   : t.type === 'info'
-                  ? 'border-[#E6E8F2] bg-white text-[#3E385B]'
-                  : 'border-[#7468C4] bg-[#6558B5] text-white'
+                  ? 'border-[#7468C4]/30 bg-white/88 text-[#3E385B]'
+                  : 'border-white/30 bg-[#6558B5]/88 text-white'
               }`}
             >
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/20 text-[11px]">

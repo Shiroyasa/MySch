@@ -23,9 +23,9 @@ export const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onCon
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3E385B]/35 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#42368E]/42 backdrop-blur-md animate-fade-in">
       <div
-        className="relative w-full max-w-md rounded-[28px] border border-[#E6E8F2] bg-white p-6 text-[#3E385B] shadow-[0_24px_60px_rgba(62,56,91,0.22)] animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-md rounded-[28px] border border-[#7468C4]/30 bg-white/90 p-6 text-[#3E385B] shadow-[0_28px_68px_rgba(64,52,142,0.34)] backdrop-blur-2xl animate-wobble-in"
         role="dialog"
         aria-modal="true"
         aria-labelledby="logout-title"

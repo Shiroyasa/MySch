@@ -27,6 +27,21 @@ const MainContent: React.FC = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [rightDrawerOpen, setRightDrawerOpen] = useState(false);
 
+  // Liquid Wipe screen transition state across Desktop, Mobile, and Tablet
+  const prevNavRef = React.useRef<string>(activeNav);
+  const [wipeKey, setWipeKey] = useState(0);
+  const [isWiping, setIsWiping] = useState(false);
+
+  React.useEffect(() => {
+    if (prevNavRef.current !== activeNav) {
+      prevNavRef.current = activeNav;
+      setWipeKey(k => k + 1);
+      setIsWiping(true);
+      const timer = window.setTimeout(() => setIsWiping(false), 600);
+      return () => window.clearTimeout(timer);
+    }
+  }, [activeNav]);
+
   const handleOpenSidebar = () => {
     setRightDrawerOpen(false);
     setMobileSidebarOpen(true);
@@ -46,11 +61,11 @@ const MainContent: React.FC = () => {
       {/* Outer Soft Lavender-Slate Backdrop */}
       <AnimeBackground />
 
-      {/* Outer Frosted Tablet/Desktop Bezel Frame (Edge-to-Edge on Small Mobile for Max Space) */}
-      <div className="relative z-10 flex h-full w-full max-w-[1560px] overflow-hidden rounded-none sm:rounded-[34px] lg:rounded-[40px] border-0 sm:border sm:border-white/65 sm:dark:border-slate-800/80 bg-transparent sm:bg-white/40 sm:dark:bg-slate-900/50 p-0 sm:p-2 lg:p-2.5 sm:shadow-[0_32px_80px_-12px_rgba(62,56,91,0.22)] sm:backdrop-blur-md">
-        {/* Inner Crisp Snow-White Application Canvas */}
-        <div className="relative flex h-full w-full overflow-hidden rounded-none sm:rounded-[28px] lg:rounded-[32px] bg-[#F8F9FD] dark:bg-slate-950">
-          {/* Left Floating Vertical Purple Pill Sidebar */}
+      {/* Outer Frosted Violet-Glass Tablet/Desktop Bezel Frame */}
+      <div className="relative z-10 flex h-full w-full max-w-[1560px] overflow-hidden rounded-none sm:rounded-[34px] lg:rounded-[40px] border-0 sm:border sm:border-white/60 sm:dark:border-[#8D81E3]/25 bg-transparent sm:bg-[#EAE7F9]/38 sm:dark:bg-[#191536]/48 p-0 sm:p-2 lg:p-2.5 sm:shadow-[0_32px_80px_-12px_rgba(79,67,156,0.28)] sm:backdrop-blur-xl">
+        {/* Inner Translucent Lavender-Glass Application Canvas */}
+        <div className="relative flex h-full w-full overflow-hidden rounded-none sm:rounded-[28px] lg:rounded-[32px] bg-[#F5F4FB]/88 dark:bg-[#121026]/88 backdrop-blur-md">
+          {/* Left Floating Vertical Frosted Violet Pill Sidebar */}
           <Sidebar
             collapsed={sidebarCollapsed}
             onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -59,18 +74,31 @@ const MainContent: React.FC = () => {
           />
 
           {/* Center Main Content Area */}
-          <div className="relative z-10 flex min-w-0 flex-1 flex-col overflow-hidden bg-[#F8F9FD] dark:bg-slate-950">
-            {/* Top Header ("Primary / Dashboard" + Search Pill + Agenda/Map Drawer + Avatar) */}
+          <div className="relative z-10 flex min-w-0 flex-1 flex-col overflow-hidden bg-transparent">
+            {/* Liquid Wipe Screen Transition Curtain (Desktop, Mobile & Tablet) */}
+            {isWiping && (
+              <div
+                key={`liquid-wipe-wave-${wipeKey}`}
+                aria-hidden="true"
+                className="animate-liquid-wipe-curtain pointer-events-none absolute inset-0 z-40 overflow-hidden"
+              >
+                <div className="h-full w-[124%] -ml-[12%] rounded-r-[84px] border-r-2 border-white/45 bg-gradient-to-r from-[#6558B5]/40 via-[#8D81E3]/28 to-[#FF7597]/16 backdrop-blur-[6px] shadow-[16px_0_48px_rgba(101,88,181,0.32)]" />
+              </div>
+            )}
+
+            {/* Top Header */}
             <Header
               onToggleMobileSidebar={handleOpenSidebar}
               onToggleRightDrawer={handleToggleRightDrawer}
             />
 
-            {/* Scrollable Page Content with Menu Transition Animation */}
+            {/* Scrollable Page Content with Liquid Wipe Transition */}
             <main className="flex-1 overflow-y-auto overflow-x-hidden px-3.5 pb-24 lg:pb-8 pt-1.5 sm:px-6 lg:px-7">
               <div
                 key={activeNav}
-                className="page-transition-stage animate-page-enter mx-auto max-w-6xl min-w-0"
+                className={`page-transition-stage mx-auto max-w-6xl min-w-0 ${
+                  isWiping ? 'animate-liquid-wipe-in' : ''
+                }`}
               >
                 {/* Student Specific Views */}
                 {activeNav === 'student-profile' && <StudentModule initialTab="profile" />}

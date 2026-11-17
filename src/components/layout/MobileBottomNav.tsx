@@ -62,7 +62,13 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       <nav
         aria-label="Navigasi Cepat Mobile dan Tablet"
         aria-hidden={isHidden}
-        className={`flex h-14 sm:h-[60px] items-center justify-around gap-1 rounded-[22px] sm:rounded-[26px] border border-white/80 bg-white/95 dark:border-slate-800 dark:bg-slate-900/95 px-1.5 sm:px-2 shadow-[0_16px_38px_-6px_rgba(62,56,91,0.24)] dark:shadow-[0_16px_38px_-6px_rgba(2,6,23,0.65)] backdrop-blur-xl transition-[transform,opacity,filter] duration-400 will-change-transform ${
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(116, 104, 196, 0.84) 0%, rgba(101, 88, 181, 0.80) 100%)',
+          boxShadow:
+            '0 18px 38px -6px rgba(74, 62, 152, 0.44), inset 0 1px 0 rgba(255, 255, 255, 0.34)',
+        }}
+        className={`flex h-14 sm:h-[60px] items-center justify-around gap-1 rounded-[22px] sm:rounded-[26px] border border-white/30 px-1.5 sm:px-2 backdrop-blur-2xl backdrop-saturate-150 transition-[transform,opacity,filter] duration-400 will-change-transform ${
           isHidden
             ? 'translate-y-28 scale-90 opacity-0 blur-[2px] pointer-events-none ease-[cubic-bezier(0.22,1,0.36,1)]'
             : 'translate-y-0 scale-100 opacity-100 blur-0 pointer-events-auto ease-[cubic-bezier(0.34,1.35,0.64,1)]'
@@ -78,8 +84,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               onClick={() => handleBottomTabClick(tab.id)}
               className={`no-ornament relative flex min-h-[44px] sm:min-h-[48px] flex-1 flex-col items-center justify-center gap-0.5 rounded-[16px] sm:rounded-[18px] px-1 transition-all duration-250 ease-[cubic-bezier(0.34,1.35,0.64,1)] active:scale-92 cursor-pointer ${
                 isActive
-                  ? 'bg-[#6C60B8] text-white shadow-[0_8px_20px_rgba(108,96,184,0.38)] -translate-y-0.5'
-                  : 'text-[#6E6A86] hover:bg-[#F2F0FC] hover:text-[#3E385B] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white'
+                  ? 'bg-white/24 border border-white/38 text-white shadow-[0_8px_18px_rgba(48,36,120,0.30),inset_0_1px_0_rgba(255,255,255,0.42)] backdrop-blur-md -translate-y-0.5'
+                  : 'text-white/85 hover:bg-white/15 hover:text-white'
               }`}
             >
               <span className={isActive ? 'animate-dock-pop flex items-center justify-center' : 'flex items-center justify-center'}>
@@ -99,8 +105,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           onClick={handleAgendaClick}
           className={`no-ornament relative flex min-h-[44px] sm:min-h-[48px] flex-1 flex-col items-center justify-center gap-0.5 rounded-[16px] sm:rounded-[18px] px-1 transition-all duration-250 ease-[cubic-bezier(0.34,1.35,0.64,1)] active:scale-92 cursor-pointer ${
             rightDrawerOpen
-              ? 'bg-[#FF7597] text-white shadow-[0_8px_20px_rgba(255,117,151,0.38)] -translate-y-0.5'
-              : 'text-[#6E6A86] hover:bg-[#FFF0F4] hover:text-[#3E385B] dark:text-slate-400 dark:hover:bg-rose-950/50 dark:hover:text-white'
+              ? 'bg-[#FF7597]/85 border border-white/38 text-white shadow-[0_8px_20px_rgba(255,117,151,0.38)] -translate-y-0.5'
+              : 'text-white/85 hover:bg-white/15 hover:text-white'
           }`}
         >
           <div className={`relative ${rightDrawerOpen ? 'animate-dock-pop' : ''}`}>
@@ -121,7 +127,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           type="button"
           tabIndex={isHidden ? -1 : 0}
           onClick={onOpenSidebar}
-          className="no-ornament flex min-h-[44px] sm:min-h-[48px] flex-1 flex-col items-center justify-center gap-0.5 rounded-[16px] sm:rounded-[18px] px-1 text-[#6E6A86] hover:bg-[#F2F0FC] hover:text-[#6C60B8] dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-indigo-300 transition-all duration-250 active:scale-92 cursor-pointer"
+          className="no-ornament flex min-h-[44px] sm:min-h-[48px] flex-1 flex-col items-center justify-center gap-0.5 rounded-[16px] sm:rounded-[18px] px-1 text-white/85 hover:bg-white/15 hover:text-white transition-all duration-250 active:scale-92 cursor-pointer"
         >
           <Menu className="h-4.5 w-4.5 sm:h-5 sm:w-5 shrink-0" />
           <span className="text-[10px] sm:text-[11px] font-extrabold leading-none tracking-tight whitespace-nowrap">

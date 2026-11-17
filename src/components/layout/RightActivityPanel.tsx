@@ -800,7 +800,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
   return (
     <>
       {/* Desktop Right Static Rail (xl+) */}
-      <aside className="hidden xl:flex w-[304px] shrink-0 flex-col justify-between border-l border-[#ECEBF5] bg-[#F5F6FB]/75 dark:border-slate-800 dark:bg-slate-900/70 px-5 py-6 overflow-y-auto select-none">
+      <aside className="hidden xl:flex w-[304px] shrink-0 flex-col justify-between border-l border-[#7468C4]/18 bg-[#F2F0FC]/74 dark:border-[#8D81E3]/18 dark:bg-[#1A1636]/76 backdrop-blur-xl px-5 py-6 overflow-y-auto select-none">
         {panelBody(false)}
       </aside>
 
@@ -809,10 +809,10 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
         <div className="xl:hidden fixed inset-0 z-50 flex justify-end">
           <div
             onClick={onCloseMobile}
-            className="fixed inset-0 bg-[#3E385B]/45 backdrop-blur-xs animate-fade-in"
+            className="fixed inset-0 bg-[#42368E]/40 backdrop-blur-md animate-fade-in"
             aria-hidden="true"
           />
-          <aside className="relative z-10 flex h-full w-full max-w-[360px] flex-col justify-between border-l border-[#ECEBF5] bg-[#F8F9FD] dark:border-slate-800 dark:bg-slate-950 px-4 py-5 pb-24 lg:pb-6 overflow-y-auto shadow-2xl animate-drawer-right select-none">
+          <aside className="relative z-10 flex h-full w-full max-w-[360px] flex-col justify-between border-l border-[#7468C4]/25 bg-gradient-to-b from-[#F5F3FC]/90 to-[#ECE9FA]/90 dark:border-[#8D81E3]/25 dark:from-[#1E1A3E]/90 dark:to-[#14112B]/90 backdrop-blur-2xl px-4 py-5 pb-24 lg:pb-6 overflow-y-auto shadow-2xl animate-drawer-right select-none">
             {panelBody(true)}
           </aside>
         </div>
@@ -822,11 +822,13 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
       {showExpandedMapModal && (
         <div
           onClick={() => setShowExpandedMapModal(false)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#3E385B]/45 backdrop-blur-xs p-3 sm:p-4 animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#42368E]/42 backdrop-blur-md p-3 sm:p-4 animate-fade-in"
         >
           <div
             onClick={e => e.stopPropagation()}
-            className="w-full max-w-3xl rounded-[24px] sm:rounded-[28px] border border-[#ECEBF5] bg-white dark:border-slate-800 dark:bg-slate-900 p-4 sm:p-6 text-[#3E385B] dark:text-slate-100 shadow-[0_28px_70px_rgba(62,56,91,0.28)] space-y-4 animate-scale-up max-h-[90dvh] overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+            className="w-full max-w-3xl rounded-[24px] sm:rounded-[28px] border border-[#7468C4]/30 bg-white/90 dark:border-[#9E92FF]/28 dark:bg-[#1E1A3E]/90 backdrop-blur-2xl p-4 sm:p-6 text-[#3E385B] dark:text-slate-100 shadow-[0_28px_70px_rgba(64,52,142,0.34)] space-y-4 animate-wobble-in max-h-[90dvh] overflow-y-auto"
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between gap-3 border-b border-[#F0F1F6] dark:border-slate-800 pb-3.5">

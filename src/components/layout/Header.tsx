@@ -114,14 +114,14 @@ export const Header: React.FC<{
 
   return (
     <>
-      <header className="relative md:sticky top-0 z-30 w-full bg-[#F8F9FD]/95 dark:bg-slate-950/90 backdrop-blur-md px-3.5 sm:px-6 lg:px-8 pt-1.5 pb-1 sm:pt-2 sm:pb-1.5 border-b border-transparent">
+      <header className="relative md:sticky top-0 z-30 w-full bg-[#F4F3FC]/74 dark:bg-[#191636]/76 backdrop-blur-xl px-3.5 sm:px-6 lg:px-8 pt-1.5 pb-1 sm:pt-2 sm:pb-1.5 border-b border-[#7468C4]/14 dark:border-[#8D81E3]/18">
         <div className="flex h-14 sm:h-[70px] w-full items-center justify-between gap-2.5">
           {/* Left: Mobile/Tablet Menu Button + Title */}
           <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
             <button
               type="button"
               onClick={onToggleMobileSidebar}
-              className="no-ornament flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#6C60B8] text-white shadow-sm hover:bg-[#5B4FA8] active:scale-95 lg:hidden cursor-pointer"
+              className="no-ornament flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/30 bg-[#6C60B8]/86 backdrop-blur-md text-white shadow-[0_8px_18px_rgba(101,88,181,0.34)] hover:bg-[#5B4FA8]/92 active:scale-95 lg:hidden cursor-pointer"
               title="Buka Menu"
             >
               <Menu className="h-5 w-5" />
@@ -272,7 +272,7 @@ export const Header: React.FC<{
               )}
 
               {showNotifMenu && (
-                <div className="fixed inset-x-3 top-16 sm:absolute sm:inset-auto sm:right-0 sm:mt-2 sm:w-96 rounded-[24px] border border-[#ECEBF5] bg-white dark:border-slate-800 dark:bg-slate-900 p-4 text-[#3E385B] dark:text-slate-100 shadow-[0_22px_50px_rgba(62,56,91,0.18)] z-50 animate-scale-up origin-top-right">
+                <div className="fixed inset-x-3 top-16 sm:absolute sm:inset-auto sm:right-0 sm:mt-2 sm:w-96 rounded-[24px] border border-[#7468C4]/25 bg-white/88 dark:border-[#9E92FF]/25 dark:bg-[#1E1A3E]/88 backdrop-blur-2xl p-4 text-[#3E385B] dark:text-slate-100 shadow-[0_24px_56px_rgba(68,56,146,0.26)] z-50 animate-wobble-in origin-top-right">
                   <div className="flex items-center justify-between border-b border-[#F0F1F6] dark:border-slate-800 pb-2.5 px-1">
                     <div className="flex items-center gap-1.5">
                       <span className="font-extrabold text-xs text-[#3E385B] dark:text-white">Pemberitahuan</span>

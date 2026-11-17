@@ -123,8 +123,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#42368E]/42 backdrop-blur-md animate-fade-in">
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="w-full max-w-lg rounded-[28px] border border-[#7468C4]/30 bg-white/90 p-6 shadow-2xl dark:border-[#9E92FF]/28 dark:bg-[#1E1A3E]/90 backdrop-blur-2xl max-h-[90vh] overflow-y-auto animate-wobble-in"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-5 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
