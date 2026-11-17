@@ -763,11 +763,11 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                 }}
                 className="no-ornament h-8.5 min-w-0 w-full truncate rounded-full border hover:bg-white/22 px-3 text-[11px] font-bold text-white focus:outline-none cursor-pointer transition-colors"
               >
-                <option value="ALL" className="text-[#3E385B] bg-white">
+                <option value="ALL" className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                   Semua Kelas ({students.length})
                 </option>
                 {classes.map(cls => (
-                  <option key={cls.id} value={cls.id} className="text-[#3E385B] bg-white">
+                  <option key={cls.id} value={cls.id} className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                     Kelas {cls.name} ({cls.majorCode})
                   </option>
                 ))}
@@ -792,11 +792,11 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                 }}
                 className="no-ornament h-8.5 min-w-0 w-full truncate rounded-full border hover:bg-white/22 px-3 text-[11px] font-bold text-white focus:outline-none cursor-pointer transition-colors"
               >
-                <option value="ALL" className="text-[#3E385B] bg-white">
+                <option value="ALL" className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                   Semua Bulan
                 </option>
                 {MONTH_OPTIONS.map(m => (
-                  <option key={m.value} value={m.value} className="text-[#3E385B] bg-white">
+                  <option key={m.value} value={m.value} className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                     {m.full}
                   </option>
                 ))}
@@ -815,11 +815,11 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                 }}
                 className="no-ornament h-8.5 min-w-0 w-full truncate rounded-full border hover:bg-white/22 px-3 text-[11px] font-bold text-white focus:outline-none cursor-pointer transition-colors"
               >
-                <option value="ALL" className="text-[#3E385B] bg-white">
+                <option value="ALL" className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                   Semua Tahun
                 </option>
                 {availableYears.map(yr => (
-                  <option key={yr} value={yr} className="text-[#3E385B] bg-white">
+                  <option key={yr} value={yr} className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                     Tahun {yr}
                   </option>
                 ))}
@@ -1942,7 +1942,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                               {cls.studentCount} Siswa ({cls.maleCount}L / {cls.femaleCount}P)
                             </span>
                             {isClassSelected && (
-                              <span className="rounded-full bg-[#FFE4EC] px-2 py-0.5 text-[10px] font-extrabold text-[#F25781] whitespace-nowrap">
+                              <span className="rounded-full bg-[#FFE4EC] dark:bg-rose-950/70 px-2 py-0.5 text-[10px] font-extrabold text-[#F25781] dark:text-rose-300 whitespace-nowrap">
                                 Filter Aktif
                               </span>
                             )}
@@ -2042,7 +2042,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                     subtitle="Sebaran capaian nilai siswa berdasarkan KKM"
                     accent="purple"
                     rightSlot={
-                      <span className="rounded-xl bg-[#F0EEFA] border border-[#DDD8F6] px-3 py-1 text-xs font-black text-[#6C60B8] tabular-nums whitespace-nowrap">
+                      <span className="rounded-xl bg-[#F0EEFA] border border-[#DDD8F6] dark:bg-indigo-950/60 dark:border-indigo-800 px-3 py-1 text-xs font-black text-[#6C60B8] dark:text-indigo-300 tabular-nums whitespace-nowrap">
                         Rata-rata: {academicAnalytics.avgScore}
                       </span>
                     }
@@ -2520,7 +2520,7 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                     subtitle="Komposisi siswa laki-laki dan perempuan aktif"
                     accent="coral"
                     rightSlot={
-                      <span className="rounded-xl bg-[#E7F9EF] border border-[#BCEAD1] px-2.5 py-1 text-[11px] font-black text-[#139A4C] tabular-nums whitespace-nowrap">
+                      <span className="rounded-xl bg-[#E7F9EF] border border-[#BCEAD1] dark:bg-emerald-950/60 dark:border-emerald-800 px-2.5 py-1 text-[11px] font-black text-[#139A4C] dark:text-emerald-300 tabular-nums whitespace-nowrap">
                         {filteredStudents.length} Siswa
                       </span>
                     }

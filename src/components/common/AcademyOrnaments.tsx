@@ -1194,11 +1194,11 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
                 }}
                 className="no-ornament h-8.5 min-w-0 w-full truncate rounded-full border px-3 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
               >
-                <option value="ALL" className="text-[#3E385B] bg-white">
+                <option value="ALL" className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                   Semua Kelas ({students.length})
                 </option>
                 {classes.map(cls => (
-                  <option key={cls.id} value={cls.id} className="text-[#3E385B] bg-white">
+                  <option key={cls.id} value={cls.id} className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                     Kelas {cls.name}
                   </option>
                 ))}
@@ -1217,11 +1217,11 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
                 }}
                 className="no-ornament h-8.5 min-w-0 w-full truncate rounded-full border px-3 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
               >
-                <option value="ALL" className="text-[#3E385B] bg-white">
+                <option value="ALL" className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                   Semua Tahun
                 </option>
                 {availableYears.map(yr => (
-                  <option key={yr} value={yr} className="text-[#3E385B] bg-white">
+                  <option key={yr} value={yr} className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                     Tahun {yr}
                   </option>
                 ))}
@@ -1240,16 +1240,16 @@ export const AcademyHeroBanner: React.FC<AcademyHeroBannerProps> = ({
                 }}
                 className="no-ornament h-8.5 min-w-0 w-full truncate rounded-full border px-3 text-[11px] font-bold text-white focus:outline-none cursor-pointer"
               >
-                <option value="kehadiran" className="text-[#3E385B] bg-white">
+                <option value="kehadiran" className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                   {metricLabelMap.kehadiran}
                 </option>
-                <option value="akademik" className="text-[#3E385B] bg-white">
+                <option value="akademik" className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                   {metricLabelMap.akademik}
                 </option>
-                <option value="pkl" className="text-[#3E385B] bg-white">
+                <option value="pkl" className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                   {metricLabelMap.pkl}
                 </option>
-                <option value="siswa" className="text-[#3E385B] bg-white">
+                <option value="siswa" className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                   {metricLabelMap.siswa}
                 </option>
               </select>

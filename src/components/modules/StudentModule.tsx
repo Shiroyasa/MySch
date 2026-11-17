@@ -727,7 +727,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
               <button
                 type="button"
                 onClick={handleExportTranscriptExcel}
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0 leading-none"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer whitespace-nowrap shrink-0 leading-none"
               >
                 <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                 <span>Unduh XLSX</span>

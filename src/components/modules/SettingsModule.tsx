@@ -956,11 +956,11 @@ export const SettingsModule: React.FC = () => {
                       <span className="truncate text-[11px]">
                         ORBITA — {schoolSettings?.schoolName || 'Sistem Informasi Akademik'}
                       </span>
-                      <span className="text-slate-400 hover:text-slate-700 ml-1">×</span>
+                      <span className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 ml-1">×</span>
                     </div>
 
                     {/* Inactive Tab hint */}
-                    <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-[11px] text-slate-500">
+                    <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-[11px] text-slate-500 dark:text-slate-400">
                       <Bookmark className="h-3.5 w-3.5" />
                       <span>Google Drive</span>
                     </div>

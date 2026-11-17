@@ -177,9 +177,9 @@ export const AcademyScheduleBoard: React.FC<AcademyScheduleBoardProps> = ({
                 onChange={e => setSelectedClassId(e.target.value)}
                 className="no-ornament w-full py-2 text-xs font-semibold bg-transparent text-[#3E385B] dark:text-slate-100 focus:outline-none cursor-pointer"
               >
-                <option value="all" className="text-[#3E385B]">Semua Kelas ({classes.length})</option>
+                <option value="all" className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">Semua Kelas ({classes.length})</option>
                 {classes.map(cls => (
-                  <option key={cls.id} value={cls.id} className="text-[#3E385B]">
+                  <option key={cls.id} value={cls.id} className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                     {cls.name}
                   </option>
                 ))}

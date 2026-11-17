@@ -124,31 +124,36 @@ const STATUS_DISPLAY: Record<
     alumniLabel: 'Bekerja di Industri / Perusahaan (DUDI)',
     grade12Label: 'Rencana Bekerja di Industri / Perusahaan',
     shortLabel: 'Bekerja (DUDI)',
-    badgeClass: 'bg-[#E7F9EF] text-[#139A4C] border border-[#BCEAD1]',
+    badgeClass:
+      'bg-[#E7F9EF] text-[#139A4C] border border-[#BCEAD1] dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800/70',
   },
   kuliah: {
     alumniLabel: 'Melanjutkan Kuliah (PTN / PTS / Vokasi)',
     grade12Label: 'Rencana Melanjutkan Kuliah (PTN / PTS)',
     shortLabel: 'Lanjut Kuliah',
-    badgeClass: 'bg-[#F0EEFA] text-[#6C60B8] border border-[#DDD8F6]',
+    badgeClass:
+      'bg-[#F0EEFA] text-[#6C60B8] border border-[#DDD8F6] dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-800/70',
   },
   wirausaha: {
     alumniLabel: 'Berwirausaha / Freelancer Mandiri',
     grade12Label: 'Rencana Berwirausaha / Usaha Mandiri',
     shortLabel: 'Wirausaha',
-    badgeClass: 'bg-amber-50 text-amber-700 border border-amber-200',
+    badgeClass:
+      'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800/70',
   },
   mencari_kerja: {
     alumniLabel: 'Pelatihan / Penyaluran BKK Sekolah',
     grade12Label: 'Ikut Program Penyaluran & Pelatihan BKK',
     shortLabel: 'Pelatihan / BKK',
-    badgeClass: 'bg-[#FFE8EF] text-[#D9436D] border border-[#FFC4D4]',
+    badgeClass:
+      'bg-[#FFE8EF] text-[#D9436D] border border-[#FFC4D4] dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-800/70',
   },
   belum_bekerja: {
     alumniLabel: 'Belum Bekerja',
     grade12Label: 'Belum Menentukan / Belum Bekerja',
     shortLabel: 'Belum Bekerja',
-    badgeClass: 'bg-slate-100 text-slate-700 border border-slate-200',
+    badgeClass:
+      'bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
   },
 };
 
@@ -514,8 +519,8 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
           ? 'Siswa Kelas XII'
           : `Siswa Aktif (${std.className || 'ORBITA'})`,
         statusBadgeClass: isActualGrade12
-          ? 'bg-[#FFE8EF] text-[#D9436D] border border-[#FFC4D4]'
-          : 'bg-[#F0EEFA] text-[#6C60B8] border border-[#DDD8F6]',
+          ? 'bg-[#FFE8EF] text-[#D9436D] border border-[#FFC4D4] dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-800/70'
+          : 'bg-[#F0EEFA] text-[#6C60B8] border border-[#DDD8F6] dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-800/70',
         destinationSummary: isAlumniStatus
           ? 'Terdata pada Master Alumni Sekolah'
           : 'Belum mengisi rencana pasca lulus',
@@ -1576,10 +1581,10 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
 
           {/* Verified ORBITA Identity Sync Card (After NIS/NISN Verification — No Ganti NIS Allowed) */}
           {verifiedRespondent ? (
-            <div className="rounded-[24px] border border-[#BCEAD1] bg-white/95 backdrop-blur-xl p-4 sm:p-5 shadow-[0_12px_30px_-8px_rgba(19,154,76,0.12)]">
+            <div className="rounded-[24px] border border-[#BCEAD1] dark:border-emerald-800/60 bg-white/95 dark:bg-[#1E1A3E]/95 backdrop-blur-xl p-4 sm:p-5 shadow-[0_12px_30px_-8px_rgba(19,154,76,0.12)]">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-3.5 min-w-0">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] bg-[#E7F9EF] border border-[#BCEAD1] text-[#139A4C]">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] bg-[#E7F9EF] dark:bg-emerald-950/70 border border-[#BCEAD1] dark:border-emerald-800/70 text-[#139A4C] dark:text-emerald-300">
                     <OrbitaMenuIcon variant="audit-logs" className="h-5.5 w-5.5" />
                   </div>
                   <div className="min-w-0 space-y-1">
@@ -1587,14 +1592,14 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                       <span className="rounded-md bg-[#139A4C] px-2 py-0.5 text-[10px] font-extrabold text-white">
                         TERVERIFIKASI ORBITA
                       </span>
-                      <span className="text-[11px] font-bold text-[#2E6F50]">
+                      <span className="text-[11px] font-bold text-[#2E6F50] dark:text-emerald-300">
                         {verifiedRespondent.statusLabel}
                       </span>
                     </div>
-                    <h3 className="text-sm sm:text-base font-black text-[#252042] truncate">
+                    <h3 className="text-sm sm:text-base font-black text-[#252042] dark:text-white truncate">
                       {verifiedRespondent.fullName}
                     </h3>
-                    <p className="text-[11px] font-semibold text-[#555070]">
+                    <p className="text-[11px] font-semibold text-[#555070] dark:text-slate-300">
                       NISN <span className="font-mono">{verifiedRespondent.matchedNisn}</span>
                       {verifiedRespondent.matchedNis ? (
                         <>
@@ -1613,7 +1618,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                         ? ` · PKL: ${verifiedRespondent.pklPartnerName}`
                         : ''}
                     </p>
-                    <p className="text-[10.5px] font-medium text-[#7A7596]">
+                    <p className="text-[10.5px] font-medium text-[#7A7596] dark:text-slate-400">
                       Sumber sinkronisasi: {verifiedRespondent.sourcesMatched.join(' · ')}
                       {verifiedRespondent.tracerRecord
                         ? ` · Tercatat: ${
@@ -1645,7 +1650,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                       ? 'Cari Data Alumni yang Sudah Terdata di Database (Opsional)'
                       : 'Cari Data Alumni Terdata atau Siswa Kelas 12 (Opsional)'}
                   </h3>
-                  <p className="text-[11px] text-[#7A7596]">
+                  <p className="text-[11px] text-[#7A7596] dark:text-slate-400">
                     {isLockedGrade12
                       ? 'Ketik Nama, NISN, atau Kelas XII untuk mengisi otomatis profil siswa Kelas 12 agar tidak ganda.'
                       : isLockedAlumni
@@ -1655,8 +1660,8 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 </div>
               </div>
 
-              <div className="orbita-searchbar orbita-field-underline relative flex items-center rounded-2xl border border-[#DFDCF2] bg-[#FAF9FE] px-3.5 py-1 focus-within:border-[#6C60B8] focus-within:bg-white transition-all">
-                <Search className="h-4 w-4 text-[#6C60B8] shrink-0 mr-2.5" />
+              <div className="orbita-searchbar orbita-field-underline relative flex items-center rounded-2xl border border-[#DFDCF2] dark:border-slate-700 bg-[#FAF9FE] dark:bg-slate-800/80 px-3.5 py-1 focus-within:border-[#6C60B8] focus-within:bg-white dark:focus-within:bg-slate-900 transition-all">
+                <Search className="h-4 w-4 text-[#6C60B8] dark:text-indigo-300 shrink-0 mr-2.5" />
                 <input
                   type="text"
                   value={lookupQuery}
@@ -1668,13 +1673,13 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                       ? 'Cari Nama Alumni Terdata, NISN, atau Tahun Lulus (contoh: 2025)...'
                       : 'Cari Nama Lengkap, NISN, Tahun Lulus, atau Kelas...'
                   }
-                  className="w-full bg-transparent py-2 text-xs font-semibold text-[#3E385B] placeholder:text-[#9694A8] focus:outline-none"
+                  className="no-ornament w-full bg-transparent py-2 text-xs font-semibold text-[#3E385B] dark:text-white placeholder:text-[#9694A8] dark:placeholder:text-slate-400 focus:outline-none"
                 />
                 {lookupQuery && (
                   <button
                     type="button"
                     onClick={() => setLookupQuery('')}
-                    className="text-[11px] font-bold text-[#6C60B8] hover:underline px-2 cursor-pointer"
+                    className="no-ornament text-[11px] font-bold text-[#6C60B8] dark:text-indigo-300 hover:underline px-2 cursor-pointer"
                   >
                     Bersihkan
                   </button>
@@ -1688,18 +1693,18 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                       key={rec.id}
                       type="button"
                       onClick={() => openFromExistingTracer(rec)}
-                      className="flex items-center justify-between gap-3 rounded-2xl border border-[#DDD8F6] bg-[#F7F5FD] hover:bg-[#EFEBFB] p-3 text-left transition-all cursor-pointer"
+                      className="flex items-center justify-between gap-3 rounded-2xl border border-[#DDD8F6] dark:border-indigo-800/60 bg-[#F7F5FD] dark:bg-indigo-950/40 hover:bg-[#EFEBFB] dark:hover:bg-indigo-950/70 p-3 text-left transition-all cursor-pointer"
                     >
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
                           <span className="rounded-md bg-[#6C60B8] px-1.5 py-0.5 text-[9.5px] font-extrabold text-white">
                             {rec.respondentCategory === 'kelas_12' ? 'KELAS 12' : 'ALUMNI TERDATA'}
                           </span>
-                          <span className="truncate text-xs font-extrabold text-[#252042]">
+                          <span className="truncate text-xs font-extrabold text-[#252042] dark:text-white">
                             {rec.fullName}
                           </span>
                         </div>
-                        <p className="mt-1 text-[10.5px] text-[#6E6A86] truncate">
+                        <p className="mt-1 text-[10.5px] text-[#6E6A86] dark:text-slate-300 truncate">
                           NISN {rec.nisn} &middot; {normalizeTracerMajor(rec.majorCode)} &middot;{' '}
                           {rec.respondentCategory === 'kelas_12'
                             ? rec.className || 'Kelas XII'
@@ -1707,7 +1712,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                           &middot; {STATUS_DISPLAY[rec.careerStatus]?.shortLabel || rec.careerStatus}
                         </p>
                       </div>
-                      <span className="inline-flex items-center gap-1 rounded-xl bg-white px-2.5 py-1 text-[10.5px] font-extrabold text-[#6C60B8] shadow-2xs shrink-0">
+                      <span className="inline-flex items-center gap-1 rounded-xl bg-white dark:bg-slate-800 px-2.5 py-1 text-[10.5px] font-extrabold text-[#6C60B8] dark:text-indigo-300 shadow-2xs shrink-0">
                         <Edit className="h-3 w-3" />
                         Perbarui
                       </span>
@@ -1725,23 +1730,23 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                           startFreshForm(targetCat);
                           applyStudentFromDb(std.id, targetCat);
                         }}
-                        className="flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100/70 p-3 text-left transition-all cursor-pointer"
+                        className="flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100/70 dark:hover:bg-emerald-950/70 p-3 text-left transition-all cursor-pointer"
                       >
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
                             <span className="rounded-md bg-[#139A4C] px-1.5 py-0.5 text-[9.5px] font-extrabold text-white">
                               {targetCat === 'alumni' ? 'LULUSAN DB' : 'SISWA KELAS 12'}
                             </span>
-                            <span className="truncate text-xs font-extrabold text-[#252042]">
+                            <span className="truncate text-xs font-extrabold text-[#252042] dark:text-white">
                               {std.fullName}
                             </span>
                           </div>
-                          <p className="mt-1 text-[10.5px] text-[#2E6F50] truncate">
+                          <p className="mt-1 text-[10.5px] text-[#2E6F50] dark:text-emerald-300 truncate">
                             {std.className} &middot; {normalizeTracerMajor(std.majorCode)} &middot; NISN{' '}
                             {std.nisn}
                           </p>
                         </div>
-                        <span className="inline-flex items-center gap-1 rounded-xl bg-white px-2.5 py-1 text-[10.5px] font-extrabold text-[#139A4C] shadow-2xs shrink-0">
+                        <span className="inline-flex items-center gap-1 rounded-xl bg-white dark:bg-slate-800 px-2.5 py-1 text-[10.5px] font-extrabold text-[#139A4C] dark:text-emerald-300 shadow-2xs shrink-0">
                           <Plus className="h-3 w-3" />
                           Isi Otomatis
                         </span>
@@ -1750,7 +1755,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                   })}
 
                   {lookupResults.tracers.length === 0 && lookupResults.students.length === 0 && (
-                    <div className="sm:col-span-2 rounded-xl border border-dashed border-[#DFDCF2] bg-[#FAF9FE] px-4 py-3 text-center text-xs text-[#7A7596]">
+                    <div className="sm:col-span-2 rounded-xl border border-dashed border-[#DFDCF2] dark:border-slate-700 bg-[#FAF9FE] dark:bg-slate-800/40 px-4 py-3 text-center text-xs text-[#7A7596] dark:text-slate-400">
                       Tidak ditemukan data yang cocok. Klik kartu formulir di bawah untuk melanjutkan pengisian.
                     </div>
                   )}
@@ -1763,22 +1768,22 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
           <div className={`grid grid-cols-1 ${effectiveLockedCategory ? '' : 'md:grid-cols-2'} gap-5`}>
             {/* Card 1: Formulir Alumni */}
             {(!effectiveLockedCategory || isLockedAlumni) && (
-              <div className="group flex flex-col justify-between rounded-[26px] border border-[#DDD8F6] bg-white/95 p-5 sm:p-6 shadow-[0_16px_38px_-10px_rgba(108,96,184,0.16)] backdrop-blur-xl transition-all hover:border-[#6C60B8]/50">
+              <div className="group flex flex-col justify-between rounded-[26px] border border-[#DDD8F6] dark:border-[#8D81E3]/25 bg-white/95 dark:bg-[#1E1A3E]/95 p-5 sm:p-6 shadow-[0_16px_38px_-10px_rgba(108,96,184,0.16)] backdrop-blur-xl transition-all hover:border-[#6C60B8]/50">
                 <div className="space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-gradient-to-br from-[#7468C4] to-[#5D51B2] text-white shadow-[0_8px_20px_rgba(108,96,184,0.34)]">
                       <GenshinElementIcon element="geo" className="h-6 w-6" />
                     </div>
-                    <span className="rounded-full bg-[#F0EEFA] border border-[#DDD8F6] px-3 py-1 text-[10.5px] font-extrabold text-[#6C60B8]">
+                    <span className="rounded-full bg-[#F0EEFA] dark:bg-indigo-950/70 border border-[#DDD8F6] dark:border-indigo-800/70 px-3 py-1 text-[10.5px] font-extrabold text-[#6C60B8] dark:text-indigo-300">
                       {recordedAlumniTracers.length + graduatedStudents.length} Alumni Terdata
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="text-base sm:text-lg font-black text-[#252042]">
+                    <h3 className="text-base sm:text-lg font-black text-[#252042] dark:text-white">
                       Formulir Tracer Study Alumni
                     </h3>
-                    <p className="mt-1 text-xs text-[#6E6A86] leading-relaxed">
+                    <p className="mt-1 text-xs text-[#6E6A86] dark:text-slate-300 leading-relaxed">
                       Disesuaikan dengan <strong>{recordedAlumniTracers.length} data alumni</strong>{' '}
                       yang sudah terdata di database BKK ORBITA (jurusan DPB &amp; RPL) untuk
                       memperbarui jejak karier, kuliah, atau wirausaha terkini.
@@ -1788,18 +1793,18 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                   <ul
                     className={`grid grid-cols-1 ${
                       isLockedAlumni ? 'sm:grid-cols-3 gap-2.5' : 'gap-1.5'
-                    } text-[11.5px] font-semibold text-[#4A4368] bg-[#FAF9FE] rounded-2xl p-3.5 border border-[#ECEAF6]`}
+                    } text-[11.5px] font-semibold text-[#4A4368] dark:text-slate-200 bg-[#FAF9FE] dark:bg-slate-800/60 rounded-2xl p-3.5 border border-[#ECEAF6] dark:border-slate-700/70`}
                   >
                     <li className="flex items-center gap-2">
-                      <Briefcase className="h-3.5 w-3.5 text-[#139A4C] shrink-0" />
+                      <Briefcase className="h-3.5 w-3.5 text-[#139A4C] dark:text-emerald-400 shrink-0" />
                       <span>Tersinkron dengan {recordedAlumniTracers.length} profil alumni di DB</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Building2 className="h-3.5 w-3.5 text-[#6C60B8] shrink-0" />
+                      <Building2 className="h-3.5 w-3.5 text-[#6C60B8] dark:text-indigo-300 shrink-0" />
                       <span>Riwayat Mitra PKL DUDI ({pklPartners.length} mitra dari DB)</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <Clock className="h-3.5 w-3.5 text-amber-600 shrink-0" />
+                      <Clock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
                       <span>Masa tunggu, relevansi jurusan &amp; testimoni alumni</span>
                     </li>
                   </ul>
@@ -1812,7 +1817,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                     background: 'linear-gradient(135deg, #7468C4 0%, #5D51B2 100%)',
                     boxShadow: '0 12px 24px -6px rgba(108, 96, 184, 0.40)',
                   }}
-                  className="mt-5 flex w-full items-center justify-between rounded-[18px] px-4 py-3 text-xs sm:text-sm font-extrabold text-white transition-all cursor-pointer"
+                  className="no-ornament mt-5 flex w-full items-center justify-between rounded-[18px] px-4 py-3 text-xs sm:text-sm font-extrabold text-white transition-all cursor-pointer"
                 >
                   <span>Mulai Isi Form Alumni</span>
                   <ChevronRight className="h-4.5 w-4.5 transition-transform group-hover:translate-x-1" />
@@ -1822,22 +1827,22 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
 
             {/* Card 2: Formulir Siswa Kelas 12 */}
             {(!effectiveLockedCategory || isLockedGrade12) && (
-              <div className="group flex flex-col justify-between rounded-[26px] border border-[#FFD1DF] bg-white/95 p-5 sm:p-6 shadow-[0_16px_38px_-10px_rgba(248,101,142,0.16)] backdrop-blur-xl transition-all hover:border-[#F8658E]/60">
+              <div className="group flex flex-col justify-between rounded-[26px] border border-[#FFD1DF] dark:border-rose-800/50 bg-white/95 dark:bg-[#1E1A3E]/95 p-5 sm:p-6 shadow-[0_16px_38px_-10px_rgba(248,101,142,0.16)] backdrop-blur-xl transition-all hover:border-[#F8658E]/60">
                 <div className="space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-gradient-to-br from-[#FF88A8] to-[#F25781] text-white shadow-[0_8px_20px_rgba(242,87,129,0.34)]">
                       <GenshinElementIcon element="electro" className="h-6 w-6" />
                     </div>
-                    <span className="rounded-full bg-[#FFE8EF] border border-[#FFC4D4] px-3 py-1 text-[10.5px] font-extrabold text-[#D9436D]">
+                    <span className="rounded-full bg-[#FFE8EF] dark:bg-rose-950/70 border border-[#FFC4D4] dark:border-rose-800/70 px-3 py-1 text-[10.5px] font-extrabold text-[#D9436D] dark:text-rose-300">
                       {liveStats.grade12Count} Rencana Kelas 12
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="text-base sm:text-lg font-black text-[#252042]">
+                    <h3 className="text-base sm:text-lg font-black text-[#252042] dark:text-white">
                       Formulir Siswa Kelas 12 (Rencana Lulus)
                     </h3>
-                    <p className="mt-1 text-xs text-[#6E6A86] leading-relaxed">
+                    <p className="mt-1 text-xs text-[#6E6A86] dark:text-slate-300 leading-relaxed">
                       Khusus siswa tingkat akhir <strong>Kelas XII (DPB &amp; RPL)</strong> untuk
                       memetakan rencana karir/kuliah setelah lulus &amp; kebutuhan bimbingan BKK.
                     </p>
@@ -1846,21 +1851,21 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                   <ul
                     className={`grid grid-cols-1 ${
                       isLockedGrade12 ? 'sm:grid-cols-3 gap-2.5' : 'gap-1.5'
-                    } text-[11.5px] font-semibold text-[#4A4368] bg-[#FFF8FA] rounded-2xl p-3.5 border border-[#FFE1EB]`}
+                    } text-[11.5px] font-semibold text-[#4A4368] dark:text-slate-200 bg-[#FFF8FA] dark:bg-rose-950/30 rounded-2xl p-3.5 border border-[#FFE1EB] dark:border-rose-900/50`}
                   >
                     <li className="flex items-center gap-2">
                       <OrbitaMenuIcon
                         variant="user-management"
-                        className="h-3.5 w-3.5 text-[#F25781] shrink-0"
+                        className="h-3.5 w-3.5 text-[#F25781] dark:text-rose-300 shrink-0"
                       />
                       <span>Tersinkron otomatis dengan {grade12Students.length} data siswa XII di DB</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <OrbitaMenuIcon variant="reports" className="h-3.5 w-3.5 text-[#6C60B8] shrink-0" />
+                      <OrbitaMenuIcon variant="reports" className="h-3.5 w-3.5 text-[#6C60B8] dark:text-indigo-300 shrink-0" />
                       <span>Target perusahaan, kampus impian, atau rencana wirausaha</span>
                     </li>
                     <li className="flex items-center gap-2">
-                      <OrbitaMenuIcon variant="grading" className="h-3.5 w-3.5 text-[#139A4C] shrink-0" />
+                      <OrbitaMenuIcon variant="grading" className="h-3.5 w-3.5 text-[#139A4C] dark:text-emerald-400 shrink-0" />
                       <span>Pemetaan kebutuhan pendampingan BKK / Guru BK sekolah</span>
                     </li>
                   </ul>
@@ -1873,7 +1878,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                     background: 'linear-gradient(135deg, #FF7B9F 0%, #EE4D7A 100%)',
                     boxShadow: '0 12px 24px -6px rgba(242, 87, 129, 0.38)',
                   }}
-                  className="mt-5 flex w-full items-center justify-between rounded-[18px] px-4 py-3 text-xs sm:text-sm font-extrabold text-white transition-all cursor-pointer"
+                  className="no-ornament mt-5 flex w-full items-center justify-between rounded-[18px] px-4 py-3 text-xs sm:text-sm font-extrabold text-white transition-all cursor-pointer"
                 >
                   <span>Mulai Isi Form Siswa Kelas 12</span>
                   <ChevronRight className="h-4.5 w-4.5 transition-transform group-hover:translate-x-1" />
@@ -2002,15 +2007,15 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                         return (
                           <div
                             key={item.key}
-                            className="flex flex-col justify-between gap-2.5 rounded-[20px] border border-[#E6E4F2] bg-[#FAF9FE] p-3.5 text-left select-none"
+                            className="flex flex-col justify-between gap-2.5 rounded-[20px] border border-[#E6E4F2] dark:border-slate-700/80 bg-[#FAF9FE] dark:bg-slate-800/70 p-3.5 text-left select-none"
                           >
                             <div className="flex items-start justify-between gap-2.5">
                               <div className="flex items-center gap-2.5 min-w-0">
                                 <div
                                   className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] ${
                                     isK12
-                                      ? 'bg-[#FFE8EF] text-[#D9436D] border border-[#FFC4D4]'
-                                      : 'bg-[#F0EEFA] text-[#6C60B8] border border-[#DDD8F6]'
+                                      ? 'bg-[#FFE8EF] text-[#D9436D] border border-[#FFC4D4] dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-800/70'
+                                      : 'bg-[#F0EEFA] text-[#6C60B8] border border-[#DDD8F6] dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-800/70'
                                   }`}
                                 >
                                   <GenshinElementIcon
@@ -2019,10 +2024,10 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                                   />
                                 </div>
                                 <div className="min-w-0">
-                                  <span className="block truncate text-xs font-extrabold text-[#252042]">
+                                  <span className="block truncate text-xs font-extrabold text-[#252042] dark:text-white">
                                     {item.fullName}
                                   </span>
-                                  <span className="block truncate text-[10.5px] font-semibold text-[#7A7596]">
+                                  <span className="block truncate text-[10.5px] font-semibold text-[#7A7596] dark:text-slate-400">
                                     {item.cohortLabel} &middot; {item.majorCode}
                                   </span>
                                 </div>
@@ -2031,17 +2036,17 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                               <span
                                 className={`rounded-lg px-2 py-0.5 text-[9.5px] font-extrabold shrink-0 ${
                                   isK12
-                                    ? 'bg-[#FFE8EF] text-[#D9436D]'
-                                    : 'bg-[#F0EEFA] text-[#6C60B8]'
+                                    ? 'bg-[#FFE8EF] text-[#D9436D] dark:bg-rose-950/70 dark:text-rose-300'
+                                    : 'bg-[#F0EEFA] text-[#6C60B8] dark:bg-indigo-950/70 dark:text-indigo-300'
                                 }`}
                               >
                                 {isK12 ? 'Kelas 12' : 'Alumni'}
                               </span>
                             </div>
 
-                            <div className="rounded-xl border border-[#ECEAF6] bg-white px-3 py-2 space-y-1">
+                            <div className="rounded-xl border border-[#ECEAF6] dark:border-slate-700/80 bg-white dark:bg-slate-900/85 px-3 py-2 space-y-1">
                               <div className="flex items-center justify-between gap-2">
-                                <span className="text-[10px] font-semibold text-[#7A7596]">
+                                <span className="text-[10px] font-semibold text-[#7A7596] dark:text-slate-400">
                                   Garis Besar Status
                                 </span>
                                 <span
@@ -2050,14 +2055,14 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                                   {item.statusLabel}
                                 </span>
                               </div>
-                              <p className="truncate text-[11px] font-bold text-[#3E385B]">
+                              <p className="truncate text-[11px] font-bold text-[#3E385B] dark:text-slate-200">
                                 {item.destinationSummary}
                               </p>
                             </div>
 
                             <div className="flex items-center justify-between text-[10px] font-semibold text-[#8A85A6] dark:text-slate-400">
                               <span className="inline-flex items-center gap-1 truncate">
-                                <MapPin className="h-3 w-3 shrink-0 text-[#6C60B8]" />
+                                <MapPin className="h-3 w-3 shrink-0 text-[#6C60B8] dark:text-indigo-300" />
                                 <span className="truncate">{item.city}</span>
                               </span>
                               <span className="inline-flex items-center gap-1 text-[#7A7596] dark:text-slate-400 shrink-0">
@@ -2335,10 +2340,10 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 </div>
 
                 <div>
-                  <label className="block font-bold text-[#3E385B] mb-1">
+                  <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                     NISN {verifiedRespondent ? '(Terkunci Terverifikasi)' : ''}
                   </label>
-                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white px-3 transition-all">
+                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white dark:focus-within:bg-slate-900 px-3 transition-all">
                     <input
                       type="text"
                       readOnly={Boolean(verifiedRespondent)}
@@ -2349,8 +2354,10 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                           setFormState(p => ({ ...p, nisn: e.target.value }));
                         }
                       }}
-                      className={`w-full bg-transparent py-2.5 text-xs font-mono font-semibold focus:outline-none ${
-                        verifiedRespondent ? 'text-[#5D51B2] cursor-not-allowed' : 'text-[#252042]'
+                      className={`no-ornament w-full bg-transparent py-2.5 text-xs font-mono font-semibold focus:outline-none ${
+                        verifiedRespondent
+                          ? 'text-[#5D51B2] dark:text-indigo-300 cursor-not-allowed'
+                          : 'text-[#252042] dark:text-white'
                       }`}
                     />
                   </div>
@@ -2358,14 +2365,14 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
 
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block font-bold text-[#3E385B] mb-1">L/P</label>
-                    <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] px-2">
+                    <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">L/P</label>
+                    <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 px-2">
                       <select
                         value={formState.gender}
                         onChange={e =>
                           setFormState(p => ({ ...p, gender: e.target.value as 'L' | 'P' }))
                         }
-                        className="w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] focus:outline-none cursor-pointer"
+                        className="no-ornament w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] dark:text-white focus:outline-none cursor-pointer"
                       >
                         <option value="L">L</option>
                         <option value="P">P</option>
@@ -2374,8 +2381,8 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                   </div>
 
                   <div>
-                    <label className="block font-bold text-[#3E385B] mb-1">Jurusan *</label>
-                    <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] px-2">
+                    <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">Jurusan *</label>
+                    <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 px-2">
                       <select
                         value={formState.majorCode}
                         onChange={e =>
@@ -2384,7 +2391,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                             majorCode: e.target.value as TracerMajorCode,
                           }))
                         }
-                        className="w-full bg-transparent py-2.5 text-xs font-extrabold text-[#6C60B8] focus:outline-none cursor-pointer"
+                        className="no-ornament w-full bg-transparent py-2.5 text-xs font-extrabold text-[#6C60B8] dark:text-indigo-300 focus:outline-none cursor-pointer"
                       >
                         {TRACER_MAJORS.map(m => (
                           <option key={m} value={m}>
@@ -2396,16 +2403,16 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                   </div>
 
                   <div>
-                    <label className="block font-bold text-[#3E385B] mb-1">
+                    <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                       {isGrade12 ? 'Est. Lulus' : 'Thn Lulus'}
                     </label>
-                    <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] px-2">
+                    <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 px-2">
                       <select
                         value={formState.graduationYear}
                         onChange={e =>
                           setFormState(p => ({ ...p, graduationYear: e.target.value }))
                         }
-                        className="w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] focus:outline-none cursor-pointer"
+                        className="no-ornament w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] dark:text-white focus:outline-none cursor-pointer"
                       >
                         {graduationYearOptions.map(yr => (
                           <option key={yr} value={yr}>
@@ -2419,10 +2426,10 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
 
                 {isGrade12 && (
                   <div>
-                    <label className="block font-bold text-[#3E385B] mb-1">
+                    <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                       Kelas XII (Rombel) *
                     </label>
-                    <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white px-3 transition-all">
+                    <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white dark:focus-within:bg-slate-900 px-3 transition-all">
                       {grade12Classes.length > 0 ? (
                         <select
                           value={formState.className}
@@ -2439,7 +2446,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                                 : p.majorCode,
                             }));
                           }}
-                          className="w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] dark:text-white focus:outline-none cursor-pointer"
+                          className="no-ornament w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] dark:text-white focus:outline-none cursor-pointer"
                         >
                           <option value="">-- Pilih Kelas XII --</option>
                           {grade12Classes.map(cls => (
@@ -2458,7 +2465,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                           value={formState.className}
                           onChange={e => setFormState(p => ({ ...p, className: e.target.value }))}
                           placeholder="XII RPL 1 / XII DPB 1"
-                          className="w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] dark:text-white focus:outline-none"
+                          className="no-ornament w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] dark:text-white focus:outline-none"
                         />
                       )}
                     </div>
@@ -2473,7 +2480,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                       placeholder="0812xxxxxxxx"
                       value={formState.phone}
                       onChange={e => setFormState(p => ({ ...p, phone: e.target.value }))}
-                      className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none"
+                      className="no-ornament w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none"
                     />
                   </div>
                 </div>
@@ -2488,7 +2495,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                       placeholder="nama@email.com"
                       value={formState.email}
                       onChange={e => setFormState(p => ({ ...p, email: e.target.value }))}
-                      className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none"
+                      className="no-ornament w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none"
                     />
                   </div>
                 </div>
@@ -2509,10 +2516,10 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 <div>
-                  <label className="block font-bold text-[#3E385B] mb-1">
+                  <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                     {isGrade12 ? 'Rencana Utama Setelah Lulus *' : 'Status Karier Saat Ini *'}
                   </label>
-                  <div className="orbita-field-underline rounded-xl bg-[#F0EEFA] border border-[#DDD8F6] px-3">
+                  <div className="orbita-field-underline rounded-xl bg-[#F0EEFA] dark:bg-indigo-950/60 border border-[#DDD8F6] dark:border-indigo-800/70 px-3">
                     <select
                       value={formState.careerStatus}
                       onChange={e =>
@@ -2521,7 +2528,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                           careerStatus: e.target.value as AlumniCareerStatus,
                         }))
                       }
-                      className="w-full bg-transparent py-2.5 text-xs font-extrabold text-[#5D51B2] focus:outline-none cursor-pointer"
+                      className="no-ornament w-full bg-transparent py-2.5 text-xs font-extrabold text-[#5D51B2] dark:text-indigo-200 focus:outline-none cursor-pointer"
                     >
                       {(Object.keys(STATUS_DISPLAY) as AlumniCareerStatus[]).map(st => (
                         <option key={st} value={st}>
@@ -2535,7 +2542,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 </div>
 
                 <div>
-                  <label className="block font-bold text-[#3E385B] mb-1">
+                  <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                     {formState.careerStatus === 'kuliah'
                       ? isGrade12
                         ? 'Kampus / Perguruan Tinggi Target *'
@@ -2583,7 +2590,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 </div>
 
                 <div>
-                  <label className="block font-bold text-[#3E385B] mb-1">
+                  <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                     {formState.careerStatus === 'kuliah'
                       ? isGrade12
                         ? 'Target Program Studi / Jurusan Kuliah'
@@ -2592,7 +2599,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                       ? 'Target Posisi / Bidang Pekerjaan'
                       : 'Jabatan / Bidang Kerja'}
                   </label>
-                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white px-3 transition-all">
+                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white dark:focus-within:bg-slate-900 px-3 transition-all">
                     <input
                       type="text"
                       placeholder="Contoh: Software Engineer / Pattern Maker / Teknik Informatika"
@@ -2600,32 +2607,32 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                       onChange={e =>
                         setFormState(p => ({ ...p, roleOrStudyProgram: e.target.value }))
                       }
-                      className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] focus:outline-none"
+                      className="no-ornament w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-[#3E385B] mb-1">
+                  <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                     {isGrade12 ? 'Kota Tujuan Karir / Studi' : 'Kota Penempatan / Domisili'}
                   </label>
-                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white px-3 transition-all flex items-center gap-2">
-                    <MapPin className="h-3.5 w-3.5 text-[#6C60B8] shrink-0" />
+                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white dark:focus-within:bg-slate-900 px-3 transition-all flex items-center gap-2">
+                    <MapPin className="h-3.5 w-3.5 text-[#6C60B8] dark:text-indigo-300 shrink-0" />
                     <input
                       type="text"
                       placeholder="Sukabumi / Bandung / Jakarta"
                       value={formState.city}
                       onChange={e => setFormState(p => ({ ...p, city: e.target.value }))}
-                      className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] focus:outline-none"
+                      className="no-ornament w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-[#3E385B] mb-1">
+                  <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                     Riwayat / Pengalaman Mitra DUDI Saat PKL
                   </label>
-                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] px-3">
+                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 px-3">
                     <select
                       value={formState.pklPartnerId}
                       onChange={e => {
@@ -2636,7 +2643,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                           pklPartnerName: chosen?.name || '',
                         }));
                       }}
-                      className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] focus:outline-none cursor-pointer"
+                      className="no-ornament w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none cursor-pointer"
                     >
                       <option value="">-- Tidak Terkait / Mandiri --</option>
                       {pklPartners.map(p => (
@@ -2649,10 +2656,10 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 </div>
 
                 <div>
-                  <label className="block font-bold text-[#3E385B] mb-1">
+                  <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                     Kesesuaian dengan Kompetensi {formState.majorCode}
                   </label>
-                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] px-3">
+                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 px-3">
                     <select
                       value={formState.industryRelevance}
                       onChange={e =>
@@ -2661,7 +2668,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                           industryRelevance: e.target.value as AlumniRelevanceLevel,
                         }))
                       }
-                      className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] focus:outline-none cursor-pointer"
+                      className="no-ornament w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none cursor-pointer"
                     >
                       <option value="sangat_sesuai">Sangat Sesuai Jurusan</option>
                       <option value="sesuai">Sesuai Kompetensi</option>
@@ -2674,16 +2681,16 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 {isGrade12 ? (
                   <>
                     <div>
-                      <label className="block font-bold text-[#3E385B] mb-1">
+                      <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                         Kebutuhan Pendampingan BKK / Guru BK
                       </label>
-                      <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] px-3">
+                      <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 px-3">
                         <select
                           value={formState.bkkSupportNeed}
                           onChange={e =>
                             setFormState(p => ({ ...p, bkkSupportNeed: e.target.value }))
                           }
-                          className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] focus:outline-none cursor-pointer"
+                          className="no-ornament w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none cursor-pointer"
                         >
                           {BKK_SUPPORT_OPTIONS.map(opt => (
                             <option key={opt} value={opt}>
@@ -2695,10 +2702,10 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                     </div>
 
                     <div>
-                      <label className="block font-bold text-[#3E385B] mb-1">
+                      <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                         Target Kesiapan Setelah Kelulusan
                       </label>
-                      <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] px-3">
+                      <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 px-3">
                         <select
                           value={formState.targetPlanDate}
                           onChange={e => {
@@ -2713,7 +2720,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                                 : '< 3 Bulan',
                             }));
                           }}
-                          className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] focus:outline-none cursor-pointer"
+                          className="no-ornament w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none cursor-pointer"
                         >
                           {PLAN_TIMELINE_OPTIONS.map(opt => (
                             <option key={opt} value={opt}>
@@ -2727,10 +2734,10 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 ) : (
                   <>
                     <div>
-                      <label className="block font-bold text-[#3E385B] mb-1">
+                      <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                         Waktu Tunggu Setelah Lulus
                       </label>
-                      <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] px-3">
+                      <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 px-3">
                         <select
                           value={formState.waitingPeriod}
                           onChange={e =>
@@ -2739,7 +2746,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                               waitingPeriod: e.target.value as AlumniWaitingPeriod,
                             }))
                           }
-                          className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] focus:outline-none cursor-pointer"
+                          className="no-ornament w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none cursor-pointer"
                         >
                           {WAITING_PERIODS.map(wp => (
                             <option key={wp} value={wp}>
@@ -2751,10 +2758,10 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                     </div>
 
                     <div>
-                      <label className="block font-bold text-[#3E385B] mb-1">
+                      <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                         Rentang Penghasilan / Keterangan (Opsional)
                       </label>
-                      <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white px-3 transition-all">
+                      <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white dark:focus-within:bg-slate-900 px-3 transition-all">
                         <input
                           type="text"
                           list="orbita-income-presets"
@@ -2763,7 +2770,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                           onChange={e =>
                             setFormState(p => ({ ...p, monthlyIncomeRange: e.target.value }))
                           }
-                          className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] focus:outline-none"
+                          className="no-ornament w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none"
                         />
                         <datalist id="orbita-income-presets">
                           {INCOME_RANGE_PRESETS.map(p => (
@@ -2777,12 +2784,12 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
               </div>
 
               <div>
-                <label className="block font-bold text-[#3E385B] mb-1">
+                <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                   {isGrade12
                     ? 'Aspirasi, Kesiapan Portofolio, atau Pesan untuk Tim BKK / Sekolah'
                     : 'Testimoni Manfaat PKL & Saran untuk Kurikulum Sekolah'}
                 </label>
-                <div className="orbita-field-underline rounded-2xl bg-[#F4F3FA] border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white p-3 transition-all">
+                <div className="orbita-field-underline rounded-2xl bg-[#F4F3FA] dark:bg-slate-800/80 border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white dark:focus-within:bg-slate-900 p-3 transition-all">
                   <textarea
                     rows={3}
                     placeholder={
@@ -2792,7 +2799,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                     }
                     value={formState.testimonial}
                     onChange={e => setFormState(p => ({ ...p, testimonial: e.target.value }))}
-                    className="w-full bg-transparent text-xs font-medium text-[#252042] focus:outline-none resize-none"
+                    className="no-ornament w-full bg-transparent text-xs font-medium text-[#252042] dark:text-white focus:outline-none resize-none"
                   />
                 </div>
               </div>
@@ -2841,21 +2848,21 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
       {/* STAGE 3: KONFIRMASI TERSIMPAN & TERSINKRON KE DATABASE                */}
       {/* ===================================================================== */}
       {stage === 'success' && savedRecord && (
-        <div className="rounded-[28px] border border-[#CBEFE0] bg-white/95 p-6 sm:p-8 shadow-[0_22px_50px_-10px_rgba(19,154,76,0.16)] backdrop-blur-xl text-center space-y-5">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-[#E7F9EF] border border-[#BCEAD1] text-[#139A4C] shadow-sm">
+        <div className="rounded-[28px] border border-[#CBEFE0] dark:border-emerald-800/60 bg-white/95 dark:bg-[#1E1A3E]/95 p-6 sm:p-8 shadow-[0_22px_50px_-10px_rgba(19,154,76,0.16)] backdrop-blur-xl text-center space-y-5">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-[#E7F9EF] dark:bg-emerald-950/70 border border-[#BCEAD1] dark:border-emerald-800/70 text-[#139A4C] dark:text-emerald-300 shadow-sm">
             <CheckCircle2 className="h-8 w-8" />
           </div>
 
           <div className="space-y-1.5 max-w-lg mx-auto">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E7F9EF] px-3 py-1 text-[10.5px] font-extrabold text-[#139A4C]">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E7F9EF] dark:bg-emerald-950/70 px-3 py-1 text-[10.5px] font-extrabold text-[#139A4C] dark:text-emerald-300">
               Tersinkron Real-Time ke Cloud Database &amp; Menu Admin BKK
             </span>
-            <h3 className="text-lg sm:text-xl font-black text-[#252042]">
+            <h3 className="text-lg sm:text-xl font-black text-[#252042] dark:text-white">
               {savedRecord.respondentCategory === 'kelas_12'
                 ? 'Rencana Pasca Lulus Kelas 12 Berhasil Disimpan!'
                 : 'Data Tracer Study Alumni Berhasil Disimpan!'}
             </h3>
-            <p className="text-xs text-[#6E6A86] leading-relaxed">
+            <p className="text-xs text-[#6E6A86] dark:text-slate-300 leading-relaxed">
               Terima kasih <strong>{savedRecord.fullName}</strong>. Data Anda telah tercatat langsung
               pada modul <strong>PKL &amp; Tracer Study</strong> Admin Sekolah dengan status{' '}
               <strong>
@@ -2865,12 +2872,12 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
             </p>
           </div>
 
-          <div className="mx-auto max-w-xl rounded-2xl border border-[#ECEAF6] bg-[#FAF9FE] p-4 text-left text-xs grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="mx-auto max-w-xl rounded-2xl border border-[#ECEAF6] dark:border-slate-700/80 bg-[#FAF9FE] dark:bg-slate-800/60 p-4 text-left text-xs grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <span className="text-[10.5px] font-semibold text-[#7A7596] block">
+              <span className="text-[10.5px] font-semibold text-[#7A7596] dark:text-slate-400 block">
                 Kategori &amp; Jurusan
               </span>
-              <span className="font-extrabold text-[#252042]">
+              <span className="font-extrabold text-[#252042] dark:text-white">
                 {savedRecord.respondentCategory === 'kelas_12'
                   ? `Siswa Kelas 12 (${savedRecord.className || 'XII'})`
                   : `Alumni Lulusan ${savedRecord.graduationYear}`}{' '}
@@ -2878,28 +2885,28 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
               </span>
             </div>
             <div>
-              <span className="text-[10.5px] font-semibold text-[#7A7596] block">
+              <span className="text-[10.5px] font-semibold text-[#7A7596] dark:text-slate-400 block">
                 {savedRecord.respondentCategory === 'kelas_12'
                   ? 'Rencana Setelah Lulus'
                   : 'Status Karier'}
               </span>
-              <span className="font-extrabold text-[#6C60B8]">
+              <span className="font-extrabold text-[#6C60B8] dark:text-indigo-300">
                 {(STATUS_DISPLAY[savedRecord.careerStatus] || STATUS_DISPLAY.belum_bekerja).shortLabel}
               </span>
             </div>
             <div>
-              <span className="text-[10.5px] font-semibold text-[#7A7596] block">
+              <span className="text-[10.5px] font-semibold text-[#7A7596] dark:text-slate-400 block">
                 Instansi / Kampus / Target
               </span>
-              <span className="font-bold text-[#252042]">
+              <span className="font-bold text-[#252042] dark:text-white">
                 {savedRecord.institutionOrCompany || '-'}
               </span>
             </div>
             <div>
-              <span className="text-[10.5px] font-semibold text-[#7A7596] block">
+              <span className="text-[10.5px] font-semibold text-[#7A7596] dark:text-slate-400 block">
                 {savedRecord.bkkSupportNeed ? 'Pendampingan BKK' : 'Jabatan / Prodi & Kota'}
               </span>
-              <span className="font-bold text-[#252042]">
+              <span className="font-bold text-[#252042] dark:text-white">
                 {savedRecord.bkkSupportNeed ||
                   `${savedRecord.roleOrStudyProgram || '-'} · ${savedRecord.city || '-'}`}
               </span>
@@ -2910,7 +2917,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
             <button
               type="button"
               onClick={() => openFromExistingTracer(savedRecord)}
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl border border-[#DDD8F6] bg-[#F4F2FC] hover:bg-[#EAE7F8] px-4 text-xs font-extrabold text-[#6C60B8] cursor-pointer"
+              className="no-ornament inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl border border-[#DDD8F6] dark:border-indigo-800/70 bg-[#F4F2FC] dark:bg-indigo-950/70 hover:bg-[#EAE7F8] dark:hover:bg-indigo-900/70 px-4 text-xs font-extrabold text-[#6C60B8] dark:text-indigo-300 cursor-pointer"
             >
               <Edit className="h-3.5 w-3.5" />
               <span>Edit Data Ini</span>
@@ -2918,7 +2925,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
             <button
               type="button"
               onClick={() => setStage('intro')}
-              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl border border-[#E2DFEF] bg-white hover:bg-[#FAF9FE] px-4 text-xs font-extrabold text-[#3E385B] cursor-pointer"
+              className="no-ornament inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl border border-[#E2DFEF] dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-[#FAF9FE] dark:hover:bg-slate-700 px-4 text-xs font-extrabold text-[#3E385B] dark:text-slate-100 cursor-pointer"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               <span>
@@ -2936,7 +2943,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 style={{
                   background: 'linear-gradient(135deg, #7468C4 0%, #5D51B2 100%)',
                 }}
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl px-5 text-xs font-extrabold text-white cursor-pointer"
+                className="no-ornament inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl px-5 text-xs font-extrabold text-white cursor-pointer"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <span>Selesai &amp; Kembali</span>
@@ -2951,19 +2958,19 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
       {/* ===================================================================== */}
       {showFormBackConfirm && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#42368E]/42 backdrop-blur-md animate-fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#42368E]/42 dark:bg-slate-950/70 backdrop-blur-md animate-fade-in"
           onClick={e => {
             if (e.target === e.currentTarget) setShowFormBackConfirm(false);
           }}
         >
           <div
-            className="relative w-full max-w-md rounded-[28px] border border-[#7468C4]/30 bg-white/90 p-6 text-[#3E385B] shadow-[0_28px_68px_rgba(64,52,142,0.34)] backdrop-blur-2xl animate-wobble-in"
+            className="relative w-full max-w-md rounded-[28px] border border-[#7468C4]/30 dark:border-[#8D81E3]/30 bg-white/90 dark:bg-[#1E1A3E]/95 p-6 text-[#3E385B] dark:text-slate-100 shadow-[0_28px_68px_rgba(64,52,142,0.34)] backdrop-blur-2xl animate-wobble-in"
             role="dialog"
             aria-modal="true"
             aria-labelledby="tracer-back-confirm-title"
           >
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-[#E6E8F2] pb-4">
+            <div className="flex items-start justify-between border-b border-[#E6E8F2] dark:border-slate-800 pb-4">
               <div className="flex items-center gap-3">
                 <div
                   style={{
@@ -2974,14 +2981,14 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                   <ArrowLeft className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 id="tracer-back-confirm-title" className="text-base font-extrabold text-[#3E385B]">
+                  <h3 id="tracer-back-confirm-title" className="text-base font-extrabold text-[#3E385B] dark:text-white">
                     {isLockedGrade12
                       ? 'Kembali ke Halaman Siswa Kelas 12'
                       : isLockedAlumni
                       ? 'Kembali ke Halaman Alumni'
                       : 'Kembali ke Portal Pengisian'}
                   </h3>
-                  <p className="text-[11px] font-semibold text-[#8C88A4]">
+                  <p className="text-[11px] font-semibold text-[#8C88A4] dark:text-slate-400">
                     Konfirmasi Perubahan Formulir ORBITA
                   </p>
                 </div>
@@ -2989,7 +2996,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
               <button
                 type="button"
                 onClick={() => setShowFormBackConfirm(false)}
-                className="no-ornament rounded-full border border-[#E6E8F2] bg-[#F5F6FA] p-1.5 text-[#6A6584] hover:bg-[#ECEEF7] hover:text-[#3E385B] transition-colors cursor-pointer"
+                className="no-ornament rounded-full border border-[#E6E8F2] dark:border-slate-700 bg-[#F5F6FA] dark:bg-slate-800 p-1.5 text-[#6A6584] dark:text-slate-300 hover:bg-[#ECEEF7] dark:hover:bg-slate-700 hover:text-[#3E385B] dark:hover:text-white transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -2997,13 +3004,13 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
 
             {/* Body */}
             <div className="py-5 space-y-3.5">
-              <div className="flex items-start gap-3 rounded-[18px] border border-[#FFE0E9] bg-[#FFF5F8] p-3.5 text-xs">
+              <div className="flex items-start gap-3 rounded-[18px] border border-[#FFE0E9] dark:border-rose-800/60 bg-[#FFF5F8] dark:bg-rose-950/50 p-3.5 text-xs">
                 <AlertTriangle className="h-5 w-5 text-[#FF6E96] shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-bold text-[#3E385B]">
+                  <p className="font-bold text-[#3E385B] dark:text-white">
                     Apakah Anda yakin ingin kembali ke pilihan formulir?
                   </p>
-                  <p className="mt-1 text-[#6A6584]">
+                  <p className="mt-1 text-[#6A6584] dark:text-slate-300">
                     Isian formulir yang belum dikirim tidak akan tersimpan ke database hingga Anda menekan tombol kirim.
                   </p>
                 </div>
@@ -3011,11 +3018,11 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-[#E6E8F2]">
+            <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-[#E6E8F2] dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setShowFormBackConfirm(false)}
-                className="no-ornament inline-flex h-9 items-center justify-center rounded-full border border-[#E6E8F2] bg-[#F5F6FA] px-4 text-xs font-bold text-[#6A6584] hover:bg-[#ECEEF7] hover:text-[#3E385B] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                className="no-ornament inline-flex h-9 items-center justify-center rounded-full border border-[#E6E8F2] dark:border-slate-700 bg-[#F5F6FA] dark:bg-slate-800 px-4 text-xs font-bold text-[#6A6584] dark:text-slate-200 hover:bg-[#ECEEF7] dark:hover:bg-slate-700 hover:text-[#3E385B] dark:hover:text-white whitespace-nowrap shrink-0 transition-colors cursor-pointer"
               >
                 Batal
               </button>

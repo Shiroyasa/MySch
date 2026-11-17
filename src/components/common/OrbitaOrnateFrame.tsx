@@ -46,7 +46,7 @@ export const OrbitaOrnateFrame: React.FC<OrbitaOrnateFrameProps> = ({
 
       {/* Top-Right Subtle 3-Dots Icon */}
       <div
-        className="pointer-events-none select-none absolute top-5 right-5 z-10 text-[#C6C4D6]"
+        className="pointer-events-none select-none absolute top-5 right-5 z-10 text-[#C6C4D6] dark:text-slate-500"
         aria-hidden="true"
       >
         <MoreVertical className="h-4.5 w-4.5" />
@@ -55,7 +55,7 @@ export const OrbitaOrnateFrame: React.FC<OrbitaOrnateFrameProps> = ({
       {/* Top-Left Soft Pink Status Pill */}
       {showTopCrest && (
         <div
-          className="pointer-events-none select-none absolute top-4 left-5 z-10 inline-flex items-center rounded-full bg-[#FFE4EC] px-3 py-0.5 text-[10px] font-bold text-[#F25781]"
+          className="pointer-events-none select-none absolute top-4 left-5 z-10 inline-flex items-center rounded-full bg-[#FFE4EC] text-[#F25781] dark:bg-rose-950/70 dark:text-rose-300 px-3 py-0.5 text-[10px] font-bold"
           aria-hidden="true"
         >
           <span>{stampText}</span>

@@ -830,7 +830,7 @@ export const MasterDataModule: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleSimulateImport}
-                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer whitespace-nowrap shrink-0"
                     title="Impor format spreadsheet Excel atau CSV"
                   >
                     <Upload className="h-3.5 w-3.5 text-blue-600 shrink-0" />
@@ -840,7 +840,7 @@ export const MasterDataModule: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleExportStudentsExcel}
-                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer whitespace-nowrap shrink-0"
                   >
                     <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                     <span>Ekspor XLSX</span>
@@ -1345,7 +1345,7 @@ export const MasterDataModule: React.FC = () => {
                     }));
                     exportToExcel(rows, 'Jadwal_Pelajaran_SMK_Mardi_Yuana');
                   }}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
                   <span>Ekspor Excel</span>
@@ -1536,7 +1536,7 @@ export const MasterDataModule: React.FC = () => {
               <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
                 {editingStudent ? 'Edit Data Siswa' : 'Pendaftaran Siswa Baru'}
               </h2>
-              <button onClick={() => setShowStudentModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowStudentModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -1667,7 +1667,7 @@ export const MasterDataModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowStudentModal(false)}
-                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
@@ -1691,7 +1691,7 @@ export const MasterDataModule: React.FC = () => {
               <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
                 {editingTeacher ? 'Edit Data Guru' : 'Tambah Tenaga Pendidik Baru'}
               </h2>
-              <button onClick={() => setShowTeacherModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowTeacherModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -1826,7 +1826,7 @@ export const MasterDataModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowTeacherModal(false)}
-                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
@@ -1850,7 +1850,7 @@ export const MasterDataModule: React.FC = () => {
               <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
                 {editingClass ? 'Edit Rombongan Belajar' : 'Tambah Rombel Kelas Baru'}
               </h2>
-              <button onClick={() => setShowClassModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowClassModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -1931,7 +1931,7 @@ export const MasterDataModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowClassModal(false)}
-                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
@@ -1955,7 +1955,7 @@ export const MasterDataModule: React.FC = () => {
               <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
                 {editingMajor ? 'Edit Program Keahlian' : 'Tambah Jurusan Vokasi Baru'}
               </h2>
-              <button onClick={() => setShowMajorModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowMajorModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -2014,7 +2014,7 @@ export const MasterDataModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowMajorModal(false)}
-                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
@@ -2038,7 +2038,7 @@ export const MasterDataModule: React.FC = () => {
               <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
                 {editingSubject ? 'Edit Mata Pelajaran' : 'Tambah Mata Pelajaran Baru'}
               </h2>
-              <button onClick={() => setShowSubjectModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowSubjectModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -2115,7 +2115,7 @@ export const MasterDataModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowSubjectModal(false)}
-                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
@@ -2137,7 +2137,7 @@ export const MasterDataModule: React.FC = () => {
           <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
               <h2 className="text-base font-extrabold text-slate-900 dark:text-white">Tambah Periode Tahun Ajaran</h2>
-              <button onClick={() => setShowYearModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowYearModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -2172,7 +2172,7 @@ export const MasterDataModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowYearModal(false)}
-                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>
@@ -2194,7 +2194,7 @@ export const MasterDataModule: React.FC = () => {
           <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 text-xs">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
               <h2 className="text-base font-extrabold text-slate-900 dark:text-white">Detail Profil Siswa</h2>
-              <button type="button" onClick={() => setDetailStudent(null)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 cursor-pointer">
+              <button type="button" onClick={() => setDetailStudent(null)} className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200 cursor-pointer">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -2231,7 +2231,7 @@ export const MasterDataModule: React.FC = () => {
               <h2 className="text-base font-extrabold text-slate-900 dark:text-white">
                 {editingSchedule ? 'Edit Jadwal Pelajaran' : 'Tambah Jadwal Pelajaran Baru'}
               </h2>
-              <button onClick={() => setShowScheduleModal(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setShowScheduleModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -2336,7 +2336,7 @@ export const MasterDataModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowScheduleModal(false)}
-                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 cursor-pointer whitespace-nowrap shrink-0"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer whitespace-nowrap shrink-0"
                 >
                   Batal
                 </button>

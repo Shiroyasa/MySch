@@ -96,7 +96,7 @@ export const BroadcastAnnouncementModal: React.FC<BroadcastAnnouncementModalProp
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>

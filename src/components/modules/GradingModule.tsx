@@ -1556,7 +1556,7 @@ export const GradingModule: React.FC = () => {
                     disabled={
                       reportClassStudents.findIndex(s => s.id === selectedStudentId) <= 0
                     }
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:hover:bg-slate-800 shrink-0 cursor-pointer"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 shrink-0 cursor-pointer"
                     title="Siswa Sebelumnya"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -1578,7 +1578,7 @@ export const GradingModule: React.FC = () => {
                       reportClassStudents.findIndex(s => s.id === selectedStudentId) >=
                       reportClassStudents.length - 1
                     }
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:hover:bg-slate-800 shrink-0 cursor-pointer"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200 shrink-0 cursor-pointer"
                     title="Siswa Berikutnya"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -1718,7 +1718,7 @@ export const GradingModule: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsEditingReport(false)}
-                    className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 whitespace-nowrap shrink-0 cursor-pointer"
+                    className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     Batal
                   </button>
@@ -2031,7 +2031,7 @@ export const GradingModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsEditingReport(false)}
-                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 whitespace-nowrap shrink-0 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   Batal
                 </button>
@@ -2336,7 +2336,7 @@ export const GradingModule: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 whitespace-nowrap shrink-0 cursor-pointer"
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-300 px-4 font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   Batal
                 </button>

@@ -1060,7 +1060,7 @@ export const ReportsModule: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleDownloadExcel}
-                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer"
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer"
                       title="Ekspor file Excel (.xlsx)"
                     >
                       <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
@@ -1832,7 +1832,7 @@ export const ReportsModule: React.FC = () => {
               <button
                 type="button"
                 onClick={handleDownloadExcel}
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer"
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <Download className="h-4 w-4 text-emerald-600 shrink-0" />
                 <span>Unduh File Excel</span>
@@ -2040,7 +2040,7 @@ export const ReportsModule: React.FC = () => {
                   </div>
 
                   <div className="flex-1 space-y-1">
-                    <label className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-white transition-colors">
+                    <label className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700 transition-colors">
                       <Upload className="h-3.5 w-3.5" />
                       <span>Unggah Logo (PNG/JPG)</span>
                       <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
@@ -2250,7 +2250,7 @@ export const ReportsModule: React.FC = () => {
                       <span className="text-[9px] text-slate-400 italic">Belum ada TTD</span>
                     )}
                   </div>
-                  <label className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white py-1.5 px-2 text-[11px] font-bold text-slate-700 hover:bg-slate-50 cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                  <label className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white py-1.5 px-2 text-[11px] font-bold text-slate-700 hover:bg-slate-50 cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
                     <Upload className="h-3 w-3" />
                     <span>Unggah Gambar TTD</span>
                     <input type="file" accept="image/*" onChange={handleLeftSignatureUpload} className="hidden" />
@@ -2339,7 +2339,7 @@ export const ReportsModule: React.FC = () => {
                       <span className="text-[9px] text-slate-400 italic">Belum ada TTD</span>
                     )}
                   </div>
-                  <label className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white py-1.5 px-2 text-[11px] font-bold text-slate-700 hover:bg-slate-50 cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                  <label className="flex-1 flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white py-1.5 px-2 text-[11px] font-bold text-slate-700 hover:bg-slate-50 cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
                     <Upload className="h-3 w-3" />
                     <span>Unggah Gambar TTD</span>
                     <input type="file" accept="image/*" onChange={handleRightSignatureUpload} className="hidden" />
@@ -2378,7 +2378,7 @@ export const ReportsModule: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => stepDocument(-1)}
-                      className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-[11px] font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
+                      className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-[11px] font-bold text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
                       title="Lihat jenis dokumen sebelumnya"
                     >
                       <ChevronLeft className="h-3.5 w-3.5 shrink-0" />
@@ -2429,7 +2429,7 @@ export const ReportsModule: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => stepClass(-1)}
-                      className="p-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                      className="p-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
                       title="Kelas Sebelumnya"
                     >
                       <ChevronLeft className="h-3.5 w-3.5" />
@@ -2451,7 +2451,7 @@ export const ReportsModule: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => stepClass(1)}
-                      className="p-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                      className="p-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
                       title="Kelas Berikutnya"
                     >
                       <ChevronRight className="h-3.5 w-3.5" />
@@ -2465,7 +2465,7 @@ export const ReportsModule: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => stepSubject(-1)}
-                        className="p-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                        className="p-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
                         title="Mata Pelajaran Sebelumnya"
                       >
                         <ChevronLeft className="h-3.5 w-3.5" />
@@ -2487,7 +2487,7 @@ export const ReportsModule: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => stepSubject(1)}
-                        className="p-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 cursor-pointer"
+                        className="p-1 rounded border border-slate-200 bg-slate-50 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
                         title="Mata Pelajaran Berikutnya"
                       >
                         <ChevronRight className="h-3.5 w-3.5" />
@@ -2600,7 +2600,7 @@ export const ReportsModule: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setIsFullscreenPreview(true)}
-                      className="inline-flex h-8 items-center justify-center gap-1 px-3 rounded-lg border border-slate-200 bg-slate-50 font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
+                      className="inline-flex h-8 items-center justify-center gap-1 px-3 rounded-lg border border-slate-200 bg-slate-50 font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 whitespace-nowrap shrink-0 cursor-pointer"
                     >
                       <Maximize2 className="h-3 w-3 text-blue-600 shrink-0" />
                       <span>Layar Penuh</span>
@@ -2624,7 +2624,7 @@ export const ReportsModule: React.FC = () => {
                     transform: `scale(${previewZoom / 100})`,
                     transformOrigin: 'top center',
                   }}
-                  className="bg-white text-slate-900 rounded-lg shadow-2xl p-6 sm:p-8 border border-slate-300 text-xs font-sans min-h-[660px] flex flex-col justify-between transition-all duration-200 mx-auto"
+                  className="paper-surface bg-white text-slate-900 rounded-lg shadow-2xl p-6 sm:p-8 border border-slate-300 text-xs font-sans min-h-[660px] flex flex-col justify-between transition-all duration-200 mx-auto"
                 >
                   {/* TOP SECTION: Kop Surat + Document Header + Document Body */}
                   <div>
@@ -2704,7 +2704,7 @@ export const ReportsModule: React.FC = () => {
                     {/* ==================================================== */}
                     {reportType === 'attendance_class' && (
                       <div className="space-y-2.5">
-                        <table className="w-full text-left text-[8.5px] border-collapse border border-slate-400">
+                        <table className="paper-table w-full text-left text-[8.5px] border-collapse border border-slate-400">
                           <thead>
                             <tr
                               style={{
@@ -2759,7 +2759,7 @@ export const ReportsModule: React.FC = () => {
                     {/* ==================================================== */}
                     {reportType === 'grade_class' && (
                       <div className="space-y-2.5">
-                        <table className="w-full text-left text-[8px] border-collapse border border-slate-400">
+                        <table className="paper-table w-full text-left text-[8px] border-collapse border border-slate-400">
                           <thead>
                             <tr
                               style={{
@@ -2820,7 +2820,7 @@ export const ReportsModule: React.FC = () => {
                     {/* ==================================================== */}
                     {reportType === 'grade_subject' && (
                       <div className="space-y-2.5">
-                        <table className="w-full text-left text-[8.5px] border-collapse border border-slate-400">
+                        <table className="paper-table w-full text-left text-[8.5px] border-collapse border border-slate-400">
                           <thead>
                             <tr
                               style={{
@@ -2910,7 +2910,7 @@ export const ReportsModule: React.FC = () => {
                         </div>
 
                         {/* Grades Table */}
-                        <table className="w-full text-left text-[8.5px] border-collapse border border-slate-400">
+                        <table className="paper-table w-full text-left text-[8.5px] border-collapse border border-slate-400">
                           <thead>
                             <tr
                               style={{
@@ -3047,14 +3047,14 @@ export const ReportsModule: React.FC = () => {
           {/* Fullscreen Modal Preview (Allows inspecting each document one by one at large scale) */}
           {isFullscreenPreview && (
             <div className="fixed inset-0 z-50 flex flex-col bg-[#3E385B]/45 backdrop-blur-md p-4 sm:p-6 overflow-y-auto animate-fade-in">
-              <div className="max-w-5xl w-full mx-auto flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#E6E8F2] bg-white p-3.5 text-[#3E385B] mb-4 shadow-2xl">
+              <div className="max-w-5xl w-full mx-auto flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#E6E8F2] bg-white p-3.5 text-[#3E385B] dark:border-[#8D81E3]/25 dark:bg-[#1E1A3E] dark:text-slate-100 mb-4 shadow-2xl">
                 <div className="flex items-center gap-2.5">
                   <span className="px-2.5 py-1 rounded-lg bg-[#685BC7] text-white text-xs font-black">
                     Dokumen {activeDocMeta.number}/4
                   </span>
                   <div>
-                    <h3 className="text-xs sm:text-sm font-extrabold text-[#3E385B]">{activeDocMeta.fullTitle}</h3>
-                    <p className="text-[10px] text-[#8C88A4]">
+                    <h3 className="text-xs sm:text-sm font-extrabold text-[#3E385B] dark:text-white">{activeDocMeta.fullTitle}</h3>
+                    <p className="text-[10px] text-[#8C88A4] dark:text-slate-400">
                       Kelas {currentClass?.name} •{' '}
                       {reportType === 'student_transcript'
                         ? `Siswa ${activeStudentIndex + 1}/${classStudents.length}: ${activeStudent?.fullName}`
@@ -3069,7 +3069,7 @@ export const ReportsModule: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => stepDocument(-1)}
-                    className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-full border border-[#E6E8F2] bg-[#F5F6FA] hover:bg-[#ECEEF7] px-3 text-xs font-bold text-[#3E385B] whitespace-nowrap shrink-0 cursor-pointer"
+                    className="no-ornament inline-flex h-8 items-center justify-center gap-1 rounded-full border border-[#E6E8F2] bg-[#F5F6FA] hover:bg-[#ECEEF7] dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 px-3 text-xs font-bold text-[#3E385B] dark:text-slate-200 whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     <ChevronLeft className="h-4 w-4 shrink-0" />
                     <span>Dokumen Sebelumnya</span>
@@ -3122,7 +3122,7 @@ export const ReportsModule: React.FC = () => {
               </div>
 
               {/* Large A4 Sheet inside Modal */}
-              <div className="max-w-4xl w-full mx-auto bg-white text-slate-900 rounded-xl shadow-2xl p-8 sm:p-10 border border-slate-300 text-xs flex-1 flex flex-col justify-between">
+              <div className="paper-surface max-w-4xl w-full mx-auto bg-white text-slate-900 rounded-xl shadow-2xl p-8 sm:p-10 border border-slate-300 text-xs flex-1 flex flex-col justify-between">
                 <div>
                   {designerConfig.showKopSurat !== false && (
                     <div className="flex items-center gap-5 border-b-[3px] border-double border-slate-900 pb-4">
@@ -3170,7 +3170,7 @@ export const ReportsModule: React.FC = () => {
 
                   {/* Render full rows in fullscreen modal */}
                   {reportType === 'attendance_class' && (
-                    <table className="w-full text-left text-[10px] border-collapse border border-slate-400">
+                    <table className="paper-table w-full text-left text-[10px] border-collapse border border-slate-400">
                       <thead>
                         <tr className="bg-slate-900 text-white">
                           <th className="border border-slate-400 p-1.5 text-center">No</th>
@@ -3205,7 +3205,7 @@ export const ReportsModule: React.FC = () => {
                   )}
 
                   {reportType === 'grade_class' && (
-                    <table className="w-full text-left text-[9.5px] border-collapse border border-slate-400">
+                    <table className="paper-table w-full text-left text-[9.5px] border-collapse border border-slate-400">
                       <thead>
                         <tr className="bg-slate-900 text-white">
                           <th className="border border-slate-400 p-1 text-center">No</th>
@@ -3242,7 +3242,7 @@ export const ReportsModule: React.FC = () => {
                   )}
 
                   {reportType === 'grade_subject' && (
-                    <table className="w-full text-left text-[10px] border-collapse border border-slate-400">
+                    <table className="paper-table w-full text-left text-[10px] border-collapse border border-slate-400">
                       <thead>
                         <tr className="bg-slate-900 text-white">
                           <th className="border border-slate-400 p-1.5 text-center">No</th>
@@ -3286,7 +3286,7 @@ export const ReportsModule: React.FC = () => {
                           <p>Urutan Siswa: <strong>{activeStudentIndex + 1} dari {classStudents.length}</strong></p>
                         </div>
                       </div>
-                      <table className="w-full text-left text-[10px] border-collapse border border-slate-400">
+                      <table className="paper-table w-full text-left text-[10px] border-collapse border border-slate-400">
                         <thead>
                           <tr className="bg-slate-900 text-white">
                             <th className="border border-slate-400 p-1.5 text-center">No</th>

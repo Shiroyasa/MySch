@@ -758,11 +758,11 @@ export const LoginPage: React.FC = () => {
                                         onChange={e => setSelectedClassId(e.target.value)}
                                         className="no-ornament rounded-full border border-white/30 bg-white/15 hover:bg-white/25 px-2.5 py-1 text-[10.5px] font-bold text-white focus:outline-none cursor-pointer"
                                       >
-                                        <option value="ALL" className="text-[#3E385B]">
+                                        <option value="ALL" className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                                           Semua Kelas
                                         </option>
                                         {classes.map(cls => (
-                                          <option key={cls.id} value={cls.id} className="text-[#3E385B]">
+                                          <option key={cls.id} value={cls.id} className="text-[#3E385B] bg-white dark:bg-[#171434] dark:text-slate-100">
                                             Kelas {cls.name}
                                           </option>
                                         ))}
@@ -1091,7 +1091,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setPendingPortalExit(null)}
-                className="no-ornament rounded-full border border-[#E6E8F2] dark:border-slate-700 bg-[#F5F6FA] dark:bg-slate-800 p-1.5 text-[#6A6584] dark:text-slate-300 hover:bg-[#ECEEF7] hover:text-[#3E385B] transition-colors cursor-pointer"
+                className="no-ornament rounded-full border border-[#E6E8F2] dark:border-slate-700 bg-[#F5F6FA] dark:bg-slate-800 p-1.5 text-[#6A6584] dark:text-slate-300 hover:bg-[#ECEEF7] hover:text-[#3E385B] dark:hover:bg-slate-700 dark:hover:text-white transition-colors cursor-pointer"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1119,7 +1119,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setPendingPortalExit(null)}
-                className="no-ornament inline-flex h-9 items-center justify-center rounded-full border border-[#E6E8F2] dark:border-slate-700 bg-[#F5F6FA] dark:bg-slate-800 px-4 text-xs font-bold text-[#6A6584] dark:text-slate-200 hover:bg-[#ECEEF7] hover:text-[#3E385B] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                className="no-ornament inline-flex h-9 items-center justify-center rounded-full border border-[#E6E8F2] dark:border-slate-700 bg-[#F5F6FA] dark:bg-slate-800 px-4 text-xs font-bold text-[#6A6584] dark:text-slate-200 hover:bg-[#ECEEF7] hover:text-[#3E385B] dark:hover:bg-slate-700 dark:hover:text-white whitespace-nowrap shrink-0 transition-colors cursor-pointer"
               >
                 Batal
               </button>

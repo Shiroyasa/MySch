@@ -783,6 +783,19 @@ html:not(.dark) main div.rounded-3xl[class*="border"][class*="bg-white"]:not([cl
   color: #3E385B !important;
 }
 
+/* Top-level module cards -> Dark Frosted Indigo-Slate Glass in Dark Mode */
+html.dark main div.rounded-2xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):not(.paper-surface),
+html.dark main div.rounded-3xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):not(.paper-surface) {
+  border-width: 1px !important;
+  border-color: rgba(141, 129, 227, 0.24) !important;
+  border-radius: 26px !important;
+  background: linear-gradient(155deg, rgba(31, 27, 66, 0.86) 0%, rgba(20, 17, 45, 0.90) 100%) !important;
+  backdrop-filter: blur(14px) saturate(145%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(145%) !important;
+  box-shadow: 0 14px 34px -6px rgba(6, 4, 18, 0.50), inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+  color: #f1f5f9 !important;
+}
+
 /* Harmonized Sidebar-Tinted Glass Backdrop & Wobble-In Frosted Glass Dialogs (Desktop, Mobile & Tablet) */
 .fixed.inset-0[class*="backdrop-blur"]:not(.pointer-events-none):not(.bg-transparent) {
   background-color: rgba(66, 54, 142, 0.42) !important;
@@ -811,14 +824,17 @@ html:not(.dark) [role="dialog"]:not(.no-ornament) {
 }
 
 html.dark .fixed.inset-0.flex.items-center.justify-center > div:not(.no-ornament):not(.paper-surface),
+html.dark .fixed div.rounded-2xl[class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament):not(.paper-surface),
+html.dark .fixed div.rounded-3xl[class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament):not(.paper-surface),
 html.dark [role="dialog"]:not(.no-ornament) {
   border-width: 1.5px !important;
   border-color: rgba(158, 146, 255, 0.30) !important;
   border-radius: 28px !important;
-  background: linear-gradient(155deg, rgba(44, 37, 88, 0.86) 0%, rgba(25, 21, 56, 0.90) 100%) !important;
+  background: linear-gradient(155deg, rgba(44, 37, 88, 0.88) 0%, rgba(25, 21, 56, 0.92) 100%) !important;
   backdrop-filter: blur(24px) saturate(165%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(165%) !important;
   box-shadow: 0 28px 68px -12px rgba(8, 6, 24, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+  color: #f1f5f9 !important;
 }
 
 /* Nested rounded-xl sub-cards inside modules -> Soft Lavender-Tinted Glass Sub-Panels in Light Mode */
@@ -831,6 +847,16 @@ html:not(.dark) main div.rounded-xl[class*="border"][class*="bg-white"]:not([cla
   color: #3E385B !important;
 }
 
+/* Nested rounded-xl sub-cards inside modules -> Dark Indigo Sub-Panels in Dark Mode */
+html.dark main div.rounded-xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.academy-ornate-card):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):not(.paper-surface) {
+  border-width: 1px !important;
+  border-color: rgba(141, 129, 227, 0.22) !important;
+  border-radius: 18px !important;
+  background: rgba(34, 29, 70, 0.74) !important;
+  box-shadow: 0 6px 16px -4px rgba(6, 4, 18, 0.36) !important;
+  color: #f1f5f9 !important;
+}
+
 /* Interactive Hover Effect on Top-Level Cards (Desktop Pointer Only) */
 @media (hover: hover) and (pointer: fine) {
   html:not(.dark) main div.rounded-2xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):hover,
@@ -840,6 +866,15 @@ html:not(.dark) main div.rounded-xl[class*="border"][class*="bg-white"]:not([cla
     transform: translateY(-2px);
     border-color: rgba(116, 104, 196, 0.34) !important;
     box-shadow: 0 18px 40px -6px rgba(108, 96, 184, 0.16) !important;
+  }
+
+  html.dark main div.rounded-2xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):not(.paper-surface):hover,
+  html.dark main div.rounded-3xl[class*="border"][class*="bg-white"]:not([class*="bg-white/"]):not(.no-ornament):not(.jrpg-flip-card):not(.jrpg-flip-front):not(.jrpg-flip-back):not(.paper-surface):hover,
+  html.dark main .jrpg-glass:not(.jrpg-flip-card):hover,
+  html.dark .academy-ornate-card:not(.jrpg-flip-card):hover {
+    transform: translateY(-2px);
+    border-color: rgba(158, 146, 255, 0.38) !important;
+    box-shadow: 0 18px 40px -6px rgba(6, 4, 18, 0.62) !important;
   }
 }
 
@@ -857,8 +892,8 @@ main table:not(.paper-table) {
 }
 
 html.dark main table:not(.paper-table) {
-  border-color: #1e293b;
-  background: #0f172a;
+  border-color: rgba(141, 129, 227, 0.22);
+  background: #13102B;
 }
 
 html:not(.dark) main table:not(.paper-table) thead tr {
@@ -888,6 +923,39 @@ html:not(.dark) main table:not(.paper-table) tbody tr:nth-child(even) {
 
 html:not(.dark) main table:not(.paper-table) tbody tr:hover {
   background: #F2F0FC !important;
+}
+
+html.dark main table:not(.paper-table) thead tr {
+  background: #1B173D !important;
+  color: #E2E8F0 !important;
+  border-bottom: 1px solid rgba(141, 129, 227, 0.24) !important;
+}
+
+html.dark main table:not(.paper-table) thead th {
+  color: #C4B5FD !important;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  border-bottom: 1px solid rgba(141, 129, 227, 0.24) !important;
+}
+
+html.dark main table:not(.paper-table) tbody tr {
+  transition: background-color 0.15s ease;
+  background-color: #13102B !important;
+  color: #E2E8F0 !important;
+}
+
+html.dark main table:not(.paper-table) tbody tr:nth-child(even) {
+  background-color: #181436 !important;
+}
+
+html.dark main table:not(.paper-table) tbody tr:hover {
+  background: #231E4F !important;
+}
+
+html.dark main table:not(.paper-table) tbody td {
+  border-color: rgba(141, 129, 227, 0.14);
 }
 
 /* ========================================================================== */
@@ -1000,6 +1068,69 @@ html:not(.dark) .fixed input:-webkit-autofill:focus {
   -webkit-text-fill-color: #3E385B !important;
   color: #3E385B !important;
   caret-color: #6C60B8 !important;
+}
+
+/* Dark Mode Native Controls, Inputs, Selects & Textareas */
+html.dark select,
+html.dark input[type="date"],
+html.dark input[type="time"],
+html.dark input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+html.dark select option {
+  background-color: #171434;
+  color: #f1f5f9;
+}
+
+html.dark main input:not(.no-ornament):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+html.dark main select:not(.no-ornament),
+html.dark main textarea:not(.no-ornament),
+html.dark .fixed input:not(.no-ornament):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+html.dark .fixed select:not(.no-ornament),
+html.dark .fixed textarea:not(.no-ornament) {
+  background-color: #171434 !important;
+  border: 1.5px solid rgba(141, 129, 227, 0.28) !important;
+  border-radius: 14px !important;
+  color: #f1f5f9 !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+  caret-color: #A79BFF !important;
+  color-scheme: dark !important;
+  transition: background-size 0.34s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+html.dark main input:not(.no-ornament)::placeholder,
+html.dark main textarea:not(.no-ornament)::placeholder,
+html.dark .fixed input:not(.no-ornament)::placeholder,
+html.dark .fixed textarea:not(.no-ornament)::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+  opacity: 1;
+}
+
+html.dark main input:not(.no-ornament):focus:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html.dark main select:not(.no-ornament):focus,
+html.dark main textarea:not(.no-ornament):focus,
+html.dark .fixed input:not(.no-ornament):focus:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html.dark .fixed select:not(.no-ornament):focus,
+html.dark .fixed textarea:not(.no-ornament):focus {
+  background-color: #1F1B44 !important;
+  border-color: #8D81E3 !important;
+  box-shadow: 0 0 0 3px rgba(141, 129, 227, 0.22) !important;
+  outline: none !important;
+}
+
+html.dark main input:-webkit-autofill,
+html.dark main input:-webkit-autofill:hover,
+html.dark main input:-webkit-autofill:focus,
+html.dark .fixed input:-webkit-autofill,
+html.dark .fixed input:-webkit-autofill:hover,
+html.dark .fixed input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #171434 inset !important;
+  box-shadow: 0 0 0px 1000px #171434 inset !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+  color: #f1f5f9 !important;
+  caret-color: #A79BFF !important;
 }
 
 /* Crisp Slate-Indigo Typography inside White Cards across all modules in Light Mode */
@@ -1486,7 +1617,8 @@ html.theme-flip-active main {
   transform: translate(2px, -2px) rotate(-8deg) scale(1.08);
 }
 
-.orbita-paper-plane-btn[data-launching="true"] .orbita-paper-plane-icon {
+.orbita-paper-plane-btn[data-launching="true"] .orbita-paper-plane-icon,
+.orbita-paper-plane-btn[data-sending="true"] .orbita-paper-plane-icon {
   animation: paperPlaneLaunch 0.52s cubic-bezier(0.22, 1, 0.36, 1);
 }
 

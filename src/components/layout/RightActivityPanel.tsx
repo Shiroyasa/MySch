@@ -674,7 +674,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
           {/* Interactive Google Maps Coordinate Preview Card — Clicking immediately shares Live Location */}
           <div className="relative overflow-hidden rounded-[22px] border border-[#E4E3F0] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-[0_12px_28px_-6px_rgba(108,96,184,0.14)]">
             {/* Embedded Real Google Maps Coordinate Iframe */}
-            <div className="relative h-40 w-full overflow-hidden bg-[#EEF0F8]">
+            <div className="relative h-40 w-full overflow-hidden bg-[#EEF0F8] dark:bg-slate-800">
               <iframe
                 title="Google Maps Titik Koordinat Live ORBITA"
                 src={googleMapsEmbedUrl}
@@ -694,7 +694,7 @@ export const RightActivityPanel: React.FC<RightActivityPanelProps> = ({
                     className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[9.5px] font-extrabold shadow-sm ${
                       isSharingLive
                         ? 'bg-[#1CC865] text-white'
-                        : 'bg-white/95 text-[#3E385B]'
+                        : 'bg-white/95 text-[#3E385B] dark:bg-slate-900/95 dark:text-slate-100'
                     }`}
                   >
                     <Radio className={`h-2.5 w-2.5 ${isSharingLive ? 'animate-ping' : 'text-[#F25781]'}`} />

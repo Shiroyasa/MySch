@@ -230,7 +230,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
               </span>
               <span
                 className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                  roleBadgeMap[currentRole]?.color || 'bg-slate-100 text-slate-800'
+                  roleBadgeMap[currentRole]?.color || 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200'
                 }`}
               >
                 {roleBadgeMap[currentRole]?.label || currentRole}
@@ -324,7 +324,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 whitespace-nowrap shrink-0 cursor-pointer"
+              className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-4 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 whitespace-nowrap shrink-0 cursor-pointer"
             >
               Batal
             </button>
