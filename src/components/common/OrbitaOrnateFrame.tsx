@@ -32,10 +32,9 @@ export const OrbitaOrnateFrame: React.FC<OrbitaOrnateFrameProps> = ({
   return (
     <div
       style={{
-        background: '#FFFFFF',
         boxShadow: '0 20px 44px -8px rgba(108, 96, 184, 0.14)',
       }}
-      className={`group/frame relative w-full rounded-[28px] border border-[#F0F0F7] text-[#3E385B] transition-all duration-300 overflow-visible ${className}`}
+      className={`group/frame relative w-full rounded-[28px] border border-[#F0F0F7] bg-white text-[#3E385B] dark:border-[#8D81E3]/25 dark:bg-[#1E1A3E] dark:text-slate-100 transition-all duration-300 overflow-visible ${className}`}
     >
       {/* Top-Center Floating Purple Squircle Icon Badge (Exact Reference Image Detail) */}
       <div

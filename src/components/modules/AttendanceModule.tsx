@@ -30,6 +30,8 @@ import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 import { LiquidNavBar } from '../common/LiquidNavBar';
+import { CarouselTablePagination, useCarouselPagination } from '../common/CarouselTablePagination';
+import { AccordionExpandAllBar, AccordionSection, useAccordionGroup } from '../common/AccordionExpandGroup';
 
 interface EditableAttendanceRow {
   studentId: string;
@@ -77,9 +79,19 @@ export const AttendanceModule: React.FC = () => {
   const [signerWaliNip, setSignerWaliNip] = useState(defaultReportConfig.leftSignerNip);
   const [signerKepsekName, setSignerKepsekName] = useState(defaultReportConfig.rightSignerName);
   const [signerKepsekNip, setSignerKepsekNip] = useState(defaultReportConfig.rightSignerNip);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [corSubmitted, setCorSubmitted] = useState(false);
 
   // Editable Attendance Report local draft overrides (before or after syncing to DB)
   const [editableReportMap, setEditableReportMap] = useState<Record<string, EditableAttendanceRow>>({});
+
+  const triggerGenieDelete = (id: string, onDelete: () => void) => {
+    setDeletingId(id);
+    setTimeout(() => {
+      onDelete();
+      setDeletingId(null);
+    }, 420);
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -325,6 +337,7 @@ export const AttendanceModule: React.FC = () => {
 
   const handleSubmitCorrection = (e: React.FormEvent) => {
     e.preventDefault();
+    setCorSubmitted(true);
     if (!corReason.trim()) {
       showToast('Harap isi alasan permohonan koreksi secara jelas.');
       return;
@@ -351,6 +364,7 @@ export const AttendanceModule: React.FC = () => {
     });
 
     setCorReason('');
+    setCorSubmitted(false);
     showToast(`Permohonan koreksi presensi ${myStd.fullName} berhasil diajukan & tersimpan di database.`);
   };
 
@@ -572,6 +586,19 @@ export const AttendanceModule: React.FC = () => {
     });
   }, [classStudents, inputSearch, sortBy]);
 
+  // Accordion & Carousel Table Pagination hooks
+  const inputFilterAccordion = useAccordionGroup(['att-input-filter'], true);
+  const correctionFormAccordion = useAccordionGroup(['att-cor-form'], true);
+  const editableControlAccordion = useAccordionGroup(
+    ['att-edit-filter', 'att-edit-signers'],
+    true
+  );
+
+  const inputPagination = useCarouselPagination(filteredInputStudents, 10);
+  const historyPagination = useCarouselPagination(attendanceSessions, 8);
+  const correctionPagination = useCarouselPagination(attendanceCorrections, 6);
+  const editablePagination = useCarouselPagination(editableClassRows, 10);
+
   return (
     <div className="space-y-6">
       {/* Toast Notification */}
@@ -607,113 +634,126 @@ export const AttendanceModule: React.FC = () => {
       {/* TAB 1: INPUT PRESENSI */}
       {activeTab === 'input' && (
         <div className="space-y-6">
-          {/* Filter Bar */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              {/* Class selection */}
-              <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Rombel / Kelas
-                </label>
-                <select
-                  value={selectedClassId}
-                  onChange={e => handleClassChange(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  {classes.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.majorCode}) - Wali: {c.homeroomTeacherName}
-                    </option>
-                  ))}
-                </select>
+          {/* Filter Bar with Accordion Expand All */}
+          <div className="space-y-3">
+            <AccordionExpandAllBar
+              title="Filter Kelas, Tanggal & Jenis Presensi"
+              allExpanded={inputFilterAccordion.allExpanded}
+              onExpandAll={inputFilterAccordion.expandAll}
+              onCollapseAll={inputFilterAccordion.collapseAll}
+            />
+            <AccordionSection
+              title="Pengaturan Rombel, Tanggal & Mata Pelajaran"
+              subtitle={`${currentClass?.name || 'Pilih Kelas'} • ${selectedDate} • ${attendanceType === 'harian' ? 'Presensi Harian' : 'Per Jam Pelajaran'}`}
+              open={inputFilterAccordion.isOpen('att-input-filter')}
+              onToggle={() => inputFilterAccordion.toggle('att-input-filter')}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                {/* Class selection */}
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                    Rombel / Kelas
+                  </label>
+                  <select
+                    value={selectedClassId}
+                    onChange={e => handleClassChange(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    {classes.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} ({c.majorCode}) - Wali: {c.homeroomTeacherName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Date selection */}
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                    Tanggal Presensi
+                  </label>
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={e => setSelectedDate(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
+
+                {/* Attendance Type */}
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                    Jenis Presensi
+                  </label>
+                  <select
+                    value={attendanceType}
+                    onChange={e => setAttendanceType(e.target.value as any)}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    <option value="harian">Harian (Wali Kelas / Piket)</option>
+                    <option value="mapel">Per Jam Pelajaran (Guru Mapel)</option>
+                  </select>
+                </div>
+
+                {/* Subject if mapel */}
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                    Mata Pelajaran {attendanceType === 'harian' && '(Opsional)'}
+                  </label>
+                  <select
+                    disabled={attendanceType === 'harian'}
+                    value={selectedSubjectId}
+                    onChange={e => setSelectedSubjectId(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    {subjects.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} ({s.code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="flex flex-col justify-end gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => markAll('H')}
+                    className="inline-flex h-[38px] items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                  >
+                    <CheckCheck className="h-4 w-4 shrink-0" />
+                    <span>Tandai Semua Hadir</span>
+                  </button>
+                </div>
               </div>
 
-              {/* Date selection */}
-              <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Tanggal Presensi
-                </label>
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={e => setSelectedDate(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                />
-              </div>
+              {/* Secondary Bar: Search Student + Database Sync Status + Quick Save Button */}
+              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div className="relative w-full sm:w-72">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={inputSearch}
+                    onChange={e => setInputSearch(e.target.value)}
+                    placeholder="Cari nama siswa atau NISN..."
+                    className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 text-xs text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
 
-              {/* Attendance Type */}
-              <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Jenis Presensi
-                </label>
-                <select
-                  value={attendanceType}
-                  onChange={e => setAttendanceType(e.target.value as any)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  <option value="harian">Harian (Wali Kelas / Piket)</option>
-                  <option value="mapel">Per Jam Pelajaran (Guru Mapel)</option>
-                </select>
-              </div>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <SortByControl value={sortBy} onChange={setSortBy} />
 
-              {/* Subject if mapel */}
-              <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Mata Pelajaran {attendanceType === 'harian' && '(Opsional)'}
-                </label>
-                <select
-                  disabled={attendanceType === 'harian'}
-                  value={selectedSubjectId}
-                  onChange={e => setSelectedSubjectId(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  {subjects.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.code})
-                    </option>
-                  ))}
-                </select>
+                  <button
+                    type="button"
+                    onClick={() => handleSave(true)}
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white shadow-sm hover:bg-blue-700 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                  >
+                    <Save className="h-3.5 w-3.5 shrink-0" />
+                    <span>Simpan Presensi</span>
+                  </button>
+                </div>
               </div>
-
-              {/* Quick Actions */}
-              <div className="flex flex-col justify-end gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => markAll('H')}
-                  className="inline-flex h-[38px] items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
-                >
-                  <CheckCheck className="h-4 w-4 shrink-0" />
-                  <span>Tandai Semua Hadir</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Secondary Bar: Search Student + Database Sync Status + Quick Save Button */}
-            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
-              <div className="relative w-full sm:w-72">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                <input
-                  type="text"
-                  value={inputSearch}
-                  onChange={e => setInputSearch(e.target.value)}
-                  placeholder="Cari nama siswa atau NISN..."
-                  className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 text-xs text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2.5">
-                <SortByControl value={sortBy} onChange={setSortBy} />
-
-                <button
-                  type="button"
-                  onClick={() => handleSave(true)}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 text-xs font-bold text-white shadow-sm hover:bg-blue-700 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
-                >
-                  <Save className="h-3.5 w-3.5 shrink-0" />
-                  <span>Simpan Presensi</span>
-                </button>
-              </div>
-            </div>
+            </AccordionSection>
           </div>
 
           {/* Real-time Summary Card */}
@@ -746,7 +786,7 @@ export const AttendanceModule: React.FC = () => {
 
           {/* Student attendance table */}
           <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden dark:border-slate-800 dark:bg-slate-900">
-            <div className="overflow-x-auto">
+            <div key={inputPagination.animKey} className={`overflow-x-auto ${inputPagination.slideClass}`}>
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300 font-bold">
@@ -759,12 +799,12 @@ export const AttendanceModule: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {filteredInputStudents.map((std, idx) => {
+                  {inputPagination.paginatedItems.map((std, idx) => {
                     const current = recordsMap[std.id] || { status: 'H', note: '' };
 
                     return (
                       <tr key={std.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
-                        <td className="py-3 px-4 text-center text-slate-400 font-medium">{idx + 1}</td>
+                        <td className="py-3 px-4 text-center text-slate-400 font-medium">{inputPagination.startIndex + idx + 1}</td>
                         <td className="py-3 px-4 font-mono text-[11px] text-slate-600 dark:text-slate-300">
                           {std.nisn} <span className="text-slate-400">/ {std.nis}</span>
                         </td>
@@ -814,6 +854,21 @@ export const AttendanceModule: React.FC = () => {
                   })}
                 </tbody>
               </table>
+            </div>
+
+            <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800">
+              <CarouselTablePagination
+                page={inputPagination.page}
+                totalPages={inputPagination.totalPages}
+                totalItems={inputPagination.totalItems}
+                pageSize={inputPagination.pageSize}
+                startIndex={inputPagination.startIndex}
+                endIndex={inputPagination.endIndex}
+                slideDirection={inputPagination.slideDirection}
+                onPageChange={inputPagination.setPage}
+                onPageSizeChange={inputPagination.setPageSize}
+                itemLabel="siswa"
+              />
             </div>
 
             {/* Bottom Action Footer */}
@@ -889,15 +944,19 @@ export const AttendanceModule: React.FC = () => {
       {/* TAB 2: RIWAYAT & REKAP */}
       {activeTab === 'history' && (
         <div className="space-y-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white mb-2">Riwayat Sesi Presensi Terdata</h2>
-            <p className="text-xs text-slate-500 mb-4">Daftar sesi absensi yang telah tersimpan di sistem.</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Riwayat Sesi Presensi Terdata</h2>
+              <p className="text-xs text-slate-500">Daftar sesi absensi yang telah tersimpan di sistem.</p>
+            </div>
 
-            <div className="space-y-3">
-              {attendanceSessions.map(ses => (
+            <div key={historyPagination.animKey} className={`space-y-3 ${historyPagination.slideClass}`}>
+              {historyPagination.paginatedItems.map(ses => (
                 <div
                   key={ses.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/40 gap-3"
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/40 gap-3 ${
+                    deletingId === ses.id ? 'animate-genie-bin-exit' : ''
+                  }`}
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
@@ -945,9 +1004,11 @@ export const AttendanceModule: React.FC = () => {
                           itemName: `Presensi ${ses.className} (${ses.date})`,
                           description: 'Apakah Anda yakin ingin menghapus seluruh rekaman presensi untuk sesi ini? Seluruh data kehadiran siswa pada sesi ini akan dihapus dari sistem.',
                           onConfirm: () => {
-                            deleteAttendanceSession(ses.id);
                             closeDeleteModal();
-                            showToast(`Sesi presensi ${ses.className} (${ses.date}) berhasil dihapus.`);
+                            triggerGenieDelete(ses.id, () => {
+                              deleteAttendanceSession(ses.id);
+                              showToast(`Sesi presensi ${ses.className} (${ses.date}) berhasil dihapus.`);
+                            });
                           },
                         });
                       }}
@@ -960,6 +1021,19 @@ export const AttendanceModule: React.FC = () => {
                 </div>
               ))}
             </div>
+
+            <CarouselTablePagination
+              page={historyPagination.page}
+              totalPages={historyPagination.totalPages}
+              totalItems={historyPagination.totalItems}
+              pageSize={historyPagination.pageSize}
+              startIndex={historyPagination.startIndex}
+              endIndex={historyPagination.endIndex}
+              slideDirection={historyPagination.slideDirection}
+              onPageChange={historyPagination.setPage}
+              onPageSizeChange={historyPagination.setPageSize}
+              itemLabel="sesi"
+            />
           </div>
         </div>
       )}
@@ -968,79 +1042,108 @@ export const AttendanceModule: React.FC = () => {
       {activeTab === 'correction' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Submit form (Especially for Siswa / Guru) */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Form Pengajuan Koreksi Presensi</h2>
-            <p className="text-xs text-slate-500 mb-4">
-              Ajukan perubahan status kehadiran jika terdapat kekeliruan pencatatan atau surat dokter susulan.
-            </p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Form Pengajuan Koreksi Presensi</h2>
+              <p className="text-xs text-slate-500">
+                Ajukan perubahan status kehadiran jika terdapat kekeliruan pencatatan atau surat dokter susulan.
+              </p>
+            </div>
 
-            <form onSubmit={handleSubmitCorrection} className="space-y-4 text-xs">
-              <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Nama Siswa Pemohon</label>
-                <select
-                  value={corStudentId}
-                  onChange={e => setCorStudentId(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  {students.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.fullName} ({s.className} - NISN: {s.nisn})
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <AccordionExpandAllBar
+              title="Dropdown Pemohon & Status Koreksi"
+              allExpanded={correctionFormAccordion.allExpanded}
+              onExpandAll={correctionFormAccordion.expandAll}
+              onCollapseAll={correctionFormAccordion.collapseAll}
+            />
 
-              <div>
-                <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Tanggal Absensi</label>
-                <input
-                  type="date"
-                  value={corDate}
-                  onChange={e => setCorDate(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  required
-                />
-              </div>
+            <form onSubmit={handleSubmitCorrection} noValidate className="space-y-4 text-xs">
+              <AccordionSection
+                title="Data Siswa & Status Perubahan"
+                subtitle="Pilih siswa pemohon serta status sebelum & sesudah koreksi"
+                open={correctionFormAccordion.isOpen('att-cor-form')}
+                onToggle={() => correctionFormAccordion.toggle('att-cor-form')}
+              >
+                <div className="space-y-3">
+                  <div>
+                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Nama Siswa Pemohon</label>
+                    <select
+                      value={corStudentId}
+                      onChange={e => setCorStudentId(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    >
+                      {students.map(s => (
+                        <option key={s.id} value={s.id}>
+                          {s.fullName} ({s.className} - NISN: {s.nisn})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Status Saat Ini</label>
-                  <select
-                    value={corCurStatus}
-                    onChange={e => setCorCurStatus(e.target.value as AttendanceStatus)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  >
-                    <option value="A">Alpa (A)</option>
-                    <option value="S">Sakit (S)</option>
-                    <option value="I">Izin (I)</option>
-                    <option value="T">Terlambat (T)</option>
-                  </select>
+                  <div>
+                    <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Tanggal Absensi</label>
+                    <input
+                      type="date"
+                      value={corDate}
+                      onChange={e => setCorDate(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      required
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Status Saat Ini</label>
+                      <select
+                        value={corCurStatus}
+                        onChange={e => setCorCurStatus(e.target.value as AttendanceStatus)}
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      >
+                        <option value="A">Alpa (A)</option>
+                        <option value="S">Sakit (S)</option>
+                        <option value="I">Izin (I)</option>
+                        <option value="T">Terlambat (T)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Koreksi Menjadi</label>
+                      <select
+                        value={corReqStatus}
+                        onChange={e => setCorReqStatus(e.target.value as AttendanceStatus)}
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      >
+                        <option value="H">Hadir (H)</option>
+                        <option value="I">Izin (I)</option>
+                        <option value="S">Sakit (S)</option>
+                        <option value="T">Terlambat (T)</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
-
-                <div>
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Koreksi Menjadi</label>
-                  <select
-                    value={corReqStatus}
-                    onChange={e => setCorReqStatus(e.target.value as AttendanceStatus)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  >
-                    <option value="H">Hadir (H)</option>
-                    <option value="I">Izin (I)</option>
-                    <option value="S">Sakit (S)</option>
-                    <option value="T">Terlambat (T)</option>
-                  </select>
-                </div>
-              </div>
+              </AccordionSection>
 
               <div>
                 <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Alasan Pengajuan Koreksi</label>
-                <textarea
-                  rows={3}
-                  value={corReason}
-                  onChange={e => setCorReason(e.target.value)}
-                  placeholder="Contoh: Surat izin dokter baru diserahkan karena orang tua dinas..."
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  required
-                />
+                <div className={`rounded-xl ${corSubmitted && !corReason.trim() ? 'orbita-field-zigzag-error' : ''}`}>
+                  <textarea
+                    rows={3}
+                    value={corReason}
+                    aria-invalid={corSubmitted && !corReason.trim()}
+                    onChange={e => setCorReason(e.target.value)}
+                    placeholder="Contoh: Surat izin dokter baru diserahkan karena orang tua dinas..."
+                    className={`w-full rounded-xl border bg-slate-50 p-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none dark:bg-slate-800 dark:text-white ${
+                      corSubmitted && !corReason.trim()
+                        ? 'border-rose-400 dark:border-rose-500'
+                        : 'border-slate-200 dark:border-slate-700'
+                    }`}
+                  />
+                </div>
+                {corSubmitted && !corReason.trim() && (
+                  <p className="mt-1 text-[11px] font-bold text-rose-600 dark:text-rose-400">
+                    Alasan pengajuan koreksi wajib diisi.
+                  </p>
+                )}
               </div>
 
               <button
@@ -1053,18 +1156,22 @@ export const AttendanceModule: React.FC = () => {
           </div>
 
           {/* Review list for Wali Kelas / Guru / Super Admin */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Daftar Permohonan Koreksi</h2>
-            <p className="text-xs text-slate-500 mb-4">Verifikasi dan persetujuan oleh Wali Kelas / Guru</p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 dark:text-white mb-1">Daftar Permohonan Koreksi</h2>
+              <p className="text-xs text-slate-500">Verifikasi dan persetujuan oleh Wali Kelas / Guru</p>
+            </div>
 
-            <div className="space-y-3">
+            <div key={correctionPagination.animKey} className={`space-y-3 ${correctionPagination.slideClass}`}>
               {attendanceCorrections.length === 0 ? (
                 <p className="text-xs text-slate-400 py-6 text-center">Belum ada pengajuan koreksi presensi.</p>
               ) : (
-                attendanceCorrections.map(cor => (
+                correctionPagination.paginatedItems.map(cor => (
                   <div
                     key={cor.id}
-                    className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/50 space-y-2"
+                    className={`p-4 rounded-xl border border-slate-200 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/50 space-y-2 ${
+                      deletingId === cor.id ? 'animate-genie-bin-exit' : ''
+                    }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-extrabold text-xs text-slate-900 dark:text-white">
@@ -1092,9 +1199,11 @@ export const AttendanceModule: React.FC = () => {
                             itemName: `Koreksi ${cor.studentName} (${cor.date})`,
                             description: 'Apakah Anda yakin ingin menghapus permohonan koreksi ini?',
                             onConfirm: () => {
-                              deleteAttendanceCorrection(cor.id);
                               closeDeleteModal();
-                              showToast(`Permohonan koreksi presensi ${cor.studentName} berhasil dihapus.`);
+                              triggerGenieDelete(cor.id, () => {
+                                deleteAttendanceCorrection(cor.id);
+                                showToast(`Permohonan koreksi presensi ${cor.studentName} berhasil dihapus.`);
+                              });
                             },
                           });
                         }}
@@ -1127,6 +1236,21 @@ export const AttendanceModule: React.FC = () => {
                 ))
               )}
             </div>
+
+            {attendanceCorrections.length > 0 && (
+              <CarouselTablePagination
+                page={correctionPagination.page}
+                totalPages={correctionPagination.totalPages}
+                totalItems={correctionPagination.totalItems}
+                pageSize={correctionPagination.pageSize}
+                startIndex={correctionPagination.startIndex}
+                endIndex={correctionPagination.endIndex}
+                slideDirection={correctionPagination.slideDirection}
+                onPageChange={correctionPagination.setPage}
+                onPageSizeChange={correctionPagination.setPageSize}
+                itemLabel="permohonan"
+              />
+            )}
           </div>
         </div>
       )}
@@ -1134,58 +1258,77 @@ export const AttendanceModule: React.FC = () => {
       {/* TAB 4: LAPORAN & REKAP PRESENSI EDITABLE (SESUAI HALAMAN LAPORAN) */}
       {activeTab === 'editable_report' && (
         <div className="space-y-6">
-          {/* Control & Export Bar */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Pilih Kelas Rekapitulasi
-                </label>
-                <select
-                  value={selectedClassId}
-                  onChange={e => handleClassChange(e.target.value)}
-                  className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  {classes.map(cls => (
-                    <option key={cls.id} value={cls.id}>
-                      {cls.name} ({cls.majorCode})
-                    </option>
-                  ))}
-                </select>
-              </div>
+          {/* Control & Export Bar with Accordion Expand All */}
+          <div className="space-y-3">
+            <AccordionExpandAllBar
+              title="Pengaturan Rekapitulasi & Penandatangan Laporan"
+              allExpanded={editableControlAccordion.allExpanded}
+              onExpandAll={editableControlAccordion.expandAll}
+              onCollapseAll={editableControlAccordion.collapseAll}
+            />
 
-              <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Periode Laporan
-                </label>
-                <input
-                  type="text"
-                  value={reportPeriodLabel}
-                  onChange={e => setReportPeriodLabel(e.target.value)}
-                  className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  placeholder="Rekapitulasi Semester Ganjil"
-                />
-              </div>
+            <AccordionSection
+              title="Filter Kelas, Periode & Pencarian Siswa"
+              subtitle={`Kelas ${currentClass?.name || '-'} • ${reportPeriodLabel}`}
+              open={editableControlAccordion.isOpen('att-edit-filter')}
+              onToggle={() => editableControlAccordion.toggle('att-edit-filter')}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                    Pilih Kelas Rekapitulasi
+                  </label>
+                  <select
+                    value={selectedClassId}
+                    onChange={e => handleClassChange(e.target.value)}
+                    className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    {classes.map(cls => (
+                      <option key={cls.id} value={cls.id}>
+                        {cls.name} ({cls.majorCode})
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div>
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Cari Siswa / NISN
-                </label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                    Periode Laporan
+                  </label>
                   <input
                     type="text"
-                    value={reportSearch}
-                    onChange={e => setReportSearch(e.target.value)}
-                    placeholder="Ketik nama atau NISN..."
-                    className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    value={reportPeriodLabel}
+                    onChange={e => setReportPeriodLabel(e.target.value)}
+                    className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    placeholder="Rekapitulasi Semester Ganjil"
                   />
                 </div>
-              </div>
-            </div>
 
-            {/* Signers Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                    Cari Siswa / NISN
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                    <input
+                      type="text"
+                      value={reportSearch}
+                      onChange={e => setReportSearch(e.target.value)}
+                      placeholder="Ketik nama atau NISN..."
+                      className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+            </AccordionSection>
+
+            <AccordionSection
+              title="Penandatangan Dokumen Resmi (Wali Kelas & Kepala Sekolah)"
+              subtitle={`${signerWaliName} • ${signerKepsekName}`}
+              open={editableControlAccordion.isOpen('att-edit-signers')}
+              onToggle={() => editableControlAccordion.toggle('att-edit-signers')}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
                 <label className="text-[11px] font-semibold text-slate-500 block mb-1">Nama Wali Kelas (Penandatangan)</label>
                 <input
@@ -1223,9 +1366,10 @@ export const AttendanceModule: React.FC = () => {
                 />
               </div>
             </div>
+            </AccordionSection>
 
             {/* Dedicated Full-Width Action Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 flex flex-wrap items-center justify-between gap-2.5">
               <button
                 type="button"
                 onClick={handleResetEditableReportClass}
@@ -1295,7 +1439,7 @@ export const AttendanceModule: React.FC = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div key={editablePagination.animKey} className={`overflow-x-auto ${editablePagination.slideClass}`}>
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
@@ -1313,12 +1457,12 @@ export const AttendanceModule: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {editableClassRows.map((row, idx) => {
+                  {editablePagination.paginatedItems.map((row, idx) => {
                     const total = row.hadir + row.sakit + row.izin + row.alpa;
                     const rate = total > 0 ? Math.round((row.hadir / total) * 100) : 100;
                     return (
                       <tr key={row.studentId} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
-                        <td className="py-2 px-2 text-center text-slate-400 font-semibold">{idx + 1}</td>
+                        <td className="py-2 px-2 text-center text-slate-400 font-semibold">{editablePagination.startIndex + idx + 1}</td>
                         <td className="py-2 px-2 font-mono text-[11px] text-slate-500">{row.nisn}</td>
                         <td className="py-2 px-3 font-bold text-slate-900 dark:text-white">{row.studentName}</td>
                         <td className="py-2 px-1.5 text-center">
@@ -1406,6 +1550,19 @@ export const AttendanceModule: React.FC = () => {
                 </tbody>
               </table>
             </div>
+
+            <CarouselTablePagination
+              page={editablePagination.page}
+              totalPages={editablePagination.totalPages}
+              totalItems={editablePagination.totalItems}
+              pageSize={editablePagination.pageSize}
+              startIndex={editablePagination.startIndex}
+              endIndex={editablePagination.endIndex}
+              slideDirection={editablePagination.slideDirection}
+              onPageChange={editablePagination.setPage}
+              onPageSizeChange={editablePagination.setPageSize}
+              itemLabel="siswa"
+            />
 
             {/* Bottom Save & Reset Bar for Editable Report */}
             <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">

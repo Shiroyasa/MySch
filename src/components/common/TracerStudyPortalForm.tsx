@@ -9,6 +9,8 @@ import {
 import { useApp } from '../../context/AppContext';
 import { LiquidNavBar } from './LiquidNavBar';
 import { GenshinElementIcon, OrbitaMenuIcon } from './AcademyOrnaments';
+import { SqueezeLineIndicator } from './CarouselTablePagination';
+import { AccordionExpandAllBar, AccordionSection, useAccordionGroup } from './AccordionExpandGroup';
 import {
   Briefcase,
   Clock,
@@ -19,7 +21,6 @@ import {
   ChevronRight,
   Building2,
   MapPin,
-  RefreshCw,
   Edit,
   Plus,
   ShieldCheck,
@@ -28,7 +29,10 @@ import {
   AlertCircle,
   AlertTriangle,
   X,
-  Lock,
+  Eye,
+  Send,
+  RotateCcw,
+  User,
 } from 'lucide-react';
 
 export type TracerPortalStage = 'verify' | 'intro' | 'form' | 'success';
@@ -188,12 +192,12 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
   const isLockedAlumni = effectiveLockedCategory === 'alumni';
   const isLockedGrade12 = effectiveLockedCategory === 'kelas_12';
 
-  // Read-only Carousel state for Portal Overview of Student & Alumni summaries
   const [carouselFilter, setCarouselFilter] = useState<'all' | 'alumni' | 'kelas_12'>(
     lockedCategory || 'all'
   );
   const [carouselMajorFilter, setCarouselMajorFilter] = useState<'ALL' | 'DPB' | 'RPL'>('ALL');
   const [carouselPage, setCarouselPage] = useState(0);
+  const [carouselDir, setCarouselDir] = useState<'next' | 'prev'>('next');
   const [cardsPerSlide, setCardsPerSlide] = useState<number>(() => {
     if (typeof window === 'undefined') return 3;
     if (window.innerWidth >= 1024) return 3;
@@ -201,6 +205,14 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
     return 1;
   });
   const touchStartXRef = React.useRef<number | null>(null);
+
+  const formAccordion = useAccordionGroup(['identity', 'career'], true);
+  const [isLaunchingPlane, setIsLaunchingPlane] = useState(false);
+
+  const goToCarouselPage = (nextPage: number) => {
+    setCarouselDir(nextPage >= carouselPage ? 'next' : 'prev');
+    setCarouselPage(nextPage);
+  };
 
   useEffect(() => {
     onStageChange?.(stage);
@@ -347,7 +359,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
     studentId: '',
     nisn: '',
     fullName: '',
-    className: grade12Classes[0]?.name || 'XII RPL 1',
+    className: '',
     gender: 'L',
     majorCode: 'RPL',
     graduationYear: defaultGradYear,
@@ -862,6 +874,38 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
     );
   };
 
+  const clearStudentFormFields = (targetCat: AlumniRespondentCategory, keepVerifiedIdentity = false) => {
+    setEditingRecordId(null);
+    setLookupQuery('');
+    setFormError(null);
+    setFormState({
+      studentId: keepVerifiedIdentity && verifiedRespondent ? verifiedRespondent.studentId || '' : '',
+      nisn: keepVerifiedIdentity && verifiedRespondent ? verifiedRespondent.matchedNisn : '',
+      fullName: keepVerifiedIdentity && verifiedRespondent ? verifiedRespondent.fullName : '',
+      className:
+        keepVerifiedIdentity && verifiedRespondent && targetCat === 'kelas_12'
+          ? verifiedRespondent.className || ''
+          : '',
+      gender: keepVerifiedIdentity && verifiedRespondent ? verifiedRespondent.gender : 'L',
+      majorCode: keepVerifiedIdentity && verifiedRespondent ? verifiedRespondent.majorCode : 'RPL',
+      graduationYear: targetCat === 'kelas_12' ? defaultGradYear : '2025',
+      pklPartnerId: keepVerifiedIdentity && verifiedRespondent ? verifiedRespondent.pklPartnerId || '' : '',
+      pklPartnerName: keepVerifiedIdentity && verifiedRespondent ? verifiedRespondent.pklPartnerName || '' : '',
+      careerStatus: 'bekerja',
+      institutionOrCompany: '',
+      roleOrStudyProgram: '',
+      city: 'Sukabumi',
+      industryRelevance: 'sangat_sesuai',
+      waitingPeriod: '< 3 Bulan',
+      monthlyIncomeRange: '',
+      bkkSupportNeed: targetCat === 'kelas_12' ? BKK_SUPPORT_OPTIONS[0] : '',
+      targetPlanDate: targetCat === 'kelas_12' ? PLAN_TIMELINE_OPTIONS[0] : '',
+      phone: keepVerifiedIdentity && verifiedRespondent ? verifiedRespondent.phone || '' : '',
+      email: keepVerifiedIdentity && verifiedRespondent ? verifiedRespondent.email || '' : '',
+      testimonial: '',
+    });
+  };
+
   const startFreshForm = (chosenCategory: AlumniRespondentCategory) => {
     const resolvedCategory = effectiveLockedCategory || chosenCategory;
     if (verifiedRespondent) {
@@ -875,32 +919,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
     }
 
     setCategory(resolvedCategory);
-    setEditingRecordId(null);
-    setFormError(null);
-    setFormState({
-      studentId: '',
-      nisn: '',
-      fullName: '',
-      className:
-        chosenCategory === 'kelas_12' ? grade12Classes[0]?.name || 'XII RPL 1' : '',
-      gender: 'L',
-      majorCode: 'RPL',
-      graduationYear: chosenCategory === 'kelas_12' ? defaultGradYear : '2025',
-      pklPartnerId: '',
-      pklPartnerName: '',
-      careerStatus: 'bekerja',
-      institutionOrCompany: '',
-      roleOrStudyProgram: '',
-      city: 'Sukabumi',
-      industryRelevance: 'sangat_sesuai',
-      waitingPeriod: '< 3 Bulan',
-      monthlyIncomeRange: '',
-      bkkSupportNeed: chosenCategory === 'kelas_12' ? BKK_SUPPORT_OPTIONS[0] : '',
-      targetPlanDate: chosenCategory === 'kelas_12' ? PLAN_TIMELINE_OPTIONS[0] : '',
-      phone: '',
-      email: '',
-      testimonial: '',
-    });
+    clearStudentFormFields(resolvedCategory, false);
     setStage('form');
   };
 
@@ -1062,9 +1081,13 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
     };
 
     setIsSubmitting(true);
+    setIsLaunchingPlane(true);
     try {
       const isNew = !editingRecordId && !matchedByNisnOrStudent;
-      await savePklTracer(payload, isNew);
+      await Promise.all([
+        savePklTracer(payload, isNew),
+        new Promise(resolve => window.setTimeout(resolve, 480)),
+      ]);
       setSavedRecord(payload);
       if (verifiedRespondent) {
         setVerifiedRespondent(prev =>
@@ -1095,6 +1118,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
       addToast('Gagal menyimpan data tracer study ke database.', 'error');
     } finally {
       setIsSubmitting(false);
+      setIsLaunchingPlane(false);
     }
   };
 
@@ -1109,7 +1133,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
       {/* ===================================================================== */}
       {stage === 'verify' && (
         <div className="mx-auto max-w-2xl">
-          <div className="rounded-[28px] border border-[#DDD8F6] bg-white/95 backdrop-blur-xl shadow-[0_24px_56px_-12px_rgba(93,81,178,0.22)] overflow-hidden">
+          <div className="rounded-[28px] border border-[#DDD8F6] dark:border-[#8D81E3]/25 bg-white/95 dark:bg-[#1E1A3E]/95 backdrop-blur-xl shadow-[0_24px_56px_-12px_rgba(93,81,178,0.22)] overflow-hidden">
             {/* Frosted Violet / Rose Header Strip */}
             <div
               style={{
@@ -1133,10 +1157,10 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                   </span>
                   <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
                     {isLockedGrade12
-                      ? 'Verifikasi NIS / NISN Siswa Kelas 12'
+                      ? 'Halaman Verifikasi NIS / NISN Siswa Kelas 12'
                       : isLockedAlumni
-                      ? 'Verifikasi NIS / NISN Alumni'
-                      : 'Verifikasi NIS / NISN Siswa & Alumni'}
+                      ? 'Halaman Verifikasi NIS / NISN Alumni'
+                      : 'Halaman Verifikasi NIS / NISN Siswa & Alumni'}
                   </h2>
                   <p className="text-xs sm:text-[13px] text-white/85 leading-relaxed">
                     {isLockedGrade12 ? (
@@ -1250,46 +1274,51 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
             </div>
 
             {/* Verification Form */}
-            <form onSubmit={handleVerifyNisOrNisn} className="p-6 sm:p-7 space-y-4">
+            <form onSubmit={handleVerifyNisOrNisn} noValidate className="p-6 sm:p-7 space-y-4">
               {verifyError && (
-                <div className="flex items-start gap-2.5 rounded-2xl border border-[#FFC4D4] bg-[#FFE8EF] px-4 py-3 text-xs font-bold text-[#D9436D] animate-fade-in">
-                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-[#D9436D]" />
+                <div className="flex items-start gap-2.5 rounded-2xl border border-[#FFC4D4] dark:border-rose-800/70 bg-[#FFE8EF] dark:bg-rose-950/60 px-4 py-3 text-xs font-bold text-[#D9436D] dark:text-rose-300 animate-fade-in">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-[#D9436D] dark:text-rose-400" />
                   <span>{verifyError}</span>
                 </div>
               )}
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between px-1">
-                  <label className="text-xs font-extrabold text-[#252042]">
+                  <label className="text-xs font-extrabold text-[#252042] dark:text-slate-100">
                     {isLockedGrade12
                       ? 'NIS / NISN Siswa Kelas 12 *'
                       : isLockedAlumni
                       ? 'NIS / NISN Alumni *'
                       : 'NIS / NISN Siswa atau Alumni *'}
                   </label>
-                  <span className="text-[10.5px] font-semibold text-[#7A7596]">
+                  <span className="text-[10.5px] font-semibold text-[#7A7596] dark:text-slate-400">
                     Wajib Terdaftar di ORBITA
                   </span>
                 </div>
 
-                <div className="orbita-field-underline relative flex items-center rounded-[18px] bg-[#F4F3FA] border border-[#E2DFF2] focus-within:border-[#6C60B8] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#6C60B8]/20 px-4 py-1.5 transition-all">
-                  <KeyRound className="h-4 w-4 text-[#6C60B8] shrink-0 mr-3" />
+                <div
+                  className={`orbita-field-underline relative flex items-center rounded-[18px] bg-[#F4F3FA] dark:bg-slate-800/80 border border-[#E2DFF2] dark:border-slate-700 focus-within:border-[#6C60B8] focus-within:bg-white dark:focus-within:bg-slate-900 focus-within:ring-2 focus-within:ring-[#6C60B8]/20 px-4 py-1.5 transition-all ${
+                    verifyError ? 'orbita-field-zigzag-error' : ''
+                  }`}
+                >
+                  <KeyRound className="h-4 w-4 text-[#6C60B8] dark:text-indigo-300 shrink-0 mr-3" />
                   <input
                     type="text"
                     inputMode="numeric"
                     autoFocus
+                    aria-invalid={Boolean(verifyError) || undefined}
                     value={nisOrNisnInput}
                     onChange={e => {
                       setNisOrNisnInput(e.target.value);
                       if (verifyError) setVerifyError(null);
                     }}
                     placeholder="Ketik NIS (cth: 24251001) atau NISN (cth: 0061239801)..."
-                    className="w-full bg-transparent py-2.5 text-sm font-mono font-bold text-[#252042] placeholder:font-sans placeholder:font-medium placeholder:text-[#9694A8] focus:outline-none"
+                    className="no-ornament w-full bg-transparent py-2.5 text-sm font-mono font-bold text-[#252042] dark:text-white placeholder:font-sans placeholder:font-medium placeholder:text-[#9694A8] dark:placeholder:text-slate-400 focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-[#ECEAF6] bg-[#FAF9FE] p-3.5 text-[11px] text-[#555070] leading-relaxed">
+              <div className="rounded-2xl border border-[#ECEAF6] dark:border-slate-800 bg-[#FAF9FE] dark:bg-slate-900/60 p-3.5 text-[11px] text-[#555070] dark:text-slate-300 leading-relaxed">
                 Sistem otomatis mencocokkan NIS / NISN Anda ke{' '}
                 <strong>
                   {isLockedGrade12
@@ -1598,18 +1627,18 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                   </div>
                 </div>
 
-                <div className="inline-flex items-center gap-1.5 rounded-xl border border-[#BCEAD1] bg-[#E7F9EF]/70 px-3 py-1.5 text-[11px] font-extrabold text-[#139A4C] shrink-0 self-start sm:self-center">
-                  <Lock className="h-3.5 w-3.5" />
+                <div className="inline-flex items-center gap-1.5 rounded-xl border border-[#BCEAD1] dark:border-emerald-700/60 bg-[#E7F9EF]/70 dark:bg-emerald-950/60 px-3 py-1.5 text-[11px] font-extrabold text-[#139A4C] dark:text-emerald-300 shrink-0 self-start sm:self-center">
+                  <ShieldCheck className="h-3.5 w-3.5" />
                   <span>Identitas NIS/NISN Terkunci</span>
                 </div>
               </div>
             </div>
           ) : (
             /* Quick Search / Autofill Lookup from Live Database (Scoped to Active Form Mode) */
-            <div className="rounded-[24px] border border-[#E6E4F2] bg-white/92 backdrop-blur-xl p-4 sm:p-5 shadow-[0_12px_30px_-8px_rgba(108,96,184,0.12)] space-y-3">
+            <div className="rounded-[24px] border border-[#E6E4F2] dark:border-slate-800 bg-white/92 dark:bg-[#1E1A3E]/90 backdrop-blur-xl p-4 sm:p-5 shadow-[0_12px_30px_-8px_rgba(108,96,184,0.12)] space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-xs sm:text-sm font-extrabold text-[#3E385B]">
+                  <h3 className="text-xs sm:text-sm font-extrabold text-[#3E385B] dark:text-white">
                     {isLockedGrade12
                       ? 'Cari Data Siswa Kelas 12 di Database ORBITA (Opsional)'
                       : isLockedAlumni
@@ -1855,14 +1884,14 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
 
           {/* Read-Only Carousel: High-Level Overview of Separated Alumni OR Grade 12 Records */}
           {carouselItems.length > 0 && (
-            <div className="rounded-[26px] border border-[#E6E4F2] bg-white/92 p-4 sm:p-5 backdrop-blur-xl shadow-[0_14px_34px_-10px_rgba(108,96,184,0.12)] space-y-4">
+            <div className="rounded-[26px] border border-[#E6E4F2] dark:border-slate-800 bg-white/92 dark:bg-[#1E1A3E]/90 p-4 sm:p-5 backdrop-blur-xl shadow-[0_14px_34px_-10px_rgba(108,96,184,0.12)] space-y-4">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div
                     className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] ${
                       isLockedGrade12
-                        ? 'bg-[#FFE8EF] border border-[#FFC4D4] text-[#D9436D]'
-                        : 'bg-[#F0EEFA] border border-[#DDD8F6] text-[#6C60B8]'
+                        ? 'bg-[#FFE8EF] border border-[#FFC4D4] text-[#D9436D] dark:bg-rose-950/70 dark:border-rose-800 dark:text-rose-300'
+                        : 'bg-[#F0EEFA] border border-[#DDD8F6] text-[#6C60B8] dark:bg-indigo-950/70 dark:border-indigo-800 dark:text-indigo-300'
                     }`}
                   >
                     <OrbitaMenuIcon
@@ -1871,14 +1900,14 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                     />
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-xs sm:text-sm font-black text-[#252042] truncate">
+                    <h4 className="text-xs sm:text-sm font-black text-[#252042] dark:text-white truncate">
                       {isLockedGrade12
                         ? `Garis Besar Data Siswa Kelas 12 (${carouselItems.length} Profil)`
                         : isLockedAlumni
                         ? `Garis Besar Data Alumni (${carouselItems.length} Profil)`
                         : `Garis Besar Data Siswa & Alumni (${carouselItems.length} Profil)`}
                     </h4>
-                    <p className="text-[10.5px] font-medium text-[#7A7596]">
+                    <p className="text-[10.5px] font-medium text-[#7A7596] dark:text-slate-400">
                       Tampilan ringkas baca-saja (read-only) tersinkron dengan Database BKK ORBITA
                     </p>
                   </div>
@@ -1916,24 +1945,24 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      onClick={() => setCarouselPage(p => Math.max(0, p - 1))}
+                      onClick={() => goToCarouselPage(Math.max(0, carouselPage - 1))}
                       disabled={carouselPage === 0}
                       aria-label="Slide Sebelumnya"
-                      className="inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-[#DDD8F6] bg-[#FAF9FE] hover:bg-[#EFEBFB] text-[#5D51B2] disabled:opacity-40 cursor-pointer transition-all"
+                      className="no-ornament inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-[#DDD8F6] dark:border-slate-700 bg-[#FAF9FE] dark:bg-slate-800 hover:bg-[#EFEBFB] dark:hover:bg-slate-700 text-[#5D51B2] dark:text-indigo-300 disabled:opacity-40 cursor-pointer transition-all"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </button>
-                    <span className="min-w-[44px] text-center text-[11px] font-extrabold text-[#3E385B] tabular-nums">
+                    <span className="min-w-[44px] text-center text-[11px] font-extrabold text-[#3E385B] dark:text-slate-200 tabular-nums">
                       {carouselPage + 1} / {totalCarouselSlides}
                     </span>
                     <button
                       type="button"
                       onClick={() =>
-                        setCarouselPage(p => Math.min(totalCarouselSlides - 1, p + 1))
+                        goToCarouselPage(Math.min(totalCarouselSlides - 1, carouselPage + 1))
                       }
                       disabled={carouselPage >= totalCarouselSlides - 1}
                       aria-label="Slide Berikutnya"
-                      className="inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-[#DDD8F6] bg-[#FAF9FE] hover:bg-[#EFEBFB] text-[#5D51B2] disabled:opacity-40 cursor-pointer transition-all"
+                      className="no-ornament inline-flex h-8.5 w-8.5 items-center justify-center rounded-full border border-[#DDD8F6] dark:border-slate-700 bg-[#FAF9FE] dark:bg-slate-800 hover:bg-[#EFEBFB] dark:hover:bg-slate-700 text-[#5D51B2] dark:text-indigo-300 disabled:opacity-40 cursor-pointer transition-all"
                     >
                       <ChevronRight className="h-4 w-4" />
                     </button>
@@ -1953,9 +1982,9 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                   const delta = endX - touchStartXRef.current;
                   touchStartXRef.current = null;
                   if (delta > 45) {
-                    setCarouselPage(p => Math.max(0, p - 1));
+                    goToCarouselPage(Math.max(0, carouselPage - 1));
                   } else if (delta < -45) {
-                    setCarouselPage(p => Math.min(totalCarouselSlides - 1, p + 1));
+                    goToCarouselPage(Math.min(totalCarouselSlides - 1, carouselPage + 1));
                   }
                 }}
               >
@@ -2026,13 +2055,13 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                               </p>
                             </div>
 
-                            <div className="flex items-center justify-between text-[10px] font-semibold text-[#8A85A6]">
+                            <div className="flex items-center justify-between text-[10px] font-semibold text-[#8A85A6] dark:text-slate-400">
                               <span className="inline-flex items-center gap-1 truncate">
                                 <MapPin className="h-3 w-3 shrink-0 text-[#6C60B8]" />
                                 <span className="truncate">{item.city}</span>
                               </span>
-                              <span className="inline-flex items-center gap-1 text-[#7A7596] shrink-0">
-                                <Lock className="h-2.5 w-2.5" />
+                              <span className="inline-flex items-center gap-1 text-[#7A7596] dark:text-slate-400 shrink-0">
+                                <Eye className="h-3 w-3" />
                                 <span>Baca Saja</span>
                               </span>
                             </div>
@@ -2044,23 +2073,15 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 </div>
               </div>
 
-              {/* Carousel Slide Indicator Bars */}
+              {/* Carousel Squeeze Line Slide Indicator Bars */}
               {totalCarouselSlides > 1 && (
-                <div className="flex items-center justify-center gap-1.5 pt-1">
-                  {Array.from({ length: totalCarouselSlides }).map((_, idx) => (
-                    <button
-                      key={`dot-${idx}`}
-                      type="button"
-                      onClick={() => setCarouselPage(idx)}
-                      aria-label={`Slide ${idx + 1}`}
-                      className={`h-2 rounded-full transition-all cursor-pointer ${
-                        idx === carouselPage
-                          ? 'w-7 bg-gradient-to-r from-[#7468C4] to-[#FF7597]'
-                          : 'w-2 bg-[#DCD8EE] hover:bg-[#BEB7DF]'
-                      }`}
-                    />
-                  ))}
-                </div>
+                <SqueezeLineIndicator
+                  total={totalCarouselSlides}
+                  activeIndex={carouselPage}
+                  direction={carouselDir}
+                  onSelect={goToCarouselPage}
+                  className="pt-1"
+                />
               )}
             </div>
           )}
@@ -2071,20 +2092,20 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
       {/* STAGE 2: FORM PENGISIAN TAILORED (ALUMNI VS SISWA KELAS 12)           */}
       {/* ===================================================================== */}
       {stage === 'form' && (
-        <div className="rounded-[28px] border border-[#E6E4F2] bg-white/94 p-5 sm:p-7 shadow-[0_22px_50px_-10px_rgba(108,96,184,0.18)] backdrop-blur-xl space-y-5">
-          {/* Top Bar: Back to Pre-Form UI + Category Switcher */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-[#ECEAF6]">
+        <div className="rounded-[28px] border border-[#E6E4F2] dark:border-slate-800 bg-white/94 dark:bg-[#1E1A3E]/94 p-5 sm:p-7 shadow-[0_22px_50px_-10px_rgba(108,96,184,0.18)] backdrop-blur-xl space-y-5">
+          {/* Top Bar: Back to Pre-Form UI + Category Switcher + Clear Grade 12 */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-[#ECEAF6] dark:border-slate-800">
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setShowFormBackConfirm(true)}
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#DDD8F6] bg-[#F4F2FC] hover:bg-[#EAE7F8] px-3 text-xs font-extrabold text-[#6C60B8] cursor-pointer shrink-0"
+                className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-[#DDD8F6] dark:border-slate-700 bg-[#F4F2FC] dark:bg-slate-800 hover:bg-[#EAE7F8] px-3 text-xs font-extrabold text-[#6C60B8] dark:text-indigo-300 cursor-pointer shrink-0"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <span>Pilihan Form</span>
               </button>
               <div>
-                <h3 className="text-sm sm:text-base font-black text-[#252042]">
+                <h3 className="text-sm sm:text-base font-black text-[#252042] dark:text-white">
                   {editingRecordId
                     ? isGrade12
                       ? 'Perbarui Rencana Pasca Lulus Kelas 12'
@@ -2093,82 +2114,99 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                     ? 'Form Perencanaan Setelah Lulus (Siswa Kelas 12)'
                     : 'Form Tracer Study Alumni (Lulusan)'}
                 </h3>
-                <p className="text-[11px] text-[#7A7596]">
+                <p className="text-[11px] text-[#7A7596] dark:text-slate-400">
                   Tersimpan otomatis ke Cloud Database &amp; Menu Admin PKL &rarr; Tracer Study
                 </p>
               </div>
             </div>
 
-            {effectiveLockedCategory ? (
-              <span
-                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-extrabold shrink-0 ${
-                  isLockedGrade12
-                    ? 'border border-[#FFC4D4] bg-[#FFE8EF] text-[#D9436D]'
-                    : 'border border-[#DDD8F6] bg-[#F0EEFA] text-[#5D51B2]'
-                }`}
-              >
-                <GenshinElementIcon
-                  element={isLockedGrade12 ? 'electro' : 'geo'}
-                  className="h-3.5 w-3.5"
-                />
-                <span>
-                  {isLockedGrade12 ? 'Khusus Halaman Siswa Kelas 12' : 'Khusus Halaman Alumni'}
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              {isGrade12 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearStudentFormFields('kelas_12', Boolean(verifiedRespondent));
+                    addToast(
+                      verifiedRespondent
+                        ? 'Isian rencana & tujuan lulus berhasil dibersihkan.'
+                        : 'Seluruh data siswa berhasil dibersihkan.',
+                      'info'
+                    );
+                  }}
+                  className="no-ornament inline-flex h-8.5 items-center gap-1.5 rounded-full border border-[#FFC4D4] dark:border-rose-800/70 bg-[#FFF5F8] dark:bg-rose-950/50 px-3 text-[11px] font-extrabold text-[#D9436D] dark:text-rose-300 hover:bg-[#FFE8EF] cursor-pointer transition-colors"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  <span>Bersihkan Data</span>
+                </button>
+              )}
+
+              {effectiveLockedCategory ? (
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[11px] font-extrabold shrink-0 ${
+                    isLockedGrade12
+                      ? 'border border-[#FFC4D4] bg-[#FFE8EF] text-[#D9436D] dark:border-rose-800 dark:bg-rose-950/70 dark:text-rose-300'
+                      : 'border border-[#DDD8F6] bg-[#F0EEFA] text-[#5D51B2] dark:border-indigo-800 dark:bg-indigo-950/70 dark:text-indigo-300'
+                  }`}
+                >
+                  <GenshinElementIcon
+                    element={isLockedGrade12 ? 'electro' : 'geo'}
+                    className="h-3.5 w-3.5"
+                  />
+                  <span>
+                    {isLockedGrade12 ? 'Khusus Halaman Siswa Kelas 12' : 'Khusus Halaman Alumni'}
+                  </span>
                 </span>
-              </span>
-            ) : (
-              <LiquidNavBar
-                size="sm"
-                pill
-                ariaLabel="Pilih Kategori Responden"
-                activeId={category}
-                onSelect={id => {
-                  const nextCat = id as AlumniRespondentCategory;
-                  setCategory(nextCat);
-                  if (nextCat === 'kelas_12' && !formState.className) {
-                    setFormState(p => ({
-                      ...p,
-                      className: grade12Classes[0]?.name || 'XII RPL 1',
-                      graduationYear: defaultGradYear,
-                      bkkSupportNeed: p.bkkSupportNeed || BKK_SUPPORT_OPTIONS[0],
-                      targetPlanDate: p.targetPlanDate || PLAN_TIMELINE_OPTIONS[0],
-                    }));
-                  }
-                }}
-                items={[
-                  {
-                    id: 'alumni',
-                    label: 'Alumni',
-                    icon: <GenshinElementIcon element="geo" className="h-3.5 w-3.5" />,
-                  },
-                  {
-                    id: 'kelas_12',
-                    label: 'Siswa Kelas 12',
-                    icon: <GenshinElementIcon element="electro" className="h-3.5 w-3.5" />,
-                  },
-                ]}
-              />
-            )}
+              ) : (
+                <LiquidNavBar
+                  size="sm"
+                  pill
+                  ariaLabel="Pilih Kategori Responden"
+                  activeId={category}
+                  onSelect={id => {
+                    const nextCat = id as AlumniRespondentCategory;
+                    setCategory(nextCat);
+                    if (nextCat === 'kelas_12') {
+                      clearStudentFormFields('kelas_12', Boolean(verifiedRespondent));
+                    } else {
+                      clearStudentFormFields('alumni', Boolean(verifiedRespondent));
+                    }
+                  }}
+                  items={[
+                    {
+                      id: 'alumni',
+                      label: 'Alumni',
+                      icon: <GenshinElementIcon element="geo" className="h-3.5 w-3.5" />,
+                    },
+                    {
+                      id: 'kelas_12',
+                      label: 'Siswa Kelas 12',
+                      icon: <GenshinElementIcon element="electro" className="h-3.5 w-3.5" />,
+                    },
+                  ]}
+                />
+              )}
+            </div>
           </div>
 
           {formError && (
-            <div className="rounded-2xl border border-[#FFC4D4] bg-[#FFE8EF] px-4 py-3 text-xs font-bold text-[#D9436D]">
+            <div className="rounded-2xl border border-[#FFC4D4] dark:border-rose-800/70 bg-[#FFE8EF] dark:bg-rose-950/60 px-4 py-3 text-xs font-bold text-[#D9436D] dark:text-rose-300">
               {formError}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5 text-xs">
-            {/* Verified Identity Strip (Locked to Verified NIS/NISN, No Ganti NIS) or Tailored DB Prefill Selector */}
+          <form onSubmit={handleSubmit} noValidate className="space-y-4 text-xs">
+            {/* Verified Identity Strip or DB Prefill Selector */}
             {verifiedRespondent ? (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#BCEAD1] bg-[#F3FCF7] px-4 py-3">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#BCEAD1] dark:border-emerald-800/60 bg-[#F3FCF7] dark:bg-emerald-950/40 px-4 py-3">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <UserCheck className="h-4.5 w-4.5 text-[#139A4C] shrink-0" />
+                  <UserCheck className="h-4.5 w-4.5 text-[#139A4C] dark:text-emerald-300 shrink-0" />
                   <div className="min-w-0">
-                    <span className="block text-[11px] font-extrabold text-[#139A4C]">
+                    <span className="block text-[11px] font-extrabold text-[#139A4C] dark:text-emerald-300">
                       {isGrade12
                         ? 'Terverifikasi Data Siswa Kelas 12 ORBITA'
                         : 'Terverifikasi Data Alumni Terdata ORBITA'}
                     </span>
-                    <span className="block truncate text-[11px] font-semibold text-[#2E6F50]">
+                    <span className="block truncate text-[11px] font-semibold text-[#2E6F50] dark:text-emerald-200/80">
                       {verifiedRespondent.fullName} &middot; NISN {verifiedRespondent.matchedNisn}
                       {verifiedRespondent.matchedNis ? ` · NIS ${verifiedRespondent.matchedNis}` : ''}
                       {isGrade12 && verifiedRespondent.className
@@ -2179,24 +2217,24 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                     </span>
                   </div>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-xl border border-[#BCEAD1] bg-white px-2.5 py-1 text-[10.5px] font-bold text-[#139A4C] shrink-0">
-                  <Lock className="h-3 w-3" />
+                <span className="inline-flex items-center gap-1 rounded-xl border border-[#BCEAD1] dark:border-emerald-800/60 bg-white dark:bg-slate-900 px-2.5 py-1 text-[10.5px] font-bold text-[#139A4C] dark:text-emerald-300 shrink-0">
+                  <ShieldCheck className="h-3 w-3" />
                   <span>NISN Terkunci</span>
                 </span>
               </div>
             ) : isGrade12 && grade12Students.length > 0 ? (
-              <div className="rounded-2xl border border-[#FFD1DF] bg-[#FFF7FA] p-3.5">
-                <label className="block text-[11px] font-extrabold mb-1.5 text-[#C2325C]">
-                  Pilih Nama dari Data Siswa Kelas 12 di Database (Isi Otomatis NISN, Kelas XII &amp; Mitra PKL)
+              <div className="rounded-2xl border border-[#FFD1DF] dark:border-rose-900/60 bg-[#FFF7FA] dark:bg-rose-950/30 p-3.5">
+                <label className="block text-[11px] font-extrabold mb-1.5 text-[#C2325C] dark:text-rose-300">
+                  Pilih Nama dari Data Siswa Kelas 12 di Database (Opsional · Isian Awal Bersih)
                 </label>
-                <div className="orbita-field-underline rounded-xl border border-white/80 bg-white px-3 py-0.5 shadow-2xs">
+                <div className="orbita-field-underline rounded-xl border border-white/80 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-0.5 shadow-2xs">
                   <select
                     value={formState.studentId}
                     onChange={e => applyStudentFromDb(e.target.value, 'kelas_12')}
-                    className="w-full bg-transparent py-2 text-xs font-bold text-[#252042] focus:outline-none cursor-pointer"
+                    className="no-ornament w-full bg-transparent py-2 text-xs font-bold text-[#252042] dark:text-white focus:outline-none cursor-pointer"
                   >
                     <option value="">
-                      -- Pilih Siswa Kelas 12 atau Ketik Manual di Bawah --
+                      -- Kosongkan / Pilih Siswa Kelas 12 (Atau Ketik Manual) --
                     </option>
                     {grade12Students.map(s => (
                       <option key={s.id} value={s.id}>
@@ -2208,11 +2246,11 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 </div>
               </div>
             ) : !isGrade12 && (recordedAlumniTracers.length > 0 || graduatedStudents.length > 0) ? (
-              <div className="rounded-2xl border border-[#DDD8F6] bg-[#F7F5FD] p-3.5">
-                <label className="block text-[11px] font-extrabold mb-1.5 text-[#5D51B2]">
+              <div className="rounded-2xl border border-[#DDD8F6] dark:border-slate-700 bg-[#F7F5FD] dark:bg-slate-900/50 p-3.5">
+                <label className="block text-[11px] font-extrabold mb-1.5 text-[#5D51B2] dark:text-indigo-300">
                   Pilih dari Data Alumni yang Sudah Terdata di Database (Isi Otomatis / Perbarui Data)
                 </label>
-                <div className="orbita-field-underline rounded-xl border border-white/80 bg-white px-3 py-0.5 shadow-2xs">
+                <div className="orbita-field-underline rounded-xl border border-white/80 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-0.5 shadow-2xs">
                   <select
                     value={
                       editingRecordId && recordedAlumniTracers.some(r => r.id === editingRecordId)
@@ -2235,7 +2273,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                         applyStudentFromDb(val.slice(4), 'alumni');
                       }
                     }}
-                    className="w-full bg-transparent py-2 text-xs font-bold text-[#252042] focus:outline-none cursor-pointer"
+                    className="no-ornament w-full bg-transparent py-2 text-xs font-bold text-[#252042] dark:text-white focus:outline-none cursor-pointer"
                   >
                     <option value="">-- Input Manual Alumni Baru --</option>
                     {recordedAlumniTracers.map(rec => (
@@ -2255,30 +2293,43 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
               </div>
             ) : null}
 
-            {/* Section A: Identitas Responden */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#6C60B8]">
-                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#6C60B8] text-white text-[10px]">
-                  1
-                </span>
-                <span>{isGrade12 ? 'Identitas Siswa Kelas 12' : 'Identitas Alumni'}</span>
-              </div>
+            <AccordionExpandAllBar
+              allExpanded={formAccordion.allExpanded}
+              onExpandAll={formAccordion.expandAll}
+              onCollapseAll={formAccordion.collapseAll}
+              title={isGrade12 ? 'Bagian Formulir Siswa Kelas 12' : 'Bagian Formulir Tracer Study Alumni'}
+            />
 
+            {/* Section 1 Accordion: Identitas Responden */}
+            <AccordionSection
+              title={isGrade12 ? '1. Identitas Siswa Kelas 12' : '1. Identitas Alumni'}
+              subtitle="Nama, NISN, Jurusan (DPB / RPL) & Kontak"
+              icon={<User className="h-3.5 w-3.5" />}
+              open={formAccordion.isOpen('identity')}
+              onToggle={() => formAccordion.toggle('identity')}
+            >
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 <div>
-                  <label className="block font-bold text-[#3E385B] mb-1">
+                  <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                     {isGrade12 ? 'Nama Lengkap Siswa *' : 'Nama Lengkap Alumni *'}
                   </label>
-                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white px-3 transition-all">
+                  <div
+                    className={`orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white dark:focus-within:bg-slate-900 px-3 transition-all ${
+                      formError && !formState.fullName.trim() ? 'orbita-field-zigzag-error' : ''
+                    }`}
+                  >
                     <input
                       type="text"
-                      required
+                      aria-invalid={Boolean(formError && !formState.fullName.trim()) || undefined}
                       placeholder={
                         isGrade12 ? 'Contoh: Nabila Putri Lestari' : 'Contoh: Aditya Pratama'
                       }
                       value={formState.fullName}
-                      onChange={e => setFormState(p => ({ ...p, fullName: e.target.value }))}
-                      className="w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] focus:outline-none"
+                      onChange={e => {
+                        setFormState(p => ({ ...p, fullName: e.target.value }));
+                        if (formError) setFormError(null);
+                      }}
+                      className="no-ornament w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] dark:text-white focus:outline-none"
                     />
                   </div>
                 </div>
@@ -2388,8 +2439,9 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                                 : p.majorCode,
                             }));
                           }}
-                          className="w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] focus:outline-none cursor-pointer"
+                          className="w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] dark:text-white focus:outline-none cursor-pointer"
                         >
+                          <option value="">-- Pilih Kelas XII --</option>
                           {grade12Classes.map(cls => (
                             <option key={cls.id} value={cls.name}>
                               {cls.name}
@@ -2406,7 +2458,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                           value={formState.className}
                           onChange={e => setFormState(p => ({ ...p, className: e.target.value }))}
                           placeholder="XII RPL 1 / XII DPB 1"
-                          className="w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] focus:outline-none"
+                          className="w-full bg-transparent py-2.5 text-xs font-bold text-[#252042] dark:text-white focus:outline-none"
                         />
                       )}
                     </div>
@@ -2414,48 +2466,47 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 )}
 
                 <div>
-                  <label className="block font-bold text-[#3E385B] mb-1">No. HP / WhatsApp</label>
-                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white px-3 transition-all">
+                  <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">No. HP / WhatsApp</label>
+                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white dark:focus-within:bg-slate-900 px-3 transition-all">
                     <input
                       type="tel"
                       placeholder="0812xxxxxxxx"
                       value={formState.phone}
                       onChange={e => setFormState(p => ({ ...p, phone: e.target.value }))}
-                      className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] focus:outline-none"
+                      className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-[#3E385B] mb-1">
+                  <label className="block font-bold text-[#3E385B] dark:text-slate-200 mb-1">
                     Email Aktif (Opsional)
                   </label>
-                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white px-3 transition-all">
+                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white dark:focus-within:bg-slate-900 px-3 transition-all">
                     <input
                       type="email"
                       placeholder="nama@email.com"
                       value={formState.email}
                       onChange={e => setFormState(p => ({ ...p, email: e.target.value }))}
-                      className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] focus:outline-none"
+                      className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none"
                     />
                   </div>
                 </div>
               </div>
-            </div>
+            </AccordionSection>
 
-            {/* Section B: Rencana Setelah Lulus / Status Karier Saat Ini */}
-            <div className="space-y-3 pt-2 border-t border-[#ECEAF6]">
-              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#6C60B8]">
-                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-[#6C60B8] text-white text-[10px]">
-                  2
-                </span>
-                <span>
-                  {isGrade12
-                    ? 'Perencanaan Karier & Studi Setelah Lulus'
-                    : 'Status Karier, Mitra PKL & Penempatan'}
-                </span>
-              </div>
-
+            {/* Section 2 Accordion: Rencana Setelah Lulus / Status Karier Saat Ini */}
+            <AccordionSection
+              title={
+                isGrade12
+                  ? '2. Perencanaan Karier & Studi Setelah Lulus'
+                  : '2. Status Karier, Mitra PKL & Penempatan'
+              }
+              subtitle="Target DUDI, Kampus, Mitra PKL, & Aspirasi BKK"
+              icon={<Briefcase className="h-3.5 w-3.5" />}
+              open={formAccordion.isOpen('career')}
+              onToggle={() => formAccordion.toggle('career')}
+            >
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                 <div>
                   <label className="block font-bold text-[#3E385B] mb-1">
@@ -2499,10 +2550,19 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                       ? 'Perusahaan / DUDI yang Dituju *'
                       : 'Nama Perusahaan / Instansi *'}
                   </label>
-                  <div className="orbita-field-underline rounded-xl bg-[#F4F3FA] border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white px-3 transition-all">
+                  <div
+                    className={`orbita-field-underline rounded-xl bg-[#F4F3FA] dark:bg-slate-800/80 border border-transparent focus-within:border-[#6C60B8]/50 focus-within:bg-white dark:focus-within:bg-slate-900 px-3 transition-all ${
+                      formError && !isUnemployed && !formState.institutionOrCompany.trim()
+                        ? 'orbita-field-zigzag-error'
+                        : ''
+                    }`}
+                  >
                     <input
                       type="text"
-                      required={!isUnemployed}
+                      aria-invalid={
+                        Boolean(formError && !isUnemployed && !formState.institutionOrCompany.trim()) ||
+                        undefined
+                      }
                       placeholder={
                         formState.careerStatus === 'kuliah'
                           ? 'Contoh: POLBAN / UPI / Universitas Nusa Putra'
@@ -2513,10 +2573,11 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                           : 'Contoh: PT Telkom Indonesia / Garment Sukabumi'
                       }
                       value={formState.institutionOrCompany}
-                      onChange={e =>
-                        setFormState(p => ({ ...p, institutionOrCompany: e.target.value }))
-                      }
-                      className="w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] focus:outline-none"
+                      onChange={e => {
+                        setFormState(p => ({ ...p, institutionOrCompany: e.target.value }));
+                        if (formError) setFormError(null);
+                      }}
+                      className="no-ornament w-full bg-transparent py-2.5 text-xs font-semibold text-[#252042] dark:text-white focus:outline-none"
                     />
                   </div>
                 </div>
@@ -2735,14 +2796,14 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                   />
                 </div>
               </div>
-            </div>
+            </AccordionSection>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[#ECEAF6]">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[#ECEAF6] dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setShowFormBackConfirm(true)}
                 disabled={isSubmitting}
-                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl border border-[#DFDCF2] bg-[#FAF9FE] hover:bg-[#F0EEFA] px-4 text-xs font-bold text-[#555070] cursor-pointer"
+                className="no-ornament inline-flex h-10 items-center justify-center gap-1.5 rounded-2xl border border-[#DFDCF2] dark:border-slate-700 bg-[#FAF9FE] dark:bg-slate-800 hover:bg-[#F0EEFA] px-4 text-xs font-bold text-[#555070] dark:text-slate-200 cursor-pointer"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <span>Kembali</span>
@@ -2751,6 +2812,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting}
+                data-launching={isLaunchingPlane ? 'true' : 'false'}
                 style={{
                   background: isGrade12
                     ? 'linear-gradient(135deg, #FF7B9F 0%, #EE4D7A 100%)'
@@ -2759,16 +2821,12 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                     ? '0 14px 28px -6px rgba(242, 87, 129, 0.40)'
                     : '0 14px 28px -6px rgba(108, 96, 184, 0.42)',
                 }}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-[18px] px-6 text-xs sm:text-sm font-extrabold text-white disabled:opacity-60 cursor-pointer"
+                className="no-ornament orbita-paper-plane-btn inline-flex h-11 items-center justify-center gap-2 rounded-[18px] px-6 text-xs sm:text-sm font-extrabold text-white disabled:opacity-75 cursor-pointer overflow-hidden"
               >
-                {isSubmitting ? (
-                  <RefreshCw className="h-4 w-4 animate-spin shrink-0" />
-                ) : (
-                  <CheckCircle2 className="h-4 w-4 shrink-0" />
-                )}
+                <Send className="h-4 w-4 shrink-0 orbita-paper-plane-icon" />
                 <span>
                   {isSubmitting
-                    ? 'Menyimpan ke Database Cloud...'
+                    ? 'Menerbangkan & Menyinkronkan Data...'
                     : isGrade12
                     ? 'Kirim & Sinkronkan Rencana Kelas 12'
                     : 'Kirim & Sinkronkan Data Alumni'}

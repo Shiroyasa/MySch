@@ -1246,3 +1246,247 @@ html.dark .paper-surface {
     padding: 0 !important;
   }
 }
+
+/* ========================================================================== */
+/* INTERACTIVE MICRO-ANIMATIONS:                                              */
+/* 1) Zigzag Error Underline  2) Theme Flip  3) Genie Bin                     */
+/* 4) Carousel Squeeze Line   5) Accordion   6) Paper Plane Launch            */
+/* ========================================================================== */
+
+/* 1. Textfield Error Zigzag Underline Animation */
+@keyframes zigzagUnderlineFlow {
+  0% {
+    background-position: 0 100%;
+  }
+  100% {
+    background-position: 24px 100%;
+  }
+}
+
+@keyframes errorFieldShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  45% { transform: translateX(4px); }
+  70% { transform: translateX(-2px); }
+  85% { transform: translateX(2px); }
+}
+
+.orbita-field-zigzag-error,
+.orbita-field-underline:has([aria-invalid="true"]),
+main input[aria-invalid="true"]:not(.no-ornament),
+main select[aria-invalid="true"]:not(.no-ornament),
+main textarea[aria-invalid="true"]:not(.no-ornament),
+.fixed input[aria-invalid="true"]:not(.no-ornament),
+.fixed select[aria-invalid="true"]:not(.no-ornament),
+.fixed textarea[aria-invalid="true"]:not(.no-ornament) {
+  border-color: rgba(242, 87, 129, 0.72) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6' viewBox='0 0 12 6'%3E%3Cpolyline points='0,5 3,1 6,5 9,1 12,5' fill='none' stroke='%23F25781' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: repeat-x !important;
+  background-position: 0 100% !important;
+  background-size: 12px 6px !important;
+  padding-bottom: 6px;
+  box-shadow: 0 0 0 3px rgba(242, 87, 129, 0.14) !important;
+  animation: zigzagUnderlineFlow 0.75s linear infinite, errorFieldShake 0.36s cubic-bezier(0.36, 0.07, 0.19, 0.97) 1;
+}
+
+/* 2. Theme Flip Transition */
+html.theme-flip-active,
+html.theme-flip-active body,
+html.theme-flip-active #root,
+html.theme-flip-active aside,
+html.theme-flip-active header,
+html.theme-flip-active main {
+  transition: background-color 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.38s ease,
+              color 0.32s ease;
+}
+
+.orbita-theme-flip-stage {
+  perspective: 800px;
+}
+
+.orbita-theme-flip-coin {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.62s cubic-bezier(0.34, 1.45, 0.64, 1);
+  will-change: transform;
+}
+
+.orbita-theme-flip-coin.is-dark {
+  transform: rotateY(180deg);
+}
+
+.orbita-theme-flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbita-theme-flip-face-back {
+  transform: rotateY(180deg);
+}
+
+/* 3. Genie Bin Delete Suction Effect */
+@keyframes genieBinSuck {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1, 1) skewX(0deg);
+    filter: blur(0px);
+  }
+  35% {
+    opacity: 0.9;
+    transform: translateY(6px) scaleX(0.68) scaleY(1.14) skewX(-6deg);
+    filter: blur(0.4px);
+  }
+  70% {
+    opacity: 0.55;
+    transform: translateY(22px) scaleX(0.28) scaleY(0.72) skewX(8deg);
+    filter: blur(1.5px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(36px) scaleX(0.06) scaleY(0.08);
+    filter: blur(3px);
+  }
+}
+
+@keyframes genieLidOpen {
+  0% { transform: rotate(0deg) translateY(0); }
+  25%, 75% { transform: rotate(-28deg) translate(-2px, -3px); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+
+@keyframes genieCardPull {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1, 1);
+  }
+  45% {
+    opacity: 0.85;
+    transform: translateY(-28px) scaleX(0.42) scaleY(1.12);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-76px) scaleX(0.08) scaleY(0.12);
+  }
+}
+
+.animate-genie-bin-exit {
+  transform-origin: bottom center;
+  animation: genieBinSuck 0.44s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards !important;
+  pointer-events: none;
+}
+
+.animate-genie-lid-open {
+  transform-origin: 18% 85%;
+  animation: genieLidOpen 0.52s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-genie-card-pull {
+  transform-origin: top center;
+  animation: genieCardPull 0.48s cubic-bezier(0.6, 0.04, 0.98, 0.335) forwards;
+}
+
+/* 4. Carousel Table Pagination & Squeeze Line Effect */
+@keyframes squeezeLineMorphNext {
+  0% { transform: scaleX(1) scaleY(1); }
+  38% { transform: scaleX(2.05) scaleY(0.58); }
+  75% { transform: scaleX(0.86) scaleY(1.15); }
+  100% { transform: scaleX(1) scaleY(1); }
+}
+
+@keyframes squeezeLineMorphPrev {
+  0% { transform: scaleX(1) scaleY(1); }
+  38% { transform: scaleX(2.05) scaleY(0.58); }
+  75% { transform: scaleX(0.86) scaleY(1.15); }
+  100% { transform: scaleX(1) scaleY(1); }
+}
+
+@keyframes carouselSlideNext {
+  0% { opacity: 0.45; transform: translateX(18px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes carouselSlidePrev {
+  0% { opacity: 0.45; transform: translateX(-18px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+.orbita-squeeze-indicator-next {
+  animation: squeezeLineMorphNext 0.44s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+.orbita-squeeze-indicator-prev {
+  animation: squeezeLineMorphPrev 0.44s cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+.animate-carousel-next {
+  animation: carouselSlideNext 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.animate-carousel-prev {
+  animation: carouselSlidePrev 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 5. Accordion Expand-All Smooth Transition */
+.orbita-accordion-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease;
+  opacity: 0;
+}
+
+.orbita-accordion-panel[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.orbita-accordion-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* 6. Paper Plane Submit Button Launch Animation */
+@keyframes paperPlaneLaunch {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: translate(-3px, 3px) rotate(-14deg) scale(0.95);
+    opacity: 1;
+  }
+  65% {
+    transform: translate(22px, -22px) rotate(12deg) scale(1.08);
+    opacity: 0.9;
+  }
+  72% {
+    transform: translate(28px, -28px) scale(0.4);
+    opacity: 0;
+  }
+  75% {
+    transform: translate(-18px, 18px) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+.orbita-paper-plane-btn .orbita-paper-plane-icon {
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.orbita-paper-plane-btn:hover:not(:disabled) .orbita-paper-plane-icon {
+  transform: translate(2px, -2px) rotate(-8deg) scale(1.08);
+}
+
+.orbita-paper-plane-btn[data-launching="true"] .orbita-paper-plane-icon {
+  animation: paperPlaneLaunch 0.52s cubic-bezier(0.22, 1, 0.36, 1);
+}
+

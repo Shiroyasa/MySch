@@ -28,6 +28,8 @@ import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
 import { AcademyHeroBanner, OrnateCard } from '../common/AcademyOrnaments';
 import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 import { LiquidNavBar } from '../common/LiquidNavBar';
+import { CarouselTablePagination, useCarouselPagination } from '../common/CarouselTablePagination';
+import { AccordionExpandAllBar, AccordionSection, useAccordionGroup } from '../common/AccordionExpandGroup';
 
 export const GradingModule: React.FC = () => {
   const {
@@ -311,6 +313,7 @@ export const GradingModule: React.FC = () => {
   // Create / Edit assessment modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingAssessmentId, setEditingAssessmentId] = useState<string | null>(null);
+  const [assessmentSubmitted, setAssessmentSubmitted] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newType, setNewType] = useState<AssessmentType>('tugas');
   const [newWeight, setNewWeight] = useState(20);
@@ -318,6 +321,7 @@ export const GradingModule: React.FC = () => {
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
 
   const openCreateAssessmentModal = () => {
+    setAssessmentSubmitted(false);
     setEditingAssessmentId(null);
     setNewTitle('');
     setNewType('tugas');
@@ -328,6 +332,7 @@ export const GradingModule: React.FC = () => {
   };
 
   const openEditAssessmentModal = (asm: Assessment) => {
+    setAssessmentSubmitted(false);
     setEditingAssessmentId(asm.id);
     setNewTitle(asm.title);
     setNewType(asm.type);
@@ -339,6 +344,7 @@ export const GradingModule: React.FC = () => {
 
   const handleSaveAssessmentForm = (e: React.FormEvent) => {
     e.preventDefault();
+    setAssessmentSubmitted(true);
     if (!newTitle.trim()) return;
 
     if (editingAssessmentId) {
@@ -781,6 +787,15 @@ export const GradingModule: React.FC = () => {
     );
   };
 
+  // Accordion & Carousel Table Pagination hooks
+  const inputFilterAccordion = useAccordionGroup(['grade-input-filter'], true);
+  const reportSelectAccordion = useAccordionGroup(['grade-report-select'], true);
+
+  const inputPagination = useCarouselPagination(filteredInputStudents, 10);
+  const legerPagination = useCarouselPagination(legerData, 10);
+  const editReportSubjectsPagination = useCarouselPagination(subjects, 8);
+  const previewReportSubjectsPagination = useCarouselPagination(subjects, 10);
+
   return (
     <div className="space-y-6">
       {/* Toast Notification */}
@@ -815,86 +830,99 @@ export const GradingModule: React.FC = () => {
       {/* TAB 1: INPUT NILAI */}
       {activeTab === 'input' && (
         <div className="space-y-6">
-          {/* Filter Bar */}
-          <OrnateCard className="p-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="min-w-0">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Rombel / Kelas
-                </label>
-                <select
-                  value={selectedClassId}
-                  onChange={e => setSelectedClassId(e.target.value)}
-                  className="h-[38px] w-full rounded-xl border border-[#DEC896] bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  {classes.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.majorCode})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="min-w-0">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Mata Pelajaran
-                </label>
-                <select
-                  value={selectedSubjectId}
-                  onChange={e => setSelectedSubjectId(e.target.value)}
-                  className="h-[38px] w-full rounded-xl border border-[#DEC896] bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  {subjects.map(s => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} (KKM: {s.kkm})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="min-w-0">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Komponen Penilaian
-                </label>
-                <select
-                  value={activeAssessment?.id || ''}
-                  onChange={e => handleSelectAssessment(e.target.value)}
-                  className="h-[38px] w-full rounded-xl border border-[#DEC896] bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  {currentAssessments.length === 0 ? (
-                    <option value="">-- Belum Ada Komponen (Otomatis Dibuat Saat Simpan) --</option>
-                  ) : (
-                    currentAssessments.map(a => (
-                      <option key={a.id} value={a.id}>
-                        [{a.type.toUpperCase()}] {a.title} ({a.weight}%)
+          {/* Filter Bar with Accordion Expand All */}
+          <div className="space-y-3">
+            <AccordionExpandAllBar
+              title="Filter Rombel, Mata Pelajaran & Komponen Penilaian"
+              allExpanded={inputFilterAccordion.allExpanded}
+              onExpandAll={inputFilterAccordion.expandAll}
+              onCollapseAll={inputFilterAccordion.collapseAll}
+            />
+            <AccordionSection
+              title="Pengaturan Kelas, Mapel & Komponen Penilaian"
+              subtitle={`${currentClass?.name || '-'} • ${currentSubject?.name || '-'} • ${activeAssessment?.title || 'Penilaian Baru'}`}
+              open={inputFilterAccordion.isOpen('grade-input-filter')}
+              onToggle={() => inputFilterAccordion.toggle('grade-input-filter')}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="min-w-0">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                    Rombel / Kelas
+                  </label>
+                  <select
+                    value={selectedClassId}
+                    onChange={e => setSelectedClassId(e.target.value)}
+                    className="h-[38px] w-full rounded-xl border border-[#DEC896] bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    {classes.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} ({c.majorCode})
                       </option>
-                    ))
-                  )}
-                </select>
-              </div>
+                    ))}
+                  </select>
+                </div>
 
-              <div className="flex items-end gap-2 min-w-0">
-                <button
-                  type="button"
-                  onClick={openCreateAssessmentModal}
-                  className="inline-flex h-[38px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 whitespace-nowrap transition-colors cursor-pointer"
-                >
-                  <PlusCircle className="h-4 w-4 shrink-0" />
-                  <span>Tambah Komponen</span>
-                </button>
-                {activeAssessment && (
+                <div className="min-w-0">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                    Mata Pelajaran
+                  </label>
+                  <select
+                    value={selectedSubjectId}
+                    onChange={e => setSelectedSubjectId(e.target.value)}
+                    className="h-[38px] w-full rounded-xl border border-[#DEC896] bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    {subjects.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} (KKM: {s.kkm})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="min-w-0">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                    Komponen Penilaian
+                  </label>
+                  <select
+                    value={activeAssessment?.id || ''}
+                    onChange={e => handleSelectAssessment(e.target.value)}
+                    className="h-[38px] w-full rounded-xl border border-[#DEC896] bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-amber-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    {currentAssessments.length === 0 ? (
+                      <option value="">-- Belum Ada Komponen (Otomatis Dibuat Saat Simpan) --</option>
+                    ) : (
+                      currentAssessments.map(a => (
+                        <option key={a.id} value={a.id}>
+                          [{a.type.toUpperCase()}] {a.title} ({a.weight}%)
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+
+                <div className="flex items-end gap-2 min-w-0">
                   <button
                     type="button"
-                    onClick={() => openEditAssessmentModal(activeAssessment)}
-                    className="inline-flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-xl border border-[#D4AF37]/60 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-300 cursor-pointer"
-                    title="Edit Komponen Penilaian"
+                    onClick={openCreateAssessmentModal}
+                    className="inline-flex h-[38px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 whitespace-nowrap transition-colors cursor-pointer"
                   >
-                    <Edit3 className="h-4 w-4" />
+                    <PlusCircle className="h-4 w-4 shrink-0" />
+                    <span>Tambah Komponen</span>
                   </button>
-                )}
+                  {activeAssessment && (
+                    <button
+                      type="button"
+                      onClick={() => openEditAssessmentModal(activeAssessment)}
+                      className="inline-flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-xl border border-[#D4AF37]/60 bg-amber-50 text-amber-800 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-300 cursor-pointer"
+                      title="Edit Komponen Penilaian"
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          </OrnateCard>
+            </AccordionSection>
+          </div>
 
           {/* Assessment Header Info & Action Buttons */}
           <OrnateCard className="p-4 sm:p-5">
@@ -1162,7 +1190,7 @@ export const GradingModule: React.FC = () => {
 
           {/* Rapid scores entry JRPG table */}
           <OrnateCard className="overflow-hidden">
-            <div className="overflow-x-auto">
+            <div key={inputPagination.animKey} className={`overflow-x-auto ${inputPagination.slideClass}`}>
               <table className="w-full text-left text-xs">
                 <thead className="whitespace-nowrap">
                   <tr>
@@ -1183,7 +1211,7 @@ export const GradingModule: React.FC = () => {
                       </td>
                     </tr>
                   ) : (
-                    filteredInputStudents.map((std, idx) => {
+                    inputPagination.paginatedItems.map((std, idx) => {
                       const currentEntry = scoresInputMap[std.id] || { score: 0, feedback: '' };
                       const scoreVal = Number(currentEntry.score ?? 0);
                       const isPass = scoreVal >= kkmVal;
@@ -1198,7 +1226,7 @@ export const GradingModule: React.FC = () => {
 
                       return (
                         <tr key={std.id} className="transition-all">
-                          <td className="py-3 px-4 text-center text-slate-400 font-medium">{idx + 1}</td>
+                          <td className="py-3 px-4 text-center text-slate-400 font-medium">{inputPagination.startIndex + idx + 1}</td>
                           <td className="py-3 px-4 font-mono text-[11px] text-slate-600 dark:text-slate-300">
                             {std.nisn}
                           </td>
@@ -1312,6 +1340,20 @@ export const GradingModule: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800">
+              <CarouselTablePagination
+                page={inputPagination.page}
+                totalPages={inputPagination.totalPages}
+                totalItems={inputPagination.totalItems}
+                pageSize={inputPagination.pageSize}
+                startIndex={inputPagination.startIndex}
+                endIndex={inputPagination.endIndex}
+                slideDirection={inputPagination.slideDirection}
+                onPageChange={inputPagination.setPage}
+                onPageSizeChange={inputPagination.setPageSize}
+                itemLabel="siswa"
+              />
+            </div>
           </OrnateCard>
         </div>
       )}
@@ -1363,7 +1405,7 @@ export const GradingModule: React.FC = () => {
           </OrnateCard>
 
           <OrnateCard className="overflow-hidden">
-            <div className="overflow-x-auto">
+            <div key={legerPagination.animKey} className={`overflow-x-auto ${legerPagination.slideClass}`}>
               <table className="w-full text-left text-xs">
                 <thead className="whitespace-nowrap">
                   <tr>
@@ -1382,7 +1424,7 @@ export const GradingModule: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800 tabular-nums">
-                  {legerData.map(r => (
+                  {legerPagination.paginatedItems.map(r => (
                     <tr key={r.studentId}>
                       <td className="py-2.5 px-3 text-center text-slate-400">{r.no}</td>
                       <td className="py-2.5 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
@@ -1419,6 +1461,20 @@ export const GradingModule: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800">
+              <CarouselTablePagination
+                page={legerPagination.page}
+                totalPages={legerPagination.totalPages}
+                totalItems={legerPagination.totalItems}
+                pageSize={legerPagination.pageSize}
+                startIndex={legerPagination.startIndex}
+                endIndex={legerPagination.endIndex}
+                slideDirection={legerPagination.slideDirection}
+                onPageChange={legerPagination.setPage}
+                onPageSizeChange={legerPagination.setPageSize}
+                itemLabel="siswa"
+              />
+            </div>
           </OrnateCard>
         </div>
       )}
@@ -1426,8 +1482,19 @@ export const GradingModule: React.FC = () => {
       {/* TAB 3: DRAF RAPOR SISWA */}
       {activeTab === 'reportCard' && (
         <div className="space-y-4">
-          {/* Top Bar: Per-Class Selector, Student Selector, Edit Mode, Reset, and Print */}
-          <OrnateCard className="p-4 sm:p-5">
+          {/* Top Bar with Accordion Expand All */}
+          <AccordionExpandAllBar
+            title="Pemilih Rapor Kelas & Siswa"
+            allExpanded={reportSelectAccordion.allExpanded}
+            onExpandAll={reportSelectAccordion.expandAll}
+            onCollapseAll={reportSelectAccordion.collapseAll}
+          />
+          <AccordionSection
+            title="Pilih Kelas & Siswa Penerima Rapor"
+            subtitle={`${reportCurrentClass?.name || '-'} • ${reportStudent?.fullName || '-'}`}
+            open={reportSelectAccordion.isOpen('grade-report-select')}
+            onToggle={() => reportSelectAccordion.toggle('grade-report-select')}
+          >
             <div className="flex flex-col gap-3.5">
               <div className="flex flex-wrap items-center gap-3 pr-8">
                 <div className="flex items-center gap-1.5 min-w-0">
@@ -1629,7 +1696,7 @@ export const GradingModule: React.FC = () => {
                 </button>
               </div>
             </div>
-          </OrnateCard>
+          </AccordionSection>
 
           {/* PANEL MODE EDIT RAPOR SISWA */}
           {isEditingReport ? (
@@ -1671,7 +1738,7 @@ export const GradingModule: React.FC = () => {
                 <span className="font-bold text-xs text-slate-800 dark:text-slate-200 block">
                   1. Nilai Akhir &amp; Deskripsi Capaian Kompetensi per Mata Pelajaran
                 </span>
-                <div className="overflow-x-auto rounded-xl border border-[#DEC896] bg-white dark:border-slate-700 dark:bg-slate-800/80">
+                <div key={editReportSubjectsPagination.animKey} className={`overflow-x-auto rounded-xl border border-[#DEC896] bg-white dark:border-slate-700 dark:bg-slate-800/80 ${editReportSubjectsPagination.slideClass}`}>
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr>
@@ -1684,14 +1751,14 @@ export const GradingModule: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                      {subjects.map((sub, idx) => {
+                      {editReportSubjectsPagination.paginatedItems.map((sub, idx) => {
                         const currentScore = editFormData.scores?.[sub.id]?.score ?? 0;
                         const currentPred = editFormData.scores?.[sub.id]?.predicate ?? 'D';
                         const currentFeedback = editFormData.scores?.[sub.id]?.feedback ?? '';
 
                         return (
                           <tr key={sub.id}>
-                            <td className="p-2 text-center text-slate-400">{idx + 1}</td>
+                            <td className="p-2 text-center text-slate-400">{editReportSubjectsPagination.startIndex + idx + 1}</td>
                             <td className="p-2 font-bold text-slate-900 dark:text-white">
                               {sub.name}
                               <span className="block text-[10px] text-slate-400 font-normal">
@@ -1775,6 +1842,18 @@ export const GradingModule: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+                <CarouselTablePagination
+                  page={editReportSubjectsPagination.page}
+                  totalPages={editReportSubjectsPagination.totalPages}
+                  totalItems={editReportSubjectsPagination.totalItems}
+                  pageSize={editReportSubjectsPagination.pageSize}
+                  startIndex={editReportSubjectsPagination.startIndex}
+                  endIndex={editReportSubjectsPagination.endIndex}
+                  slideDirection={editReportSubjectsPagination.slideDirection}
+                  onPageChange={editReportSubjectsPagination.setPage}
+                  onPageSizeChange={editReportSubjectsPagination.setPageSize}
+                  itemLabel="mata pelajaran"
+                />
               </div>
 
               {/* Attendance & Notes */}
@@ -2021,59 +2100,73 @@ export const GradingModule: React.FC = () => {
               </div>
 
               {/* Subject scores table */}
-              <div className="overflow-x-auto mb-6">
-                <table className="w-full text-left text-xs border border-slate-200 dark:border-slate-700">
-                  <thead>
-                    <tr>
-                      <th className="p-2.5 w-10 text-center">No</th>
-                      <th className="p-2.5">Mata Pelajaran</th>
-                      <th className="p-2.5 text-center w-16">KKM</th>
-                      <th className="p-2.5 text-center w-20">Nilai Akhir</th>
-                      <th className="p-2.5 text-center w-16">Predikat</th>
-                      <th className="p-2.5">Capaian Kompetensi &amp; Keterangan</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                    {subjects.map((subj, index) => {
-                      const item = currentStudentReport.scores[subj.id] || {
-                        score: 0,
-                        predicate: 'D',
-                        feedback: '-',
-                      };
+              <div className="mb-6 space-y-3">
+                <div key={previewReportSubjectsPagination.animKey} className={`overflow-x-auto ${previewReportSubjectsPagination.slideClass}`}>
+                  <table className="w-full text-left text-xs border border-slate-200 dark:border-slate-700">
+                    <thead>
+                      <tr>
+                        <th className="p-2.5 w-10 text-center">No</th>
+                        <th className="p-2.5">Mata Pelajaran</th>
+                        <th className="p-2.5 text-center w-16">KKM</th>
+                        <th className="p-2.5 text-center w-20">Nilai Akhir</th>
+                        <th className="p-2.5 text-center w-16">Predikat</th>
+                        <th className="p-2.5">Capaian Kompetensi &amp; Keterangan</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                      {previewReportSubjectsPagination.paginatedItems.map((subj, index) => {
+                        const item = currentStudentReport.scores[subj.id] || {
+                          score: 0,
+                          predicate: 'D',
+                          feedback: '-',
+                        };
 
-                      return (
-                        <tr key={subj.id}>
-                          <td className="p-2 text-center">{index + 1}</td>
-                          <td className="p-2 font-bold text-slate-900 dark:text-white">
-                            {subj.name}
-                          </td>
-                          <td className="p-2 text-center">{subj.kkm}</td>
-                          <td className="p-2 text-center font-black text-blue-600 dark:text-amber-300">
-                            {item.score}
-                          </td>
-                          <td className="p-2 text-center font-bold">
-                            <span
-                              className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                item.predicate === 'A'
-                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                                  : item.predicate === 'B'
-                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
-                                  : item.predicate === 'C'
-                                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                                  : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
-                              }`}
-                            >
-                              {item.predicate}
-                            </span>
-                          </td>
-                          <td className="p-2 text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
-                            {item.feedback}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                        return (
+                          <tr key={subj.id}>
+                            <td className="p-2 text-center">{previewReportSubjectsPagination.startIndex + index + 1}</td>
+                            <td className="p-2 font-bold text-slate-900 dark:text-white">
+                              {subj.name}
+                            </td>
+                            <td className="p-2 text-center">{subj.kkm}</td>
+                            <td className="p-2 text-center font-black text-blue-600 dark:text-amber-300">
+                              {item.score}
+                            </td>
+                            <td className="p-2 text-center font-bold">
+                              <span
+                                className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                                  item.predicate === 'A'
+                                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                    : item.predicate === 'B'
+                                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                                    : item.predicate === 'C'
+                                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                    : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
+                                }`}
+                              >
+                                {item.predicate}
+                              </span>
+                            </td>
+                            <td className="p-2 text-[11px] text-slate-600 dark:text-slate-300 leading-snug">
+                              {item.feedback}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <CarouselTablePagination
+                  page={previewReportSubjectsPagination.page}
+                  totalPages={previewReportSubjectsPagination.totalPages}
+                  totalItems={previewReportSubjectsPagination.totalItems}
+                  pageSize={previewReportSubjectsPagination.pageSize}
+                  startIndex={previewReportSubjectsPagination.startIndex}
+                  endIndex={previewReportSubjectsPagination.endIndex}
+                  slideDirection={previewReportSubjectsPagination.slideDirection}
+                  onPageChange={previewReportSubjectsPagination.setPage}
+                  onPageSizeChange={previewReportSubjectsPagination.setPageSize}
+                  itemLabel="mata pelajaran"
+                />
               </div>
 
               {/* Attendance & Catatan Wali Kelas */}
@@ -2149,19 +2242,30 @@ export const GradingModule: React.FC = () => {
               Kelas: {currentClass.name} &bull; Mapel: {currentSubject.name}
             </p>
 
-            <form onSubmit={handleSaveAssessmentForm} className="space-y-4 text-xs">
+            <form onSubmit={handleSaveAssessmentForm} noValidate className="space-y-4 text-xs">
               <div>
                 <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">
                   Judul / Materi Penilaian
                 </label>
-                <input
-                  type="text"
-                  placeholder="Contoh: Praktik 2: Integrasi REST API & Form"
-                  value={newTitle}
-                  onChange={e => setNewTitle(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  required
-                />
+                <div className={`rounded-xl ${assessmentSubmitted && !newTitle.trim() ? 'orbita-field-zigzag-error' : ''}`}>
+                  <input
+                    type="text"
+                    placeholder="Contoh: Praktik 2: Integrasi REST API & Form"
+                    value={newTitle}
+                    aria-invalid={assessmentSubmitted && !newTitle.trim()}
+                    onChange={e => setNewTitle(e.target.value)}
+                    className={`w-full rounded-xl border bg-slate-50 p-2.5 font-semibold text-slate-900 focus:outline-none dark:bg-slate-800 dark:text-white ${
+                      assessmentSubmitted && !newTitle.trim()
+                        ? 'border-rose-400 dark:border-rose-500'
+                        : 'border-slate-200 dark:border-slate-700'
+                    }`}
+                  />
+                </div>
+                {assessmentSubmitted && !newTitle.trim() && (
+                  <p className="mt-1 text-[11px] font-bold text-rose-600 dark:text-rose-400">
+                    Judul / materi penilaian wajib diisi.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">

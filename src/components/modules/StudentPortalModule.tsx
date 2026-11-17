@@ -21,6 +21,8 @@ import { exportToPdf } from '../../utils/exportUtils';
 import { AttendanceStatus } from '../../types';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 import { LiquidNavBar } from '../common/LiquidNavBar';
+import { CarouselTablePagination, useCarouselPagination } from '../common/CarouselTablePagination';
+import { AccordionExpandAllBar, AccordionSection, useAccordionGroup } from '../common/AccordionExpandGroup';
 
 interface StudentPortalModuleProps {
   initialTab?: 'profile' | 'grades' | 'summary' | 'attendance';
@@ -109,7 +111,11 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
   const [corCurStatus, setCorCurStatus] = useState<AttendanceStatus>('A');
   const [corReqStatus, setCorReqStatus] = useState<AttendanceStatus>('I');
   const [corReason, setCorReason] = useState<string>('');
+  const [corSubmitted, setCorSubmitted] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const gradesPagination = useCarouselPagination(subjectGrades, 8);
+  const correctionAccordion = useAccordionGroup(['portal-cor-status'], true);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -118,8 +124,9 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
 
   const handleCorrectionSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!corReason.trim()) {
-      showToast('Harap tuliskan alasan pengajuan koreksi.');
+    setCorSubmitted(true);
+    if (!corDate || !corReason.trim()) {
+      showToast('Harap lengkapi tanggal dan alasan pengajuan koreksi.');
       return;
     }
 
@@ -137,6 +144,7 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
     });
 
     setCorReason('');
+    setCorSubmitted(false);
     showToast('Permohonan koreksi presensi berhasil diajukan ke Wali Kelas.');
   };
 
@@ -377,10 +385,13 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
                     <th className="py-3 px-4 text-center">Ketuntasan</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {subjectGrades.map((item, idx) => (
+                <tbody
+                  key={gradesPagination.animKey}
+                  className={`divide-y divide-slate-100 dark:divide-slate-800 ${gradesPagination.slideClass}`}
+                >
+                  {gradesPagination.paginatedItems.map((item, idx) => (
                     <tr key={item.subject.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
-                      <td className="py-3.5 px-4 text-center text-slate-400">{idx + 1}</td>
+                      <td className="py-3.5 px-4 text-center text-slate-400">{gradesPagination.startIndex + idx + 1}</td>
                       <td className="py-3.5 px-4">
                         <span className="font-bold text-slate-900 dark:text-white block text-sm">
                           {item.subject.name}
@@ -425,6 +436,22 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
                 </tbody>
               </table>
             </div>
+            {subjectGrades.length > 0 && (
+              <div className="p-4 border-t border-slate-100 dark:border-slate-800">
+                <CarouselTablePagination
+                  page={gradesPagination.page}
+                  totalPages={gradesPagination.totalPages}
+                  totalItems={gradesPagination.totalItems}
+                  pageSize={gradesPagination.pageSize}
+                  startIndex={gradesPagination.startIndex}
+                  endIndex={gradesPagination.endIndex}
+                  slideDirection={gradesPagination.slideDirection}
+                  onPageChange={gradesPagination.setPage}
+                  onPageSizeChange={gradesPagination.setPageSize}
+                  itemLabel="mapel"
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -515,46 +542,66 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
               Ajukan perbaikan data kehadiran kepada Wali Kelas jika ada ketidaksesuaian atau surat dokter susulan
             </p>
 
-            <form onSubmit={handleCorrectionSubmit} className="space-y-4 text-xs">
+            <form onSubmit={handleCorrectionSubmit} noValidate className="space-y-4 text-xs">
               <div>
                 <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Tanggal Absensi</label>
                 <input
                   type="date"
                   value={corDate}
+                  aria-invalid={corSubmitted && !corDate}
                   onChange={e => setCorDate(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  required
+                  className={`w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white ${
+                    corSubmitted && !corDate ? 'orbita-field-zigzag-error' : ''
+                  }`}
                 />
+                {corSubmitted && !corDate && (
+                  <p className="mt-1 text-[10.5px] font-bold text-rose-500">Tanggal absensi wajib dipilih.</p>
+                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Status Tercatat</label>
-                  <select
-                    value={corCurStatus}
-                    onChange={e => setCorCurStatus(e.target.value as AttendanceStatus)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  >
-                    <option value="A">Alpa (A)</option>
-                    <option value="T">Terlambat (T)</option>
-                    <option value="I">Izin (I)</option>
-                    <option value="S">Sakit (S)</option>
-                  </select>
-                </div>
+              <div className="space-y-2.5">
+                <AccordionExpandAllBar
+                  title="Pilihan Status Presensi"
+                  allExpanded={correctionAccordion.allExpanded}
+                  onExpandAll={correctionAccordion.expandAll}
+                  onCollapseAll={correctionAccordion.collapseAll}
+                />
+                <AccordionSection
+                  title="Detail Status Tercatat & Koreksi"
+                  subtitle={`${corCurStatus} → ${corReqStatus}`}
+                  open={correctionAccordion.isOpen('portal-cor-status')}
+                  onToggle={() => correctionAccordion.toggle('portal-cor-status')}
+                >
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Status Tercatat</label>
+                      <select
+                        value={corCurStatus}
+                        onChange={e => setCorCurStatus(e.target.value as AttendanceStatus)}
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      >
+                        <option value="A">Alpa (A)</option>
+                        <option value="T">Terlambat (T)</option>
+                        <option value="I">Izin (I)</option>
+                        <option value="S">Sakit (S)</option>
+                      </select>
+                    </div>
 
-                <div>
-                  <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Koreksi Menjadi</label>
-                  <select
-                    value={corReqStatus}
-                    onChange={e => setCorReqStatus(e.target.value as AttendanceStatus)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  >
-                    <option value="H">Hadir (H)</option>
-                    <option value="S">Sakit (S - Surat Dokter)</option>
-                    <option value="I">Izin (I - Surat Ortu)</option>
-                    <option value="T">Terlambat (T)</option>
-                  </select>
-                </div>
+                    <div>
+                      <label className="font-bold text-slate-700 dark:text-slate-300 block mb-1">Koreksi Menjadi</label>
+                      <select
+                        value={corReqStatus}
+                        onChange={e => setCorReqStatus(e.target.value as AttendanceStatus)}
+                        className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      >
+                        <option value="H">Hadir (H)</option>
+                        <option value="S">Sakit (S - Surat Dokter)</option>
+                        <option value="I">Izin (I - Surat Ortu)</option>
+                        <option value="T">Terlambat (T)</option>
+                      </select>
+                    </div>
+                  </div>
+                </AccordionSection>
               </div>
 
               <div>
@@ -562,11 +609,16 @@ export const StudentPortalModule: React.FC<StudentPortalModuleProps> = ({
                 <textarea
                   rows={3}
                   value={corReason}
+                  aria-invalid={corSubmitted && !corReason.trim()}
                   onChange={e => setCorReason(e.target.value)}
                   placeholder="Contoh: Mengikuti lomba kejuruan / surat dokter baru diserahkan..."
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  required
+                  className={`w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs text-slate-900 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-white ${
+                    corSubmitted && !corReason.trim() ? 'orbita-field-zigzag-error' : ''
+                  }`}
                 />
+                {corSubmitted && !corReason.trim() && (
+                  <p className="mt-1 text-[10.5px] font-bold text-rose-500">Alasan lengkap pengajuan wajib diisi.</p>
+                )}
               </div>
 
               <button

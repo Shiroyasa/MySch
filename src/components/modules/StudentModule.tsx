@@ -25,6 +25,85 @@ import {
 import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
 import { AcademyHeroBanner, OrnateCard, AcademyCornerBadge } from '../common/AcademyOrnaments';
 import { LiquidNavBar } from '../common/LiquidNavBar';
+import { CarouselTablePagination, useCarouselPagination } from '../common/CarouselTablePagination';
+
+interface SubjectComponentItem {
+  id: string;
+  title: string;
+  type: string;
+  weight: number;
+  kkm: number;
+  score: number;
+  feedback: string;
+}
+
+const SubjectComponentsTable: React.FC<{ components: SubjectComponentItem[] }> = ({ components }) => {
+  const pagination = useCarouselPagination(components, 5);
+  return (
+    <div className="space-y-2.5">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs bg-white rounded-xl dark:bg-slate-900 overflow-hidden border border-slate-100 dark:border-slate-800">
+          <thead>
+            <tr className="border-b border-slate-100 bg-slate-50 text-slate-500 dark:border-slate-800 dark:bg-slate-800/60 font-bold">
+              <th className="py-2.5 px-3">Komponen Penilaian</th>
+              <th className="py-2.5 px-3">Jenis</th>
+              <th className="py-2.5 px-3 text-center">Bobot</th>
+              <th className="py-2.5 px-3 text-center">Nilai Kamu</th>
+              <th className="py-2.5 px-3">Catatan / Umpan Balik Guru</th>
+            </tr>
+          </thead>
+          <tbody
+            key={pagination.animKey}
+            className={`divide-y divide-slate-100 dark:divide-slate-800 ${pagination.slideClass}`}
+          >
+            {components.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-4 text-center text-slate-400">
+                  Belum ada komponen penilaian yang dipublikasikan untuk mata pelajaran ini.
+                </td>
+              </tr>
+            ) : (
+              pagination.paginatedItems.map(comp => (
+                <tr key={comp.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
+                  <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-white">
+                    {comp.title}
+                  </td>
+                  <td className="py-2.5 px-3 capitalize text-slate-600 dark:text-slate-300">
+                    {comp.type}
+                  </td>
+                  <td className="py-2.5 px-3 text-center text-slate-500 font-mono">
+                    {comp.weight}%
+                  </td>
+                  <td className="py-2.5 px-3 text-center font-bold font-mono text-blue-600 dark:text-blue-400 text-sm">
+                    {comp.score}
+                  </td>
+                  <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300 text-[11px]">
+                    {comp.feedback}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+      {components.length > 0 && (
+        <CarouselTablePagination
+          page={pagination.page}
+          totalPages={pagination.totalPages}
+          totalItems={pagination.totalItems}
+          pageSize={pagination.pageSize}
+          startIndex={pagination.startIndex}
+          endIndex={pagination.endIndex}
+          slideDirection={pagination.slideDirection}
+          onPageChange={pagination.setPage}
+          onPageSizeChange={pagination.setPageSize}
+          pageSizeOptions={[5, 8, 12, 20]}
+          itemLabel="komponen"
+        />
+      )}
+    </div>
+  );
+};
 
 interface StudentModuleProps {
   initialTab?: 'profile' | 'grades';
@@ -136,6 +215,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
       : '0.0';
 
   const allPassed = subjectGrades.every(g => g.isPassed);
+  const overallPagination = useCarouselPagination(subjectGrades, 8);
 
   // Export handlers
   const handleExportTranscriptExcel = () => {
@@ -726,48 +806,7 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                       </div>
 
                       {/* Component breakdown table */}
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs bg-white rounded-xl dark:bg-slate-900 overflow-hidden border border-slate-100 dark:border-slate-800">
-                          <thead>
-                            <tr className="border-b border-slate-100 bg-slate-50 text-slate-500 dark:border-slate-800 dark:bg-slate-800/60 font-bold">
-                              <th className="py-2.5 px-3">Komponen Penilaian</th>
-                              <th className="py-2.5 px-3">Jenis</th>
-                              <th className="py-2.5 px-3 text-center">Bobot</th>
-                              <th className="py-2.5 px-3 text-center">Nilai Kamu</th>
-                              <th className="py-2.5 px-3">Catatan / Umpan Balik Guru</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                            {sg.components.length === 0 ? (
-                              <tr>
-                                <td colSpan={5} className="py-4 text-center text-slate-400">
-                                  Belum ada komponen penilaian yang dipublikasikan untuk mata pelajaran ini.
-                                </td>
-                              </tr>
-                            ) : (
-                              sg.components.map(comp => (
-                                <tr key={comp.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                                  <td className="py-2.5 px-3 font-semibold text-slate-900 dark:text-white">
-                                    {comp.title}
-                                  </td>
-                                  <td className="py-2.5 px-3 capitalize text-slate-600 dark:text-slate-300">
-                                    {comp.type}
-                                  </td>
-                                  <td className="py-2.5 px-3 text-center text-slate-500 font-mono">
-                                    {comp.weight}%
-                                  </td>
-                                  <td className="py-2.5 px-3 text-center font-bold font-mono text-blue-600 dark:text-blue-400 text-sm">
-                                    {comp.score}
-                                  </td>
-                                  <td className="py-2.5 px-3 text-slate-600 dark:text-slate-300 text-[11px]">
-                                    {comp.feedback}
-                                  </td>
-                                </tr>
-                              ))
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
+                      <SubjectComponentsTable components={sg.components} />
                     </div>
                   ))}
                 </div>
@@ -821,10 +860,13 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                         <th className="py-3 px-3 text-center">Status Kelulusan</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {subjectGrades.map((g, idx) => (
+                    <tbody
+                      key={overallPagination.animKey}
+                      className={`divide-y divide-slate-100 dark:divide-slate-800 ${overallPagination.slideClass}`}
+                    >
+                      {overallPagination.paginatedItems.map((g, idx) => (
                         <tr key={g.subject.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
-                          <td className="py-3 px-3 text-center text-slate-400">{idx + 1}</td>
+                          <td className="py-3 px-3 text-center text-slate-400">{overallPagination.startIndex + idx + 1}</td>
                           <td className="py-3 px-3 font-mono font-bold text-slate-600 dark:text-slate-300">{g.subject.code}</td>
                           <td className="py-3 px-3 font-bold text-slate-900 dark:text-white">{g.subject.name}</td>
                           <td className="py-3 px-3 text-slate-500">{g.subject.category}</td>
@@ -847,6 +889,23 @@ export const StudentModule: React.FC<StudentModuleProps> = ({ initialTab = 'prof
                     </tbody>
                   </table>
                 </div>
+
+                {subjectGrades.length > 0 && (
+                  <div className="mt-4">
+                    <CarouselTablePagination
+                      page={overallPagination.page}
+                      totalPages={overallPagination.totalPages}
+                      totalItems={overallPagination.totalItems}
+                      pageSize={overallPagination.pageSize}
+                      startIndex={overallPagination.startIndex}
+                      endIndex={overallPagination.endIndex}
+                      slideDirection={overallPagination.slideDirection}
+                      onPageChange={overallPagination.setPage}
+                      onPageSizeChange={overallPagination.setPageSize}
+                      itemLabel="mapel"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}

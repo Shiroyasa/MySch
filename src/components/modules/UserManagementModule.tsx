@@ -21,6 +21,8 @@ import {
 import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
 import { AcademyHeroBanner, OrnateCard, AcademyCornerBadge } from '../common/AcademyOrnaments';
 import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
+import { CarouselTablePagination, useCarouselPagination } from '../common/CarouselTablePagination';
+import { AccordionExpandAllBar, AccordionSection, useAccordionGroup } from '../common/AccordionExpandGroup';
 
 // Role definitions with default tailored permissions
 interface RolePreset {
@@ -177,6 +179,9 @@ export const UserManagementModule: React.FC = () => {
   // Search & Role Filter
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const userAccordion = useAccordionGroup(['user_filter', 'user_modal_access'], true);
 
   // Selected user detail for viewing/editing permissions quickly
   const [viewingUser, setViewingUser] = useState<User | null>(null);
@@ -210,6 +215,7 @@ export const UserManagementModule: React.FC = () => {
   const openCreateModal = () => {
     setEditingUser(null);
     setFormError(null);
+    setSubmitAttempted(false);
     setFormEmail('');
     setFormName('');
     setFormRole('guru');
@@ -226,6 +232,7 @@ export const UserManagementModule: React.FC = () => {
     const safeRole: UserRole = rolePresets[u.role] ? u.role : 'guru';
     setEditingUser(u);
     setFormError(null);
+    setSubmitAttempted(false);
     setFormEmail(u.email || '');
     setFormName(u.displayName || '');
     setFormRole(safeRole);
@@ -309,13 +316,17 @@ export const UserManagementModule: React.FC = () => {
       itemName: `${targetUser.displayName} (${targetUser.email})`,
       description: `Apakah Anda yakin ingin menghapus akun pengguna ini secara permanen dari Database?`,
       onConfirm: () => {
-        const result = deleteUser(targetUser.id);
+        setDeletingUserId(targetUser.id);
         closeDeleteModal();
-        if (result.success) {
-          showToast(`Akun ${targetUser.displayName} berhasil dihapus dari Database.`, 'info');
-        } else {
-          showToast(result.message, 'error');
-        }
+        window.setTimeout(() => {
+          const result = deleteUser(targetUser.id);
+          setDeletingUserId(null);
+          if (result.success) {
+            showToast(`Akun ${targetUser.displayName} berhasil dihapus dari Database.`, 'info');
+          } else {
+            showToast(result.message, 'error');
+          }
+        }, 420);
       },
     });
   };
@@ -323,6 +334,7 @@ export const UserManagementModule: React.FC = () => {
   const handleSaveUserForm = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+    setSubmitAttempted(true);
 
     const trimmedName = formName.trim();
     const trimmedEmail = formEmail.trim();
@@ -403,6 +415,8 @@ export const UserManagementModule: React.FC = () => {
       getDate: u => u.lastLogin || '2025-01-01',
     });
   }, [users, roleFilter, searchTerm, sortBy]);
+
+  const userPagination = useCarouselPagination(filteredAndSortedUsers, 8);
 
   return (
     <div className="space-y-6">
@@ -525,38 +539,52 @@ export const UserManagementModule: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                placeholder="Cari nama / email / NIP..."
-                className="h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 pl-8 pr-3 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500"
-              />
-            </div>
-
-            {/* Role Filter */}
-            <select
-              value={roleFilter}
-              onChange={e => setRoleFilter(e.target.value)}
-              className="h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-xs font-bold text-slate-700 dark:text-slate-200"
+          <div className="space-y-2 w-full lg:w-auto">
+            <AccordionExpandAllBar
+              title="Filter & Dropdown Peran"
+              allExpanded={userAccordion.allExpanded}
+              onExpandAll={userAccordion.expandAll}
+              onCollapseAll={userAccordion.collapseAll}
+            />
+            <AccordionSection
+              title="Filter Daftar Akun"
+              open={userAccordion.isOpen('user_filter')}
+              onToggle={() => userAccordion.toggle('user_filter')}
             >
-              <option value="ALL">Semua Peran ({users.length})</option>
-              {(Object.keys(rolePresets) as UserRole[]).map(r => (
-                <option key={r} value={r}>
-                  {rolePresets[r].title}
-                </option>
-              ))}
-            </select>
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Search Input */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    placeholder="Cari nama / email / NIP..."
+                    className="h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 pl-8 pr-3 text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
 
-            <SortByControl value={sortBy} onChange={setSortBy} compact />
+                {/* Role Filter */}
+                <select
+                  value={roleFilter}
+                  onChange={e => setRoleFilter(e.target.value)}
+                  className="h-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 text-xs font-bold text-slate-700 dark:text-slate-200"
+                >
+                  <option value="ALL">Semua Peran ({users.length})</option>
+                  {(Object.keys(rolePresets) as UserRole[]).map(r => (
+                    <option key={r} value={r}>
+                      {rolePresets[r].title}
+                    </option>
+                  ))}
+                </select>
+
+                <SortByControl value={sortBy} onChange={setSortBy} compact />
+              </div>
+            </AccordionSection>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div key={userPagination.animKey} className={`overflow-x-auto ${userPagination.slideClass}`}>
           <table className="w-full text-left text-xs">
             <thead>
               <tr>
@@ -570,7 +598,7 @@ export const UserManagementModule: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {filteredAndSortedUsers.map((u, idx) => {
+              {userPagination.paginatedItems.map((u, idx) => {
                 const isSelf = u.id === currentUser?.id;
                 const isRootSuperAdmin = (u.email || '').toLowerCase() === 'kkaito447@gmail.com';
                 const safeRole: UserRole = rolePresets[u.role] ? u.role : 'guru';
@@ -585,8 +613,13 @@ export const UserManagementModule: React.FC = () => {
                 const isActive = u.isActive !== false;
 
                 return (
-                  <tr key={u.id}>
-                    <td className="py-3 px-4 text-center text-slate-400 font-bold">{idx + 1}</td>
+                  <tr
+                    key={u.id}
+                    className={deletingUserId === u.id ? 'animate-genie-bin-exit' : undefined}
+                  >
+                    <td className="py-3 px-4 text-center text-slate-400 font-bold">
+                      {userPagination.startIndex + idx + 1}
+                    </td>
                     <td className="py-3 px-4">
                       <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 flex-wrap">
                         <span>{u.displayName || 'Tanpa Nama'}</span>
@@ -674,6 +707,20 @@ export const UserManagementModule: React.FC = () => {
             </tbody>
           </table>
         </div>
+        <div className="p-3 pt-0">
+          <CarouselTablePagination
+            page={userPagination.page}
+            totalPages={userPagination.totalPages}
+            totalItems={userPagination.totalItems}
+            pageSize={userPagination.pageSize}
+            startIndex={userPagination.startIndex}
+            endIndex={userPagination.endIndex}
+            slideDirection={userPagination.slideDirection}
+            onPageChange={userPagination.setPage}
+            onPageSizeChange={userPagination.setPageSize}
+            itemLabel="pengguna"
+          />
+        </div>
       </OrnateCard>
 
       {/* MODAL: TAMBAH / EDIT DATA PENGGUNA & HAK AKSES */}
@@ -724,8 +771,11 @@ export const UserManagementModule: React.FC = () => {
                     type="text"
                     placeholder="Contoh: Rahmat Hidayat, S.Kom"
                     value={formName}
+                    aria-invalid={submitAttempted && !formName.trim()}
                     onChange={e => setFormName(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white font-semibold"
+                    className={`w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white font-semibold ${
+                      submitAttempted && !formName.trim() ? 'orbita-field-zigzag-error' : ''
+                    }`}
                     required
                   />
                 </div>
@@ -738,8 +788,13 @@ export const UserManagementModule: React.FC = () => {
                     type="email"
                     placeholder="nama@smkmy-cikembar.sch.id"
                     value={formEmail}
+                    aria-invalid={submitAttempted && (!formEmail.trim() || Boolean(formError?.toLowerCase().includes('email')))}
                     onChange={e => setFormEmail(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white font-semibold"
+                    className={`w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white font-semibold ${
+                      submitAttempted && (!formEmail.trim() || Boolean(formError?.toLowerCase().includes('email')))
+                        ? 'orbita-field-zigzag-error'
+                        : ''
+                    }`}
                     required
                   />
                 </div>

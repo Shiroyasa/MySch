@@ -43,9 +43,12 @@ import {
   FileCheck2,
   ScrollText,
   Sparkles,
+  Send,
 } from 'lucide-react';
 import { HighlightedChartHeader, OrbitaMenuIcon } from '../common/AcademyOrnaments';
 import { LiquidNavBar } from '../common/LiquidNavBar';
+import { CarouselTablePagination, useCarouselPagination } from '../common/CarouselTablePagination';
+import { AccordionExpandAllBar, AccordionSection, useAccordionGroup } from '../common/AccordionExpandGroup';
 import {
   ReportCustomConfig,
   defaultReportConfig,
@@ -277,6 +280,11 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
   const [isSavingModal, setIsSavingModal] = useState(false);
   const [isSavingTemplate, setIsSavingTemplate] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const [deletingRowId, setDeletingRowId] = useState<string | null>(null);
+  const [isLaunchingSyncPlane, setIsLaunchingSyncPlane] = useState(false);
+  const [isLaunchingModalPlane, setIsLaunchingModalPlane] = useState(false);
+  const [formSubmitAttempted, setFormSubmitAttempted] = useState(false);
+  const tracerAccordion = useAccordionGroup(['tracer_filters', 'modal_identity', 'modal_career'], true);
 
   // Paper Report & Print Customizer State (Synced with reportTemplate in AppContext/Firestore)
   const [paperConfig, setPaperConfig] = useState<ReportCustomConfig>(() => ({
@@ -488,6 +496,8 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     });
   }, [activeSourceList, searchQuery, categoryFilter, yearFilter, majorFilter, statusFilter]);
 
+  const tracerPagination = useCarouselPagination(filteredTracers, 8);
+
   const stats = useMemo(() => {
     const total = filteredTracers.length;
     const alumniCount = filteredTracers.filter(
@@ -548,12 +558,13 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
   const openCreateModal = () => {
     const isGrade12Tab = categoryFilter === 'kelas_12';
     setEditingTracerId(null);
+    setFormSubmitAttempted(false);
     setFormState({
       respondentCategory: isGrade12Tab ? 'kelas_12' : 'alumni',
       studentId: '',
       nisn: '',
       fullName: '',
-      className: isGrade12Tab ? grade12Classes[0]?.name || 'XII RPL 1' : '',
+      className: '',
       gender: 'L',
       majorCode: majorFilter === 'DPB' ? 'DPB' : 'RPL',
       graduationYear: yearFilter !== 'ALL' ? yearFilter : isGrade12Tab ? defaultGradYear : '2025',
@@ -562,7 +573,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
       careerStatus: statusFilter !== 'ALL' ? statusFilter : 'bekerja',
       institutionOrCompany: '',
       roleOrStudyProgram: '',
-      city: 'Sukabumi',
+      city: isGrade12Tab ? '' : 'Sukabumi',
       industryRelevance: 'sangat_sesuai',
       waitingPeriod: '< 3 Bulan',
       monthlyIncomeRange: isGrade12Tab ? '' : 'Rp 4.500.000 - Rp 6.000.000',
@@ -688,6 +699,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormSubmitAttempted(true);
     const isUnemployedStatus =
       formState.careerStatus === 'belum_bekerja' || formState.careerStatus === 'mencari_kerja';
     if (!formState.fullName.trim()) {
@@ -740,9 +752,12 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     };
 
     setIsSavingModal(true);
+    setIsLaunchingModalPlane(true);
     setSyncError(null);
     try {
+      await new Promise(resolve => setTimeout(resolve, 420));
       await Promise.resolve(onSaveTracer(payload, !editingTracerId));
+      setFormSubmitAttempted(false);
       setShowModal(false);
       onToast(
         isGrade12Payload
@@ -759,6 +774,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
       onToast('Gagal menyimpan data tracer ke Database Cloud. Periksa koneksi lalu coba lagi.');
     } finally {
       setIsSavingModal(false);
+      setIsLaunchingModalPlane(false);
     }
   };
 
@@ -814,11 +830,15 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
   };
 
   const handleDeleteEditableRow = (rowId: string) => {
-    setDraftRows(prev => prev.filter(r => r.id !== rowId));
-    if (tracers.some(t => t.id === rowId)) {
-      setDeletedDraftIds(prev => (prev.includes(rowId) ? prev : [...prev, rowId]));
-    }
-    setIsDraftDirty(true);
+    setDeletingRowId(rowId);
+    window.setTimeout(() => {
+      setDraftRows(prev => prev.filter(r => r.id !== rowId));
+      if (tracers.some(t => t.id === rowId)) {
+        setDeletedDraftIds(prev => (prev.includes(rowId) ? prev : [...prev, rowId]));
+      }
+      setIsDraftDirty(true);
+      setDeletingRowId(null);
+    }, 420);
   };
 
   const handleResetEditableDraft = () => {
@@ -853,8 +873,10 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     }));
 
     setIsSyncingDraft(true);
+    setIsLaunchingSyncPlane(true);
     setSyncError(null);
     try {
+      await new Promise(resolve => setTimeout(resolve, 420));
       if (onSaveTracersBatch) {
         await onSaveTracersBatch(sanitizedPayload, deletedDraftIds);
       } else {
@@ -877,6 +899,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
       onToast('Gagal menyimpan & menyinkronkan draf ke Database Cloud. Pastikan koneksi stabil lalu coba lagi.');
     } finally {
       setIsSyncingDraft(false);
+      setIsLaunchingSyncPlane(false);
     }
   };
 
@@ -1587,89 +1610,104 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
         </div>
       )}
 
-      {/* Clean 2-Tier Filter & Actions Bar (Zero Cramping & Zero Edge Overflow) */}
+      {/* Clean 2-Tier Filter & Actions Bar with Accordion Expand-All */}
       <div className="rounded-2xl border border-[#E6E4F2] bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3">
-        {/* Tier 1: Responsive Search & Filter Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 items-center">
-          <div className="relative sm:col-span-2 lg:col-span-5">
-            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8BA3]" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder={
-                isGrade12Page
-                  ? 'Cari nama siswa XII, NISN, kelas, atau target...'
-                  : 'Cari nama alumni, NISN, instansi, atau kota...'
-              }
-              className="no-ornament h-9 w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] pl-9 pr-3 text-xs font-medium text-[#262341] placeholder:text-[#9694A8] focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400"
-            />
-          </div>
+        <AccordionExpandAllBar
+          title="Filter Pencarian & Dropdown Tracer Study"
+          allExpanded={tracerAccordion.allExpanded}
+          onExpandAll={tracerAccordion.expandAll}
+          onCollapseAll={tracerAccordion.collapseAll}
+        />
 
-          <div className="lg:col-span-2">
-            <div className="relative flex items-center">
-              <Filter className="pointer-events-none absolute left-2.5 h-3.5 w-3.5 text-[#8E8BA3]" />
+        <AccordionSection
+          title="Filter Angkatan, Jurusan & Status Karier"
+          subtitle={`${filteredTracers.length} data ditampilkan`}
+          icon={<Filter className="h-3.5 w-3.5" />}
+          open={tracerAccordion.isOpen('tracer_filters')}
+          onToggle={() => tracerAccordion.toggle('tracer_filters')}
+        >
+          {/* Tier 1: Responsive Search & Filter Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 items-center">
+            <div className="relative sm:col-span-2 lg:col-span-5">
+              <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8BA3]" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder={
+                  isGrade12Page
+                    ? 'Cari nama siswa XII, NISN, kelas, atau target...'
+                    : 'Cari nama alumni, NISN, instansi, atau kota...'
+                }
+                className="no-ornament h-9 w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] pl-9 pr-3 text-xs font-medium text-[#262341] placeholder:text-[#9694A8] focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400"
+              />
+            </div>
+
+            <div className="lg:col-span-2">
+              <div className="relative flex items-center">
+                <Filter className="pointer-events-none absolute left-2.5 h-3.5 w-3.5 text-[#8E8BA3]" />
+                <select
+                  value={yearFilter}
+                  onChange={e => setYearFilter(e.target.value)}
+                  className="no-ornament h-9 w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] pl-8 pr-2.5 text-xs font-bold text-[#3E385B] focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+                >
+                  {graduationYears.map(yr => (
+                    <option key={yr} value={yr}>
+                      {yr === 'ALL' ? 'Semua Angkatan' : `Lulusan ${yr}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="lg:col-span-2">
               <select
-                value={yearFilter}
-                onChange={e => setYearFilter(e.target.value)}
-                className="no-ornament h-9 w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] pl-8 pr-2.5 text-xs font-bold text-[#3E385B] focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+                value={majorFilter}
+                onChange={e => setMajorFilter(e.target.value)}
+                className="no-ornament h-9 w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] px-3 text-xs font-bold text-[#3E385B] focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
               >
-                {graduationYears.map(yr => (
-                  <option key={yr} value={yr}>
-                    {yr === 'ALL' ? 'Semua Angkatan' : `Lulusan ${yr}`}
+                <option value="ALL">Semua Jurusan</option>
+                {TRACER_MAJORS.map(mj => (
+                  <option key={mj} value={mj}>
+                    Jurusan {mj}
                   </option>
                 ))}
               </select>
             </div>
-          </div>
 
-          <div className="lg:col-span-2">
-            <select
-              value={majorFilter}
-              onChange={e => setMajorFilter(e.target.value)}
-              className="no-ornament h-9 w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] px-3 text-xs font-bold text-[#3E385B] focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
-            >
-              <option value="ALL">Semua Jurusan</option>
-              {TRACER_MAJORS.map(mj => (
-                <option key={mj} value={mj}>
-                  Jurusan {mj}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="sm:col-span-2 lg:col-span-3 flex items-center gap-2">
-            <select
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value as AlumniCareerStatus | 'ALL')}
-              className="no-ornament h-9 w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] px-3 text-xs font-bold text-[#3E385B] focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
-            >
-              <option value="ALL">Semua Status Karier</option>
-              <option value="bekerja">Bekerja di Industri</option>
-              <option value="kuliah">Melanjutkan Kuliah</option>
-              <option value="wirausaha">Berwirausaha Mandiri</option>
-              <option value="mencari_kerja">Pelatihan / Penyaluran BKK</option>
-              <option value="belum_bekerja">Belum Bekerja</option>
-            </select>
-
-            {hasActiveFilter && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchQuery('');
-                  setYearFilter('ALL');
-                  setMajorFilter('ALL');
-                  setStatusFilter('ALL');
-                }}
-                title="Reset semua filter"
-                className="no-ornament inline-flex h-9 items-center justify-center gap-1 rounded-xl bg-[#FFE8EF] px-3 text-xs font-bold text-[#D9436D] hover:bg-[#FFD6E3] dark:bg-rose-950/60 dark:text-rose-300 dark:hover:bg-rose-900/70 cursor-pointer whitespace-nowrap shrink-0"
+            <div className="sm:col-span-2 lg:col-span-3 flex items-center gap-2">
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value as AlumniCareerStatus | 'ALL')}
+                className="no-ornament h-9 w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] px-3 text-xs font-bold text-[#3E385B] focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
               >
-                <RotateCcw className="h-3.5 w-3.5 shrink-0" />
-                <span>Reset</span>
-              </button>
-            )}
+                <option value="ALL">Semua Status Karier</option>
+                <option value="bekerja">Bekerja di Industri</option>
+                <option value="kuliah">Melanjutkan Kuliah</option>
+                <option value="wirausaha">Berwirausaha Mandiri</option>
+                <option value="mencari_kerja">Pelatihan / Penyaluran BKK</option>
+                <option value="belum_bekerja">Belum Bekerja</option>
+              </select>
+
+              {hasActiveFilter && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setYearFilter('ALL');
+                    setMajorFilter('ALL');
+                    setStatusFilter('ALL');
+                  }}
+                  title="Reset semua filter"
+                  className="no-ornament inline-flex h-9 items-center justify-center gap-1 rounded-xl bg-[#FFE8EF] px-3 text-xs font-bold text-[#D9436D] hover:bg-[#FFD6E3] dark:bg-rose-950/60 dark:text-rose-300 dark:hover:bg-rose-900/70 cursor-pointer whitespace-nowrap shrink-0"
+                >
+                  <RotateCcw className="h-3.5 w-3.5 shrink-0" />
+                  <span>Reset</span>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
+        </AccordionSection>
 
         {/* Tier 2: Aligned Primary Workflow & Export Buttons */}
         <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-[#ECEAF6] dark:border-slate-800">
@@ -1688,14 +1726,11 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                   type="button"
                   onClick={handleSyncEditableDraftToDb}
                   disabled={isSyncingDraft}
-                  className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-4 text-xs font-extrabold text-white shadow-xs hover:bg-[#5B4FA8] disabled:opacity-60 cursor-pointer whitespace-nowrap shrink-0 transition-colors"
+                  data-sending={isLaunchingSyncPlane ? 'true' : 'false'}
+                  className="no-ornament orbita-paper-plane-btn inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-4 text-xs font-extrabold text-white shadow-xs hover:bg-[#5B4FA8] disabled:opacity-60 cursor-pointer whitespace-nowrap shrink-0 transition-colors"
                 >
-                  {isSyncingDraft ? (
-                    <RefreshCw className="h-3.5 w-3.5 shrink-0 animate-spin" />
-                  ) : (
-                    <Save className="h-3.5 w-3.5 shrink-0" />
-                  )}
-                  <span>Simpan &amp; Sinkronkan Database</span>
+                  <Send className="h-3.5 w-3.5 shrink-0 orbita-paper-plane-icon" />
+                  <span>{isSyncingDraft ? 'Menyinkronkan...' : 'Simpan & Sinkronkan Database'}</span>
                 </button>
                 {isDraftDirty && (
                   <button
@@ -1854,8 +1889,8 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
             </div>
           ) : (
             <>
-              {/* Desktop Table */}
-              <div className="hidden lg:block overflow-x-auto rounded-2xl border border-[#ECEBF5] dark:border-slate-800">
+              {/* Desktop Table (Carousel Paginated) */}
+              <div key={`dir-tbl-${tracerPagination.animKey}`} className={`hidden lg:block overflow-x-auto rounded-2xl border border-[#ECEBF5] dark:border-slate-800 ${tracerPagination.slideClass}`}>
                 <table className="w-full text-left text-xs tabular-nums">
                   <thead>
                     <tr className="border-b border-[#ECEBF5] bg-[#FAF9FE] text-[#3E385B] dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-extrabold">
@@ -1870,13 +1905,20 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0EFF8] dark:divide-slate-800">
-                    {filteredTracers.map((t, idx) => {
+                    {tracerPagination.paginatedItems.map((t, idx) => {
                       const meta = getStatusMeta(t.careerStatus);
                       const rel = RELEVANCE_LABEL[t.industryRelevance] || RELEVANCE_LABEL.sesuai;
                       const majorDisplay = normalizeTracerMajor(t.majorCode);
                       return (
-                        <tr key={t.id} className="hover:bg-[#FAF9FE]/70 dark:hover:bg-slate-800/40 align-top">
-                          <td className="py-3 px-3 text-center text-[#8E8BA3] font-bold">{idx + 1}</td>
+                        <tr
+                          key={t.id}
+                          className={`hover:bg-[#FAF9FE]/70 dark:hover:bg-slate-800/40 align-top ${
+                            deletingRowId === t.id ? 'animate-genie-bin-exit' : ''
+                          }`}
+                        >
+                          <td className="py-3 px-3 text-center text-[#8E8BA3] font-bold">
+                            {tracerPagination.startIndex + idx + 1}
+                          </td>
                           <td className="py-3 px-3">
                             <div className="flex flex-wrap items-center gap-1.5">
                               <span className="font-extrabold text-[#252042] dark:text-white">
@@ -1996,6 +2038,8 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                                     itemName: t.fullName,
                                     description: `Hapus jejak alumni ${t.fullName} (${t.institutionOrCompany || '-'}) dari database Tracer Study?`,
                                     onConfirm: async () => {
+                                      setDeletingRowId(t.id);
+                                      await new Promise(r => setTimeout(r, 420));
                                       try {
                                         await Promise.resolve(onDeleteTracer(t.id));
                                         setSyncError(null);
@@ -2003,6 +2047,8 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                                       } catch {
                                         setSyncError('Gagal menghapus data dari Database.');
                                         onToast(`Gagal menghapus catatan ${t.fullName} di Database Cloud.`);
+                                      } finally {
+                                        setDeletingRowId(null);
                                       }
                                     },
                                   })
@@ -2022,15 +2068,17 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
               </div>
 
               {/* Mobile & Tablet Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden">
-                {filteredTracers.map(t => {
+              <div key={`dir-mob-${tracerPagination.animKey}`} className={`grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden ${tracerPagination.slideClass}`}>
+                {tracerPagination.paginatedItems.map(t => {
                   const meta = getStatusMeta(t.careerStatus);
                   const rel = RELEVANCE_LABEL[t.industryRelevance] || RELEVANCE_LABEL.sesuai;
                   const majorDisplay = normalizeTracerMajor(t.majorCode);
                   return (
                     <div
                       key={t.id}
-                      className="rounded-2xl border border-[#ECEAF6] bg-[#FAF9FE] p-4 space-y-3 dark:border-slate-800 dark:bg-slate-800/40"
+                      className={`rounded-2xl border border-[#ECEAF6] bg-[#FAF9FE] p-4 space-y-3 dark:border-slate-800 dark:bg-slate-800/40 ${
+                        deletingRowId === t.id ? 'animate-genie-bin-exit' : ''
+                      }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
@@ -2131,6 +2179,8 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                                 itemName: t.fullName,
                                 description: `Hapus jejak alumni ${t.fullName} dari database Tracer Study?`,
                                 onConfirm: async () => {
+                                  setDeletingRowId(t.id);
+                                  await new Promise(r => setTimeout(r, 420));
                                   try {
                                     await Promise.resolve(onDeleteTracer(t.id));
                                     setSyncError(null);
@@ -2138,6 +2188,8 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                                   } catch {
                                     setSyncError('Gagal menghapus data dari Database.');
                                     onToast(`Gagal menghapus catatan ${t.fullName} di Database Cloud.`);
+                                  } finally {
+                                    setDeletingRowId(null);
                                   }
                                 },
                               })
@@ -2152,6 +2204,19 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                   );
                 })}
               </div>
+
+              <CarouselTablePagination
+                page={tracerPagination.page}
+                totalPages={tracerPagination.totalPages}
+                totalItems={tracerPagination.totalItems}
+                pageSize={tracerPagination.pageSize}
+                startIndex={tracerPagination.startIndex}
+                endIndex={tracerPagination.endIndex}
+                slideDirection={tracerPagination.slideDirection}
+                onPageChange={tracerPagination.setPage}
+                onPageSizeChange={tracerPagination.setPageSize}
+                itemLabel={isGrade12Page ? 'siswa XII' : 'alumni'}
+              />
             </>
           )}
         </div>
@@ -2193,8 +2258,8 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
             </div>
           ) : (
             <>
-              {/* Desktop Compact 7-Column Spreadsheet (Fits cleanly without cramping L/P, Jurusan, or Year) */}
-              <div className="hidden lg:block overflow-x-auto rounded-2xl border border-[#ECEBF5] dark:border-slate-800">
+              {/* Desktop Compact 7-Column Spreadsheet (Carousel Paginated) */}
+              <div key={`edit-tbl-${tracerPagination.animKey}`} className={`hidden lg:block overflow-x-auto rounded-2xl border border-[#ECEBF5] dark:border-slate-800 ${tracerPagination.slideClass}`}>
                 <table className="w-full text-left text-xs tabular-nums">
                   <thead>
                     <tr className="border-b border-[#ECEBF5] bg-[#FAF9FE] text-[#3E385B] dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-extrabold">
@@ -2208,10 +2273,15 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0EFF8] dark:divide-slate-800">
-                    {filteredTracers.map((row, idx) => (
-                      <tr key={row.id} className="hover:bg-[#FAF9FE]/60 dark:hover:bg-slate-800/30 align-top">
+                    {tracerPagination.paginatedItems.map((row, idx) => (
+                      <tr
+                        key={row.id}
+                        className={`hover:bg-[#FAF9FE]/60 dark:hover:bg-slate-800/30 align-top ${
+                          deletingRowId === row.id ? 'animate-genie-bin-exit' : ''
+                        }`}
+                      >
                         <td className="py-2.5 px-2.5 text-center font-bold text-[#8E8BA3] pt-4">
-                          {idx + 1}
+                          {tracerPagination.startIndex + idx + 1}
                         </td>
 
                         {/* Nama & NISN */}
@@ -2421,15 +2491,17 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
               </div>
 
               {/* Mobile & Tablet Editable Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden">
-                {filteredTracers.map((row, idx) => (
+              <div key={`edit-mob-${tracerPagination.animKey}`} className={`grid grid-cols-1 md:grid-cols-2 gap-4 lg:hidden ${tracerPagination.slideClass}`}>
+                {tracerPagination.paginatedItems.map((row, idx) => (
                   <div
                     key={row.id}
-                    className="rounded-2xl border border-[#ECEAF6] bg-[#FAF9FE] p-4 space-y-3 dark:border-slate-800 dark:bg-slate-800/40 text-xs"
+                    className={`rounded-2xl border border-[#ECEAF6] bg-[#FAF9FE] p-4 space-y-3 dark:border-slate-800 dark:bg-slate-800/40 text-xs ${
+                      deletingRowId === row.id ? 'animate-genie-bin-exit' : ''
+                    }`}
                   >
                     <div className="flex items-center justify-between gap-2 border-b border-[#E6E4F2] pb-2 dark:border-slate-700">
                       <span className="font-black text-[#6C60B8] dark:text-violet-300">
-                        Baris #{idx + 1} &middot; {normalizeTracerMajor(row.majorCode)}
+                        Baris #{tracerPagination.startIndex + idx + 1} &middot; {normalizeTracerMajor(row.majorCode)}
                       </span>
                       <div className="flex items-center gap-1.5">
                         <button
@@ -2608,6 +2680,19 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                   </div>
                 ))}
               </div>
+
+              <CarouselTablePagination
+                page={tracerPagination.page}
+                totalPages={tracerPagination.totalPages}
+                totalItems={tracerPagination.totalItems}
+                pageSize={tracerPagination.pageSize}
+                startIndex={tracerPagination.startIndex}
+                endIndex={tracerPagination.endIndex}
+                slideDirection={tracerPagination.slideDirection}
+                onPageChange={tracerPagination.setPage}
+                onPageSizeChange={tracerPagination.setPageSize}
+                itemLabel="baris draf"
+              />
             </>
           )}
         </div>
@@ -3299,13 +3384,23 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                   <button
                     type="button"
                     onClick={() => {
+                      setFormSubmitAttempted(false);
                       setFormState(p => ({
                         ...p,
                         respondentCategory: 'kelas_12',
-                        className: p.className || grade12Classes[0]?.name || 'XII RPL 1',
+                        studentId: editingTracerId ? p.studentId : '',
+                        nisn: editingTracerId ? p.nisn : '',
+                        fullName: editingTracerId ? p.fullName : '',
+                        className: editingTracerId ? p.className : '',
                         graduationYear: defaultGradYear,
-                        bkkSupportNeed: p.bkkSupportNeed || BKK_SUPPORT_OPTIONS[0],
-                        targetPlanDate: p.targetPlanDate || PLAN_TIMELINE_OPTIONS[0],
+                        institutionOrCompany: editingTracerId ? p.institutionOrCompany : '',
+                        roleOrStudyProgram: editingTracerId ? p.roleOrStudyProgram : '',
+                        city: editingTracerId ? p.city : '',
+                        phone: editingTracerId ? p.phone : '',
+                        email: editingTracerId ? p.email : '',
+                        testimonial: editingTracerId ? p.testimonial : '',
+                        bkkSupportNeed: BKK_SUPPORT_OPTIONS[0],
+                        targetPlanDate: PLAN_TIMELINE_OPTIONS[0],
                       }));
                     }}
                     className={`no-ornament rounded-xl py-2 px-3 text-xs font-extrabold transition-all cursor-pointer ${
@@ -3317,6 +3412,20 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                     Siswa Kelas 12 (Rencana Lulus)
                   </button>
                 </div>
+
+                <AccordionExpandAllBar
+                  title="Grup Formulir & Dropdown Modal"
+                  allExpanded={tracerAccordion.allExpanded}
+                  onExpandAll={tracerAccordion.expandAll}
+                  onCollapseAll={tracerAccordion.collapseAll}
+                />
+
+                <AccordionSection
+                  title="Identitas Responden & Data Kelas / Alumni"
+                  open={tracerAccordion.isOpen('modal_identity')}
+                  onToggle={() => tracerAccordion.toggle('modal_identity')}
+                >
+                  <div className="space-y-3">
 
                 {formState.respondentCategory === 'kelas_12'
                   ? !editingTracerId &&
@@ -3391,8 +3500,11 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                           : 'Contoh: Aditya Pratama Putra'
                       }
                       value={formState.fullName}
+                      aria-invalid={formSubmitAttempted && !formState.fullName.trim()}
                       onChange={e => setFormState(p => ({ ...p, fullName: e.target.value }))}
-                      className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-semibold focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      className={`w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-semibold focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white ${
+                        formSubmitAttempted && !formState.fullName.trim() ? 'orbita-field-zigzag-error' : ''
+                      }`}
                     />
                   </div>
 
@@ -3432,6 +3544,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                             }}
                             className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-bold focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                           >
+                            <option value="">-- Pilih Kelas XII --</option>
                             {grade12Classes.map(cls => (
                               <option key={cls.id} value={cls.name}>
                                 {cls.name}
@@ -3523,7 +3636,16 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                       />
                     </div>
                   </div>
+                </div>
+                  </div>
+                </AccordionSection>
 
+                <AccordionSection
+                  title="Rencana / Status Karier, Mitra & Timeline"
+                  open={tracerAccordion.isOpen('modal_career')}
+                  onToggle={() => tracerAccordion.toggle('modal_career')}
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
                       {formState.respondentCategory === 'kelas_12'
@@ -3593,8 +3715,13 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                           : 'Contoh: PT Telkom Indonesia / POLBAN'
                       }
                       value={formState.institutionOrCompany}
+                      aria-invalid={formSubmitAttempted && !isModalUnemployed && !formState.institutionOrCompany.trim()}
                       onChange={e => setFormState(p => ({ ...p, institutionOrCompany: e.target.value }))}
-                      className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-semibold focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      className={`w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-semibold focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white ${
+                        formSubmitAttempted && !isModalUnemployed && !formState.institutionOrCompany.trim()
+                          ? 'orbita-field-zigzag-error'
+                          : ''
+                      }`}
                     />
                   </div>
 
@@ -3776,6 +3903,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                     </div>
                   )}
                 </div>
+                </AccordionSection>
 
                 <div>
                   <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
@@ -3820,19 +3948,20 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                   <button
                     type="submit"
                     disabled={isSavingModal}
-                    className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-5 text-xs font-extrabold text-white shadow-xs hover:bg-[#5B4FA8] disabled:opacity-60 cursor-pointer whitespace-nowrap shrink-0"
+                    data-sending={isLaunchingModalPlane ? 'true' : 'false'}
+                    className="no-ornament orbita-paper-plane-btn inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-5 text-xs font-extrabold text-white shadow-xs hover:bg-[#5B4FA8] disabled:opacity-60 cursor-pointer whitespace-nowrap shrink-0"
                   >
-                    {isSavingModal && <RefreshCw className="h-3.5 w-3.5 shrink-0 animate-spin" />}
+                    <Send className="h-3.5 w-3.5 shrink-0 orbita-paper-plane-icon" />
                     <span>
                       {isSavingModal
                         ? 'Menyimpan ke Database...'
                         : formState.respondentCategory === 'kelas_12'
                         ? editingTracerId
-                          ? 'Simpan Perubahan Kelas 12'
-                          : 'Simpan Rencana Kelas 12'
+                          ? 'Simpan & Sinkronkan Kelas 12'
+                          : 'Kirim & Sinkronkan Rencana Kelas 12'
                         : editingTracerId
-                        ? 'Simpan Perubahan Alumni'
-                        : 'Simpan Data Tracer Alumni'}
+                        ? 'Simpan & Sinkronkan Alumni'
+                        : 'Kirim & Sinkronkan Data Alumni'}
                     </span>
                   </button>
                 </div>

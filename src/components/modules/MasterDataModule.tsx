@@ -29,6 +29,8 @@ import { DeleteConfirmModal } from '../common/DeleteConfirmModal';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 import { LiquidNavBar } from '../common/LiquidNavBar';
+import { CarouselTablePagination, useCarouselPagination } from '../common/CarouselTablePagination';
+import { AccordionExpandAllBar, AccordionSection, useAccordionGroup } from '../common/AccordionExpandGroup';
 
 export const MasterDataModule: React.FC = () => {
   const {
@@ -70,6 +72,8 @@ export const MasterDataModule: React.FC = () => {
   const [filterClass, setFilterClass] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [sortBy, setSortBy] = useState<SortOption>('az');
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
+  const masterAccordion = useAccordionGroup(['student_filters', 'schedule_filters'], true);
 
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -196,9 +200,13 @@ export const MasterDataModule: React.FC = () => {
       itemName: `${std.fullName} (NISN: ${std.nisn})`,
       description: `Apakah Anda yakin ingin menghapus data siswa ini secara permanen? Seluruh riwayat presensi dan nilai akademik terkait siswa ini juga akan dibersihkan dari sistem.`,
       onConfirm: () => {
-        deleteStudent(std.id);
+        setDeletingItemId(std.id);
         closeDeleteModal();
-        showToast(`Data siswa ${std.fullName} berhasil dihapus.`);
+        window.setTimeout(() => {
+          deleteStudent(std.id);
+          setDeletingItemId(null);
+          showToast(`Data siswa ${std.fullName} berhasil dihapus.`);
+        }, 420);
       },
     });
   };
@@ -292,9 +300,13 @@ export const MasterDataModule: React.FC = () => {
       itemName: `${tch.fullName} (NIP: ${tch.nip})`,
       description: `Apakah Anda yakin ingin menghapus guru ini dari daftar tenaga pendidik sekolah?`,
       onConfirm: () => {
-        deleteTeacher(tch.id);
+        setDeletingItemId(tch.id);
         closeDeleteModal();
-        showToast(`Data guru ${tch.fullName} berhasil dihapus.`);
+        window.setTimeout(() => {
+          deleteTeacher(tch.id);
+          setDeletingItemId(null);
+          showToast(`Data guru ${tch.fullName} berhasil dihapus.`);
+        }, 420);
       },
     });
   };
@@ -506,9 +518,13 @@ export const MasterDataModule: React.FC = () => {
       itemName: `${s.name} (${s.code})`,
       description: `Apakah Anda yakin ingin menghapus mata pelajaran ini dari kurikulum? Semua komponen penilaian dan nilai yang terkait dengan mata pelajaran ini juga akan dihapus.`,
       onConfirm: () => {
-        deleteSubject(s.id);
+        setDeletingItemId(s.id);
         closeDeleteModal();
-        showToast(`Mata pelajaran ${s.name} berhasil dihapus.`);
+        window.setTimeout(() => {
+          deleteSubject(s.id);
+          setDeletingItemId(null);
+          showToast(`Mata pelajaran ${s.name} berhasil dihapus.`);
+        }, 420);
       },
     });
   };
@@ -632,9 +648,13 @@ export const MasterDataModule: React.FC = () => {
       itemName: `${sch.subjectName} — ${sch.className} (${sch.day}, ${sch.startTime}-${sch.endTime})`,
       description: 'Apakah Anda yakin ingin menghapus jadwal pelajaran ini dari Data Pokok sekolah?',
       onConfirm: () => {
-        deleteLessonSchedule(sch.id);
+        setDeletingItemId(sch.id);
         closeDeleteModal();
-        showToast('Jadwal pelajaran berhasil dihapus dari database.');
+        window.setTimeout(() => {
+          deleteLessonSchedule(sch.id);
+          setDeletingItemId(null);
+          showToast('Jadwal pelajaran berhasil dihapus dari database.');
+        }, 420);
       },
     });
   };
@@ -663,6 +683,11 @@ export const MasterDataModule: React.FC = () => {
       getDate: s => s.enrollmentDate || '2025-07-14',
     }
   );
+
+  const studentPagination = useCarouselPagination(filteredStudents, 8);
+  const teacherPagination = useCarouselPagination(teachers, 8);
+  const subjectPagination = useCarouselPagination(subjects, 8);
+  const schedulePagination = useCarouselPagination(filteredSchedules, 8);
 
   const handleExportStudentsExcel = () => {
     const rows = filteredStudents.map((s, i) => ({
@@ -746,81 +771,97 @@ export const MasterDataModule: React.FC = () => {
       {/* TAB 1: DATA SISWA */}
       {activeTab === 'students' && (
         <div className="space-y-4">
-          {/* Controls Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex flex-wrap items-center gap-2 w-full sm:flex-1 sm:min-w-[240px]">
-              <div className="relative w-full sm:flex-1 sm:min-w-[180px] sm:max-w-xs">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Cari nama, NISN, atau NIS..."
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
-                />
+          {/* Controls Bar with Accordion Expand-All */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3">
+            <AccordionExpandAllBar
+              title="Filter Data Siswa & Dropdown Kelas/Status"
+              allExpanded={masterAccordion.allExpanded}
+              onExpandAll={masterAccordion.expandAll}
+              onCollapseAll={masterAccordion.collapseAll}
+            />
+            <AccordionSection
+              title="Pencarian & Filter Siswa"
+              subtitle={`${filteredStudents.length} siswa ditampilkan`}
+              icon={<Filter className="h-3.5 w-3.5" />}
+              open={masterAccordion.isOpen('student_filters')}
+              onToggle={() => masterAccordion.toggle('student_filters')}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2 w-full sm:flex-1 sm:min-w-[240px]">
+                  <div className="relative w-full sm:flex-1 sm:min-w-[180px] sm:max-w-xs">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Cari nama, NISN, atau NIS..."
+                      value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                      className="h-9 w-full rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 text-xs text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-white focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <select
+                    value={filterClass}
+                    onChange={e => setFilterClass(e.target.value)}
+                    className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    <option value="ALL">Semua Kelas</option>
+                    {classes.map(c => (
+                      <option key={c.id} value={c.name}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={filterStatus}
+                    onChange={e => setFilterStatus(e.target.value)}
+                    className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
+                    <option value="ALL">Semua Status</option>
+                    <option value="aktif">Aktif</option>
+                    <option value="mutasi">Mutasi / Diarsipkan</option>
+                    <option value="lulus">Lulus</option>
+                  </select>
+
+                  <SortByControl value={sortBy} onChange={setSortBy} />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSimulateImport}
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
+                    title="Impor format spreadsheet Excel atau CSV"
+                  >
+                    <Upload className="h-3.5 w-3.5 text-blue-600 shrink-0" />
+                    <span>Impor Excel/CSV</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleExportStudentsExcel}
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
+                  >
+                    <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                    <span>Ekspor XLSX</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={openAddStudentModal}
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
+                  >
+                    <Plus className="h-4 w-4 shrink-0" />
+                    <span>Tambah Siswa</span>
+                  </button>
+                </div>
               </div>
-
-              <select
-                value={filterClass}
-                onChange={e => setFilterClass(e.target.value)}
-                className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              >
-                <option value="ALL">Semua Kelas</option>
-                {classes.map(c => (
-                  <option key={c.id} value={c.name}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={filterStatus}
-                onChange={e => setFilterStatus(e.target.value)}
-                className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              >
-                <option value="ALL">Semua Status</option>
-                <option value="aktif">Aktif</option>
-                <option value="mutasi">Mutasi / Diarsipkan</option>
-                <option value="lulus">Lulus</option>
-              </select>
-
-              <SortByControl value={sortBy} onChange={setSortBy} />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={handleSimulateImport}
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
-                title="Impor format spreadsheet Excel atau CSV"
-              >
-                <Upload className="h-3.5 w-3.5 text-blue-600 shrink-0" />
-                <span>Impor Excel/CSV</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleExportStudentsExcel}
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
-              >
-                <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                <span>Ekspor XLSX</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={openAddStudentModal}
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 transition-colors cursor-pointer whitespace-nowrap shrink-0"
-              >
-                <Plus className="h-4 w-4 shrink-0" />
-                <span>Tambah Siswa</span>
-              </button>
-            </div>
+            </AccordionSection>
           </div>
 
-          {/* Students Data Table */}
+          {/* Students Data Table (Carousel Paginated) */}
           <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden dark:border-slate-800 dark:bg-slate-900">
-            <div className="overflow-x-auto">
+            <div key={studentPagination.animKey} className={`overflow-x-auto ${studentPagination.slideClass}`}>
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300 font-bold">
@@ -835,16 +876,23 @@ export const MasterDataModule: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {filteredStudents.length === 0 ? (
+                  {studentPagination.paginatedItems.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="py-8 text-center text-xs text-slate-400">
                         Tidak ada data siswa yang cocok dengan filter pencarian.
                       </td>
                     </tr>
                   ) : (
-                    filteredStudents.map((std, idx) => (
-                      <tr key={std.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
-                        <td className="py-3 px-4 text-center text-slate-400">{idx + 1}</td>
+                    studentPagination.paginatedItems.map((std, idx) => (
+                      <tr
+                        key={std.id}
+                        className={`hover:bg-slate-50/70 dark:hover:bg-slate-800/40 ${
+                          deletingItemId === std.id ? 'animate-genie-bin-exit' : ''
+                        }`}
+                      >
+                        <td className="py-3 px-4 text-center text-slate-400">
+                          {studentPagination.startIndex + idx + 1}
+                        </td>
                         <td className="py-3 px-4 font-mono text-[11px]">
                           <span className="font-bold text-slate-800 dark:text-slate-200">{std.nisn}</span>
                           <span className="text-slate-400 block text-[10px]">{std.nis}</span>
@@ -906,6 +954,20 @@ export const MasterDataModule: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            <div className="p-3 pt-0">
+              <CarouselTablePagination
+                page={studentPagination.page}
+                totalPages={studentPagination.totalPages}
+                totalItems={studentPagination.totalItems}
+                pageSize={studentPagination.pageSize}
+                startIndex={studentPagination.startIndex}
+                endIndex={studentPagination.endIndex}
+                slideDirection={studentPagination.slideDirection}
+                onPageChange={studentPagination.setPage}
+                onPageSizeChange={studentPagination.setPageSize}
+                itemLabel="siswa"
+              />
+            </div>
           </div>
         </div>
       )}
@@ -927,7 +989,7 @@ export const MasterDataModule: React.FC = () => {
               <span>Tambah Guru Baru</span>
             </button>
           </div>
-          <div className="overflow-x-auto">
+          <div key={teacherPagination.animKey} className={`overflow-x-auto ${teacherPagination.slideClass}`}>
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300 font-bold">
@@ -941,9 +1003,16 @@ export const MasterDataModule: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {teachers.map((t, idx) => (
-                  <tr key={t.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
-                    <td className="py-3 px-4 text-center text-slate-400">{idx + 1}</td>
+                {teacherPagination.paginatedItems.map((t, idx) => (
+                  <tr
+                    key={t.id}
+                    className={`hover:bg-slate-50/70 dark:hover:bg-slate-800/40 ${
+                      deletingItemId === t.id ? 'animate-genie-bin-exit' : ''
+                    }`}
+                  >
+                    <td className="py-3 px-4 text-center text-slate-400">
+                      {teacherPagination.startIndex + idx + 1}
+                    </td>
                     <td className="py-3 px-4 font-mono text-[11px] text-slate-600 dark:text-slate-300">{t.nip}</td>
                     <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{t.fullName}</td>
                     <td className="py-3 px-4 text-slate-700 dark:text-slate-300">
@@ -986,6 +1055,20 @@ export const MasterDataModule: React.FC = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="p-3 pt-0">
+            <CarouselTablePagination
+              page={teacherPagination.page}
+              totalPages={teacherPagination.totalPages}
+              totalItems={teacherPagination.totalItems}
+              pageSize={teacherPagination.pageSize}
+              startIndex={teacherPagination.startIndex}
+              endIndex={teacherPagination.endIndex}
+              slideDirection={teacherPagination.slideDirection}
+              onPageChange={teacherPagination.setPage}
+              onPageSizeChange={teacherPagination.setPageSize}
+              itemLabel="guru"
+            />
           </div>
         </div>
       )}
@@ -1126,7 +1209,7 @@ export const MasterDataModule: React.FC = () => {
               <span>Tambah Mapel Baru</span>
             </button>
           </div>
-          <div className="overflow-x-auto">
+          <div key={subjectPagination.animKey} className={`overflow-x-auto ${subjectPagination.slideClass}`}>
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300 font-bold">
@@ -1139,8 +1222,13 @@ export const MasterDataModule: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {subjects.map(s => (
-                <tr key={s.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+              {subjectPagination.paginatedItems.map(s => (
+                <tr
+                  key={s.id}
+                  className={`hover:bg-slate-50/70 dark:hover:bg-slate-800/40 ${
+                    deletingItemId === s.id ? 'animate-genie-bin-exit' : ''
+                  }`}
+                >
                   <td className="py-3 px-4 font-mono font-bold text-blue-600">{s.code}</td>
                   <td className="py-3 px-4 font-bold text-slate-900 dark:text-white">{s.name}</td>
                   <td className="py-3 px-4 text-slate-600 dark:text-slate-300">{s.category}</td>
@@ -1171,84 +1259,112 @@ export const MasterDataModule: React.FC = () => {
             </tbody>
           </table>
           </div>
+          <div className="p-3 pt-0">
+            <CarouselTablePagination
+              page={subjectPagination.page}
+              totalPages={subjectPagination.totalPages}
+              totalItems={subjectPagination.totalItems}
+              pageSize={subjectPagination.pageSize}
+              startIndex={subjectPagination.startIndex}
+              endIndex={subjectPagination.endIndex}
+              slideDirection={subjectPagination.slideDirection}
+              onPageChange={subjectPagination.setPage}
+              onPageSizeChange={subjectPagination.setPageSize}
+              itemLabel="mata pelajaran"
+            />
+          </div>
         </div>
       )}
 
       {/* TAB 6: JADWAL PELAJARAN (DATA POKOK) */}
       {activeTab === 'schedules' && (
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <div>
-              <h2 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-blue-600" />
-                <span>Jadwal Pelajaran Sekolah ({filteredSchedules.length} Sesi Terjadwal)</span>
-              </h2>
-              <p className="text-xs text-slate-500">
-                Manajemen jadwal kegiatan belajar mengajar (KBM) mingguan per kelas, mata pelajaran, guru pengampu, dan ruang praktik/teori
-              </p>
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <span>Jadwal Pelajaran Sekolah ({filteredSchedules.length} Sesi Terjadwal)</span>
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Manajemen jadwal kegiatan belajar mengajar (KBM) mingguan per kelas, mata pelajaran, guru pengampu, dan ruang praktik/teori
+                </p>
+              </div>
+              <AccordionExpandAllBar
+                title="Filter Jadwal & Dropdown Kelas/Hari"
+                allExpanded={masterAccordion.allExpanded}
+                onExpandAll={masterAccordion.expandAll}
+                onCollapseAll={masterAccordion.collapseAll}
+              />
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <select
-                value={filterScheduleDay}
-                onChange={e => setFilterScheduleDay(e.target.value)}
-                className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              >
-                <option value="ALL">Semua Hari (Senin - Sabtu)</option>
-                {(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as const).map(d => (
-                  <option key={d} value={d}>
-                    Hari {d}
-                  </option>
-                ))}
-              </select>
+            <AccordionSection
+              title="Filter Hari, Kelas & Tombol Aksi Jadwal"
+              open={masterAccordion.isOpen('schedule_filters')}
+              onToggle={() => masterAccordion.toggle('schedule_filters')}
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={filterScheduleDay}
+                  onChange={e => setFilterScheduleDay(e.target.value)}
+                  className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                >
+                  <option value="ALL">Semua Hari (Senin - Sabtu)</option>
+                  {(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'] as const).map(d => (
+                    <option key={d} value={d}>
+                      Hari {d}
+                    </option>
+                  ))}
+                </select>
 
-              <select
-                value={filterScheduleClass}
-                onChange={e => setFilterScheduleClass(e.target.value)}
-                className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              >
-                <option value="ALL">Semua Kelas</option>
-                {classes.map(c => (
-                  <option key={c.id} value={c.name}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+                <select
+                  value={filterScheduleClass}
+                  onChange={e => setFilterScheduleClass(e.target.value)}
+                  className="h-9 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                >
+                  <option value="ALL">Semua Kelas</option>
+                  {classes.map(c => (
+                    <option key={c.id} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
 
-              <button
-                type="button"
-                onClick={() => {
-                  const rows = filteredSchedules.map((sch, i) => ({
-                    No: i + 1,
-                    Hari: sch.day,
-                    'Jam Mulai': sch.startTime,
-                    'Jam Selesai': sch.endTime,
-                    Kelas: sch.className,
-                    'Mata Pelajaran': sch.subjectName,
-                    'Guru Pengampu': sch.teacherName,
-                    Ruangan: sch.room,
-                  }));
-                  exportToExcel(rows, 'Jadwal_Pelajaran_SMK_Mardi_Yuana');
-                }}
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
-              >
-                <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                <span>Ekspor Excel</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const rows = filteredSchedules.map((sch, i) => ({
+                      No: i + 1,
+                      Hari: sch.day,
+                      'Jam Mulai': sch.startTime,
+                      'Jam Selesai': sch.endTime,
+                      Kelas: sch.className,
+                      'Mata Pelajaran': sch.subjectName,
+                      'Guru Pengampu': sch.teacherName,
+                      Ruangan: sch.room,
+                    }));
+                    exportToExcel(rows, 'Jadwal_Pelajaran_SMK_Mardi_Yuana');
+                  }}
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer whitespace-nowrap shrink-0"
+                >
+                  <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                  <span>Ekspor Excel</span>
+                </button>
 
-              <button
-                type="button"
-                onClick={openAddScheduleModal}
-                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
-              >
-                <Plus className="h-4 w-4 shrink-0" />
-                <span>Tambah Jadwal</span>
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={openAddScheduleModal}
+                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 cursor-pointer whitespace-nowrap shrink-0"
+                >
+                  <Plus className="h-4 w-4 shrink-0" />
+                  <span>Tambah Jadwal</span>
+                </button>
+              </div>
+            </AccordionSection>
           </div>
 
           <div className="rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden dark:border-slate-800 dark:bg-slate-900">
-            <div className="overflow-x-auto">
+            <div key={schedulePagination.animKey} className={`overflow-x-auto ${schedulePagination.slideClass}`}>
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300 font-bold">
@@ -1263,16 +1379,23 @@ export const MasterDataModule: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {filteredSchedules.length === 0 ? (
+                  {schedulePagination.paginatedItems.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="py-8 text-center text-xs text-slate-400">
                         Belum ada jadwal pelajaran untuk filter hari/kelas yang dipilih.
                       </td>
                     </tr>
                   ) : (
-                    filteredSchedules.map((sch, idx) => (
-                      <tr key={sch.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
-                        <td className="py-3 px-4 text-center text-slate-400">{idx + 1}</td>
+                    schedulePagination.paginatedItems.map((sch, idx) => (
+                      <tr
+                        key={sch.id}
+                        className={`hover:bg-slate-50/70 dark:hover:bg-slate-800/40 ${
+                          deletingItemId === sch.id ? 'animate-genie-bin-exit' : ''
+                        }`}
+                      >
+                        <td className="py-3 px-4 text-center text-slate-400">
+                          {schedulePagination.startIndex + idx + 1}
+                        </td>
                         <td className="py-3 px-4">
                           <span className="rounded-lg bg-indigo-50 px-2.5 py-1 text-[11px] font-extrabold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
                             {sch.day}

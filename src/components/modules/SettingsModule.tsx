@@ -25,8 +25,6 @@ import {
   Palette,
   Sparkles,
   Film,
-  Moon,
-  Sun,
   BookOpen,
   Bookmark,
   ExternalLink,
@@ -40,6 +38,7 @@ import {
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 import { SkyborneCastleBackground, LiveWallpaperPresetLayer } from '../common/SkyborneCastleBackground';
 import { LiquidNavBar } from '../common/LiquidNavBar';
+import { ThemeFlipToggle } from '../common/ThemeFlipToggle';
 
 const compressUploadedImage = (file: File, maxWidth = 1440, quality = 0.8, keepAlpha = false): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -250,8 +249,6 @@ export const SettingsModule: React.FC = () => {
     updateVisualSettings,
     schoolSettings,
     updateSchoolSettings,
-    darkMode,
-    toggleDarkMode,
     addToast,
   } = useApp();
 
@@ -1219,18 +1216,7 @@ export const SettingsModule: React.FC = () => {
                     Ubah latar belakang seluruh halaman menu (mendukung Live Wallpaper) dan aktifkan Dark Mode yang menyatu mengikuti ambience background.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={toggleDarkMode}
-                  className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-xl px-3.5 text-xs font-bold border transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none ${
-                    darkMode
-                      ? 'border-amber-400/60 bg-slate-950 text-amber-300 shadow-sm'
-                      : 'border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
-                >
-                  {darkMode ? <Moon className="h-3.5 w-3.5 text-amber-400 shrink-0" /> : <Sun className="h-3.5 w-3.5 text-amber-500 shrink-0" />}
-                  <span>{darkMode ? 'Dark Mode: Aktif' : 'Light Mode: Aktif'}</span>
-                </button>
+                <ThemeFlipToggle showLabel size="md" />
               </div>
 
               {/* Live Preview Box for Menu Background */}

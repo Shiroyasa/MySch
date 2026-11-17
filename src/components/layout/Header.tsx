@@ -15,6 +15,7 @@ import {
 import { BroadcastAnnouncementModal } from '../common/BroadcastAnnouncementModal';
 import { ProfileModal } from '../common/ProfileModal';
 import { LiquidNavBar } from '../common/LiquidNavBar';
+import { ThemeFlipToggle } from '../common/ThemeFlipToggle';
 
 export const Header: React.FC<{
   onToggleMobileSidebar: () => void;
@@ -44,6 +45,15 @@ export const Header: React.FC<{
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [deletingNotifIds, setDeletingNotifIds] = useState<string[]>([]);
+
+  const handleGenieDeleteNotif = (id: string) => {
+    setDeletingNotifIds(prev => (prev.includes(id) ? prev : [...prev, id]));
+    window.setTimeout(() => {
+      deleteNotification(id);
+      setDeletingNotifIds(prev => prev.filter(item => item !== id));
+    }, 420);
+  };
 
   const isAdmin = currentRole === 'admin' || currentRole === 'super_admin';
   const pendingCorrCount = attendanceCorrections.filter(c => c.status === 'pending').length;
@@ -248,6 +258,9 @@ export const Header: React.FC<{
               </button>
             )}
 
+            {/* Theme Flip Light / Dark Mode Toggle */}
+            <ThemeFlipToggle size="sm" />
+
             {/* Notifications Popover */}
             <div className="relative">
               <button
@@ -341,6 +354,8 @@ export const Header: React.FC<{
                       <div
                         key={n.id}
                         className={`group flex items-start justify-between gap-2 rounded-[16px] border p-3 transition-colors ${
+                          deletingNotifIds.includes(n.id) ? 'animate-genie-bin-exit' : ''
+                        } ${
                           n.isRead
                             ? 'border-[#F0F1F6] bg-[#FAF9FE] dark:border-slate-800 dark:bg-slate-800/40 opacity-80'
                             : 'border-[#E2DFF5] bg-[#F5F4FC] dark:border-indigo-900/60 dark:bg-indigo-950/35'
@@ -370,9 +385,10 @@ export const Header: React.FC<{
                         <button
                           onClick={e => {
                             e.stopPropagation();
-                            deleteNotification(n.id);
+                            handleGenieDeleteNotif(n.id);
                           }}
                           className="no-ornament p-1 text-[#A2A0B4] hover:text-[#F25781] cursor-pointer"
+                          title="Buang ke Genie Bin"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>

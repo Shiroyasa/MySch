@@ -16,11 +16,13 @@ import {
 } from 'lucide-react';
 import { runPedagogicalThinkingAnalysis, generateVeoSchoolVideo, checkVeoVideoStatus } from '../../services/aiService';
 import { LiquidNavBar } from '../common/LiquidNavBar';
+import { AccordionExpandAllBar, AccordionSection, useAccordionGroup } from '../common/AccordionExpandGroup';
 
 export const AiStudioModule: React.FC = () => {
   const { students, classes, subjects, assessments, assessmentScores } = useApp();
 
   const [activeTab, setActiveTab] = useState<'thinking' | 'veo'>('thinking');
+  const analysisAccordion = useAccordionGroup(['ai-select-student', 'ai-select-focus'], true);
 
   // Pedagogical Thinking State
   const [selectedStudentId, setSelectedStudentId] = useState<string>(students[0]?.id || 'std-001');
@@ -198,38 +200,53 @@ export const AiStudioModule: React.FC = () => {
               </p>
             </div>
 
-            <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                Pilih Siswa yang Dianalisis
-              </label>
-              <select
-                value={selectedStudentId}
-                onChange={e => setSelectedStudentId(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              >
-                {students.map(s => (
-                  <option key={s.id} value={s.id}>
-                    {s.fullName} ({s.className} - {s.nisn})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <AccordionExpandAllBar
+              title="Parameter Pemilihan Siswa & Fokus"
+              allExpanded={analysisAccordion.allExpanded}
+              onExpandAll={analysisAccordion.expandAll}
+              onCollapseAll={analysisAccordion.collapseAll}
+            />
 
-            <div>
-              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1">
-                Fokus Analisis Pedagogik
-              </label>
-              <select
-                value={analysisType}
-                onChange={e => setAnalysisType(e.target.value as any)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              >
-                <option value="student_diagnostic">Diagnostik Lengkap Akademik &amp; Kehadiran</option>
-                <option value="remedial_plan">Rencana Intervensi Remedial &amp; Pengayaan</option>
-                <option value="growth_report">Draf Catatan Rapor Kurikulum Merdeka</option>
-                <option value="homeroom_summary">Rangkuman Konseling Wali Kelas</option>
-              </select>
-            </div>
+            <AccordionSection
+              title="Pilih Siswa yang Dianalisis"
+              subtitle={targetStudent ? `${targetStudent.fullName} (${targetStudent.className})` : 'Belum dipilih'}
+              open={analysisAccordion.isOpen('ai-select-student')}
+              onToggle={() => analysisAccordion.toggle('ai-select-student')}
+            >
+              <div>
+                <select
+                  value={selectedStudentId}
+                  onChange={e => setSelectedStudentId(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                >
+                  {students.map(s => (
+                    <option key={s.id} value={s.id}>
+                      {s.fullName} ({s.className} - {s.nisn})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </AccordionSection>
+
+            <AccordionSection
+              title="Fokus Analisis Pedagogik"
+              subtitle={analysisType.replace('_', ' ')}
+              open={analysisAccordion.isOpen('ai-select-focus')}
+              onToggle={() => analysisAccordion.toggle('ai-select-focus')}
+            >
+              <div>
+                <select
+                  value={analysisType}
+                  onChange={e => setAnalysisType(e.target.value as any)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                >
+                  <option value="student_diagnostic">Diagnostik Lengkap Akademik &amp; Kehadiran</option>
+                  <option value="remedial_plan">Rencana Intervensi Remedial &amp; Pengayaan</option>
+                  <option value="growth_report">Draf Catatan Rapor Kurikulum Merdeka</option>
+                  <option value="homeroom_summary">Rangkuman Konseling Wali Kelas</option>
+                </select>
+              </div>
+            </AccordionSection>
 
             <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800/60 text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
               <p><strong>Kelas:</strong> {targetStudent.className}</p>

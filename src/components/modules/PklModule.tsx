@@ -62,6 +62,120 @@ import {
 import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 import { PklAlumniTracerSection } from './PklAlumniTracerSection';
 import { LiquidNavBar } from '../common/LiquidNavBar';
+import { CarouselTablePagination, useCarouselPagination } from '../common/CarouselTablePagination';
+import { AccordionExpandAllBar, AccordionSection, useAccordionGroup } from '../common/AccordionExpandGroup';
+
+interface PartnerPlacementsTableProps {
+  partnerId: string;
+  placements: IndustryPlacementRecord[];
+  deletingId: string | null;
+  onEdit: (partnerId: string, placement: IndustryPlacementRecord) => void;
+  onDelete: (partnerId: string, placementId: string, studentName: string) => void;
+}
+
+const PartnerPlacementsTable: React.FC<PartnerPlacementsTableProps> = ({
+  partnerId,
+  placements,
+  deletingId,
+  onEdit,
+  onDelete,
+}) => {
+  const pagination = useCarouselPagination(placements, 6);
+
+  return (
+    <div className="space-y-3">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left text-xs">
+          <thead>
+            <tr className="border-b border-[#ECEAF6] bg-[#FAF9FE] text-[#4E496E] dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300 font-bold">
+              <th className="p-2 w-10 text-center">No</th>
+              <th className="p-2">NISN</th>
+              <th className="p-2">Nama Siswa</th>
+              <th className="p-2">Kelas / Jurusan</th>
+              <th className="p-2">Periode PKL</th>
+              <th className="p-2">Pembimbing Sekolah</th>
+              <th className="p-2">Pembimbing DUDI</th>
+              <th className="p-2 text-center">Nilai Akhir</th>
+              <th className="p-2 text-center">Status</th>
+              <th className="p-2 text-center w-20">Aksi</th>
+            </tr>
+          </thead>
+          <tbody
+            key={pagination.animKey}
+            className={`divide-y divide-[#ECEAF6] dark:divide-slate-800 ${pagination.slideClass}`}
+          >
+            {pagination.paginatedItems.map((plc, idx) => (
+              <tr
+                key={plc.id}
+                className={`hover:bg-[#FAF9FE] dark:hover:bg-slate-800/40 ${
+                  deletingId === plc.id ? 'animate-genie-bin-exit' : ''
+                }`}
+              >
+                <td className="p-2 text-center text-[#8E8BA3] tabular-nums">
+                  {pagination.startIndex + idx + 1}
+                </td>
+                <td className="p-2 font-mono text-[11px] text-[#7A7596]">{plc.nisn}</td>
+                <td className="p-2 font-bold text-[#241F3F] dark:text-white">{plc.studentName}</td>
+                <td className="p-2">
+                  <span className="font-semibold">{plc.className}</span> ({plc.majorCode})
+                </td>
+                <td className="p-2 text-[#7A7596] text-[11px]">{plc.period}</td>
+                <td className="p-2 text-[#4E496E] dark:text-slate-300">{plc.schoolMentorName}</td>
+                <td className="p-2 text-[#4E496E] dark:text-slate-300">{plc.industryMentorName}</td>
+                <td className="p-2 text-center font-bold text-[#6C60B8] dark:text-indigo-300 tabular-nums">
+                  {plc.finalScore ? `${plc.finalScore} (${plc.grade})` : '-'}
+                </td>
+                <td className="p-2 text-center">
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                      plc.status === 'sedang_berjalan'
+                        ? 'bg-[#EAE7F8] text-[#5B4FA8] dark:bg-indigo-950 dark:text-indigo-300'
+                        : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                    }`}
+                  >
+                    {plc.status === 'sedang_berjalan' ? 'Sedang PKL' : 'Selesai'}
+                  </span>
+                </td>
+                <td className="p-2 text-center">
+                  <div className="inline-flex items-center justify-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(partnerId, plc)}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#7A7596] hover:bg-[#F0EEFA] hover:text-[#6C60B8] cursor-pointer shrink-0"
+                      title="Edit Nilai & Status Penempatan"
+                    >
+                      <Edit className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(partnerId, plc.id, plc.studentName)}
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#7A7596] hover:bg-rose-50 hover:text-rose-600 cursor-pointer shrink-0"
+                      title="Tarik Siswa dari Perusahaan"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <CarouselTablePagination
+        page={pagination.page}
+        totalPages={pagination.totalPages}
+        totalItems={pagination.totalItems}
+        pageSize={pagination.pageSize}
+        startIndex={pagination.startIndex}
+        endIndex={pagination.endIndex}
+        slideDirection={pagination.slideDirection}
+        onPageChange={pagination.setPage}
+        onPageSizeChange={pagination.setPageSize}
+        itemLabel="siswa"
+      />
+    </div>
+  );
+};
 
 export const PklModule: React.FC = () => {
   const {
@@ -99,8 +213,18 @@ export const PklModule: React.FC = () => {
   // Search, Filter & Sort
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSectorFilter, setSelectedSectorFilter] = useState('ALL');
-  const [expandedPartnerId, setExpandedPartnerId] = useState<string | null>(null);
+  const [expandedPartnerIds, setExpandedPartnerIds] = useState<Record<string, boolean>>({});
   const [sortBy, setSortBy] = useState<SortOption>('az');
+
+  const dudiFilterAccordion = useAccordionGroup(['pkl-dudi-filter'], true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const triggerGenieDelete = (id: string, action: () => void) => {
+    setDeletingId(id);
+    setTimeout(() => {
+      action();
+      setDeletingId(null);
+    }, 420);
+  };
 
   const studentReports = useMemo(() => {
     return sortDataItems(rawStudentReports, sortBy, {
@@ -260,6 +384,40 @@ export const PklModule: React.FC = () => {
     });
   }, [partners, searchTerm, selectedSectorFilter, sortBy]);
 
+  const pendingStudentReports = useMemo(
+    () => studentReports.filter(r => r.submissionStatus !== 'sudah_dikumpulkan'),
+    [studentReports]
+  );
+
+  const reportsByClassPagination = useCarouselPagination(studentReports, 8);
+  const reportsByCompanyPagination = useCarouselPagination(partners, 8);
+  const visitsPagination = useCarouselPagination(visits, 8);
+  const pendingReportsPagination = useCarouselPagination(pendingStudentReports, 8);
+  const gradesReportsPagination = useCarouselPagination(studentReports, 8);
+  const absorptionPagination = useCarouselPagination(studentReports, 8);
+
+  const allPartnersExpanded =
+    filteredPartners.length > 0 && filteredPartners.every(p => Boolean(expandedPartnerIds[p.id]));
+
+  const togglePartnerCard = (partnerId: string) => {
+    setExpandedPartnerIds(prev => ({
+      ...prev,
+      [partnerId]: !prev[partnerId],
+    }));
+  };
+
+  const expandAllPartners = () => {
+    const next: Record<string, boolean> = {};
+    filteredPartners.forEach(p => {
+      next[p.id] = true;
+    });
+    setExpandedPartnerIds(next);
+  };
+
+  const collapseAllPartners = () => {
+    setExpandedPartnerIds({});
+  };
+
   // CLEAR ALL DATA FUNCTION (Synced with Firestore Database)
   const handleClearAllPklData = () => {
     setDeleteModalConfig({
@@ -271,7 +429,7 @@ export const PklModule: React.FC = () => {
       confirmLabel: 'Kosongkan Sekarang',
       onConfirm: () => {
         clearAllPklData();
-        setExpandedPartnerId(null);
+        setExpandedPartnerIds({});
         closeDeleteModal();
         showToast('Seluruh data administrasi PKL berhasil dikosongkan dari Database Cloud.');
       },
@@ -281,7 +439,8 @@ export const PklModule: React.FC = () => {
   // LOAD SAMPLE DATA TEMPLATE (Synced with Firestore Database)
   const handleLoadSampleData = () => {
     loadSamplePklData();
-    setExpandedPartnerId(sampleIndustryPartners[0]?.id || null);
+    const firstId = sampleIndustryPartners[0]?.id;
+    setExpandedPartnerIds(firstId ? { [firstId]: true } : {});
     showToast('Template data kemitraan & PKL berhasil dimuat dan disimpan ke Database Cloud!');
   };
 
@@ -332,7 +491,7 @@ export const PklModule: React.FC = () => {
     };
 
     savePklPartner(newPartner);
-    setExpandedPartnerId(newPartner.id);
+    setExpandedPartnerIds(prev => ({ ...prev, [newPartner.id]: true }));
     setShowAddPartnerModal(false);
     showToast(`Mitra DUDI "${newPartner.name}" berhasil disimpan ke Database Cloud!`);
   };
@@ -354,9 +513,11 @@ export const PklModule: React.FC = () => {
       description: `Apakah Anda yakin ingin menghapus "${partner.name}" beserta riwayat penempatan siswa dan MoU-nya dari database? Tindakan ini tidak dapat dibatalkan.`,
       confirmLabel: 'Hapus Perusahaan',
       onConfirm: () => {
-        deletePklPartner(partner.id);
         closeDeleteModal();
-        showToast(`Perusahaan "${partner.name}" beserta data terkait berhasil dihapus dari Database Cloud.`);
+        triggerGenieDelete(partner.id, () => {
+          deletePklPartner(partner.id);
+          showToast(`Perusahaan "${partner.name}" beserta data terkait berhasil dihapus dari Database Cloud.`);
+        });
       },
     });
   };
@@ -468,26 +629,28 @@ export const PklModule: React.FC = () => {
       description: `Apakah Anda yakin ingin membatalkan penempatan siswa ${studentName} dari perusahaan ini?`,
       confirmLabel: 'Hapus Penempatan',
       onConfirm: () => {
-        const targetPartner = partners.find(p => p.id === partnerId);
-        if (targetPartner) {
-          const removedPlc = (targetPartner.placements || []).find(pl => pl.id === placementId);
-          const updatedPartner: IndustryPartner = {
-            ...targetPartner,
-            placements: (targetPartner.placements || []).filter(pl => pl.id !== placementId),
-          };
-          savePklPartner(updatedPartner);
+        closeDeleteModal();
+        triggerGenieDelete(placementId, () => {
+          const targetPartner = partners.find(p => p.id === partnerId);
+          if (targetPartner) {
+            const removedPlc = (targetPartner.placements || []).find(pl => pl.id === placementId);
+            const updatedPartner: IndustryPartner = {
+              ...targetPartner,
+              placements: (targetPartner.placements || []).filter(pl => pl.id !== placementId),
+            };
+            savePklPartner(updatedPartner);
 
-          if (removedPlc) {
-            const linkedReport = studentReports.find(
-              r => r.studentId === removedPlc.studentId && r.partnerId === partnerId
-            );
-            if (linkedReport) {
-              deletePklReport(linkedReport.id);
+            if (removedPlc) {
+              const linkedReport = studentReports.find(
+                r => r.studentId === removedPlc.studentId && r.partnerId === partnerId
+              );
+              if (linkedReport) {
+                deletePklReport(linkedReport.id);
+              }
             }
           }
-        }
-        closeDeleteModal();
-        showToast(`Penempatan siswa ${studentName} berhasil dihapus dari Database Cloud.`);
+          showToast(`Penempatan siswa ${studentName} berhasil dihapus dari Database Cloud.`);
+        });
       },
     });
   };
@@ -601,9 +764,11 @@ export const PklModule: React.FC = () => {
       description: 'Apakah Anda yakin ingin menghapus log catatan supervisi ini dari database?',
       confirmLabel: 'Hapus Log',
       onConfirm: () => {
-        deletePklVisit(visit.id);
         closeDeleteModal();
-        showToast('Catatan kunjungan berhasil dihapus dari Database Cloud.');
+        triggerGenieDelete(visit.id, () => {
+          deletePklVisit(visit.id);
+          showToast('Catatan kunjungan berhasil dihapus dari Database Cloud.');
+        });
       },
     });
   };
@@ -673,9 +838,11 @@ export const PklModule: React.FC = () => {
       description: `Hapus entri laporan dan nilai PKL untuk ${item.studentName} dari database?`,
       confirmLabel: 'Hapus Entri',
       onConfirm: () => {
-        deletePklReport(item.id);
         closeDeleteModal();
-        showToast(`Laporan ${item.studentName} berhasil dihapus dari Database Cloud.`);
+        triggerGenieDelete(item.id, () => {
+          deletePklReport(item.id);
+          showToast(`Laporan ${item.studentName} berhasil dihapus dari Database Cloud.`);
+        });
       },
     });
   };
@@ -1274,41 +1441,56 @@ export const PklModule: React.FC = () => {
       {/* ==================================================================== */}
       {activeTab === 'dudi_database' && (
         <div className="space-y-4">
-          {/* Controls & Filter Bar */}
-          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 rounded-2xl border border-[#ECEAF6] bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8BA3]" />
-              <input
-                type="text"
-                placeholder="Cari perusahaan, HRD, bidang usaha, atau kota..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="h-9.5 w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] pl-9 pr-4 text-xs font-medium text-[#262341] placeholder:text-[#9694A8] focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              />
-            </div>
+          {/* Controls & Filter Bar with Accordion Expand All */}
+          <div className="space-y-2.5">
+            <AccordionExpandAllBar
+              title="Pencarian, Filter Bidang Usaha & Urutan Mitra DUDI"
+              allExpanded={dudiFilterAccordion.allExpanded}
+              onExpandAll={dudiFilterAccordion.expandAll}
+              onCollapseAll={dudiFilterAccordion.collapseAll}
+            />
+            <AccordionSection
+              title="Kontrol Filter Bidang Usaha DUDI"
+              subtitle={`${filteredPartners.length} Mitra DUDI • Filter: ${selectedSectorFilter === 'ALL' ? 'Semua Bidang Usaha' : selectedSectorFilter}`}
+              open={dudiFilterAccordion.isOpen('pkl-dudi-filter')}
+              onToggle={() => dudiFilterAccordion.toggle('pkl-dudi-filter')}
+            >
+              <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8BA3]" />
+                  <input
+                    type="text"
+                    placeholder="Cari perusahaan, HRD, bidang usaha, atau kota..."
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    className="h-9.5 w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] pl-9 pr-4 text-xs font-medium text-[#262341] placeholder:text-[#9694A8] focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1.5">
-                <Filter className="h-3.5 w-3.5 text-[#8E8BA3] shrink-0" />
-                <select
-                  value={selectedSectorFilter}
-                  onChange={e => setSelectedSectorFilter(e.target.value)}
-                  className="h-9.5 rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] px-3 text-xs font-bold text-[#3E385B] focus:border-[#6C60B8] focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                >
-                  {sectors.map(sec => (
-                    <option key={sec} value={sec}>
-                      {sec === 'ALL' ? 'Semua Bidang Usaha' : sec}
-                    </option>
-                  ))}
-                </select>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <Filter className="h-3.5 w-3.5 text-[#8E8BA3] shrink-0" />
+                    <select
+                      value={selectedSectorFilter}
+                      onChange={e => setSelectedSectorFilter(e.target.value)}
+                      className="h-9.5 rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] px-3 text-xs font-bold text-[#3E385B] focus:border-[#6C60B8] focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                    >
+                      {sectors.map(sec => (
+                        <option key={sec} value={sec}>
+                          {sec === 'ALL' ? 'Semua Bidang Usaha' : sec}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <SortByControl value={sortBy} onChange={setSortBy} />
+
+                  <span className="rounded-xl bg-[#F0EEFA] px-3 py-1.5 text-xs text-[#6C60B8] font-extrabold tabular-nums whitespace-nowrap">
+                    {filteredPartners.length} Mitra
+                  </span>
+                </div>
               </div>
-
-              <SortByControl value={sortBy} onChange={setSortBy} />
-
-              <span className="rounded-xl bg-[#F0EEFA] px-3 py-1.5 text-xs text-[#6C60B8] font-extrabold tabular-nums whitespace-nowrap">
-                {filteredPartners.length} Mitra
-              </span>
-            </div>
+            </AccordionSection>
           </div>
 
           {/* Empty State */}
@@ -1344,22 +1526,32 @@ export const PklModule: React.FC = () => {
             </div>
           )}
 
-          {/* List of DUDI Partners */}
+          {/* List of DUDI Partners with Accordion Expand-All */}
+          {filteredPartners.length > 0 && (
+            <AccordionExpandAllBar
+              title={`Daftar Detail Mitra DUDI (${filteredPartners.length} Perusahaan)`}
+              allExpanded={allPartnersExpanded}
+              onExpandAll={expandAllPartners}
+              onCollapseAll={collapseAllPartners}
+            />
+          )}
           <div className="space-y-4">
             {filteredPartners.map(partner => {
-              const isExpanded = expandedPartnerId === partner.id;
+              const isExpanded = Boolean(expandedPartnerIds[partner.id]);
               const activeCount = partner.placements?.filter(p => p.status === 'sedang_berjalan').length || 0;
               const quotaPercent = Math.min(100, Math.round((activeCount / (partner.quota || 1)) * 100));
 
               return (
                 <div
                   key={partner.id}
-                  className="rounded-2xl border border-[#E6E4F2] bg-white shadow-xs transition-all hover:border-[#D0CBEF] dark:border-slate-800 dark:bg-slate-900 overflow-hidden"
+                  className={`rounded-2xl border border-[#E6E4F2] bg-white shadow-xs transition-all hover:border-[#D0CBEF] dark:border-slate-800 dark:bg-slate-900 overflow-hidden ${
+                    deletingId === partner.id ? 'animate-genie-bin-exit' : ''
+                  }`}
                 >
                   {/* Card Header Summary */}
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between p-5 gap-4 hover:bg-[#FAF9FE]/70 dark:hover:bg-slate-800/40 transition-colors">
                     <div
-                      onClick={() => setExpandedPartnerId(isExpanded ? null : partner.id)}
+                      onClick={() => togglePartnerCard(partner.id)}
                       className="flex items-start gap-3.5 cursor-pointer flex-1 min-w-0"
                     >
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#F0EEFA] dark:bg-indigo-950/60 text-[#6C60B8] dark:text-indigo-400 font-black text-sm">
@@ -1449,7 +1641,7 @@ export const PklModule: React.FC = () => {
                         </button>
                         <button
                           type="button"
-                          onClick={() => setExpandedPartnerId(isExpanded ? null : partner.id)}
+                          onClick={() => togglePartnerCard(partner.id)}
                           className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-[#6C60B8] bg-[#F4F3FA] hover:bg-[#EAE7F8] dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors cursor-pointer shrink-0"
                         >
                           {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
@@ -1607,73 +1799,13 @@ export const PklModule: React.FC = () => {
                             Belum ada siswa yang ditempatkan di perusahaan ini. Klik "+ Tempatkan Siswa Baru" di atas.
                           </div>
                         ) : (
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-left text-xs">
-                              <thead>
-                                <tr className="border-b border-[#ECEAF6] bg-[#FAF9FE] text-[#4E496E] dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300 font-bold">
-                                  <th className="p-2 w-10 text-center">No</th>
-                                  <th className="p-2">NISN</th>
-                                  <th className="p-2">Nama Siswa</th>
-                                  <th className="p-2">Kelas / Jurusan</th>
-                                  <th className="p-2">Periode PKL</th>
-                                  <th className="p-2">Pembimbing Sekolah</th>
-                                  <th className="p-2">Pembimbing DUDI</th>
-                                  <th className="p-2 text-center">Nilai Akhir</th>
-                                  <th className="p-2 text-center">Status</th>
-                                  <th className="p-2 text-center w-20">Aksi</th>
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-[#ECEAF6] dark:divide-slate-800">
-                                {partner.placements.map((plc, idx) => (
-                                  <tr key={plc.id} className="hover:bg-[#FAF9FE] dark:hover:bg-slate-800/40">
-                                    <td className="p-2 text-center text-[#8E8BA3] tabular-nums">{idx + 1}</td>
-                                    <td className="p-2 font-mono text-[11px] text-[#7A7596]">{plc.nisn}</td>
-                                    <td className="p-2 font-bold text-[#241F3F] dark:text-white">{plc.studentName}</td>
-                                    <td className="p-2">
-                                      <span className="font-semibold">{plc.className}</span> ({plc.majorCode})
-                                    </td>
-                                    <td className="p-2 text-[#7A7596] text-[11px]">{plc.period}</td>
-                                    <td className="p-2 text-[#4E496E] dark:text-slate-300">{plc.schoolMentorName}</td>
-                                    <td className="p-2 text-[#4E496E] dark:text-slate-300">{plc.industryMentorName}</td>
-                                    <td className="p-2 text-center font-bold text-[#6C60B8] dark:text-indigo-300 tabular-nums">
-                                      {plc.finalScore ? `${plc.finalScore} (${plc.grade})` : '-'}
-                                    </td>
-                                    <td className="p-2 text-center">
-                                      <span
-                                        className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                                          plc.status === 'sedang_berjalan'
-                                            ? 'bg-[#EAE7F8] text-[#5B4FA8] dark:bg-indigo-950 dark:text-indigo-300'
-                                            : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                                        }`}
-                                      >
-                                        {plc.status === 'sedang_berjalan' ? 'Sedang PKL' : 'Selesai'}
-                                      </span>
-                                    </td>
-                                    <td className="p-2 text-center">
-                                      <div className="inline-flex items-center justify-center gap-1">
-                                        <button
-                                          type="button"
-                                          onClick={() => setEditingPlacement({ partnerId: partner.id, placement: plc })}
-                                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#7A7596] hover:bg-[#F0EEFA] hover:text-[#6C60B8] cursor-pointer shrink-0"
-                                          title="Edit Nilai & Status Penempatan"
-                                        >
-                                          <Edit className="h-3.5 w-3.5" />
-                                        </button>
-                                        <button
-                                          type="button"
-                                          onClick={() => handleDeletePlacement(partner.id, plc.id, plc.studentName)}
-                                          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#7A7596] hover:bg-rose-50 hover:text-rose-600 cursor-pointer shrink-0"
-                                          title="Tarik Siswa dari Perusahaan"
-                                        >
-                                          <Trash2 className="h-3.5 w-3.5" />
-                                        </button>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
+                          <PartnerPlacementsTable
+                            partnerId={partner.id}
+                            placements={partner.placements || []}
+                            deletingId={deletingId}
+                            onEdit={(pid, plc) => setEditingPlacement({ partnerId: pid, placement: plc })}
+                            onDelete={handleDeletePlacement}
+                          />
                         )}
                       </div>
 
@@ -1860,82 +1992,106 @@ export const PklModule: React.FC = () => {
                   Belum ada peserta PKL yang terdaftar. Klik "+ Entri Laporan Siswa" di atas untuk menambahkan peserta.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
-                        <th className="p-2.5 w-10 text-center">No</th>
-                        <th className="p-2.5">NISN</th>
-                        <th className="p-2.5">Nama Siswa</th>
-                        <th className="p-2.5">Kelas</th>
-                        <th className="p-2.5">Jurusan</th>
-                        <th className="p-2.5">Perusahaan Penempatan DUDI</th>
-                        <th className="p-2.5">Judul Laporan PKL</th>
-                        <th className="p-2.5 text-center">Status</th>
-                        <th className="p-2.5 text-center">Nilai</th>
-                        <th className="p-2.5 text-center w-20">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {studentReports.map((r, i) => (
-                        <tr key={r.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
-                          <td className="p-2.5 text-center text-slate-400">{i + 1}</td>
-                          <td className="p-2.5 font-mono text-[11px] text-slate-500">{r.nisn}</td>
-                          <td className="p-2.5 font-bold text-slate-900 dark:text-white">{r.studentName}</td>
-                          <td className="p-2.5 font-semibold text-slate-700 dark:text-slate-300">{r.className}</td>
-                          <td className="p-2.5">
-                            <span className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 font-bold text-[10px]">
-                              {r.majorCode}
-                            </span>
-                          </td>
-                          <td className="p-2.5 font-medium text-slate-800 dark:text-slate-200">{r.partnerName}</td>
-                          <td className="p-2.5 text-[11px] text-slate-600 dark:text-slate-400 max-w-xs truncate" title={r.reportTitle}>
-                            {r.reportTitle}
-                          </td>
-                          <td className="p-2.5 text-center">
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                                r.submissionStatus === 'sudah_dikumpulkan'
-                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                                  : r.submissionStatus === 'revisi'
-                                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                                  : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
-                              }`}
-                            >
-                              {r.submissionStatus === 'sudah_dikumpulkan'
-                                ? 'Sudah Kumpul'
-                                : r.submissionStatus === 'revisi'
-                                ? 'Revisi'
-                                : 'Belum Kumpul'}
-                            </span>
-                          </td>
-                          <td className="p-2.5 text-center font-bold text-blue-600 dark:text-cyan-400">
-                            {r.finalScore} ({r.grade})
-                          </td>
-                          <td className="p-2.5 text-center">
-                            <div className="inline-flex items-center justify-center gap-1">
-                              <button
-                                type="button"
-                                onClick={() => setEditingReportItem(r)}
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 cursor-pointer shrink-0"
-                                title="Edit Laporan Siswa"
-                              >
-                                <Edit className="h-3.5 w-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteStudentReport(r)}
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer shrink-0"
-                                title="Hapus Laporan Siswa"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                          </td>
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
+                          <th className="p-2.5 w-10 text-center">No</th>
+                          <th className="p-2.5">NISN</th>
+                          <th className="p-2.5">Nama Siswa</th>
+                          <th className="p-2.5">Kelas</th>
+                          <th className="p-2.5">Jurusan</th>
+                          <th className="p-2.5">Perusahaan Penempatan DUDI</th>
+                          <th className="p-2.5">Judul Laporan PKL</th>
+                          <th className="p-2.5 text-center">Status</th>
+                          <th className="p-2.5 text-center">Nilai</th>
+                          <th className="p-2.5 text-center w-20">Aksi</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody
+                        key={reportsByClassPagination.animKey}
+                        className={`divide-y divide-slate-100 dark:divide-slate-800 ${reportsByClassPagination.slideClass}`}
+                      >
+                        {reportsByClassPagination.paginatedItems.map((r, i) => (
+                          <tr
+                            key={r.id}
+                            className={`hover:bg-slate-50/70 dark:hover:bg-slate-800/40 ${
+                              deletingId === r.id ? 'animate-genie-bin-exit' : ''
+                            }`}
+                          >
+                            <td className="p-2.5 text-center text-slate-400">
+                              {reportsByClassPagination.startIndex + i + 1}
+                            </td>
+                            <td className="p-2.5 font-mono text-[11px] text-slate-500">{r.nisn}</td>
+                            <td className="p-2.5 font-bold text-slate-900 dark:text-white">{r.studentName}</td>
+                            <td className="p-2.5 font-semibold text-slate-700 dark:text-slate-300">{r.className}</td>
+                            <td className="p-2.5">
+                              <span className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 font-bold text-[10px]">
+                                {r.majorCode}
+                              </span>
+                            </td>
+                            <td className="p-2.5 font-medium text-slate-800 dark:text-slate-200">{r.partnerName}</td>
+                            <td className="p-2.5 text-[11px] text-slate-600 dark:text-slate-400 max-w-xs truncate" title={r.reportTitle}>
+                              {r.reportTitle}
+                            </td>
+                            <td className="p-2.5 text-center">
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                                  r.submissionStatus === 'sudah_dikumpulkan'
+                                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                    : r.submissionStatus === 'revisi'
+                                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                    : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300'
+                                }`}
+                              >
+                                {r.submissionStatus === 'sudah_dikumpulkan'
+                                  ? 'Sudah Kumpul'
+                                  : r.submissionStatus === 'revisi'
+                                  ? 'Revisi'
+                                  : 'Belum Kumpul'}
+                              </span>
+                            </td>
+                            <td className="p-2.5 text-center font-bold text-blue-600 dark:text-cyan-400">
+                              {r.finalScore} ({r.grade})
+                            </td>
+                            <td className="p-2.5 text-center">
+                              <div className="inline-flex items-center justify-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingReportItem(r)}
+                                  className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 cursor-pointer shrink-0"
+                                  title="Edit Laporan Siswa"
+                                >
+                                  <Edit className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteStudentReport(r)}
+                                  className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 cursor-pointer shrink-0"
+                                  title="Hapus Laporan Siswa"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <CarouselTablePagination
+                    page={reportsByClassPagination.page}
+                    totalPages={reportsByClassPagination.totalPages}
+                    totalItems={reportsByClassPagination.totalItems}
+                    pageSize={reportsByClassPagination.pageSize}
+                    startIndex={reportsByClassPagination.startIndex}
+                    endIndex={reportsByClassPagination.endIndex}
+                    slideDirection={reportsByClassPagination.slideDirection}
+                    onPageChange={reportsByClassPagination.setPage}
+                    onPageSizeChange={reportsByClassPagination.setPageSize}
+                    itemLabel="siswa"
+                  />
                 </div>
               )}
             </div>
@@ -1960,65 +2116,84 @@ export const PklModule: React.FC = () => {
                   Belum ada perusahaan mitra di database. Silakan tambahkan mitra DUDI terlebih dahulu.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-[#ECEAF6] bg-[#FAF9FE] text-[#4E496E] dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
-                        <th className="p-2.5 w-10 text-center">No</th>
-                        <th className="p-2.5">Nama Perusahaan</th>
-                        <th className="p-2.5">Bidang Usaha</th>
-                        <th className="p-2.5">Kota</th>
-                        <th className="p-2.5">Kontak HRD</th>
-                        <th className="p-2.5 text-center">Kuota</th>
-                        <th className="p-2.5 text-center">Terisi</th>
-                        <th className="p-2.5 text-center">Sisa</th>
-                        <th className="p-2.5 text-center">Masa MoU</th>
-                        <th className="p-2.5 text-center">Rating</th>
-                        <th className="p-2.5 text-center w-16">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#ECEAF6] dark:divide-slate-800">
-                      {partners.map((p, idx) => {
-                        const filled = p.placements?.filter(pl => pl.status === 'sedang_berjalan').length || 0;
-                        const remaining = Math.max(0, p.quota - filled);
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-[#ECEAF6] bg-[#FAF9FE] text-[#4E496E] dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
+                          <th className="p-2.5 w-10 text-center">No</th>
+                          <th className="p-2.5">Nama Perusahaan</th>
+                          <th className="p-2.5">Bidang Usaha</th>
+                          <th className="p-2.5">Kota</th>
+                          <th className="p-2.5">Kontak HRD</th>
+                          <th className="p-2.5 text-center">Kuota</th>
+                          <th className="p-2.5 text-center">Terisi</th>
+                          <th className="p-2.5 text-center">Sisa</th>
+                          <th className="p-2.5 text-center">Masa MoU</th>
+                          <th className="p-2.5 text-center">Rating</th>
+                          <th className="p-2.5 text-center w-16">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody
+                        key={reportsByCompanyPagination.animKey}
+                        className={`divide-y divide-[#ECEAF6] dark:divide-slate-800 ${reportsByCompanyPagination.slideClass}`}
+                      >
+                        {reportsByCompanyPagination.paginatedItems.map((p, idx) => {
+                          const filled = p.placements?.filter(pl => pl.status === 'sedang_berjalan').length || 0;
+                          const remaining = Math.max(0, p.quota - filled);
 
-                        return (
-                          <tr key={p.id} className="hover:bg-[#FAF9FE] dark:hover:bg-slate-800/40">
-                            <td className="p-2.5 text-center text-[#8E8BA3] tabular-nums">{idx + 1}</td>
-                            <td className="p-2.5 font-bold text-[#241F3F] dark:text-white">{p.name}</td>
-                            <td className="p-2.5 text-[#4E496E] dark:text-slate-300">{p.sector}</td>
-                            <td className="p-2.5 text-[#7A7596]">{p.city}</td>
-                            <td className="p-2.5">
-                              <span className="font-semibold block">{p.hrdName}</span>
-                              <span className="text-[10px] text-[#8E8BA3] tabular-nums">{p.hrdPhone}</span>
-                            </td>
-                            <td className="p-2.5 text-center font-bold tabular-nums">{p.quota}</td>
-                            <td className="p-2.5 text-center font-bold text-[#6C60B8] dark:text-indigo-300 tabular-nums">{filled}</td>
-                            <td className="p-2.5 text-center font-semibold text-emerald-600 tabular-nums">{remaining}</td>
-                            <td className="p-2.5 text-center font-mono text-[11px] text-[#7A7596] tabular-nums">
-                              {p.mouHistory?.[0]?.endDate || '-'}
-                            </td>
-                            <td className="p-2.5 text-center">
-                              <span className="font-bold text-amber-500 flex items-center justify-center gap-1 tabular-nums">
-                                <Star className="h-3 w-3 fill-amber-400" />
-                                {p.evaluation?.rating || 5}.0
-                              </span>
-                            </td>
-                            <td className="p-2.5 text-center">
-                              <button
-                                type="button"
-                                onClick={() => setEditingPartner(p)}
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#7A7596] hover:bg-[#F0EEFA] hover:text-[#6C60B8] cursor-pointer shrink-0"
-                                title="Edit Kuota / Data Perusahaan"
-                              >
-                                <Edit className="h-3.5 w-3.5" />
-                              </button>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                          return (
+                            <tr key={p.id} className="hover:bg-[#FAF9FE] dark:hover:bg-slate-800/40">
+                              <td className="p-2.5 text-center text-[#8E8BA3] tabular-nums">
+                                {reportsByCompanyPagination.startIndex + idx + 1}
+                              </td>
+                              <td className="p-2.5 font-bold text-[#241F3F] dark:text-white">{p.name}</td>
+                              <td className="p-2.5 text-[#4E496E] dark:text-slate-300">{p.sector}</td>
+                              <td className="p-2.5 text-[#7A7596]">{p.city}</td>
+                              <td className="p-2.5">
+                                <span className="font-semibold block">{p.hrdName}</span>
+                                <span className="text-[10px] text-[#8E8BA3] tabular-nums">{p.hrdPhone}</span>
+                              </td>
+                              <td className="p-2.5 text-center font-bold tabular-nums">{p.quota}</td>
+                              <td className="p-2.5 text-center font-bold text-[#6C60B8] dark:text-indigo-300 tabular-nums">{filled}</td>
+                              <td className="p-2.5 text-center font-semibold text-emerald-600 tabular-nums">{remaining}</td>
+                              <td className="p-2.5 text-center font-mono text-[11px] text-[#7A7596] tabular-nums">
+                                {p.mouHistory?.[0]?.endDate || '-'}
+                              </td>
+                              <td className="p-2.5 text-center">
+                                <span className="font-bold text-amber-500 flex items-center justify-center gap-1 tabular-nums">
+                                  <Star className="h-3 w-3 fill-amber-400" />
+                                  {p.evaluation?.rating || 5}.0
+                                </span>
+                              </td>
+                              <td className="p-2.5 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingPartner(p)}
+                                  className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#7A7596] hover:bg-[#F0EEFA] hover:text-[#6C60B8] cursor-pointer shrink-0"
+                                  title="Edit Kuota / Data Perusahaan"
+                                >
+                                  <Edit className="h-3.5 w-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <CarouselTablePagination
+                    page={reportsByCompanyPagination.page}
+                    totalPages={reportsByCompanyPagination.totalPages}
+                    totalItems={reportsByCompanyPagination.totalItems}
+                    pageSize={reportsByCompanyPagination.pageSize}
+                    startIndex={reportsByCompanyPagination.startIndex}
+                    endIndex={reportsByCompanyPagination.endIndex}
+                    slideDirection={reportsByCompanyPagination.slideDirection}
+                    onPageChange={reportsByCompanyPagination.setPage}
+                    onPageSizeChange={reportsByCompanyPagination.setPageSize}
+                    itemLabel="perusahaan"
+                  />
                 </div>
               )}
             </div>
@@ -2048,79 +2223,103 @@ export const PklModule: React.FC = () => {
                   Belum ada log kunjungan supervisi. Klik "+ Tambah Kunjungan" untuk menjadwalkan supervisi ke mitra industri.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-[#ECEAF6] bg-[#FAF9FE] text-[#4E496E] dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
-                        <th className="p-2.5 w-10 text-center">No</th>
-                        <th className="p-2.5">Tanggal</th>
-                        <th className="p-2.5">Perusahaan Mitra DUDI</th>
-                        <th className="p-2.5">Guru Pembimbing</th>
-                        <th className="p-2.5">Jenis Kunjungan</th>
-                        <th className="p-2.5 text-center">Siswa Hadir</th>
-                        <th className="p-2.5 text-center">Tingkat Hadir</th>
-                        <th className="p-2.5">Catatan Bimbingan &amp; Feedback DUDI</th>
-                        <th className="p-2.5 text-center">Status</th>
-                        <th className="p-2.5 text-center w-20">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#ECEAF6] dark:divide-slate-800">
-                      {visits.map((v, idx) => (
-                        <tr key={v.id} className="hover:bg-[#FAF9FE] dark:hover:bg-slate-800/40">
-                          <td className="p-2.5 text-center text-[#8E8BA3] tabular-nums">{idx + 1}</td>
-                          <td className="p-2.5 font-mono text-[11px] text-[#7A7596] whitespace-nowrap tabular-nums">{v.visitDate}</td>
-                          <td className="p-2.5 font-bold text-[#241F3F] dark:text-white">{v.partnerName}</td>
-                          <td className="p-2.5 text-[#4E496E] dark:text-slate-300 font-semibold">{v.teacherName}</td>
-                          <td className="p-2.5">
-                            <span className="rounded-md bg-[#F0EEFA] dark:bg-indigo-950 px-2 py-0.5 text-[#6C60B8] dark:text-indigo-300 font-semibold text-[10px]">
-                              {v.visitType}
-                            </span>
-                          </td>
-                          <td className="p-2.5 text-center font-bold text-[#241F3F] dark:text-slate-200 tabular-nums">
-                            {v.studentCount} Siswa
-                          </td>
-                          <td className="p-2.5 text-center font-black text-emerald-600 tabular-nums">
-                            {v.attendanceRate}%
-                          </td>
-                          <td className="p-2.5 text-[11px] text-[#4E496E] dark:text-slate-400 max-w-sm">
-                            <p className="line-clamp-2"><strong>Supervisi:</strong> {v.guidanceNotes}</p>
-                            <p className="line-clamp-2 mt-0.5 text-[#6C60B8] dark:text-indigo-300"><strong>DUDI:</strong> {v.industryFeedback}</p>
-                          </td>
-                          <td className="p-2.5 text-center">
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                                v.status === 'terlaksana'
-                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                                  : 'bg-[#EAE7F8] text-[#5B4FA8] dark:bg-indigo-950 dark:text-indigo-300'
-                              }`}
-                            >
-                              {v.status === 'terlaksana' ? 'Terlaksana' : 'Terjadwal'}
-                            </span>
-                          </td>
-                          <td className="p-2.5 text-center">
-                            <div className="inline-flex items-center justify-center gap-1">
-                              <button
-                                type="button"
-                                onClick={() => setEditingVisit(v)}
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#7A7596] hover:bg-[#F0EEFA] hover:text-[#6C60B8] cursor-pointer shrink-0"
-                                title="Edit Catatan Supervisi"
-                              >
-                                <Edit className="h-3.5 w-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteVisit(v)}
-                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#7A7596] hover:bg-rose-50 hover:text-rose-600 cursor-pointer shrink-0"
-                                title="Hapus Log Kunjungan"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </div>
-                          </td>
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-[#ECEAF6] bg-[#FAF9FE] text-[#4E496E] dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
+                          <th className="p-2.5 w-10 text-center">No</th>
+                          <th className="p-2.5">Tanggal</th>
+                          <th className="p-2.5">Perusahaan Mitra DUDI</th>
+                          <th className="p-2.5">Guru Pembimbing</th>
+                          <th className="p-2.5">Jenis Kunjungan</th>
+                          <th className="p-2.5 text-center">Siswa Hadir</th>
+                          <th className="p-2.5 text-center">Tingkat Hadir</th>
+                          <th className="p-2.5">Catatan Bimbingan &amp; Feedback DUDI</th>
+                          <th className="p-2.5 text-center">Status</th>
+                          <th className="p-2.5 text-center w-20">Aksi</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody
+                        key={visitsPagination.animKey}
+                        className={`divide-y divide-[#ECEAF6] dark:divide-slate-800 ${visitsPagination.slideClass}`}
+                      >
+                        {visitsPagination.paginatedItems.map((v, idx) => (
+                          <tr
+                            key={v.id}
+                            className={`hover:bg-[#FAF9FE] dark:hover:bg-slate-800/40 ${
+                              deletingId === v.id ? 'animate-genie-bin-exit' : ''
+                            }`}
+                          >
+                            <td className="p-2.5 text-center text-[#8E8BA3] tabular-nums">
+                              {visitsPagination.startIndex + idx + 1}
+                            </td>
+                            <td className="p-2.5 font-mono text-[11px] text-[#7A7596] whitespace-nowrap tabular-nums">{v.visitDate}</td>
+                            <td className="p-2.5 font-bold text-[#241F3F] dark:text-white">{v.partnerName}</td>
+                            <td className="p-2.5 text-[#4E496E] dark:text-slate-300 font-semibold">{v.teacherName}</td>
+                            <td className="p-2.5">
+                              <span className="rounded-md bg-[#F0EEFA] dark:bg-indigo-950 px-2 py-0.5 text-[#6C60B8] dark:text-indigo-300 font-semibold text-[10px]">
+                                {v.visitType}
+                              </span>
+                            </td>
+                            <td className="p-2.5 text-center font-bold text-[#241F3F] dark:text-slate-200 tabular-nums">
+                              {v.studentCount} Siswa
+                            </td>
+                            <td className="p-2.5 text-center font-black text-emerald-600 tabular-nums">
+                              {v.attendanceRate}%
+                            </td>
+                            <td className="p-2.5 text-[11px] text-[#4E496E] dark:text-slate-400 max-w-sm">
+                              <p className="line-clamp-2"><strong>Supervisi:</strong> {v.guidanceNotes}</p>
+                              <p className="line-clamp-2 mt-0.5 text-[#6C60B8] dark:text-indigo-300"><strong>DUDI:</strong> {v.industryFeedback}</p>
+                            </td>
+                            <td className="p-2.5 text-center">
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                                  v.status === 'terlaksana'
+                                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                    : 'bg-[#EAE7F8] text-[#5B4FA8] dark:bg-indigo-950 dark:text-indigo-300'
+                                }`}
+                              >
+                                {v.status === 'terlaksana' ? 'Terlaksana' : 'Terjadwal'}
+                              </span>
+                            </td>
+                            <td className="p-2.5 text-center">
+                              <div className="inline-flex items-center justify-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingVisit(v)}
+                                  className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#7A7596] hover:bg-[#F0EEFA] hover:text-[#6C60B8] cursor-pointer shrink-0"
+                                  title="Edit Catatan Supervisi"
+                                >
+                                  <Edit className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteVisit(v)}
+                                  className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#7A7596] hover:bg-rose-50 hover:text-rose-600 cursor-pointer shrink-0"
+                                  title="Hapus Log Kunjungan"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <CarouselTablePagination
+                    page={visitsPagination.page}
+                    totalPages={visitsPagination.totalPages}
+                    totalItems={visitsPagination.totalItems}
+                    pageSize={visitsPagination.pageSize}
+                    startIndex={visitsPagination.startIndex}
+                    endIndex={visitsPagination.endIndex}
+                    slideDirection={visitsPagination.slideDirection}
+                    onPageChange={visitsPagination.setPage}
+                    onPageSizeChange={visitsPagination.setPageSize}
+                    itemLabel="kunjungan"
+                  />
                 </div>
               )}
             </div>
@@ -2140,32 +2339,36 @@ export const PklModule: React.FC = () => {
                 }
               />
 
-              {studentReports.filter(r => r.submissionStatus !== 'sudah_dikumpulkan').length === 0 ? (
+              {pendingStudentReports.length === 0 ? (
                 <div className="p-8 text-center text-xs text-emerald-600 font-bold bg-emerald-50/50 rounded-2xl dark:bg-emerald-950/20">
                   Luar biasa! Semua siswa telah mengumpulkan laporan akhir PKL tepat waktu.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-rose-100 bg-rose-50/60 text-[#4E496E] dark:border-slate-800 dark:bg-rose-950/20 dark:text-slate-200 font-bold">
-                        <th className="p-2.5 w-10 text-center">No</th>
-                        <th className="p-2.5">NISN</th>
-                        <th className="p-2.5">Nama Siswa</th>
-                        <th className="p-2.5">Kelas</th>
-                        <th className="p-2.5">Jurusan</th>
-                        <th className="p-2.5">Perusahaan Tempat PKL</th>
-                        <th className="p-2.5">Judul Proyek Laporan</th>
-                        <th className="p-2.5 text-center">Status</th>
-                        <th className="p-2.5 text-center">Tindakan Langsung</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#ECEAF6] dark:divide-slate-800">
-                      {studentReports
-                        .filter(r => r.submissionStatus !== 'sudah_dikumpulkan')
-                        .map((r, idx) => (
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-rose-100 bg-rose-50/60 text-[#4E496E] dark:border-slate-800 dark:bg-rose-950/20 dark:text-slate-200 font-bold">
+                          <th className="p-2.5 w-10 text-center">No</th>
+                          <th className="p-2.5">NISN</th>
+                          <th className="p-2.5">Nama Siswa</th>
+                          <th className="p-2.5">Kelas</th>
+                          <th className="p-2.5">Jurusan</th>
+                          <th className="p-2.5">Perusahaan Tempat PKL</th>
+                          <th className="p-2.5">Judul Proyek Laporan</th>
+                          <th className="p-2.5 text-center">Status</th>
+                          <th className="p-2.5 text-center">Tindakan Langsung</th>
+                        </tr>
+                      </thead>
+                      <tbody
+                        key={pendingReportsPagination.animKey}
+                        className={`divide-y divide-[#ECEAF6] dark:divide-slate-800 ${pendingReportsPagination.slideClass}`}
+                      >
+                        {pendingReportsPagination.paginatedItems.map((r, idx) => (
                           <tr key={r.id} className="hover:bg-[#FAF9FE] dark:hover:bg-slate-800/40">
-                            <td className="p-2.5 text-center text-[#8E8BA3] tabular-nums">{idx + 1}</td>
+                            <td className="p-2.5 text-center text-[#8E8BA3] tabular-nums">
+                              {pendingReportsPagination.startIndex + idx + 1}
+                            </td>
                             <td className="p-2.5 font-mono text-[11px] text-[#7A7596]">{r.nisn}</td>
                             <td className="p-2.5 font-bold text-[#241F3F] dark:text-white">{r.studentName}</td>
                             <td className="p-2.5 font-semibold text-[#4E496E] dark:text-slate-300">{r.className}</td>
@@ -2217,8 +2420,21 @@ export const PklModule: React.FC = () => {
                             </td>
                           </tr>
                         ))}
-                    </tbody>
-                  </table>
+                      </tbody>
+                    </table>
+                  </div>
+                  <CarouselTablePagination
+                    page={pendingReportsPagination.page}
+                    totalPages={pendingReportsPagination.totalPages}
+                    totalItems={pendingReportsPagination.totalItems}
+                    pageSize={pendingReportsPagination.pageSize}
+                    startIndex={pendingReportsPagination.startIndex}
+                    endIndex={pendingReportsPagination.endIndex}
+                    slideDirection={pendingReportsPagination.slideDirection}
+                    onPageChange={pendingReportsPagination.setPage}
+                    onPageSizeChange={pendingReportsPagination.setPageSize}
+                    itemLabel="tunggakan"
+                  />
                 </div>
               )}
             </div>
@@ -2243,68 +2459,87 @@ export const PklModule: React.FC = () => {
                   Belum ada data nilai PKL siswa.
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-[#ECEAF6] bg-[#FAF9FE] text-[#4E496E] dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
-                        <th className="p-2.5 w-10 text-center">No</th>
-                        <th className="p-2.5">NISN</th>
-                        <th className="p-2.5">Nama Siswa</th>
-                        <th className="p-2.5">Kelas / Jurusan</th>
-                        <th className="p-2.5">Mitra Industri DUDI</th>
-                        <th className="p-2.5 text-center text-[#6C60B8]">Nilai Sekolah (40%)</th>
-                        <th className="p-2.5 text-center text-indigo-600">Nilai DUDI (60%)</th>
-                        <th className="p-2.5 text-center text-emerald-600 font-black">Nilai Akhir</th>
-                        <th className="p-2.5 text-center">Predikat</th>
-                        <th className="p-2.5 text-center">Keterangan</th>
-                        <th className="p-2.5 text-center w-16">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#ECEAF6] dark:divide-slate-800">
-                      {studentReports.map((r, idx) => (
-                        <tr key={r.id} className="hover:bg-[#FAF9FE] dark:hover:bg-slate-800/40">
-                          <td className="p-2.5 text-center text-[#8E8BA3] tabular-nums">{idx + 1}</td>
-                          <td className="p-2.5 font-mono text-[11px] text-[#7A7596]">{r.nisn}</td>
-                          <td className="p-2.5 font-bold text-[#241F3F] dark:text-white">{r.studentName}</td>
-                          <td className="p-2.5 font-semibold text-[#4E496E] dark:text-slate-300">
-                            {r.className} ({r.majorCode})
-                          </td>
-                          <td className="p-2.5 text-[#241F3F] dark:text-slate-200">{r.partnerName}</td>
-                          <td className="p-2.5 text-center font-bold text-[#6C60B8] dark:text-indigo-300 tabular-nums">{r.schoolMentorScore}</td>
-                          <td className="p-2.5 text-center font-bold text-indigo-600 dark:text-indigo-300 tabular-nums">{r.industryMentorScore}</td>
-                          <td className="p-2.5 text-center font-black text-emerald-600 text-sm bg-emerald-50/20 tabular-nums">
-                            {r.finalScore}
-                          </td>
-                          <td className="p-2.5 text-center font-black">
-                            <span
-                              className={`rounded px-2 py-0.5 text-[10px] ${
-                                r.grade === 'A'
-                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                                  : 'bg-[#EAE7F8] text-[#5B4FA8] dark:bg-indigo-950 dark:text-indigo-300'
-                              }`}
-                            >
-                              {r.grade}
-                            </span>
-                          </td>
-                          <td className="p-2.5 text-center">
-                            <span className="text-[10px] font-bold text-emerald-600">
-                              {r.finalScore >= 75 ? 'KOMPETEN' : 'REMEDIAL'}
-                            </span>
-                          </td>
-                          <td className="p-2.5 text-center">
-                            <button
-                              type="button"
-                              onClick={() => setEditingReportItem(r)}
-                              className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#7A7596] hover:bg-[#F0EEFA] hover:text-[#6C60B8] cursor-pointer shrink-0"
-                              title="Edit Nilai PKL Siswa"
-                            >
-                              <Edit className="h-3.5 w-3.5" />
-                            </button>
-                          </td>
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="border-b border-[#ECEAF6] bg-[#FAF9FE] text-[#4E496E] dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
+                          <th className="p-2.5 w-10 text-center">No</th>
+                          <th className="p-2.5">NISN</th>
+                          <th className="p-2.5">Nama Siswa</th>
+                          <th className="p-2.5">Kelas / Jurusan</th>
+                          <th className="p-2.5">Mitra Industri DUDI</th>
+                          <th className="p-2.5 text-center text-[#6C60B8]">Nilai Sekolah (40%)</th>
+                          <th className="p-2.5 text-center text-indigo-600">Nilai DUDI (60%)</th>
+                          <th className="p-2.5 text-center text-emerald-600 font-black">Nilai Akhir</th>
+                          <th className="p-2.5 text-center">Predikat</th>
+                          <th className="p-2.5 text-center">Keterangan</th>
+                          <th className="p-2.5 text-center w-16">Aksi</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody
+                        key={gradesReportsPagination.animKey}
+                        className={`divide-y divide-[#ECEAF6] dark:divide-slate-800 ${gradesReportsPagination.slideClass}`}
+                      >
+                        {gradesReportsPagination.paginatedItems.map((r, idx) => (
+                          <tr key={r.id} className="hover:bg-[#FAF9FE] dark:hover:bg-slate-800/40">
+                            <td className="p-2.5 text-center text-[#8E8BA3] tabular-nums">
+                              {gradesReportsPagination.startIndex + idx + 1}
+                            </td>
+                            <td className="p-2.5 font-mono text-[11px] text-[#7A7596]">{r.nisn}</td>
+                            <td className="p-2.5 font-bold text-[#241F3F] dark:text-white">{r.studentName}</td>
+                            <td className="p-2.5 font-semibold text-[#4E496E] dark:text-slate-300">
+                              {r.className} ({r.majorCode})
+                            </td>
+                            <td className="p-2.5 text-[#241F3F] dark:text-slate-200">{r.partnerName}</td>
+                            <td className="p-2.5 text-center font-bold text-[#6C60B8] dark:text-indigo-300 tabular-nums">{r.schoolMentorScore}</td>
+                            <td className="p-2.5 text-center font-bold text-indigo-600 dark:text-indigo-300 tabular-nums">{r.industryMentorScore}</td>
+                            <td className="p-2.5 text-center font-black text-emerald-600 text-sm bg-emerald-50/20 tabular-nums">
+                              {r.finalScore}
+                            </td>
+                            <td className="p-2.5 text-center font-black">
+                              <span
+                                className={`rounded px-2 py-0.5 text-[10px] ${
+                                  r.grade === 'A'
+                                    ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                    : 'bg-[#EAE7F8] text-[#5B4FA8] dark:bg-indigo-950 dark:text-indigo-300'
+                                }`}
+                              >
+                                {r.grade}
+                              </span>
+                            </td>
+                            <td className="p-2.5 text-center">
+                              <span className="text-[10px] font-bold text-emerald-600">
+                                {r.finalScore >= 75 ? 'KOMPETEN' : 'REMEDIAL'}
+                              </span>
+                            </td>
+                            <td className="p-2.5 text-center">
+                              <button
+                                type="button"
+                                onClick={() => setEditingReportItem(r)}
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#7A7596] hover:bg-[#F0EEFA] hover:text-[#6C60B8] cursor-pointer shrink-0"
+                                title="Edit Nilai PKL Siswa"
+                              >
+                                <Edit className="h-3.5 w-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <CarouselTablePagination
+                    page={gradesReportsPagination.page}
+                    totalPages={gradesReportsPagination.totalPages}
+                    totalItems={gradesReportsPagination.totalItems}
+                    pageSize={gradesReportsPagination.pageSize}
+                    startIndex={gradesReportsPagination.startIndex}
+                    endIndex={gradesReportsPagination.endIndex}
+                    slideDirection={gradesReportsPagination.slideDirection}
+                    onPageChange={gradesReportsPagination.setPage}
+                    onPageSizeChange={gradesReportsPagination.setPageSize}
+                    itemLabel="nilai siswa"
+                  />
                 </div>
               )}
             </div>
@@ -2382,71 +2617,90 @@ export const PklModule: React.FC = () => {
               </div>
 
               {/* Detail Table */}
-              <div className="overflow-x-auto pt-1">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-[#ECEAF6] bg-[#FAF9FE] text-[#4E496E] dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
-                      <th className="p-2.5 w-10 text-center">No</th>
-                      <th className="p-2.5">NISN</th>
-                      <th className="p-2.5">Nama Siswa</th>
-                      <th className="p-2.5">Kelas</th>
-                      <th className="p-2.5">Mitra DUDI Tempat PKL</th>
-                      <th className="p-2.5">Status Penyerapan Pasca PKL</th>
-                      <th className="p-2.5 text-center w-28">Ubah Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#ECEAF6] dark:divide-slate-800">
-                    {studentReports.map((r, idx) => (
-                      <tr key={r.id} className="hover:bg-[#FAF9FE] dark:hover:bg-slate-800/40">
-                        <td className="p-2.5 text-center text-[#8E8BA3] tabular-nums">{idx + 1}</td>
-                        <td className="p-2.5 font-mono text-[11px] text-[#7A7596]">{r.nisn}</td>
-                        <td className="p-2.5 font-bold text-[#241F3F] dark:text-white">{r.studentName}</td>
-                        <td className="p-2.5 font-semibold text-[#4E496E] dark:text-slate-300">{r.className}</td>
-                        <td className="p-2.5 text-[#241F3F] dark:text-slate-200">{r.partnerName}</td>
-                        <td className="p-2.5">
-                          <span
-                            className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                              r.absorbedStatus === 'terserap_kerja'
-                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                                : r.absorbedStatus === 'melanjutkan_kuliah'
-                                ? 'bg-[#EAE7F8] text-[#5B4FA8] dark:bg-indigo-950 dark:text-indigo-300'
-                                : r.absorbedStatus === 'wirausaha'
-                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                                : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
-                            }`}
-                          >
-                            {r.absorbedStatus === 'terserap_kerja'
-                              ? 'Bekerja di Industri DUDI'
-                              : r.absorbedStatus === 'melanjutkan_kuliah'
-                              ? 'Melanjutkan Kuliah'
-                              : r.absorbedStatus === 'wirausaha'
-                              ? 'Wirausaha Mandiri'
-                              : 'Menunggu Penempatan Kerja'}
-                          </span>
-                        </td>
-                        <td className="p-2.5 text-center">
-                          <select
-                            value={r.absorbedStatus}
-                            onChange={e => {
-                              const newStatus = e.target.value as any;
-                              savePklReport({
-                                ...r,
-                                absorbedStatus: newStatus,
-                              });
-                              showToast(`Status alumni ${r.studentName} berhasil diperbarui.`);
-                            }}
-                            className="rounded-lg border border-[#E2DFEF] bg-white p-1 text-[10px] font-bold text-[#241F3F] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
-                          >
-                            <option value="terserap_kerja">Bekerja di DUDI</option>
-                            <option value="melanjutkan_kuliah">Kuliah</option>
-                            <option value="wirausaha">Wirausaha</option>
-                            <option value="mencari_kerja">Mencari Kerja</option>
-                          </select>
-                        </td>
+              <div className="space-y-4">
+                <div className="overflow-x-auto pt-1">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-[#ECEAF6] bg-[#FAF9FE] text-[#4E496E] dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-200 font-bold">
+                        <th className="p-2.5 w-10 text-center">No</th>
+                        <th className="p-2.5">NISN</th>
+                        <th className="p-2.5">Nama Siswa</th>
+                        <th className="p-2.5">Kelas</th>
+                        <th className="p-2.5">Mitra DUDI Tempat PKL</th>
+                        <th className="p-2.5">Status Penyerapan Pasca PKL</th>
+                        <th className="p-2.5 text-center w-28">Ubah Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody
+                      key={absorptionPagination.animKey}
+                      className={`divide-y divide-[#ECEAF6] dark:divide-slate-800 ${absorptionPagination.slideClass}`}
+                    >
+                      {absorptionPagination.paginatedItems.map((r, idx) => (
+                        <tr key={r.id} className="hover:bg-[#FAF9FE] dark:hover:bg-slate-800/40">
+                          <td className="p-2.5 text-center text-[#8E8BA3] tabular-nums">
+                            {absorptionPagination.startIndex + idx + 1}
+                          </td>
+                          <td className="p-2.5 font-mono text-[11px] text-[#7A7596]">{r.nisn}</td>
+                          <td className="p-2.5 font-bold text-[#241F3F] dark:text-white">{r.studentName}</td>
+                          <td className="p-2.5 font-semibold text-[#4E496E] dark:text-slate-300">{r.className}</td>
+                          <td className="p-2.5 text-[#241F3F] dark:text-slate-200">{r.partnerName}</td>
+                          <td className="p-2.5">
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                                r.absorbedStatus === 'terserap_kerja'
+                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                  : r.absorbedStatus === 'melanjutkan_kuliah'
+                                  ? 'bg-[#EAE7F8] text-[#5B4FA8] dark:bg-indigo-950 dark:text-indigo-300'
+                                  : r.absorbedStatus === 'wirausaha'
+                                  ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                                  : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
+                              }`}
+                            >
+                              {r.absorbedStatus === 'terserap_kerja'
+                                ? 'Bekerja di Industri DUDI'
+                                : r.absorbedStatus === 'melanjutkan_kuliah'
+                                ? 'Melanjutkan Kuliah'
+                                : r.absorbedStatus === 'wirausaha'
+                                ? 'Wirausaha Mandiri'
+                                : 'Menunggu Penempatan Kerja'}
+                            </span>
+                          </td>
+                          <td className="p-2.5 text-center">
+                            <select
+                              value={r.absorbedStatus}
+                              onChange={e => {
+                                const newStatus = e.target.value as any;
+                                savePklReport({
+                                  ...r,
+                                  absorbedStatus: newStatus,
+                                });
+                                showToast(`Status alumni ${r.studentName} berhasil diperbarui.`);
+                              }}
+                              className="rounded-lg border border-[#E2DFEF] bg-white p-1 text-[10px] font-bold text-[#241F3F] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
+                            >
+                              <option value="terserap_kerja">Bekerja di DUDI</option>
+                              <option value="melanjutkan_kuliah">Kuliah</option>
+                              <option value="wirausaha">Wirausaha</option>
+                              <option value="mencari_kerja">Mencari Kerja</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <CarouselTablePagination
+                  page={absorptionPagination.page}
+                  totalPages={absorptionPagination.totalPages}
+                  totalItems={absorptionPagination.totalItems}
+                  pageSize={absorptionPagination.pageSize}
+                  startIndex={absorptionPagination.startIndex}
+                  endIndex={absorptionPagination.endIndex}
+                  slideDirection={absorptionPagination.slideDirection}
+                  onPageChange={absorptionPagination.setPage}
+                  onPageSizeChange={absorptionPagination.setPageSize}
+                  itemLabel="siswa"
+                />
               </div>
             </div>
           )}

@@ -21,6 +21,8 @@ import {
   POPOUT_CHARACTERS,
   ARTBOARD_BACKGROUNDS,
 } from '../common/AcademyOrnaments';
+import { CarouselTablePagination, useCarouselPagination } from '../common/CarouselTablePagination';
+import { AccordionExpandAllBar, AccordionSection, useAccordionGroup } from '../common/AccordionExpandGroup';
 
 interface JrpgFlipBoxProps {
   boxId: string;
@@ -383,6 +385,9 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
     selectedYearFilter,
     selectedMonthFilter,
   ]);
+
+  const classMatrixPagination = useCarouselPagination(classComparisonData, 8);
+  const filterAccordion = useAccordionGroup(['dash-filter-strip'], true);
 
   // -------------------------------------------------------------
   // 4. SUBJECT PERFORMANCE & COMPLETION PERCENTAGE
@@ -1574,82 +1579,97 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             </div>
           </div>
 
-          {/* Dedicated Clean Filter Strip */}
-          <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-[#DFDCF2] bg-white/90 dark:bg-slate-800/80 dark:border-slate-700 px-3 py-2.5">
-            <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
-              {/* Filter Kelas */}
-              <div className="relative flex items-center">
-                <OrbitaMenuIcon
-                  variant="master-data"
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6C60B8] z-10"
-                />
-                <select
-                  value={selectedClassFilter}
-                  onChange={e => setSelectedClassFilter(e.target.value)}
-                  className="h-9 w-full sm:w-auto pl-8 pr-3 text-xs font-extrabold text-[#3E385B] dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 focus:outline-none cursor-pointer"
-                >
-                  <option value="ALL">Semua Kelas ({students.length} Siswa)</option>
-                  {classes.map(cls => (
-                    <option key={cls.id} value={cls.id}>
-                      Kelas {cls.name} ({cls.majorCode})
-                    </option>
-                  ))}
-                </select>
+          {/* Dedicated Clean Filter Strip with Accordion Expand All */}
+          <div className="space-y-2.5">
+            <AccordionExpandAllBar
+              title="Filter Analisis Kelas, Bulan & Tahun"
+              allExpanded={filterAccordion.allExpanded}
+              onExpandAll={filterAccordion.expandAll}
+              onCollapseAll={filterAccordion.collapseAll}
+            />
+            <AccordionSection
+              title="Parameter Filter Grafik & Matriks Analisis"
+              subtitle={`Kelas: ${selectedClassFilter === 'ALL' ? 'Semua' : classes.find(c => c.id === selectedClassFilter)?.name || selectedClassFilter} • Tahun: ${selectedYearFilter === 'ALL' ? 'Semua' : selectedYearFilter}`}
+              open={filterAccordion.isOpen('dash-filter-strip')}
+              onToggle={() => filterAccordion.toggle('dash-filter-strip')}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2.5">
+                <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+                  {/* Filter Kelas */}
+                  <div className="relative flex items-center">
+                    <OrbitaMenuIcon
+                      variant="master-data"
+                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6C60B8] z-10"
+                    />
+                    <select
+                      value={selectedClassFilter}
+                      onChange={e => setSelectedClassFilter(e.target.value)}
+                      className="h-9 w-full sm:w-auto pl-8 pr-3 text-xs font-extrabold text-[#3E385B] dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 focus:outline-none cursor-pointer"
+                    >
+                      <option value="ALL">Semua Kelas ({students.length} Siswa)</option>
+                      {classes.map(cls => (
+                        <option key={cls.id} value={cls.id}>
+                          Kelas {cls.name} ({cls.majorCode})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Filter Bulan */}
+                  <div className="relative flex items-center">
+                    <Calendar className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6C60B8] z-10" />
+                    <select
+                      value={selectedMonthFilter}
+                      onChange={e => {
+                        const val = e.target.value;
+                        setSelectedMonthFilter(val);
+                        if (val !== 'ALL') {
+                          setActiveMonthIdx(Math.max(0, Number(val) - 1));
+                        }
+                      }}
+                      className="h-9 w-full sm:w-auto pl-8 pr-3 text-xs font-extrabold text-[#3E385B] dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 focus:outline-none cursor-pointer"
+                    >
+                      <option value="ALL">Semua Bulan</option>
+                      {MONTH_OPTIONS.map(m => (
+                        <option key={m.value} value={m.value}>
+                          Bulan {m.full}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Filter Tahun */}
+                  <select
+                    value={selectedYearFilter}
+                    onChange={e => setSelectedYearFilter(e.target.value)}
+                    className="h-9 w-full sm:w-auto px-3 text-xs font-extrabold text-[#3E385B] dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 focus:outline-none cursor-pointer"
+                  >
+                    <option value="ALL">Semua Tahun</option>
+                    {availableYears.map(yr => (
+                      <option key={yr} value={yr}>
+                        Tahun {yr}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {(selectedClassFilter !== 'ALL' ||
+                  selectedMonthFilter !== 'ALL' ||
+                  selectedYearFilter !== 'ALL') && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedClassFilter('ALL');
+                      setSelectedMonthFilter('ALL');
+                      setSelectedYearFilter('ALL');
+                    }}
+                    className="no-ornament inline-flex h-9 items-center justify-center rounded-xl bg-[#FFE4EC] hover:bg-[#FFD2E0] px-3.5 text-xs font-extrabold text-[#F25781] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                  >
+                    Reset Filter
+                  </button>
+                )}
               </div>
-
-              {/* Filter Bulan */}
-              <div className="relative flex items-center">
-                <Calendar className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6C60B8] z-10" />
-                <select
-                  value={selectedMonthFilter}
-                  onChange={e => {
-                    const val = e.target.value;
-                    setSelectedMonthFilter(val);
-                    if (val !== 'ALL') {
-                      setActiveMonthIdx(Math.max(0, Number(val) - 1));
-                    }
-                  }}
-                  className="h-9 w-full sm:w-auto pl-8 pr-3 text-xs font-extrabold text-[#3E385B] dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 focus:outline-none cursor-pointer"
-                >
-                  <option value="ALL">Semua Bulan</option>
-                  {MONTH_OPTIONS.map(m => (
-                    <option key={m.value} value={m.value}>
-                      Bulan {m.full}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Filter Tahun */}
-              <select
-                value={selectedYearFilter}
-                onChange={e => setSelectedYearFilter(e.target.value)}
-                className="h-9 w-full sm:w-auto px-3 text-xs font-extrabold text-[#3E385B] dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 focus:outline-none cursor-pointer"
-              >
-                <option value="ALL">Semua Tahun</option>
-                {availableYears.map(yr => (
-                  <option key={yr} value={yr}>
-                    Tahun {yr}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {(selectedClassFilter !== 'ALL' ||
-              selectedMonthFilter !== 'ALL' ||
-              selectedYearFilter !== 'ALL') && (
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedClassFilter('ALL');
-                  setSelectedMonthFilter('ALL');
-                  setSelectedYearFilter('ALL');
-                }}
-                className="no-ornament inline-flex h-9 items-center justify-center rounded-xl bg-[#FFE4EC] hover:bg-[#FFD2E0] px-3.5 text-xs font-extrabold text-[#F25781] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
-              >
-                Reset Filter
-              </button>
-            )}
+            </AccordionSection>
           </div>
         </div>
 
@@ -2660,8 +2680,11 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
                 <th className="py-3 px-4 text-center whitespace-nowrap">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#ECEBF5] dark:divide-slate-800">
-              {classComparisonData.map(row => (
+            <tbody
+              key={classMatrixPagination.animKey}
+              className={`divide-y divide-[#ECEBF5] dark:divide-slate-800 ${classMatrixPagination.slideClass}`}
+            >
+              {classMatrixPagination.paginatedItems.map(row => (
                 <tr key={row.id}>
                   <td className="py-3 px-4 font-extrabold text-[#3E385B] dark:text-slate-100 whitespace-nowrap">
                     {row.name}
@@ -2734,6 +2757,23 @@ export const DashboardRouter: React.FC<DashboardRouterProps> = ({ onNavigate }) 
             </tbody>
           </table>
         </div>
+
+        {classComparisonData.length > 0 && (
+          <div className="mt-4">
+            <CarouselTablePagination
+              page={classMatrixPagination.page}
+              totalPages={classMatrixPagination.totalPages}
+              totalItems={classMatrixPagination.totalItems}
+              pageSize={classMatrixPagination.pageSize}
+              startIndex={classMatrixPagination.startIndex}
+              endIndex={classMatrixPagination.endIndex}
+              slideDirection={classMatrixPagination.slideDirection}
+              onPageChange={classMatrixPagination.setPage}
+              onPageSizeChange={classMatrixPagination.setPageSize}
+              itemLabel="kelas"
+            />
+          </div>
+        )}
       </OrnateCard>
     </div>
   );

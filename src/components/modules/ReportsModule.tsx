@@ -54,6 +54,8 @@ import { exportToGoogleSheets } from '../../utils/googleSheetsUtils';
 import { AcademyHeroBanner } from '../common/AcademyOrnaments';
 import { SortByControl, SortOption, sortDataItems } from '../common/SortByControl';
 import { LiquidNavBar } from '../common/LiquidNavBar';
+import { CarouselTablePagination, useCarouselPagination } from '../common/CarouselTablePagination';
+import { AccordionExpandAllBar, AccordionSection, useAccordionGroup } from '../common/AccordionExpandGroup';
 
 export const ReportsModule: React.FC = () => {
   const {
@@ -575,6 +577,19 @@ export const ReportsModule: React.FC = () => {
     };
   }, [activeStudent, subjects, assessmentScores, assessments, editableScores, classAttendanceData, currentSubject, customStudentReports]);
 
+  const exportControlAccordion = useAccordionGroup(['rep-export-filter'], true);
+  const designerAccordion = useAccordionGroup(
+    ['rep-design-logo', 'rep-design-kop', 'rep-design-ttd'],
+    true
+  );
+
+  const attReportPagination = useCarouselPagination(classAttendanceData, 8);
+  const legerReportPagination = useCarouselPagination(classLegerData, 8);
+  const subjectReportPagination = useCarouselPagination(subjectGradingData, 8);
+  const transcriptSubjects = studentTranscriptData?.subjectsList || [];
+  const transcriptPagination = useCarouselPagination(transcriptSubjects, 8);
+  const spreadsheetPagination = useCarouselPagination(classStudents, 8);
+
   // -------------------------------------------------------------
   // EXPORT HANDLERS SYNCHRONIZED BY REPORT TYPE
   // -------------------------------------------------------------
@@ -926,138 +941,153 @@ export const ReportsModule: React.FC = () => {
       {/* ======================================================== */}
       {activeMainTab === 'export' && (
         <div className="space-y-6">
-          {/* Filter / Generator Control Card */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="min-w-0">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Jenis Laporan
-                </label>
-                <select
-                  value={reportType}
-                  onChange={e => setReportType(e.target.value as any)}
-                  className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  <option value="attendance_class">1. Rekap Presensi per Kelas</option>
-                  <option value="grade_class">2. Leger Nilai Akademik Kelas</option>
-                  <option value="grade_subject">3. Rekap Nilai per Mata Pelajaran</option>
-                  <option value="student_transcript">4. Rapor &amp; Transkrip Nilai Siswa</option>
-                </select>
-              </div>
+          {/* Filter / Generator Control Card with Accordion Expand All */}
+          <div className="space-y-3">
+            <AccordionExpandAllBar
+              title="Filter Jenis Laporan, Rombel & Ekspor Dokumen"
+              allExpanded={exportControlAccordion.allExpanded}
+              onExpandAll={exportControlAccordion.expandAll}
+              onCollapseAll={exportControlAccordion.collapseAll}
+            />
+            <AccordionSection
+              title="Pengaturan Dokumen Laporan & Tombol Ekspor"
+              subtitle={`Kelas ${currentClass?.name || '-'} • T.A. ${activeAcademicYear.name}`}
+              open={exportControlAccordion.isOpen('rep-export-filter')}
+              onToggle={() => exportControlAccordion.toggle('rep-export-filter')}
+            >
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="min-w-0">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                      Jenis Laporan
+                    </label>
+                    <select
+                      value={reportType}
+                      onChange={e => setReportType(e.target.value as any)}
+                      className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    >
+                      <option value="attendance_class">1. Rekap Presensi per Kelas</option>
+                      <option value="grade_class">2. Leger Nilai Akademik Kelas</option>
+                      <option value="grade_subject">3. Rekap Nilai per Mata Pelajaran</option>
+                      <option value="student_transcript">4. Rapor &amp; Transkrip Nilai Siswa</option>
+                    </select>
+                  </div>
 
-              <div className="min-w-0">
-                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                  Kelas / Rombel
-                </label>
-                <select
-                  value={selectedClassId}
-                  onChange={e => setSelectedClassId(e.target.value)}
-                  className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                >
-                  {classes.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.majorCode})
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  <div className="min-w-0">
+                    <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                      Kelas / Rombel
+                    </label>
+                    <select
+                      value={selectedClassId}
+                      onChange={e => setSelectedClassId(e.target.value)}
+                      className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    >
+                      {classes.map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.name} ({c.majorCode})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-              {/* Show Subject selector if grade_subject */}
-              {reportType === 'grade_subject' && (
-                <div className="min-w-0">
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                    Mata Pelajaran
-                  </label>
-                  <select
-                    value={selectedSubjectId}
-                    onChange={e => setSelectedSubjectId(e.target.value)}
-                    className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  >
-                    {subjects.map(s => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} (KKM: {s.kkm})
-                      </option>
-                    ))}
-                  </select>
+                  {/* Show Subject selector if grade_subject */}
+                  {reportType === 'grade_subject' && (
+                    <div className="min-w-0">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                        Mata Pelajaran
+                      </label>
+                      <select
+                        value={selectedSubjectId}
+                        onChange={e => setSelectedSubjectId(e.target.value)}
+                        className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      >
+                        {subjects.map(s => (
+                          <option key={s.id} value={s.id}>
+                            {s.name} (KKM: {s.kkm})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Show Student selector if student_transcript */}
+                  {reportType === 'student_transcript' && (
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
+                        Pilih Siswa (Cetak Rapor)
+                      </label>
+                      <select
+                        value={selectedStudentId}
+                        onChange={e => setSelectedStudentId(e.target.value)}
+                        className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      >
+                        {classStudents.map(std => (
+                          <option key={std.id} value={std.id}>
+                            {std.fullName} ({std.nisn})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Tahun Ajaran info if not showing 3rd select */}
+                  {reportType !== 'grade_subject' && reportType !== 'student_transcript' && (
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 block mb-1.5">Tahun Ajaran</label>
+                      <div className="h-[38px] flex items-center px-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                        T.A. {activeAcademicYear.name} ({activeAcademicYear.activeSemester.toUpperCase()})
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
 
-              {/* Show Student selector if student_transcript */}
-              {reportType === 'student_transcript' && (
-                <div>
-                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block mb-1.5">
-                    Pilih Siswa (Cetak Rapor)
-                  </label>
-                  <select
-                    value={selectedStudentId}
-                    onChange={e => setSelectedStudentId(e.target.value)}
-                    className="h-[38px] w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  >
-                    {classStudents.map(std => (
-                      <option key={std.id} value={std.id}>
-                        {std.fullName} ({std.nisn})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+                {/* Dedicated Full-Width Export & Sort Action Bar */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <SortByControl value={sortBy} onChange={setSortBy} />
 
-              {/* Tahun Ajaran info if not showing 3rd select */}
-              {reportType !== 'grade_subject' && reportType !== 'student_transcript' && (
-                <div>
-                  <label className="text-xs font-bold text-slate-500 block mb-1.5">Tahun Ajaran</label>
-                  <div className="h-[38px] flex items-center px-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    T.A. {activeAcademicYear.name} ({activeAcademicYear.activeSemester.toUpperCase()})
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveMainTab('designer');
+                      }}
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3.5 text-xs font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer"
+                      title="Pratinjau Lembar Dokumen Satu per Satu"
+                    >
+                      <Eye className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                      <span>Pratinjau Dokumen</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadExcel}
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer"
+                      title="Ekspor file Excel (.xlsx)"
+                    >
+                      <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                      <span>Ekspor Excel</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadPdf}
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+                      title="Cetak PDF Resmi Sesuai Format"
+                    >
+                      <Printer className="h-3.5 w-3.5 shrink-0" />
+                      <span>Cetak PDF</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleExportGoogleSheets}
+                      disabled={isExportingSheets}
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap shrink-0 transition-colors disabled:opacity-50 cursor-pointer"
+                    >
+                      <Table className="h-3.5 w-3.5 shrink-0" />
+                      <span>{isExportingSheets ? 'Menyimpan...' : 'Google Sheets'}</span>
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Dedicated Full-Width Export & Sort Action Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-              <SortByControl value={sortBy} onChange={setSortBy} />
-
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveMainTab('designer');
-                  }}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3.5 text-xs font-bold text-blue-700 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/60 dark:text-blue-300 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer"
-                  title="Pratinjau Lembar Dokumen Satu per Satu"
-                >
-                  <Eye className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
-                  <span>Pratinjau Dokumen</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDownloadExcel}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 text-xs font-bold text-slate-800 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 shadow-2xs whitespace-nowrap shrink-0 cursor-pointer"
-                  title="Ekspor file Excel (.xlsx)"
-                >
-                  <Download className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                  <span>Ekspor Excel</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDownloadPdf}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-blue-700 whitespace-nowrap shrink-0 transition-colors cursor-pointer"
-                  title="Cetak PDF Resmi Sesuai Format"
-                >
-                  <Printer className="h-3.5 w-3.5 shrink-0" />
-                  <span>Cetak PDF</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleExportGoogleSheets}
-                  disabled={isExportingSheets}
-                  className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 whitespace-nowrap shrink-0 transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                  <Table className="h-3.5 w-3.5 shrink-0" />
-                  <span>{isExportingSheets ? 'Menyimpan...' : 'Google Sheets'}</span>
-                </button>
               </div>
-            </div>
+            </AccordionSection>
           </div>
 
           {/* ======================================================== */}
@@ -1134,8 +1164,11 @@ export const ReportsModule: React.FC = () => {
                         <th className="py-2.5 px-3 text-center">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {classAttendanceData.map(r => (
+                    <tbody
+                      key={attReportPagination.animKey}
+                      className={`divide-y divide-slate-100 dark:divide-slate-800 ${attReportPagination.slideClass}`}
+                    >
+                      {attReportPagination.paginatedItems.map(r => (
                         <tr key={r.studentId} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors">
                           <td className="py-2 px-3 text-center text-slate-400">{r.no}</td>
                           <td className="py-2 px-3 font-mono text-[11px] text-slate-500">{r.nisn}</td>
@@ -1169,6 +1202,23 @@ export const ReportsModule: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+
+                {classAttendanceData.length > 0 && (
+                  <div className="mt-4">
+                    <CarouselTablePagination
+                      page={attReportPagination.page}
+                      totalPages={attReportPagination.totalPages}
+                      totalItems={attReportPagination.totalItems}
+                      pageSize={attReportPagination.pageSize}
+                      startIndex={attReportPagination.startIndex}
+                      endIndex={attReportPagination.endIndex}
+                      slideDirection={attReportPagination.slideDirection}
+                      onPageChange={attReportPagination.setPage}
+                      onPageSizeChange={attReportPagination.setPageSize}
+                      itemLabel="siswa"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1251,8 +1301,11 @@ export const ReportsModule: React.FC = () => {
                         <th className="py-2.5 px-3 text-center">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {classLegerData.map(r => (
+                    <tbody
+                      key={legerReportPagination.animKey}
+                      className={`divide-y divide-slate-100 dark:divide-slate-800 ${legerReportPagination.slideClass}`}
+                    >
+                      {legerReportPagination.paginatedItems.map(r => (
                         <tr key={r.studentId} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors">
                           <td className="py-2 px-3 text-center text-slate-400">{r.no}</td>
                           <td className="py-2 px-3 font-mono text-[11px] text-slate-500">{r.nisn}</td>
@@ -1293,6 +1346,23 @@ export const ReportsModule: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+
+                {classLegerData.length > 0 && (
+                  <div className="mt-4">
+                    <CarouselTablePagination
+                      page={legerReportPagination.page}
+                      totalPages={legerReportPagination.totalPages}
+                      totalItems={legerReportPagination.totalItems}
+                      pageSize={legerReportPagination.pageSize}
+                      startIndex={legerReportPagination.startIndex}
+                      endIndex={legerReportPagination.endIndex}
+                      slideDirection={legerReportPagination.slideDirection}
+                      onPageChange={legerReportPagination.setPage}
+                      onPageSizeChange={legerReportPagination.setPageSize}
+                      itemLabel="siswa"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1374,8 +1444,11 @@ export const ReportsModule: React.FC = () => {
                         <th className="py-2.5 px-3 text-center">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {subjectGradingData.map(r => (
+                    <tbody
+                      key={subjectReportPagination.animKey}
+                      className={`divide-y divide-slate-100 dark:divide-slate-800 ${subjectReportPagination.slideClass}`}
+                    >
+                      {subjectReportPagination.paginatedItems.map(r => (
                         <tr key={r.studentId} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-colors">
                           <td className="py-2 px-3 text-center text-slate-400">{r.no}</td>
                           <td className="py-2 px-3 font-mono text-[11px] text-slate-500">{r.nisn}</td>
@@ -1415,6 +1488,23 @@ export const ReportsModule: React.FC = () => {
                     </tbody>
                   </table>
                 </div>
+
+                {subjectGradingData.length > 0 && (
+                  <div className="mt-4">
+                    <CarouselTablePagination
+                      page={subjectReportPagination.page}
+                      totalPages={subjectReportPagination.totalPages}
+                      totalItems={subjectReportPagination.totalItems}
+                      pageSize={subjectReportPagination.pageSize}
+                      startIndex={subjectReportPagination.startIndex}
+                      endIndex={subjectReportPagination.endIndex}
+                      slideDirection={subjectReportPagination.slideDirection}
+                      onPageChange={subjectReportPagination.setPage}
+                      onPageSizeChange={subjectReportPagination.setPageSize}
+                      itemLabel="siswa"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1504,62 +1594,81 @@ export const ReportsModule: React.FC = () => {
                 </div>
 
                 {/* Subjects & Grades Table */}
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border border-slate-200 dark:border-slate-800">
-                    <thead>
-                      <tr className="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 font-bold border-b border-slate-200 dark:border-slate-700">
-                        <th className="p-2 text-center w-8">No</th>
-                        <th className="p-2">Mata Pelajaran</th>
-                        <th className="p-2 text-center w-14">KKM</th>
-                        <th className="p-2 text-center w-16">Nilai</th>
-                        <th className="p-2 text-center w-14">Predikat</th>
-                        <th className="p-2">Capaian Kompetensi Pembelajaran</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {studentTranscriptData.subjectsList.map(sub => (
-                        <tr key={sub.subjectId} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                          <td className="p-2 text-center text-slate-400">{sub.no}</td>
-                          <td className="p-2 font-bold text-slate-900 dark:text-white">
-                            {sub.name}
-                            <span className="block text-[10px] text-slate-400 font-normal">Kode: {sub.code}</span>
+                <div className="space-y-4">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border border-slate-200 dark:border-slate-800">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 font-bold border-b border-slate-200 dark:border-slate-700">
+                          <th className="p-2 text-center w-8">No</th>
+                          <th className="p-2">Mata Pelajaran</th>
+                          <th className="p-2 text-center w-14">KKM</th>
+                          <th className="p-2 text-center w-16">Nilai</th>
+                          <th className="p-2 text-center w-14">Predikat</th>
+                          <th className="p-2">Capaian Kompetensi Pembelajaran</th>
+                        </tr>
+                      </thead>
+                      <tbody
+                        key={transcriptPagination.animKey}
+                        className={`divide-y divide-slate-100 dark:divide-slate-800 ${transcriptPagination.slideClass}`}
+                      >
+                        {transcriptPagination.paginatedItems.map(sub => (
+                          <tr key={sub.subjectId} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
+                            <td className="p-2 text-center text-slate-400">{sub.no}</td>
+                            <td className="p-2 font-bold text-slate-900 dark:text-white">
+                              {sub.name}
+                              <span className="block text-[10px] text-slate-400 font-normal">Kode: {sub.code}</span>
+                            </td>
+                            <td className="p-2 text-center font-medium text-slate-500">{sub.kkm}</td>
+                            <td className="p-2 text-center font-black text-sm text-blue-600 dark:text-cyan-400 bg-blue-50/20">
+                              {sub.score}
+                            </td>
+                            <td className="p-2 text-center font-bold">
+                              <span className={`px-2 py-0.5 rounded-md text-[11px] font-black ${
+                                sub.predicate === 'A'
+                                  ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                                  : sub.predicate === 'B'
+                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
+                                  : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                              }`}>
+                                {sub.predicate}
+                              </span>
+                            </td>
+                            <td className="p-2 text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                              {sub.feedback}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr className="bg-slate-50 font-bold text-slate-900 dark:bg-slate-800/80 dark:text-white border-t border-slate-200 dark:border-slate-700">
+                          <td colSpan={3} className="p-2 text-right">Rata-rata Nilai Akademik:</td>
+                          <td className="p-2 text-center text-sm font-black text-blue-600 dark:text-cyan-400">
+                            {studentTranscriptData.averageScore}
                           </td>
-                          <td className="p-2 text-center font-medium text-slate-500">{sub.kkm}</td>
-                          <td className="p-2 text-center font-black text-sm text-blue-600 dark:text-cyan-400 bg-blue-50/20">
-                            {sub.score}
+                          <td className="p-2 text-center">
+                            {studentTranscriptData.averageScore >= 80 ? 'B' : 'C'}
                           </td>
-                          <td className="p-2 text-center font-bold">
-                            <span className={`px-2 py-0.5 rounded-md text-[11px] font-black ${
-                              sub.predicate === 'A'
-                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
-                                : sub.predicate === 'B'
-                                ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
-                                : 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                            }`}>
-                              {sub.predicate}
-                            </span>
-                          </td>
-                          <td className="p-2 text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
-                            {sub.feedback}
+                          <td className="p-2 text-[11px] text-emerald-600 font-bold">
+                            Status Kelulusan: TUNTAS SELURUH KOMPETENSI
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr className="bg-slate-50 font-bold text-slate-900 dark:bg-slate-800/80 dark:text-white border-t border-slate-200 dark:border-slate-700">
-                        <td colSpan={3} className="p-2 text-right">Rata-rata Nilai Akademik:</td>
-                        <td className="p-2 text-center text-sm font-black text-blue-600 dark:text-cyan-400">
-                          {studentTranscriptData.averageScore}
-                        </td>
-                        <td className="p-2 text-center">
-                          {studentTranscriptData.averageScore >= 80 ? 'B' : 'C'}
-                        </td>
-                        <td className="p-2 text-[11px] text-emerald-600 font-bold">
-                          Status Kelulusan: TUNTAS SELURUH KOMPETENSI
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
+                      </tfoot>
+                    </table>
+                  </div>
+                  {transcriptSubjects.length > 0 && (
+                    <CarouselTablePagination
+                      page={transcriptPagination.page}
+                      totalPages={transcriptPagination.totalPages}
+                      totalItems={transcriptPagination.totalItems}
+                      pageSize={transcriptPagination.pageSize}
+                      startIndex={transcriptPagination.startIndex}
+                      endIndex={transcriptPagination.endIndex}
+                      slideDirection={transcriptPagination.slideDirection}
+                      onPageChange={transcriptPagination.setPage}
+                      onPageSizeChange={transcriptPagination.setPageSize}
+                      itemLabel="mapel"
+                    />
+                  )}
                 </div>
 
                 {/* Attendance Summary & Remarks Box */}
@@ -1756,8 +1865,11 @@ export const ReportsModule: React.FC = () => {
                     <th className="py-2.5 px-3 text-center">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {classStudents.map((std, idx) => {
+                <tbody
+                  key={spreadsheetPagination.animKey}
+                  className={`divide-y divide-slate-100 dark:divide-slate-800 ${spreadsheetPagination.slideClass}`}
+                >
+                  {spreadsheetPagination.paginatedItems.map((std, idx) => {
                     const sc = editableScores[std.id] || { tugas: 85, praktik: 80, formatif: 82, sumatif: 88 };
                     const finalScore = Math.round((sc.tugas * 0.2) + (sc.praktik * 0.3) + (sc.formatif * 0.2) + (sc.sumatif * 0.3));
                     const pred = finalScore >= 90 ? 'A' : finalScore >= 80 ? 'B' : finalScore >= 75 ? 'C' : 'D';
@@ -1765,7 +1877,9 @@ export const ReportsModule: React.FC = () => {
 
                     return (
                       <tr key={std.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
-                        <td className="py-2 px-3 text-center text-slate-400">{idx + 1}</td>
+                        <td className="py-2 px-3 text-center text-slate-400">
+                          {spreadsheetPagination.startIndex + idx + 1}
+                        </td>
                         <td className="py-2 px-3 font-mono text-[11px] text-slate-500">{std.nisn}</td>
                         <td className="py-2 px-3 font-bold text-slate-900 dark:text-white">{std.fullName}</td>
                         <td className="py-1 px-2 text-center">
@@ -1831,6 +1945,22 @@ export const ReportsModule: React.FC = () => {
                 </tbody>
               </table>
             </div>
+            {classStudents.length > 0 && (
+              <div className="p-4 border-t border-slate-100 dark:border-slate-800">
+                <CarouselTablePagination
+                  page={spreadsheetPagination.page}
+                  totalPages={spreadsheetPagination.totalPages}
+                  totalItems={spreadsheetPagination.totalItems}
+                  pageSize={spreadsheetPagination.pageSize}
+                  startIndex={spreadsheetPagination.startIndex}
+                  endIndex={spreadsheetPagination.endIndex}
+                  slideDirection={spreadsheetPagination.slideDirection}
+                  onPageChange={spreadsheetPagination.setPage}
+                  onPageSizeChange={spreadsheetPagination.setPageSize}
+                  itemLabel="siswa"
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -1867,82 +1997,100 @@ export const ReportsModule: React.FC = () => {
               </div>
             </div>
 
-            {/* Section 1: Logo Instansi Proporsional */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ImageIcon className="h-4 w-4 text-blue-600" />
-                  <h3 className="font-bold text-xs text-slate-900 dark:text-white">Logo Instansi Sekolah</h3>
-                </div>
-                {designerConfig.logoDataUrl && (
-                  <button
-                    type="button"
-                    onClick={() => setDesignerConfig(prev => ({ ...prev, logoDataUrl: undefined }))}
-                    className="text-[11px] text-rose-500 hover:underline"
-                  >
-                    Hapus Logo
-                  </button>
-                )}
-              </div>
+            <AccordionExpandAllBar
+              title="Bagian Pengaturan Desain & Kop PDF (3 Panel)"
+              allExpanded={designerAccordion.allExpanded}
+              onExpandAll={designerAccordion.expandAll}
+              onCollapseAll={designerAccordion.collapseAll}
+            />
 
-              <div className="flex items-center gap-4">
-                <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 overflow-hidden dark:border-slate-700 dark:bg-slate-800">
-                  {designerConfig.logoDataUrl ? (
-                    <img
-                      src={designerConfig.logoDataUrl}
-                      alt="Logo Preview"
-                      className="h-full w-full object-contain p-1"
-                    />
-                  ) : (
-                    <ImageIcon className="h-6 w-6 text-slate-400" />
+            {/* Section 1: Logo Instansi Proporsional */}
+            <AccordionSection
+              title="1. Logo Instansi Sekolah & Proporsi"
+              subtitle={`Lebar cetak logo: ${designerConfig.logoWidth || 20} mm`}
+              icon={<ImageIcon className="h-4 w-4 text-blue-600" />}
+              open={designerAccordion.isOpen('rep-design-logo')}
+              onToggle={() => designerAccordion.toggle('rep-design-logo')}
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">Unggah &amp; Skala Logo</span>
+                  {designerConfig.logoDataUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setDesignerConfig(prev => ({ ...prev, logoDataUrl: undefined }))}
+                      className="text-[11px] text-rose-500 hover:underline cursor-pointer"
+                    >
+                      Hapus Logo
+                    </button>
                   )}
                 </div>
 
-                <div className="flex-1 space-y-1">
-                  <label className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-white transition-colors">
-                    <Upload className="h-3.5 w-3.5" />
-                    <span>Unggah Logo (PNG/JPG)</span>
-                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-                  </label>
-                  <p className="text-[10px] text-slate-400">
-                    Otomatis diskalakan proporsional menjaga rasio aspek gambar.
-                  </p>
-                </div>
-              </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 overflow-hidden dark:border-slate-700 dark:bg-slate-800">
+                    {designerConfig.logoDataUrl ? (
+                      <img
+                        src={designerConfig.logoDataUrl}
+                        alt="Logo Preview"
+                        className="h-full w-full object-contain p-1"
+                      />
+                    ) : (
+                      <ImageIcon className="h-6 w-6 text-slate-400" />
+                    )}
+                  </div>
 
-              {/* Logo Sizing Control */}
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                <label className="text-[10px] font-bold text-slate-500 block mb-1">
-                  Proporsi Ukuran Logo pada Dokumen
-                </label>
-                <div className="flex items-center gap-2">
-                  <select
-                    value={designerConfig.logoWidth || 20}
-                    onChange={e => setDesignerConfig(prev => ({ ...prev, logoWidth: Number(e.target.value) }))}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-2.5 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                  >
-                    <option value={16}>Kompak (Lebar 16 mm - Proporsional)</option>
-                    <option value={20}>Standar Dokumen (Lebar 20 mm - Proporsional)</option>
-                    <option value={24}>Besar Lembar (Lebar 24 mm - Proporsional)</option>
-                  </select>
+                  <div className="flex-1 space-y-1">
+                    <label className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-bold text-slate-700 hover:bg-slate-100 cursor-pointer dark:border-slate-700 dark:bg-slate-800 dark:text-white transition-colors">
+                      <Upload className="h-3.5 w-3.5" />
+                      <span>Unggah Logo (PNG/JPG)</span>
+                      <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                    </label>
+                    <p className="text-[10px] text-slate-400">
+                      Otomatis diskalakan proporsional menjaga rasio aspek gambar.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Logo Sizing Control */}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <label className="text-[10px] font-bold text-slate-500 block mb-1">
+                    Proporsi Ukuran Logo pada Dokumen
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={designerConfig.logoWidth || 20}
+                      onChange={e => setDesignerConfig(prev => ({ ...prev, logoWidth: Number(e.target.value) }))}
+                      className="w-full rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-2.5 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    >
+                      <option value={16}>Kompak (Lebar 16 mm - Proporsional)</option>
+                      <option value={20}>Standar Dokumen (Lebar 20 mm - Proporsional)</option>
+                      <option value={24}>Besar Lembar (Lebar 24 mm - Proporsional)</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
+            </AccordionSection>
 
             {/* Section 2: Header Kop Surat & Warna Tabel */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-xs text-slate-900 dark:text-white">Informasi Kop Surat &amp; Tema Tabel</h3>
-                <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={designerConfig.showKopSurat !== false}
-                    onChange={e => setDesignerConfig(prev => ({ ...prev, showKopSurat: e.target.checked }))}
-                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span>Tampilkan Kop</span>
-                </label>
-              </div>
+            <AccordionSection
+              title="2. Informasi Kop Surat & Tema Tabel"
+              subtitle={designerConfig.institutionName}
+              icon={<Palette className="h-4 w-4 text-purple-600" />}
+              open={designerAccordion.isOpen('rep-design-kop')}
+              onToggle={() => designerAccordion.toggle('rep-design-kop')}
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-end">
+                  <label className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={designerConfig.showKopSurat !== false}
+                      onChange={e => setDesignerConfig(prev => ({ ...prev, showKopSurat: e.target.checked }))}
+                      className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span>Tampilkan Kop</span>
+                  </label>
+                </div>
 
               <div className="space-y-2">
                 <div>
@@ -2028,16 +2176,18 @@ export const ReportsModule: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
+              </div>
+            </AccordionSection>
 
             {/* Section 3: Tanda Tangan & Kolom NIP Guru / Wali Kelas */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
-              <div className="flex items-center gap-2">
-                <PenTool className="h-4 w-4 text-emerald-600" />
-                <h3 className="font-bold text-xs text-slate-900 dark:text-white">
-                  Tanda Tangan &amp; Pengaturan NIP Penandatangan
-                </h3>
-              </div>
+            <AccordionSection
+              title="3. Tanda Tangan & Pengaturan NIP Penandatangan"
+              subtitle={`${designerConfig.leftSignerName} • ${designerConfig.rightSignerName}`}
+              icon={<PenTool className="h-4 w-4 text-emerald-600" />}
+              open={designerAccordion.isOpen('rep-design-ttd')}
+              onToggle={() => designerAccordion.toggle('rep-design-ttd')}
+            >
+              <div className="space-y-4">
 
               {/* TTD 1: Guru / Wali Kelas dengan Kolom NIP */}
               <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 space-y-2 dark:border-slate-800 dark:bg-slate-800/40">
@@ -2196,7 +2346,8 @@ export const ReportsModule: React.FC = () => {
                   </label>
                 </div>
               </div>
-            </div>
+              </div>
+            </AccordionSection>
           </div>
 
           {/* Live A4 Preview Canvas (Right - Interactive One-by-One Document & Page Navigator) */}

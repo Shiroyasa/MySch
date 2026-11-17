@@ -10,11 +10,7 @@ export const AnimeBackground: React.FC = () => {
 
   return (
     <div
-      className="pointer-events-none select-none fixed inset-0 z-0 overflow-hidden"
-      style={{
-        background:
-          'linear-gradient(135deg, #C5CEE0 0%, #CFD7E6 48%, #C2CBE0 100%)',
-      }}
+      className="pointer-events-none select-none fixed inset-0 z-0 overflow-hidden bg-gradient-to-br from-[#C5CEE0] via-[#CFD7E6] to-[#C2CBE0] dark:from-[#0C0A1D] dark:via-[#14102E] dark:to-[#0E0B24] transition-colors duration-300"
       aria-hidden="true"
     >
       {customBgUrl && (
