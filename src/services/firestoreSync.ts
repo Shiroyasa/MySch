@@ -1486,6 +1486,10 @@ export async function syncCurrentStateToFirestore(
       }
     }
 
+    if (state) {
+      extraPromises.push(pushPublicBundlesToFirestore(state));
+    }
+
     await Promise.allSettled(extraPromises);
     return { success: true, count: ops.length };
   } catch (e: any) {
@@ -1493,6 +1497,93 @@ export async function syncCurrentStateToFirestore(
       return { success: true, count: 0 };
     }
     return { success: false, count: 0, error: e?.message || 'Gagal menyinkronkan data ke Firestore' };
+  }
+}
+
+// Write 3 compact public bundle documents to Firestore (costs only 3 writes, and allows public visitors to read all inputted data in just 3 read units instead of 650+)
+export async function pushPublicBundlesToFirestore(state: Record<string, any>): Promise<void> {
+  try {
+    const nowIso = new Date().toISOString();
+    const stripPhoto = (arr: any[]) =>
+      Array.isArray(arr)
+        ? arr.map(item => {
+            if (item && typeof item.photoURL === 'string' && item.photoURL.length > 15_000) {
+              const { photoURL: _p, ...rest } = item;
+              return rest;
+            }
+            return item;
+          })
+        : [];
+
+    const masterBundle = sanitizeForFirestore({
+      updatedAt: nowIso,
+      classes: state.classes ?? [],
+      majors: state.majors ?? [],
+      subjects: state.subjects ?? [],
+      academicYears: state.academicYears ?? [],
+      teachers: stripPhoto(state.teachers ?? []),
+      users: stripPhoto(state.users ?? []),
+      lessonSchedules: state.lessonSchedules ?? [],
+      schoolSettings: state.schoolSettings ?? null,
+      galleryViewSettings: state.galleryViewSettings ?? null,
+      pklPartners: state.pklPartners ?? [],
+      pklVisits: state.pklVisits ?? [],
+      pklReports: state.pklReports ?? [],
+      pklTracers: state.pklTracers ?? [],
+      assessments: state.assessments ?? [],
+      attendanceSessions: state.attendanceSessions ?? [],
+      customStudentReports: state.customStudentReports ?? {},
+    });
+
+    const studentsBundle = sanitizeForFirestore({
+      updatedAt: nowIso,
+      students: stripPhoto(state.students ?? []),
+    });
+
+    const recordsBundle = sanitizeForFirestore({
+      updatedAt: nowIso,
+      attendanceRecords: (state.attendanceRecords ?? []).slice(0, 1200),
+      attendanceCorrections: (state.attendanceCorrections ?? []).slice(0, 300),
+      assessmentScores: (state.assessmentScores ?? []).slice(0, 1500),
+    });
+
+    await Promise.allSettled([
+      setDoc(doc(db, 'settings', 'orbita_bundle_master'), masterBundle),
+      setDoc(doc(db, 'settings', 'orbita_bundle_students'), studentsBundle),
+      setDoc(doc(db, 'settings', 'orbita_bundle_records'), recordsBundle),
+    ]);
+  } catch {
+    // Handled silently if offline or quota-limited
+  }
+}
+
+export async function pullPublicBundlesFromFirestore(): Promise<Record<string, any> | null> {
+  try {
+    const [masterSnap, studentsSnap, recordsSnap] = await Promise.all([
+      getDoc(doc(db, 'settings', 'orbita_bundle_master')),
+      getDoc(doc(db, 'settings', 'orbita_bundle_students')),
+      getDoc(doc(db, 'settings', 'orbita_bundle_records')),
+    ]);
+
+    const merged: Record<string, any> = {};
+    let foundAny = false;
+
+    if (masterSnap.exists()) {
+      Object.assign(merged, masterSnap.data());
+      foundAny = true;
+    }
+    if (studentsSnap.exists()) {
+      Object.assign(merged, studentsSnap.data());
+      foundAny = true;
+    }
+    if (recordsSnap.exists()) {
+      Object.assign(merged, recordsSnap.data());
+      foundAny = true;
+    }
+
+    return foundAny ? merged : null;
+  } catch {
+    return null;
   }
 }
 

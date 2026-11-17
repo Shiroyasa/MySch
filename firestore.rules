@@ -90,11 +90,10 @@ service cloud.firestore {
       allow write: if isValidId(scoreId);
     }
 
-    // Audit logs (Immutable)
+    // Audit logs
     match /auditLogs/{logId} {
       allow read: if true;
-      allow create: if isValidId(logId);
-      allow update, delete: if false;
+      allow write: if isValidId(logId);
     }
 
     // Chat messages (Real-time student chat room & admin monitoring)
@@ -155,30 +154,9 @@ service cloud.firestore {
     }
 
     // Gallery Photos (Activity documentation managed by Admin, shown in Login Gallery)
-    function isValidGalleryPhoto(data) {
-      return data.keys().hasAll(['id', 'title', 'category', 'activityDate', 'imageUrl', 'isPublished', 'order', 'createdAt', 'updatedAt']) &&
-        data.keys().hasOnly(['id', 'title', 'caption', 'category', 'activityDate', 'location', 'imageUrl', 'aspectRatioOverride', 'imageFitOverride', 'isFeatured', 'isPublished', 'order', 'uploadedBy', 'createdAt', 'updatedAt']) &&
-        data.id is string && data.id.size() > 0 && data.id.size() <= 128 &&
-        data.title is string && data.title.size() > 0 && data.title.size() <= 160 &&
-        (!('caption' in data) || (data.caption is string && data.caption.size() <= 600)) &&
-        data.category in ['Kegiatan Sekolah', 'PKL & Industri', 'Prestasi & Lomba', 'Ekstrakurikuler', 'Akademik'] &&
-        data.activityDate is string && data.activityDate.size() > 0 && data.activityDate.size() <= 30 &&
-        (!('location' in data) || (data.location is string && data.location.size() <= 140)) &&
-        data.imageUrl is string && data.imageUrl.size() > 0 && data.imageUrl.size() <= 850000 &&
-        (!('aspectRatioOverride' in data) || data.aspectRatioOverride in ['inherit', '16:9', '4:3', '1:1', '21:9']) &&
-        (!('imageFitOverride' in data) || data.imageFitOverride in ['inherit', 'cover', 'contain']) &&
-        (!('isFeatured' in data) || data.isFeatured is bool) &&
-        data.isPublished is bool &&
-        data.order is number &&
-        (!('uploadedBy' in data) || (data.uploadedBy is string && data.uploadedBy.size() <= 120)) &&
-        data.createdAt is string && data.createdAt.size() <= 50 &&
-        data.updatedAt is string && data.updatedAt.size() <= 50;
-    }
-
     match /galleryPhotos/{photoId} {
       allow read: if true;
-      allow create, update: if isValidId(photoId) && isValidGalleryPhoto(request.resource.data);
-      allow delete: if isValidId(photoId);
+      allow write: if isValidId(photoId);
     }
 
     // Connection test document

@@ -119,6 +119,8 @@ import {
   firestoreSaveGalleryViewSettings,
   forceReseedFirestore,
   syncCurrentStateToFirestore,
+  pushPublicBundlesToFirestore,
+  pullPublicBundlesFromFirestore,
   sanitizeForFirestore,
 } from '../services/firestoreSync';
 import {
@@ -1609,7 +1611,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       // 3. Pull authoritative merged state from Cross-Device Sync Hub so this device reads all data inputted on other devices
       const pulled = await pullStateFromSyncHub();
-      if (!cancelled && pulled && pulled.collections) {
+      if (!cancelled && pulled && pulled.collections && Object.keys(pulled.collections).length > 0) {
         lastRemoteVersionRef.current = pulled.version || 0;
         applyRemoteCollections(pulled.collections, pulled.meta, true);
 
@@ -1622,6 +1624,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         if (Object.keys(missingCustomCols).length > 0) {
           await pushStateToSyncHub(missingCustomCols, 'auto');
+        }
+      } else if (!cancelled) {
+        // Fallback for external static public domains (e.g. Vercel): read the 3 ultra-low-read Firestore public bundles
+        const bundleData = await pullPublicBundlesFromFirestore();
+        if (!cancelled && bundleData) {
+          applyRemoteCollections(bundleData as Partial<AllSyncCollections>, undefined, true);
         }
       }
 
@@ -1703,7 +1711,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         })
         .catch(() => {});
-    }, 220);
+
+      // Also update the 3 ultra-low-read public Firestore bundles so any public domain (including Vercel) reads the latest data
+      pushPublicBundlesToFirestore(latestCollectionsRef.current).catch(() => {});
+    }, 280);
 
     return () => clearTimeout(timer);
   }, [
