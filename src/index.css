@@ -1133,14 +1133,27 @@ html.dark .fixed input:-webkit-autofill:focus {
   caret-color: #A79BFF !important;
 }
 
-.orbita-white-textfield input:-webkit-autofill,
-.orbita-white-textfield input:-webkit-autofill:hover,
-.orbita-white-textfield input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
-  box-shadow: 0 0 0px 1000px #ffffff inset !important;
-  -webkit-text-fill-color: #2B2548 !important;
-  color: #2B2548 !important;
+html:not(.dark) .orbita-white-textfield input:-webkit-autofill,
+html:not(.dark) .orbita-white-textfield input:-webkit-autofill:hover,
+html:not(.dark) .orbita-white-textfield input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #F0F1F6 inset !important;
+  box-shadow: 0 0 0px 1000px #F0F1F6 inset !important;
+  -webkit-text-fill-color: #3E385B !important;
+  color: #3E385B !important;
   caret-color: #6C60B8 !important;
+}
+
+html.dark .orbita-login-shell input:-webkit-autofill,
+html.dark .orbita-login-shell input:-webkit-autofill:hover,
+html.dark .orbita-login-shell input:-webkit-autofill:focus,
+html.dark .orbita-white-textfield input:-webkit-autofill,
+html.dark .orbita-white-textfield input:-webkit-autofill:hover,
+html.dark .orbita-white-textfield input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #171434 inset !important;
+  box-shadow: 0 0 0px 1000px #171434 inset !important;
+  -webkit-text-fill-color: #EAE8F6 !important;
+  color: #EAE8F6 !important;
+  caret-color: #A79BFF !important;
 }
 
 /* Crisp Slate-Indigo Typography inside White Cards across all modules in Light Mode */
@@ -1591,45 +1604,97 @@ html.theme-flip-active main {
   min-height: 0;
 }
 
-/* 6. Paper Plane Submit Button Launch Animation */
+/* 6. Paper Plane Submit Button Launch Animation (Flies Outside Button Bounds) */
 @keyframes paperPlaneLaunch {
   0% {
     transform: translate(0, 0) rotate(0deg) scale(1);
     opacity: 1;
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
   }
-  25% {
-    transform: translate(-3px, 3px) rotate(-14deg) scale(0.95);
+  18% {
+    transform: translate(-5px, 4px) rotate(-18deg) scale(0.92);
     opacity: 1;
+    filter: drop-shadow(0 2px 6px rgba(255, 255, 255, 0.35));
   }
-  65% {
-    transform: translate(22px, -22px) rotate(12deg) scale(1.08);
-    opacity: 0.9;
+  48% {
+    transform: translate(42px, -42px) rotate(10deg) scale(1.22);
+    opacity: 1;
+    filter: drop-shadow(-8px 8px 10px rgba(255, 255, 255, 0.55));
   }
   72% {
-    transform: translate(28px, -28px) scale(0.4);
+    transform: translate(92px, -84px) rotate(18deg) scale(1.1);
+    opacity: 0.78;
+    filter: drop-shadow(-12px 12px 14px rgba(167, 155, 255, 0.5));
+  }
+  82% {
+    transform: translate(118px, -108px) rotate(22deg) scale(0.55);
     opacity: 0;
   }
-  75% {
-    transform: translate(-18px, 18px) scale(0.5);
+  85% {
+    transform: translate(-18px, 18px) rotate(-8deg) scale(0.5);
     opacity: 0;
   }
   100% {
     transform: translate(0, 0) rotate(0deg) scale(1);
     opacity: 1;
+    filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0));
   }
 }
 
+@keyframes paperPlaneContrail {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(-42deg) scaleX(0.2);
+  }
+  25% {
+    opacity: 0.9;
+    transform: translate(16px, -16px) rotate(-42deg) scaleX(1);
+  }
+  70% {
+    opacity: 0.55;
+    transform: translate(54px, -54px) rotate(-42deg) scaleX(1.35);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(78px, -78px) rotate(-42deg) scaleX(0.4);
+  }
+}
+
+.orbita-paper-plane-btn {
+  position: relative;
+  overflow: visible !important;
+}
+
 .orbita-paper-plane-btn .orbita-paper-plane-icon {
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  z-index: 40;
+  will-change: transform, opacity;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), filter 0.28s ease;
 }
 
 .orbita-paper-plane-btn:hover:not(:disabled) .orbita-paper-plane-icon {
-  transform: translate(2px, -2px) rotate(-8deg) scale(1.08);
+  transform: translate(4px, -5px) rotate(-10deg) scale(1.12);
 }
 
 .orbita-paper-plane-btn[data-launching="true"] .orbita-paper-plane-icon,
 .orbita-paper-plane-btn[data-sending="true"] .orbita-paper-plane-icon {
-  animation: paperPlaneLaunch 0.52s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: paperPlaneLaunch 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.orbita-paper-plane-btn[data-launching="true"]::after,
+.orbita-paper-plane-btn[data-sending="true"]::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  width: 34px;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.85) 100%);
+  pointer-events: none;
+  z-index: 35;
+  transform-origin: left center;
+  animation: paperPlaneContrail 0.72s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* ========================================================================== */
@@ -1739,7 +1804,7 @@ html.dark h4 {
   color: #EAE8F6;
 }
 
-html.dark :where(main, header, .fixed, .orbita-login-shell) .dark\:text-white:not(.paper-surface *):not(.orbita-white-textfield *) {
+html.dark :where(main, header, .fixed, .orbita-login-shell) .dark\:text-white:not(.paper-surface *) {
   color: #EAE8F6 !important;
 }
 
@@ -1787,14 +1852,14 @@ html.dark :where(main, .fixed, .orbita-login-shell) .bg-\[\#F5F6FA\]:not(.paper-
   color: #DDD9F3 !important;
 }
 
-html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#3E385B\]:not(.paper-surface *):not(.orbita-white-textfield *) {
+html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#3E385B\]:not(.paper-surface *) {
   color: #E6E4F4 !important;
 }
 
-html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#5A537A\]:not(.paper-surface *):not(.orbita-white-textfield *),
-html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#6A6584\]:not(.paper-surface *):not(.orbita-white-textfield *),
-html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#6E6A86\]:not(.paper-surface *):not(.orbita-white-textfield *),
-html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#7A7596\]:not(.paper-surface *):not(.orbita-white-textfield *) {
+html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#5A537A\]:not(.paper-surface *),
+html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#6A6584\]:not(.paper-surface *),
+html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#6E6A86\]:not(.paper-surface *),
+html.dark :where(main, .fixed, .orbita-login-shell) .text-\[\#7A7596\]:not(.paper-surface *) {
   color: #B9B4D4 !important;
 }
 

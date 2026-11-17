@@ -517,11 +517,11 @@ export const LoginPage: React.FC = () => {
                               </div>
 
                               <div
-                                className={`orbita-field-underline orbita-white-textfield relative flex items-center rounded-[16px] bg-[#F0F1F6] dark:bg-white border border-transparent dark:border-white/90 px-4 py-1 transition-all focus-within:border-[#6C60B8]/50 dark:focus-within:border-[#8D81E3] focus-within:bg-white dark:focus-within:bg-white focus-within:ring-2 focus-within:ring-[#6C60B8]/20 dark:focus-within:ring-[#8D81E3]/30 dark:shadow-[0_4px_14px_rgba(10,8,30,0.28)] ${
+                                className={`orbita-field-underline orbita-white-textfield relative flex items-center rounded-[16px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-4 py-1 transition-all focus-within:border-[#6C60B8]/50 dark:focus-within:border-[#9E92FF] focus-within:bg-white dark:focus-within:bg-[#1F1B44] focus-within:ring-2 focus-within:ring-[#6C60B8]/20 dark:focus-within:ring-[#8D81E3]/25 ${
                                   emailInvalid ? 'orbita-field-zigzag-error' : ''
                                 }`}
                               >
-                                <User className="h-4 w-4 text-[#6C60B8] dark:text-[#6C60B8] shrink-0 mr-2.5" />
+                                <User className="h-4 w-4 text-[#6C60B8] dark:text-[#A599F8] shrink-0 mr-2.5" />
                                 <input
                                   type="text"
                                   value={email}
@@ -532,7 +532,7 @@ export const LoginPage: React.FC = () => {
                                   }}
                                   placeholder="Masukkan Email atau NIP/NIS..."
                                   autoComplete="username"
-                                  className="no-ornament w-full bg-transparent py-2.5 text-xs sm:text-sm font-semibold text-[#3E385B] dark:text-[#2B2548] caret-[#6C60B8] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E8BA6] focus:outline-none"
+                                  className="no-ornament w-full bg-transparent py-2.5 text-xs sm:text-sm font-semibold text-[#3E385B] dark:text-[#EAE8F6] caret-[#6C60B8] dark:caret-[#A79BFF] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
                                 />
                               </div>
                             </div>
@@ -549,11 +549,11 @@ export const LoginPage: React.FC = () => {
                               </div>
 
                               <div
-                                className={`orbita-field-underline orbita-white-textfield relative flex items-center rounded-[16px] bg-[#F0F1F6] dark:bg-white border border-transparent dark:border-white/90 px-4 py-1 transition-all focus-within:border-[#6C60B8]/50 dark:focus-within:border-[#8D81E3] focus-within:bg-white dark:focus-within:bg-white focus-within:ring-2 focus-within:ring-[#6C60B8]/20 dark:focus-within:ring-[#8D81E3]/30 dark:shadow-[0_4px_14px_rgba(10,8,30,0.28)] ${
+                                className={`orbita-field-underline orbita-white-textfield relative flex items-center rounded-[16px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-4 py-1 transition-all focus-within:border-[#6C60B8]/50 dark:focus-within:border-[#9E92FF] focus-within:bg-white dark:focus-within:bg-[#1F1B44] focus-within:ring-2 focus-within:ring-[#6C60B8]/20 dark:focus-within:ring-[#8D81E3]/25 ${
                                   passwordInvalid ? 'orbita-field-zigzag-error' : ''
                                 }`}
                               >
-                                <KeyRound className="h-4 w-4 text-[#6C60B8] dark:text-[#6C60B8] shrink-0 mr-2.5" />
+                                <KeyRound className="h-4 w-4 text-[#6C60B8] dark:text-[#A599F8] shrink-0 mr-2.5" />
                                 <input
                                   type={showPassword ? 'text' : 'password'}
                                   value={password}
@@ -564,12 +564,12 @@ export const LoginPage: React.FC = () => {
                                   }}
                                   placeholder="••••••••"
                                   autoComplete="current-password"
-                                  className="no-ornament w-full bg-transparent pr-8 py-2.5 text-xs sm:text-sm font-semibold text-[#3E385B] dark:text-[#2B2548] caret-[#6C60B8] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E8BA6] focus:outline-none"
+                                  className="no-ornament w-full bg-transparent pr-8 py-2.5 text-xs sm:text-sm font-semibold text-[#3E385B] dark:text-[#EAE8F6] caret-[#6C60B8] dark:caret-[#A79BFF] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
                                 />
                                 <button
                                   type="button"
                                   onClick={() => setShowPassword(!showPassword)}
-                                  className="no-ornament absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#9694A8] hover:text-[#6C60B8] dark:text-[#6E6A85] dark:hover:text-[#6C60B8] cursor-pointer transition-colors"
+                                  className="no-ornament absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#9694A8] hover:text-[#6C60B8] dark:text-[#9893B8] dark:hover:text-[#EAE8F6] cursor-pointer transition-colors"
                                   title={showPassword ? 'Sembunyikan Kata Sandi' : 'Tampilkan Kata Sandi'}
                                 >
                                   {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}

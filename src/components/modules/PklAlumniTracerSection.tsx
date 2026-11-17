@@ -755,7 +755,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     setIsLaunchingModalPlane(true);
     setSyncError(null);
     try {
-      await new Promise(resolve => setTimeout(resolve, 420));
+      await new Promise(resolve => setTimeout(resolve, 700));
       await Promise.resolve(onSaveTracer(payload, !editingTracerId));
       setFormSubmitAttempted(false);
       setShowModal(false);
@@ -876,7 +876,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     setIsLaunchingSyncPlane(true);
     setSyncError(null);
     try {
-      await new Promise(resolve => setTimeout(resolve, 420));
+      await new Promise(resolve => setTimeout(resolve, 700));
       if (onSaveTracersBatch) {
         await onSaveTracersBatch(sanitizedPayload, deletedDraftIds);
       } else {
@@ -1727,7 +1727,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                   onClick={handleSyncEditableDraftToDb}
                   disabled={isSyncingDraft}
                   data-sending={isLaunchingSyncPlane ? 'true' : 'false'}
-                  className="no-ornament orbita-paper-plane-btn inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-4 text-xs font-extrabold text-white shadow-xs hover:bg-[#5B4FA8] disabled:opacity-60 cursor-pointer whitespace-nowrap shrink-0 transition-colors"
+                  className="no-ornament orbita-paper-plane-btn orbita-btn-violet inline-flex h-9 items-center justify-center gap-1.5 rounded-xl px-4 text-xs font-extrabold text-white hover:brightness-105 disabled:opacity-85 cursor-pointer whitespace-nowrap shrink-0 transition-all overflow-visible"
                 >
                   <Send className="h-3.5 w-3.5 shrink-0 orbita-paper-plane-icon" />
                   <span>{isSyncingDraft ? 'Menyinkronkan...' : 'Simpan & Sinkronkan Database'}</span>
@@ -3949,7 +3949,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                     type="submit"
                     disabled={isSavingModal}
                     data-sending={isLaunchingModalPlane ? 'true' : 'false'}
-                    className="no-ornament orbita-paper-plane-btn inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-5 text-xs font-extrabold text-white shadow-xs hover:bg-[#5B4FA8] disabled:opacity-60 cursor-pointer whitespace-nowrap shrink-0"
+                    className="no-ornament orbita-paper-plane-btn orbita-btn-violet inline-flex h-9 items-center justify-center gap-1.5 rounded-xl px-5 text-xs font-extrabold text-white hover:brightness-105 disabled:opacity-85 cursor-pointer whitespace-nowrap shrink-0 transition-all overflow-visible"
                   >
                     <Send className="h-3.5 w-3.5 shrink-0 orbita-paper-plane-icon" />
                     <span>

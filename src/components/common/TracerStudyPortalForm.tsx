@@ -1091,7 +1091,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
       const isNew = !editingRecordId && !matchedByNisnOrStudent;
       await Promise.all([
         savePklTracer(payload, isNew),
-        new Promise(resolve => window.setTimeout(resolve, 480)),
+        new Promise(resolve => window.setTimeout(resolve, 720)),
       ]);
       setSavedRecord(payload);
       if (verifiedRespondent) {
@@ -2799,7 +2799,7 @@ export const TracerStudyPortalForm: React.FC<TracerStudyPortalFormProps> = ({
                 data-launching={isLaunchingPlane ? 'true' : 'false'}
                 className={`no-ornament orbita-paper-plane-btn ${
                   isGrade12 ? 'orbita-btn-coral' : 'orbita-btn-violet'
-                } inline-flex h-11 items-center justify-center gap-2 rounded-[18px] px-6 text-xs sm:text-sm font-extrabold text-white disabled:opacity-75 cursor-pointer overflow-hidden`}
+                } inline-flex h-11 items-center justify-center gap-2 rounded-[18px] px-6 text-xs sm:text-sm font-extrabold text-white disabled:opacity-85 cursor-pointer overflow-visible`}
               >
                 <Send className="h-4 w-4 shrink-0 orbita-paper-plane-icon" />
                 <span>
