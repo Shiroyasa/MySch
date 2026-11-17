@@ -162,14 +162,14 @@ export const LoginPage: React.FC = () => {
       <AnimeBackground />
 
       {/* Outer Frosted Tablet/Desktop Bezel Frame (Edge-to-Edge on Small Mobile) */}
-      <div className="animate-login-reveal relative z-10 flex min-h-[100dvh] sm:min-h-[680px] w-full max-w-[1480px] overflow-hidden rounded-none sm:rounded-[34px] lg:rounded-[40px] border-0 sm:border sm:border-white/65 bg-transparent sm:bg-white/40 p-0 sm:p-2 lg:p-2.5 sm:shadow-[0_32px_80px_-12px_rgba(62,56,91,0.22)] sm:backdrop-blur-md">
-        {/* Inner Crisp Snow-White Application Canvas */}
-        <div className="relative flex w-full overflow-hidden rounded-none sm:rounded-[28px] lg:rounded-[32px] bg-[#F8F9FD]">
+      <div className="animate-login-reveal relative z-10 flex min-h-[100dvh] sm:min-h-[680px] w-full max-w-[1480px] overflow-hidden rounded-none sm:rounded-[34px] lg:rounded-[40px] border-0 sm:border sm:border-white/60 bg-transparent sm:bg-[#EAE7F9]/38 p-0 sm:p-2 lg:p-2.5 sm:shadow-[0_32px_80px_-12px_rgba(79,67,156,0.28)] sm:backdrop-blur-xl">
+        {/* Inner Translucent Lavender-Glass Application Canvas (Matched to Main Sidebar Shell) */}
+        <div className="relative flex w-full overflow-hidden rounded-none sm:rounded-[28px] lg:rounded-[32px] bg-[#F5F4FB]/88 backdrop-blur-md">
           {/* Left Floating Vertical Frosted Violet Glass Pill Sidebar (Desktop & Landscape Tablet) */}
           <aside
             style={{
               background:
-                'linear-gradient(180deg, rgba(116, 104, 196, 0.82) 0%, rgba(101, 88, 181, 0.78) 100%)',
+                'linear-gradient(180deg, rgba(116, 104, 196, 0.80) 0%, rgba(101, 88, 181, 0.76) 100%)',
               boxShadow:
                 '0 20px 44px -8px rgba(84, 70, 172, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.36)',
             }}
@@ -184,11 +184,11 @@ export const LoginPage: React.FC = () => {
               )}
             </div>
 
-            {/* Center Icons: Vertical Liquid Bulge Toggles */}
+            {/* Center Icons: Embedded Vertical Liquid Bulge Toggles (Clean Single Glass Layer) */}
             <LiquidNavBar
               orientation="vertical"
+              embedded
               ariaLabel="Navigasi Portal Login"
-              className="!bg-transparent !border-0 !shadow-none !backdrop-blur-none !p-0"
               activeId={showScheduleModal ? 'schedule' : 'login'}
               onSelect={id => {
                 const isSched = id === 'schedule';

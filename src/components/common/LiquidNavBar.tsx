@@ -18,6 +18,7 @@ export interface LiquidNavBarProps {
   fullWidth?: boolean;
   wrap?: boolean;
   pill?: boolean;
+  embedded?: boolean;
   className?: string;
   ariaLabel?: string;
 }
@@ -31,6 +32,7 @@ export const LiquidNavBar: React.FC<LiquidNavBarProps> = ({
   fullWidth = false,
   wrap = false,
   pill = false,
+  embedded = false,
   className = '',
   ariaLabel = 'Navigasi Tab',
 }) => {
@@ -211,13 +213,21 @@ export const LiquidNavBar: React.FC<LiquidNavBarProps> = ({
     <nav
       ref={navRef}
       aria-label={ariaLabel}
-      style={{
-        background:
-          'linear-gradient(135deg, rgba(116, 104, 196, 0.86) 0%, rgba(101, 88, 181, 0.82) 100%)',
-        boxShadow:
-          '0 14px 32px -6px rgba(74, 62, 152, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.36)',
-      }}
-      className={`relative max-w-full border border-white/30 p-1.5 text-white backdrop-blur-2xl backdrop-saturate-150 ${containerRadius} ${
+      style={
+        embedded
+          ? undefined
+          : {
+              background:
+                'linear-gradient(135deg, rgba(116, 104, 196, 0.86) 0%, rgba(101, 88, 181, 0.82) 100%)',
+              boxShadow:
+                '0 14px 32px -6px rgba(74, 62, 152, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.36)',
+            }
+      }
+      className={`relative max-w-full text-white ${
+        embedded
+          ? 'bg-transparent border-0 p-0 shadow-none'
+          : `border border-white/30 p-1.5 backdrop-blur-2xl backdrop-saturate-150 ${containerRadius}`
+      } ${
         orientation === 'horizontal'
           ? wrap
             ? 'overflow-visible'
