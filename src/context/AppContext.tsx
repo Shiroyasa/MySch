@@ -118,8 +118,19 @@ import {
   firestoreDeleteGalleryPhoto,
   firestoreSaveGalleryViewSettings,
   forceReseedFirestore,
+  syncCurrentStateToFirestore,
   sanitizeForFirestore,
 } from '../services/firestoreSync';
+import {
+  AllSyncCollections,
+  SyncCollectionKey,
+  ALL_SYNC_KEYS,
+  computeCollectionHash,
+  isCollectionCustomized,
+  pullStateFromSyncHub,
+  pushStateToSyncHub,
+  subscribeToSyncHubStream,
+} from '../services/crossDeviceSync';
 import { ReportCustomConfig, defaultReportConfig } from '../utils/exportUtils';
 import {
   idbGet,
@@ -732,6 +743,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return safeGetLocalStorage<ChatMessage[]>('myschool_direct_messages', [], Array.isArray);
   });
 
+  // Student Chat Room & Admin Oversight (Synchronized to Cloud Firestore)
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => {
+    return safeGetLocalStorage<ChatMessage[]>('myschool_chat_messages', initialChatMessages, Array.isArray);
+  });
+
   // Custom Report Template state (PDF Kop, Logo, TTD synced to Firestore)
   const [reportTemplate, setReportTemplate] = useState<ReportCustomConfig>(() => {
     return safeGetLocalStorage<ReportCustomConfig>(
@@ -1280,17 +1296,474 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => unsubscribe();
   }, []);
 
-  // Force re-seed / cloud database sync utility
+  // Keep a live ref to all current collections so sync handlers always access fresh state
+  const latestCollectionsRef = React.useRef<AllSyncCollections>({
+    students,
+    teachers,
+    classes,
+    majors,
+    subjects,
+    academicYears,
+    users,
+    attendanceSessions,
+    attendanceRecords,
+    attendanceCorrections,
+    assessments,
+    assessmentScores,
+    customStudentReports,
+    auditLogs,
+    notifications,
+    chatMessages,
+    directMessages,
+    reportTemplate,
+    pklPartners,
+    pklVisits,
+    pklReports,
+    pklTracers,
+    visualSettings,
+    schoolSettings,
+    lessonSchedules,
+    galleryPhotos,
+    galleryViewSettings,
+  });
+
+  latestCollectionsRef.current = {
+    students,
+    teachers,
+    classes,
+    majors,
+    subjects,
+    academicYears,
+    users,
+    attendanceSessions,
+    attendanceRecords,
+    attendanceCorrections,
+    assessments,
+    assessmentScores,
+    customStudentReports,
+    auditLogs,
+    notifications,
+    chatMessages,
+    directMessages,
+    reportTemplate,
+    pklPartners,
+    pklVisits,
+    pklReports,
+    pklTracers,
+    visualSettings,
+    schoolSettings,
+    lessonSchedules,
+    galleryPhotos,
+    galleryViewSettings,
+  };
+
+  const lastSyncedHashesRef = React.useRef<Partial<Record<SyncCollectionKey, string>>>({});
+  const isInitialSyncDoneRef = React.useRef<boolean>(false);
+  const lastRemoteVersionRef = React.useRef<number>(0);
+
+  // Apply remote collections from Cross-Device Sync Hub into local React state, localStorage, and IndexedDB
+  const applyRemoteCollections = React.useCallback(
+    (
+      remoteCols: Partial<AllSyncCollections>,
+      remoteMeta?: Record<string, { updatedAt: string; isCustom: boolean; clientId: string; hash: string }>,
+      isInitialPull = false
+    ) => {
+      const currentSnap = latestCollectionsRef.current;
+
+      for (const key of ALL_SYNC_KEYS) {
+        const incoming = remoteCols[key];
+        if (incoming === undefined || incoming === null) continue;
+
+        const meta = remoteMeta?.[key];
+        // On initial pull, if this device has customized data for a key and server only has non-custom seed data, keep local customized data
+        if (isInitialPull && meta && !meta.isCustom && isCollectionCustomized(key, currentSnap[key])) {
+          continue;
+        }
+
+        const incomingHash = computeCollectionHash(incoming);
+        if (lastSyncedHashesRef.current[key] === incomingHash && !isInitialPull) {
+          continue;
+        }
+        lastSyncedHashesRef.current[key] = incomingHash;
+
+        switch (key) {
+          case 'students':
+            if (Array.isArray(incoming)) {
+              setStudents(incoming as Student[]);
+              try { localStorage.setItem('myschool_students', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'teachers':
+            if (Array.isArray(incoming)) {
+              setTeachers(incoming as Teacher[]);
+              try { localStorage.setItem('myschool_teachers', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'classes':
+            if (Array.isArray(incoming)) {
+              setClasses(incoming as ClassRoom[]);
+              try { localStorage.setItem('myschool_classes', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'majors':
+            if (Array.isArray(incoming)) {
+              setMajors(incoming as Major[]);
+              try { localStorage.setItem('myschool_majors', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'subjects':
+            if (Array.isArray(incoming)) {
+              setSubjects(incoming as Subject[]);
+              try { localStorage.setItem('myschool_subjects', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'academicYears':
+            if (Array.isArray(incoming)) {
+              setAcademicYears(incoming as AcademicYear[]);
+              try { localStorage.setItem('myschool_academic_years', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'users':
+            if (Array.isArray(incoming)) {
+              setUsers(incoming as User[]);
+              try { localStorage.setItem('myschool_users', JSON.stringify(incoming)); } catch {}
+              setCurrentUser(curr => {
+                const match = (incoming as User[]).find(u => u.id === curr.id);
+                if (match) {
+                  const merged = { ...curr, ...match };
+                  try { localStorage.setItem('myschool_current_user', JSON.stringify(merged)); } catch {}
+                  return merged;
+                }
+                return curr;
+              });
+            }
+            break;
+          case 'attendanceSessions':
+            if (Array.isArray(incoming)) {
+              setAttendanceSessions(incoming as AttendanceSession[]);
+              try { localStorage.setItem('myschool_attendance_sessions', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'attendanceRecords':
+            if (Array.isArray(incoming)) {
+              setAttendanceRecords(incoming as AttendanceRecord[]);
+              try { localStorage.setItem('myschool_attendance_records', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'attendanceCorrections':
+            if (Array.isArray(incoming)) {
+              setAttendanceCorrections(incoming as AttendanceCorrection[]);
+              try { localStorage.setItem('myschool_attendance_corrections', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'assessments':
+            if (Array.isArray(incoming)) {
+              setAssessments(incoming as Assessment[]);
+              try { localStorage.setItem('myschool_assessments', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'assessmentScores':
+            if (Array.isArray(incoming)) {
+              setAssessmentScores(incoming as AssessmentScore[]);
+              try { localStorage.setItem('myschool_assessment_scores', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'customStudentReports':
+            if (incoming && typeof incoming === 'object') {
+              setCustomStudentReports(incoming as Record<string, any>);
+              try { localStorage.setItem('myschool_student_reports_custom', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'auditLogs':
+            if (Array.isArray(incoming)) {
+              setAuditLogs(incoming as AuditLog[]);
+              try { localStorage.setItem('myschool_audit_logs', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'notifications':
+            if (Array.isArray(incoming)) {
+              setNotifications(incoming as NotificationItem[]);
+              try { localStorage.setItem('myschool_notifications', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'chatMessages':
+            if (Array.isArray(incoming)) {
+              setChatMessages(incoming as ChatMessage[]);
+              try { localStorage.setItem('myschool_chat_messages', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'directMessages':
+            if (Array.isArray(incoming)) {
+              setDirectMessages(incoming as any[]);
+              try { localStorage.setItem('myschool_direct_messages', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'reportTemplate':
+            if (incoming && typeof incoming === 'object') {
+              const normalized: ReportCustomConfig = {
+                ...defaultReportConfig,
+                ...(incoming as ReportCustomConfig),
+              };
+              setReportTemplate(normalized);
+              try { localStorage.setItem('myschool_report_template', JSON.stringify(normalized)); } catch {}
+            }
+            break;
+          case 'pklPartners':
+            if (Array.isArray(incoming)) {
+              setPklPartners(incoming as IndustryPartner[]);
+              try { localStorage.setItem('myschool_pkl_partners_v3', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'pklVisits':
+            if (Array.isArray(incoming)) {
+              setPklVisits(incoming as PklVisitRecord[]);
+              try { localStorage.setItem('myschool_pkl_visits_v3', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'pklReports':
+            if (Array.isArray(incoming)) {
+              setPklReports(incoming as PklStudentReportItem[]);
+              try { localStorage.setItem('myschool_pkl_reports_v3', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'pklTracers':
+            if (Array.isArray(incoming)) {
+              setPklTracers(incoming as AlumniTracerRecord[]);
+              try { localStorage.setItem('myschool_pkl_tracers_v1', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'visualSettings':
+            if (incoming && typeof incoming === 'object') {
+              setVisualSettings(prev => {
+                const next = { ...prev, ...(incoming as VisualSettings) };
+                saveVisualSettingsLocally(next);
+                return next;
+              });
+            }
+            break;
+          case 'schoolSettings':
+            if (incoming && typeof incoming === 'object') {
+              setSchoolSettings(prev => {
+                const next = sanitizeSchoolIdentity({ ...prev, ...(incoming as SchoolSettings) });
+                try { localStorage.setItem('myschool_school_settings', JSON.stringify(next)); } catch {}
+                return next;
+              });
+            }
+            break;
+          case 'lessonSchedules':
+            if (Array.isArray(incoming) && incoming.length > 0) {
+              setLessonSchedules(incoming as LessonSchedule[]);
+              saveLessonSchedulesLocally(incoming as LessonSchedule[]);
+            }
+            break;
+          case 'galleryPhotos':
+            if (Array.isArray(incoming)) {
+              setGalleryPhotos(incoming as GalleryPhoto[]);
+              idbSet('myschool_gallery_photos_full', incoming).catch(() => {});
+              try { localStorage.setItem('myschool_gallery_photos', JSON.stringify(incoming)); } catch {}
+            }
+            break;
+          case 'galleryViewSettings':
+            if (incoming && typeof incoming === 'object') {
+              setGalleryViewSettings(prev => {
+                const next = { ...defaultGalleryViewSettings, ...prev, ...(incoming as GalleryViewSettings) };
+                try { localStorage.setItem('myschool_gallery_view_settings', JSON.stringify(next)); } catch {}
+                return next;
+              });
+            }
+            break;
+        }
+      }
+      setLastSyncTime(new Date());
+      setIsFirestoreConnected(true);
+    },
+    []
+  );
+
+  // Initial Cross-Device Handshake + Real-Time SSE Stream + Focus/Visibility Sync
+  useEffect(() => {
+    let cancelled = false;
+
+    const performInitialCrossDeviceSync = async () => {
+      // Wait briefly for IndexedDB hydration (visualSettings, lessonSchedules, galleryPhotos) to complete
+      await new Promise(resolve => setTimeout(resolve, 400));
+      if (cancelled) return;
+
+      const localSnapshot = latestCollectionsRef.current;
+
+      // Record initial hashes
+      for (const k of ALL_SYNC_KEYS) {
+        lastSyncedHashesRef.current[k] = computeCollectionHash(localSnapshot[k]);
+      }
+
+      // 1. Upload this device's state to Cross-Device Sync Hub (any customized/inputted collections upgrade the hub)
+      await pushStateToSyncHub(localSnapshot, 'hydrate');
+
+      // 2. If this device has custom inputted data, also push it to Cloud Firestore in the background
+      const hasAnyCustomLocalData = ALL_SYNC_KEYS.some(k =>
+        isCollectionCustomized(k, localSnapshot[k])
+      );
+      if (hasAnyCustomLocalData) {
+        syncCurrentStateToFirestore(localSnapshot).catch(() => {});
+      }
+
+      // 3. Pull authoritative merged state from Cross-Device Sync Hub so this device reads all data inputted on other devices
+      const pulled = await pullStateFromSyncHub();
+      if (!cancelled && pulled && pulled.collections) {
+        lastRemoteVersionRef.current = pulled.version || 0;
+        applyRemoteCollections(pulled.collections, pulled.meta, true);
+
+        // If local had custom data that wasn't on server yet, push it in 'auto' mode to ensure full convergence
+        const missingCustomCols: Partial<AllSyncCollections> = {};
+        for (const k of ALL_SYNC_KEYS) {
+          if (isCollectionCustomized(k, localSnapshot[k]) && !pulled.meta?.[k]?.isCustom) {
+            (missingCustomCols as any)[k] = localSnapshot[k];
+          }
+        }
+        if (Object.keys(missingCustomCols).length > 0) {
+          await pushStateToSyncHub(missingCustomCols, 'auto');
+        }
+      }
+
+      if (!cancelled) {
+        isInitialSyncDoneRef.current = true;
+      }
+    };
+
+    performInitialCrossDeviceSync();
+
+    // Subscribe to real-time Server-Sent Events from the Cross-Device Sync Hub
+    const unsubscribeStream = subscribeToSyncHubStream(async (changedKeys, version) => {
+      if (cancelled) return;
+      if (version > 0 && version <= lastRemoteVersionRef.current) return;
+      const pulled = await pullStateFromSyncHub(changedKeys);
+      if (!cancelled && pulled && pulled.collections) {
+        if (pulled.version) lastRemoteVersionRef.current = pulled.version;
+        applyRemoteCollections(pulled.collections, pulled.meta, false);
+      }
+    });
+
+    // Pull updates when tab/app regains focus or visibility, plus periodic 7s check
+    const checkRemoteUpdates = async () => {
+      if (cancelled || !isInitialSyncDoneRef.current) return;
+      const pulled = await pullStateFromSyncHub();
+      if (!cancelled && pulled && pulled.collections) {
+        if (pulled.version && pulled.version !== lastRemoteVersionRef.current) {
+          lastRemoteVersionRef.current = pulled.version;
+          applyRemoteCollections(pulled.collections, pulled.meta, false);
+        }
+      }
+    };
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        checkRemoteUpdates();
+      }
+    };
+
+    window.addEventListener('focus', checkRemoteUpdates);
+    document.addEventListener('visibilitychange', handleVisibility);
+    const pollInterval = setInterval(checkRemoteUpdates, 7000);
+
+    return () => {
+      cancelled = true;
+      unsubscribeStream();
+      window.removeEventListener('focus', checkRemoteUpdates);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      clearInterval(pollInterval);
+    };
+  }, [applyRemoteCollections]);
+
+  // Automatic Cross-Device Push whenever any collection is modified on this device
+  useEffect(() => {
+    if (!isInitialSyncDoneRef.current) return;
+
+    const currentSnap = latestCollectionsRef.current;
+    const changedToPush: Partial<AllSyncCollections> = {};
+
+    for (const key of ALL_SYNC_KEYS) {
+      const currentVal = currentSnap[key];
+      const nextHash = computeCollectionHash(currentVal);
+      if (lastSyncedHashesRef.current[key] !== nextHash) {
+        lastSyncedHashesRef.current[key] = nextHash;
+        (changedToPush as any)[key] = currentVal;
+      }
+    }
+
+    const changedKeys = Object.keys(changedToPush) as SyncCollectionKey[];
+    if (changedKeys.length === 0) return;
+
+    const timer = setTimeout(() => {
+      pushStateToSyncHub(changedToPush, 'auto')
+        .then(res => {
+          if (res.ok) {
+            if (res.version) lastRemoteVersionRef.current = res.version;
+            setLastSyncTime(new Date());
+            setIsFirestoreConnected(true);
+          }
+        })
+        .catch(() => {});
+    }, 220);
+
+    return () => clearTimeout(timer);
+  }, [
+    students,
+    teachers,
+    classes,
+    majors,
+    subjects,
+    academicYears,
+    users,
+    attendanceSessions,
+    attendanceRecords,
+    attendanceCorrections,
+    assessments,
+    assessmentScores,
+    customStudentReports,
+    auditLogs,
+    notifications,
+    chatMessages,
+    directMessages,
+    reportTemplate,
+    pklPartners,
+    pklVisits,
+    pklReports,
+    pklTracers,
+    visualSettings,
+    schoolSettings,
+    lessonSchedules,
+    galleryPhotos,
+    galleryViewSettings,
+  ]);
+
+  // Force cloud database & cross-device sync utility (pushes actual inputted data, never resets to seed data)
   const forceCloudResync = async () => {
     setIsSyncing(true);
     try {
-      const res = await forceReseedFirestore();
-      if (res.success) {
+      const currentSnap = latestCollectionsRef.current;
+      const [hubRes, firestoreRes] = await Promise.all([
+        pushStateToSyncHub(currentSnap, 'force'),
+        forceReseedFirestore(currentSnap),
+      ]);
+      const pulled = await pullStateFromSyncHub();
+      if (pulled && pulled.collections) {
+        if (pulled.version) lastRemoteVersionRef.current = pulled.version;
+        applyRemoteCollections(pulled.collections, pulled.meta, false);
+      }
+      if (hubRes.ok || firestoreRes.success) {
         setLastSyncTime(new Date());
         setIsFirestoreConnected(true);
-        pushNotification('Sinkronisasi Berhasil', 'Seluruh data sekolah telah berhasil disinkronkan ke Cloud Firestore untuk semua perangkat dan peramban.', 'success');
+        pushNotification(
+          'Sinkronisasi Berhasil',
+          'Seluruh data yang telah diinput berhasil disinkronkan dan siap dibaca oleh semua perangkat secara real-time.',
+          'success'
+        );
       } else {
-        pushNotification('Gagal Sinkronisasi', res.error || 'Terjadi kesalahan saat menyinkronkan data.', 'alert');
+        pushNotification(
+          'Gagal Sinkronisasi',
+          firestoreRes.error || 'Terjadi kesalahan saat menyinkronkan data.',
+          'alert'
+        );
       }
     } finally {
       setIsSyncing(false);
@@ -1489,11 +1962,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addAuditLog('BROADCAST_NOTIFICATION', 'Pusat Pengumuman', `Mengirim pemberitahuan massal: "${title}" (${urgency.toUpperCase()}) ke semua role`);
   };
 
-  // Student Chat Room & Admin Oversight (Synchronized to Cloud Firestore)
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => {
-    const cached = localStorage.getItem('myschool_chat_messages');
-    return cached ? JSON.parse(cached) : initialChatMessages;
-  });
+  // Keep chatMessages synced in localStorage
 
   useEffect(() => {
     localStorage.setItem('myschool_chat_messages', JSON.stringify(chatMessages));

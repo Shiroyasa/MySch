@@ -1377,31 +1377,118 @@ export async function firestoreSaveReportTemplate(template: any): Promise<void> 
   }
 }
 
-// Reset/reseed utility that user can invoke from UI if needed
-export async function forceReseedFirestore(): Promise<{ success: boolean; count: number; error?: string }> {
+// Push all current user-inputted state across all collections to Cloud Firestore
+export async function syncCurrentStateToFirestore(
+  state?: Record<string, any>
+): Promise<{ success: boolean; count: number; error?: string }> {
   try {
-    const batch = writeBatch(db);
+    const studentsList: Student[] = state?.students ?? initialStudents;
+    const teachersList: Teacher[] = state?.teachers ?? initialTeachers;
+    const classesList: ClassRoom[] = state?.classes ?? initialClasses;
+    const majorsList: Major[] = state?.majors ?? initialMajors;
+    const subjectsList: Subject[] = state?.subjects ?? initialSubjects;
+    const academicYearsList: AcademicYear[] = state?.academicYears ?? initialAcademicYears;
+    const usersList: User[] = state?.users ?? initialUsers;
+    const sessionsList: AttendanceSession[] = state?.attendanceSessions ?? initialAttendanceSessions;
+    const recordsList: AttendanceRecord[] = state?.attendanceRecords ?? initialAttendanceRecords;
+    const correctionsList: AttendanceCorrection[] = state?.attendanceCorrections ?? [];
+    const assessmentsList: Assessment[] = state?.assessments ?? initialAssessments;
+    const scoresList: AssessmentScore[] = state?.assessmentScores ?? initialAssessmentScores;
+    const notificationsList: NotificationItem[] = state?.notifications ?? initialNotifications;
+    const chatList: ChatMessage[] = state?.chatMessages ?? initialChatMessages;
+    const dmList: any[] = state?.directMessages ?? [];
+    const logsList: AuditLog[] = (state?.auditLogs ?? initialAuditLogs).slice(0, 150);
+    const pklPartnersList: IndustryPartner[] = state?.pklPartners ?? [];
+    const pklVisitsList: PklVisitRecord[] = state?.pklVisits ?? [];
+    const pklReportsList: PklStudentReportItem[] = state?.pklReports ?? [];
+    const pklTracersList: AlumniTracerRecord[] = state?.pklTracers ?? [];
+    const schedulesList: LessonSchedule[] = state?.lessonSchedules ?? initialLessonSchedules;
 
-    initialStudents.forEach(item => batch.set(doc(db, 'students', item.id), sanitizeForFirestore(item)));
-    initialTeachers.forEach(item => batch.set(doc(db, 'teachers', item.id), sanitizeForFirestore(item)));
-    initialClasses.forEach(item => batch.set(doc(db, 'classes', item.id), sanitizeForFirestore(item)));
-    initialMajors.forEach(item => batch.set(doc(db, 'majors', item.id), sanitizeForFirestore(item)));
-    initialSubjects.forEach(item => batch.set(doc(db, 'subjects', item.id), sanitizeForFirestore(item)));
-    initialAcademicYears.forEach(item => batch.set(doc(db, 'academicYears', item.id), sanitizeForFirestore(item)));
-    initialUsers.forEach(item => batch.set(doc(db, 'users', item.id), sanitizeForFirestore(item)));
-    initialAttendanceSessions.forEach(item => batch.set(doc(db, 'attendanceSessions', item.id), sanitizeForFirestore(item)));
-    initialAttendanceRecords.forEach(item => batch.set(doc(db, 'attendanceRecords', item.id), sanitizeForFirestore(item)));
-    initialAssessments.forEach(item => batch.set(doc(db, 'assessments', item.id), sanitizeForFirestore(item)));
-    initialAssessmentScores.forEach(item => batch.set(doc(db, 'assessmentScores', item.id), sanitizeForFirestore(item)));
-    initialNotifications.forEach(item => batch.set(doc(db, 'notifications', item.id), sanitizeForFirestore(item)));
-    initialChatMessages.forEach(item => batch.set(doc(db, 'chatMessages', item.id), sanitizeForFirestore(item)));
-    initialAuditLogs.forEach(item => batch.set(doc(db, 'auditLogs', item.id), sanitizeForFirestore(item)));
+    const ops: Array<{ col: string; id: string; data: any }> = [];
+    const pushOps = (col: string, items: any[]) => {
+      if (!Array.isArray(items)) return;
+      for (const item of items) {
+        if (item && item.id) {
+          ops.push({ col, id: String(item.id), data: sanitizeForFirestore(item) });
+        }
+      }
+    };
 
-    await batch.commit();
-    return { success: true, count: 14 };
+    pushOps('students', studentsList);
+    pushOps('teachers', teachersList);
+    pushOps('classes', classesList);
+    pushOps('majors', majorsList);
+    pushOps('subjects', subjectsList);
+    pushOps('academicYears', academicYearsList);
+    pushOps('users', usersList);
+    pushOps('attendanceSessions', sessionsList);
+    pushOps('attendanceRecords', recordsList);
+    pushOps('attendanceCorrections', correctionsList);
+    pushOps('assessments', assessmentsList);
+    pushOps('assessmentScores', scoresList);
+    pushOps('notifications', notificationsList);
+    pushOps('chatMessages', chatList);
+    pushOps('directMessages', dmList);
+    pushOps('auditLogs', logsList);
+    pushOps('pklPartners', pklPartnersList);
+    pushOps('pklVisits', pklVisitsList);
+    pushOps('pklReports', pklReportsList);
+    pushOps('pklTracerStudies', pklTracersList);
+    pushOps('lessonSchedules', schedulesList);
+
+    const chunkSize = 400;
+    for (let i = 0; i < ops.length; i += chunkSize) {
+      const chunk = ops.slice(i, i + chunkSize);
+      const batch = writeBatch(db);
+      for (const op of chunk) {
+        batch.set(doc(db, op.col, op.id), op.data, { merge: true });
+      }
+      await batch.commit();
+    }
+
+    // Sync settings, report templates, schedules_meta, gallery photos & view settings
+    const extraPromises: Promise<any>[] = [];
+    if (state?.schoolSettings) {
+      extraPromises.push(firestoreSaveSchoolSettings(state.schoolSettings));
+    }
+    if (state?.visualSettings) {
+      extraPromises.push(firestoreSaveVisualSettings(state.visualSettings));
+    }
+    if (state?.reportTemplate) {
+      extraPromises.push(firestoreSaveReportTemplate(state.reportTemplate));
+    }
+    if (state?.customStudentReports) {
+      extraPromises.push(firestoreSaveCustomStudentReports(state.customStudentReports));
+    }
+    if (Array.isArray(state?.lessonSchedules)) {
+      extraPromises.push(firestoreSaveAllLessonSchedules(state.lessonSchedules));
+    }
+    if (state?.galleryViewSettings) {
+      extraPromises.push(firestoreSaveGalleryViewSettings(state.galleryViewSettings));
+    }
+    if (Array.isArray(state?.galleryPhotos)) {
+      for (const photo of state.galleryPhotos) {
+        if (photo && photo.id) {
+          extraPromises.push(firestoreSaveGalleryPhoto(photo));
+        }
+      }
+    }
+
+    await Promise.allSettled(extraPromises);
+    return { success: true, count: ops.length };
   } catch (e: any) {
-    return { success: false, count: 0, error: e?.message || 'Gagal menyinkronkan data' };
+    if (isFirestoreQuotaError(e)) {
+      return { success: true, count: 0 };
+    }
+    return { success: false, count: 0, error: e?.message || 'Gagal menyinkronkan data ke Firestore' };
   }
+}
+
+// Reset/reseed utility that syncs current state if provided, or initial data as fallback
+export async function forceReseedFirestore(
+  currentState?: Record<string, any>
+): Promise<{ success: boolean; count: number; error?: string }> {
+  return syncCurrentStateToFirestore(currentState);
 }
 
 export function sanitizeForFirestore<T>(data: T): T {

@@ -2,7 +2,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
-import { Camera, ChevronLeft, X } from 'lucide-react';
+import { Camera, ChevronLeft, RefreshCw, X } from 'lucide-react';
 import { OrbitaMenuIcon } from '../common/AcademyOrnaments';
 
 interface SidebarProps {
@@ -26,6 +26,7 @@ interface FloatingTooltipState {
   subLabel: string;
   top: number;
   left: number;
+  orbitDeg: number;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -44,6 +45,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     schoolSettings,
     updateVisualSettings,
     addToast,
+    isSyncing,
+    isFirestoreConnected,
+    forceCloudResync,
   } = useApp();
 
   const quickLogoInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -150,6 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const [hoveredTooltip, setHoveredTooltip] = React.useState<FloatingTooltipState | null>(null);
+  const [hoveredItemId, setHoveredItemId] = React.useState<string | null>(null);
   const stageRef = React.useRef<HTMLDivElement | null>(null);
   const wrapperRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
   const btnRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
@@ -157,7 +162,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const bulgeTimeoutRef = React.useRef<number | null>(null);
 
   const visibleItems = navItems.filter(item => item.roles.includes(currentRole));
+  const activeIdx = Math.max(
+    0,
+    visibleItems.findIndex(i => i.id === activeNav)
+  );
   const activeItemHasBadge = visibleItems.some(i => i.id === activeNav && Boolean(i.badge));
+
+  // Compute radial orbit angle (-55deg to +55deg) for each navigation satellite node
+  const getOrbitAngle = (index: number, total: number): number => {
+    if (total <= 1) return 0;
+    const normalized = index / (total - 1); // 0 to 1
+    return Math.round((normalized - 0.5) * 110);
+  };
+
+  // Compute subtle radial arc horizontal offset (in px) so items follow an orbital curve
+  const getRadialArcOffset = (index: number, total: number, expanded: boolean): number => {
+    if (total <= 2) return 0;
+    const progress = index / (total - 1); // 0 .. 1
+    const sine = Math.sin(progress * Math.PI); // peaks at center (1.0)
+    return expanded ? Math.round(sine * 7) : Math.round(sine * 4);
+  };
 
   const [indicatorRect, setIndicatorRect] = React.useState<{
     top: number;
@@ -200,19 +224,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
     });
   }, [activeNav]);
 
-  // Hide collapsed tooltip whenever sidebar expands or unmounts
   React.useEffect(() => {
     if (showExpanded) {
       setHoveredTooltip(null);
     }
   }, [showExpanded]);
 
-  // Detect active menu change -> trigger directional Liquid Bulge animation
+  // Detect active menu change -> trigger directional Radial Liquid Bulge animation
   React.useEffect(() => {
     if (prevNavRef.current !== activeNav) {
       const prevIdx = visibleItems.findIndex(i => i.id === prevNavRef.current);
       const nextIdx = visibleItems.findIndex(i => i.id === activeNav);
-      const direction: 'up' | 'down' = prevIdx !== -1 && nextIdx !== -1 && nextIdx < prevIdx ? 'up' : 'down';
+      const direction: 'up' | 'down' =
+        prevIdx !== -1 && nextIdx !== -1 && nextIdx < prevIdx ? 'up' : 'down';
       prevNavRef.current = activeNav;
 
       setBulgeEffect(prev => ({
@@ -226,7 +250,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       }
       bulgeTimeoutRef.current = window.setTimeout(() => {
         setBulgeEffect(prev => ({ ...prev, active: false }));
-      }, 560);
+      }, 620);
     }
   }, [activeNav, visibleItems]);
 
@@ -267,7 +291,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onCloseMobile();
   };
 
-  const showFloatingTooltip = (item: NavItem, el: HTMLButtonElement) => {
+  const showFloatingTooltip = (item: NavItem, index: number, el: HTMLButtonElement) => {
+    setHoveredItemId(item.id);
     if (showExpanded) return;
     const rect = el.getBoundingClientRect();
     setHoveredTooltip({
@@ -276,8 +301,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       subLabel: item.subLabel,
       top: rect.top + rect.height / 2,
       left: rect.right,
+      orbitDeg: getOrbitAngle(index, visibleItems.length),
     });
   };
+
+  const activeOrbitDeg = getOrbitAngle(activeIdx, visibleItems.length);
 
   return (
     <>
@@ -285,26 +313,80 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div
         onClick={onCloseMobile}
         aria-hidden={!mobileOpen}
-        className={`fixed inset-0 z-40 bg-[#42368E]/40 backdrop-blur-md transition-opacity duration-300 ease-out lg:hidden ${
+        className={`fixed inset-0 z-40 bg-[#231B54]/35 dark:bg-[#080616]/60 backdrop-blur-md transition-opacity duration-300 ease-out lg:hidden ${
           mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       />
 
-      {/* Left Floating Vertical Frosted Violet Glass Sidebar (#7468C4 -> #6558B5) */}
+      {/* Radial Orbit + Liquid Bulge Adaptive Transparent Glass Sidebar */}
       <aside
         onTransitionEnd={e => {
           if (e.propertyName === 'width' || e.propertyName === 'transform') {
             measureActiveButton();
           }
         }}
-        className={`orbita-sidebar-glass fixed top-2.5 bottom-2.5 left-2.5 z-50 flex flex-col items-center justify-between rounded-[28px] border border-white/28 backdrop-blur-2xl backdrop-saturate-150 py-4 sm:py-5 text-white transition-[transform,opacity,width] duration-300 will-change-transform lg:static lg:my-4 lg:ml-4 ${
-          showExpanded ? 'w-[268px] max-w-[84vw] lg:w-60' : 'w-[74px]'
+        className={`fixed top-2.5 bottom-2.5 left-2.5 z-50 flex flex-col items-center justify-between overflow-hidden rounded-[32px] border border-white/60 dark:border-[#9E92FF]/24 bg-white/58 dark:bg-[#130F2E]/56 backdrop-blur-2xl backdrop-saturate-180 py-4 sm:py-5 text-[#2E265E] dark:text-white shadow-[0_24px_60px_-12px_rgba(88,72,184,0.22),inset_0_1px_2px_rgba(255,255,255,0.88)] dark:shadow-[0_26px_68px_-12px_rgba(4,3,14,0.72),inset_0_1px_1px_rgba(255,255,255,0.16)] transition-[transform,opacity,width,background-color] duration-300 will-change-transform lg:static lg:my-4 lg:ml-4 ${
+          showExpanded ? 'w-[274px] max-w-[85vw] lg:w-[248px]' : 'w-[82px]'
         } ${
           mobileOpen
             ? 'translate-x-0 scale-100 opacity-100 pointer-events-auto ease-[cubic-bezier(0.34,1.25,0.64,1)]'
             : '-translate-x-[118%] scale-[0.94] opacity-0 pointer-events-none ease-[cubic-bezier(0.22,1,0.36,1)] lg:translate-x-0 lg:scale-100 lg:opacity-100 lg:pointer-events-auto'
         }`}
       >
+        {/* Ambient Radial Orbit Background Rings & Adaptive Glow */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 overflow-hidden rounded-[32px]"
+        >
+          {/* Adaptive radial light/dark aura that follows active item */}
+          <div
+            style={{
+              top: indicatorRect ? `${indicatorRect.top - 40}px` : '35%',
+            }}
+            className="absolute -left-10 h-36 w-36 rounded-full bg-gradient-to-br from-[#7468C4]/30 via-[#9E92FF]/22 to-[#FF6E96]/25 dark:from-[#8D81E3]/35 dark:via-[#6558B5]/25 dark:to-[#FF6E96]/25 blur-2xl transition-[top] duration-500 ease-out"
+          />
+
+          {/* SVG Radial Orbit Trajectory Curve */}
+          <svg
+            className="absolute inset-y-0 left-0 h-full w-full opacity-55 dark:opacity-45"
+            viewBox="0 0 260 800"
+            preserveAspectRatio="none"
+            fill="none"
+          >
+            <defs>
+              <linearGradient id="orbitaSidebarOrbitLine" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#8D81E3" stopOpacity="0.05" />
+                <stop offset="25%" stopColor="#7468C4" stopOpacity="0.42" />
+                <stop offset="50%" stopColor="#FF6E96" stopOpacity="0.55" />
+                <stop offset="75%" stopColor="#7468C4" stopOpacity="0.42" />
+                <stop offset="100%" stopColor="#8D81E3" stopOpacity="0.05" />
+              </linearGradient>
+            </defs>
+            {/* Outer Radial Orbit Arc */}
+            <path
+              d={
+                showExpanded
+                  ? 'M 14 70 Q 42 400 14 730'
+                  : 'M 22 70 Q 54 400 22 730'
+              }
+              stroke="url(#orbitaSidebarOrbitLine)"
+              strokeWidth="1.5"
+              strokeDasharray="4 5"
+            />
+            {/* Secondary Harmonic Orbit Arc */}
+            <path
+              d={
+                showExpanded
+                  ? 'M 6 110 Q 28 400 6 690'
+                  : 'M 12 110 Q 38 400 12 690'
+              }
+              stroke="url(#orbitaSidebarOrbitLine)"
+              strokeWidth="0.9"
+              strokeOpacity="0.5"
+            />
+          </svg>
+        </div>
+
         {isAdmin && (
           <input
             ref={quickLogoInputRef}
@@ -315,8 +397,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           />
         )}
 
-        {/* Top Brand Ring Button + Mobile/Tablet Close Button */}
-        <div className={`flex w-full items-center justify-between gap-2 ${showExpanded ? 'px-3.5' : 'px-2.5'}`}>
+        {/* Top Planetary Core Hub + Mobile/Tablet Close Button */}
+        <div
+          className={`relative z-10 flex w-full items-center justify-between gap-2 ${
+            showExpanded ? 'px-3.5' : 'px-2.5'
+          }`}
+        >
           <button
             type="button"
             onClick={() => {
@@ -328,43 +414,62 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
             title={
               !showExpanded
-                ? 'Klik untuk perluas label menu (Klik 2x ganti logo)'
-                : 'Klik untuk ringkaskan sidebar (Klik 2x ganti logo)'
+                ? 'Klik untuk membuka Orbit Menu (Klik 2x ganti logo)'
+                : 'Klik untuk mode Radial Orbit Ringkas (Klik 2x ganti logo)'
             }
-            className={`no-ornament group relative flex items-center justify-center border border-white/25 bg-white/12 hover:bg-white/20 active:scale-95 text-white transition-all duration-300 cursor-pointer ${
+            className={`no-ornament group relative flex items-center justify-center border border-white/65 dark:border-[#9E92FF]/28 bg-white/55 dark:bg-white/8 hover:bg-white/80 dark:hover:bg-white/14 active:scale-95 text-[#2E265E] dark:text-white shadow-[0_8px_24px_-6px_rgba(92,78,178,0.18),inset_0_1px_1px_rgba(255,255,255,0.9)] dark:shadow-[0_10px_26px_-6px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all duration-300 cursor-pointer ${
               !showExpanded
-                ? 'h-11 w-11 mx-auto rounded-full'
-                : 'flex-1 min-w-0 gap-2.5 rounded-[18px] px-2.5 py-2 justify-start'
+                ? 'h-12 w-12 mx-auto rounded-full'
+                : 'flex-1 min-w-0 gap-2.5 rounded-[22px] px-2.5 py-2 justify-start'
             }`}
           >
-            <div className="relative flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-full transition-transform duration-300 group-hover:rotate-6">
-              {activeLogoUrl ? (
-                <img
-                  src={activeLogoUrl}
-                  alt="ORBITA"
-                  className="h-7 w-7 rounded-full object-contain"
-                />
-              ) : (
-                <OrbitaMenuIcon variant="brand" className="h-5.5 w-5.5 text-white" />
-              )}
-              {isAdmin && (
-                <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Camera className="h-3 w-3 text-white" />
-                </span>
-              )}
+            {/* Radial Planetary Ring around Core Logo */}
+            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
+              <span
+                style={{ transform: `rotate(${activeOrbitDeg}deg)` }}
+                className="pointer-events-none absolute inset-0 rounded-full border border-dashed border-[#7468C4]/55 dark:border-[#A79CFF]/55 transition-transform duration-500 ease-out group-hover:rotate-45"
+              />
+              <span
+                style={{ transform: `rotate(${activeOrbitDeg * 1.4}deg)` }}
+                className="pointer-events-none absolute inset-0 flex items-start justify-center transition-transform duration-500 ease-out"
+              >
+                <span className="-mt-0.5 h-1.5 w-1.5 rounded-full bg-[#FF6E96] shadow-[0_0_8px_#FF6E96]" />
+              </span>
+
+              <div className="relative flex h-7.5 w-7.5 items-center justify-center rounded-full bg-gradient-to-br from-[#7468C4] to-[#5648A8] text-white shadow-inner">
+                {activeLogoUrl ? (
+                  <img
+                    src={activeLogoUrl}
+                    alt="ORBITA"
+                    className="h-6.5 w-6.5 rounded-full object-contain"
+                  />
+                ) : (
+                  <OrbitaMenuIcon variant="brand" className="h-4.5 w-4.5 text-white" />
+                )}
+                {isAdmin && (
+                  <span className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Camera className="h-3 w-3 text-white" />
+                  </span>
+                )}
+              </div>
             </div>
 
             {showExpanded && (
               <>
                 <div className="min-w-0 flex-1 text-left animate-fade-in">
-                  <p className="truncate text-sm font-extrabold tracking-tight text-white leading-none">
-                    ORBITA
-                  </p>
-                  <p className="truncate text-[10px] font-medium text-white/75 mt-0.5">
-                    Academic Portal
+                  <div className="flex items-center gap-1.5">
+                    <p className="truncate text-sm font-extrabold tracking-tight text-[#2E265E] dark:text-white leading-none">
+                      ORBITA
+                    </p>
+                    <span className="rounded-md bg-[#7468C4]/15 dark:bg-[#9E92FF]/20 px-1.5 py-0.5 text-[8.5px] font-extrabold uppercase tracking-wider text-[#5B4EB0] dark:text-[#C8C0FF]">
+                      {activeOrbitDeg >= 0 ? `+${activeOrbitDeg}°` : `${activeOrbitDeg}°`}
+                    </span>
+                  </div>
+                  <p className="truncate text-[10px] font-semibold text-[#6E6696] dark:text-white/70 mt-0.5">
+                    Radial Orbit Portal
                   </p>
                 </div>
-                <span className="hidden lg:flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/75 group-hover:bg-white/20 group-hover:text-white transition-colors">
+                <span className="hidden lg:flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#7468C4]/12 dark:bg-white/10 text-[#5B4EB0] dark:text-white/75 group-hover:bg-[#7468C4]/22 dark:group-hover:bg-white/20 transition-colors">
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </span>
               </>
@@ -376,25 +481,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
             type="button"
             onClick={onCloseMobile}
             aria-label="Tutup Menu"
-            className="no-ornament lg:hidden flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/15 hover:bg-white/25 text-white active:scale-95 transition-all cursor-pointer"
+            className="no-ornament lg:hidden flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/60 dark:border-white/20 bg-white/65 dark:bg-white/12 text-[#2E265E] dark:text-white active:scale-95 transition-all cursor-pointer"
           >
             <X className="h-4.5 w-4.5" />
           </button>
         </div>
 
-        {/* Center Navigation Stack with Safe Scroll Centering & Fluid Liquid Bulge Capsule */}
+        {/* Center Radial Orbit Navigation Stage with Morphing Liquid Bulge Glass Capsule */}
         <nav
-          aria-label="Menu Utama"
+          aria-label="Menu Utama Radial Orbit"
           onScroll={() => setHoveredTooltip(null)}
-          className="relative my-2.5 flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden scrollbar-none"
+          className="relative z-10 my-2 flex w-full flex-1 flex-col overflow-y-auto overflow-x-hidden scrollbar-none"
         >
           <div
             ref={stageRef}
-            className={`relative my-auto flex w-full flex-col items-center gap-1.5 sm:gap-2 py-1.5 ${
-              showExpanded ? 'px-3.5' : 'px-2.5'
+            className={`relative my-auto flex w-full flex-col items-center gap-1.5 py-1.5 ${
+              showExpanded ? 'px-3' : 'px-2'
             }`}
           >
-            {/* Floating Cohesive Liquid Bulge Capsule Layer */}
+            {/* Floating Cohesive Liquid Bulge Glassy Capsule Layer */}
             {indicatorRect && (
               <div
                 aria-hidden="true"
@@ -404,17 +509,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   width: `${indicatorRect.width}px`,
                   height: `${indicatorRect.height}px`,
                 }}
-                className={`pointer-events-none absolute z-0 transition-[top,left,width,height,opacity,transform] duration-400 ease-[cubic-bezier(0.32,1.28,0.56,1)] motion-reduce:transition-none will-change-[top,left,width,height] ${
+                className={`pointer-events-none absolute z-0 transition-[top,left,width,height,opacity,transform] duration-450 ease-[cubic-bezier(0.28,1.35,0.52,1)] motion-reduce:transition-none will-change-[top,left,width,height] ${
                   mobileOpen
                     ? 'max-lg:opacity-100 max-lg:translate-x-0'
                     : 'max-lg:opacity-0 max-lg:-translate-x-4'
                 }`}
               >
-                {/* Viscous Directional Trail Droplet */}
+                {/* Viscous Directional Liquid Bulge Trail Droplet */}
                 {bulgeEffect.active && (
                   <div
                     key={`trail-${bulgeEffect.key}`}
-                    className={`absolute inset-0.5 rounded-[16px] bg-gradient-to-b from-[#A79CFF]/35 to-[#FF7597]/20 blur-[2px] ${
+                    className={`absolute -inset-1 rounded-[22px] bg-gradient-to-b from-[#7468C4]/40 via-[#9E92FF]/30 to-[#FF6E96]/35 blur-[4px] ${
                       bulgeEffect.direction === 'up'
                         ? 'animate-liquid-trail-up'
                         : 'animate-liquid-trail-down'
@@ -422,18 +527,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   />
                 )}
 
-                {/* Soft Ambient Fluid Aura */}
+                {/* Radial Orbit Halo Aura */}
                 <div
                   key={`aura-${bulgeEffect.key}`}
-                  className={`absolute inset-0 rounded-[16px] bg-[#A79CFF]/25 blur-[5px] ${
-                    bulgeEffect.active ? 'animate-liquid-aura' : 'opacity-45'
+                  className={`absolute -inset-0.5 rounded-[22px] bg-gradient-to-r from-[#7468C4]/30 via-[#9E92FF]/25 to-[#FF6E96]/25 blur-[6px] ${
+                    bulgeEffect.active ? 'animate-liquid-aura' : 'opacity-65'
                   }`}
                 />
 
-                {/* Main Morphing Frosted Glass Liquid Capsule (Sidebar Color-Matched) */}
+                {/* Main Morphing Transparent Glassy Liquid Bulge Capsule */}
                 <div
                   key={`bulge-${bulgeEffect.key}`}
-                  className={`orbita-liquid-capsule relative h-full w-full overflow-hidden rounded-[16px] border border-white/40 backdrop-blur-md shadow-[0_10px_24px_-4px_rgba(48,36,120,0.34),inset_0_1px_1px_rgba(255,255,255,0.48)] ${
+                  className={`relative h-full w-full overflow-hidden rounded-[20px] border border-white/80 dark:border-[#B5ABFF]/45 bg-gradient-to-r from-[#7468C4]/22 via-[#8D81E3]/18 to-[#FF6E96]/16 dark:from-[#8D81E3]/36 dark:via-[#6558B5]/28 dark:to-[#FF6E96]/22 backdrop-blur-xl shadow-[0_12px_28px_-6px_rgba(92,78,178,0.28),inset_0_1px_2px_rgba(255,255,255,0.92)] dark:shadow-[0_12px_28px_-6px_rgba(12,8,36,0.65),inset_0_1px_1.5px_rgba(255,255,255,0.35)] ${
                     bulgeEffect.active
                       ? bulgeEffect.direction === 'up'
                         ? 'animate-liquid-bulge-up'
@@ -441,31 +546,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       : ''
                   }`}
                 >
-                  {/* Top Meniscus Glass Highlight */}
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/18 via-transparent to-black/10" />
+                  {/* Top Specular Liquid Meniscus Highlight */}
+                  <div className="pointer-events-none absolute inset-x-2 top-0 h-[1.5px] rounded-full bg-gradient-to-r from-transparent via-white/90 dark:via-white/60 to-transparent" />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/30 dark:from-white/14 via-transparent to-transparent" />
 
                   {/* Glossy Diagonal Liquid Sheen Wave */}
                   {bulgeEffect.active && (
-                    <div className="animate-liquid-sheen pointer-events-none absolute inset-y-0 -left-1/2 w-2/3 bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+                    <div className="animate-liquid-sheen pointer-events-none absolute inset-y-0 -left-1/2 w-2/3 bg-gradient-to-r from-transparent via-white/50 dark:via-white/30 to-transparent" />
                   )}
                 </div>
 
-                {/* Inset Left Meniscus Coral Indicator (Contained safely within capsule edge) */}
+                {/* Left Radial Orbit Satellite Node Indicator */}
                 <span
-                  className={`pointer-events-none absolute left-1.5 top-1/2 -translate-y-1/2 w-[3.5px] rounded-full bg-gradient-to-b from-[#FF8FAD] to-[#FF5F8D] shadow-[0_0_10px_rgba(255,117,151,0.8)] transition-all duration-300 ${
-                    bulgeEffect.active ? 'h-6' : 'h-4.5'
+                  className={`pointer-events-none absolute -left-1 top-1/2 -translate-y-1/2 flex items-center justify-center transition-all duration-300 ${
+                    bulgeEffect.active ? 'scale-125' : 'scale-100'
                   }`}
-                />
+                >
+                  <span className="h-3 w-3 rounded-full border-2 border-white dark:border-[#1E1945] bg-gradient-to-br from-[#FF8FAD] to-[#FF5C86] shadow-[0_0_12px_rgba(255,110,150,0.9)]" />
+                </span>
 
-                {/* Subtle Right Meniscus Bead in Expanded Mode */}
+                {/* Right Orbital Degree Micro-Bead in Expanded Mode */}
                 {showExpanded && !activeItemHasBadge && (
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-1.5 w-1.5 rounded-full bg-white/35" />
+                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#7468C4] dark:bg-[#B5ABFF] shadow-[0_0_6px_rgba(141,129,227,0.8)]" />
+                  </span>
                 )}
               </div>
             )}
 
             {visibleItems.map((item, idx) => {
               const isActive = activeNav === item.id;
+              const isHovered = hoveredItemId === item.id;
+              const arcOffset = getRadialArcOffset(idx, visibleItems.length, showExpanded);
+              const orbitDeg = getOrbitAngle(idx, visibleItems.length);
 
               return (
                 <div
@@ -474,9 +587,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     wrapperRefs.current[item.id] = el;
                   }}
                   style={{
-                    transitionDelay: mobileOpen ? `${Math.min(idx * 24, 180)}ms` : '0ms',
+                    transform: `translateX(${arcOffset}px)`,
+                    transitionDelay: mobileOpen ? `${Math.min(idx * 22, 160)}ms` : '0ms',
                   }}
-                  className={`relative z-10 w-full flex justify-center max-lg:transition-[transform,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  className={`relative z-10 w-full flex justify-center transition-transform duration-300 ease-out ${
                     mobileOpen
                       ? 'max-lg:translate-x-0 max-lg:opacity-100'
                       : 'max-lg:-translate-x-4 max-lg:opacity-0'
@@ -488,42 +602,74 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     }}
                     type="button"
                     onClick={() => handleSelectNav(item.id)}
-                    onMouseEnter={e => showFloatingTooltip(item, e.currentTarget)}
-                    onMouseLeave={() => setHoveredTooltip(null)}
-                    onFocus={e => showFloatingTooltip(item, e.currentTarget)}
-                    onBlur={() => setHoveredTooltip(null)}
+                    onMouseEnter={e => showFloatingTooltip(item, idx, e.currentTarget)}
+                    onMouseLeave={() => {
+                      setHoveredItemId(null);
+                      setHoveredTooltip(null);
+                    }}
+                    onFocus={e => showFloatingTooltip(item, idx, e.currentTarget)}
+                    onBlur={() => {
+                      setHoveredItemId(null);
+                      setHoveredTooltip(null);
+                    }}
                     aria-current={isActive ? 'page' : undefined}
-                    className={`no-ornament group relative flex min-h-[44px] items-center transition-colors duration-250 ease-out cursor-pointer ${
+                    className={`no-ornament group relative flex min-h-[44px] items-center transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] cursor-pointer ${
                       !showExpanded
-                        ? 'h-12 w-12 justify-center rounded-[16px]'
-                        : 'w-full gap-3 rounded-[16px] pl-4 pr-3.5 py-2.5 justify-start'
+                        ? 'h-12 w-12 justify-center rounded-[20px]'
+                        : 'w-full gap-3 rounded-[20px] pl-3.5 pr-3 py-2 justify-start'
                     } ${
                       isActive
                         ? indicatorRect
-                          ? 'bg-transparent text-white'
-                          : 'bg-white/24 text-white border border-white/38 backdrop-blur-md shadow-[0_10px_22px_-4px_rgba(48,36,120,0.32)]'
-                        : 'text-white/85 hover:bg-white/15 hover:text-white active:scale-95'
+                          ? 'bg-transparent text-[#241C52] dark:text-white'
+                          : 'bg-[#7468C4]/20 dark:bg-white/20 text-[#241C52] dark:text-white border border-white/60 dark:border-white/30 backdrop-blur-md'
+                        : 'text-[#4A417A] dark:text-white/80 hover:bg-white/45 dark:hover:bg-white/10 hover:text-[#241C52] dark:hover:text-white hover:scale-[1.03] active:scale-95'
                     }`}
                   >
+                    {/* Radial Orbit Icon Node with Rotating Ring */}
                     <span
                       key={isActive && bulgeEffect.active ? `icon-${bulgeEffect.key}` : 'icon-rest'}
-                      className={`flex items-center justify-center transition-transform duration-300 ${
+                      className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
                         isActive
-                          ? bulgeEffect.active
-                            ? 'animate-liquid-icon-jelly'
-                            : 'scale-105'
-                          : 'group-hover:scale-110 group-hover:-rotate-3'
+                          ? `bg-gradient-to-br from-[#7468C4] to-[#5B4EB0] text-white shadow-[0_6px_16px_-2px_rgba(101,88,181,0.55)] ${
+                              bulgeEffect.active ? 'animate-liquid-icon-jelly' : 'scale-105'
+                            }`
+                          : isHovered
+                          ? 'bg-white/75 dark:bg-white/15 text-[#5B4EB0] dark:text-white scale-110 -rotate-3 shadow-sm'
+                          : 'bg-white/45 dark:bg-white/8 text-[#524888] dark:text-white/85'
                       }`}
                     >
-                      <OrbitaMenuIcon variant={item.id} className="h-5.5 w-5.5 shrink-0" />
+                      {/* Subtle Orbital Ring on Active or Hovered Icon */}
+                      {(isActive || isHovered) && (
+                        <span
+                          className={`pointer-events-none absolute -inset-1 rounded-full border ${
+                            isActive
+                              ? 'border-[#FF6E96]/55 dark:border-[#FF8FAD]/50'
+                              : 'border-[#7468C4]/35 dark:border-white/25'
+                          } transition-transform duration-500`}
+                          style={{ transform: `rotate(${orbitDeg}deg)` }}
+                        />
+                      )}
+                      <OrbitaMenuIcon variant={item.id} className="h-4.5 w-4.5 shrink-0" />
                     </span>
 
                     {showExpanded && (
                       <div className="min-w-0 flex-1 text-left transition-transform duration-200 group-hover:translate-x-0.5">
-                        <span className="block truncate text-xs font-bold leading-tight">
+                        <span
+                          className={`block truncate text-xs font-extrabold leading-tight ${
+                            isActive
+                              ? 'text-[#21194D] dark:text-white'
+                              : 'text-[#3E356E] dark:text-white/90'
+                          }`}
+                        >
                           {item.label}
                         </span>
-                        <span className="block truncate text-[10px] text-white/75 leading-tight mt-0.5">
+                        <span
+                          className={`block truncate text-[10px] leading-tight mt-0.5 ${
+                            isActive
+                              ? 'font-semibold text-[#5B4EB0] dark:text-[#C8C0FF]'
+                              : 'text-[#6E659B] dark:text-white/65'
+                          }`}
+                        >
                           {item.subLabel}
                         </span>
                       </div>
@@ -533,7 +679,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       <span
                         className={`${
                           !showExpanded ? 'absolute -top-1 -right-1' : 'shrink-0'
-                        } flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#FF6E96] px-1.5 text-[9.5px] font-extrabold text-white shadow-sm`}
+                        } flex h-5 min-w-[20px] items-center justify-center rounded-full bg-gradient-to-r from-[#FF5C86] to-[#FF7597] px-1.5 text-[9.5px] font-extrabold text-white shadow-[0_4px_10px_rgba(255,92,134,0.45)]`}
                       >
                         {item.badge}
                       </span>
@@ -545,8 +691,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </nav>
 
-        {/* Bottom Logout Icon Button */}
-        <div className={`flex w-full items-center justify-center pt-1 ${showExpanded ? 'px-3.5' : 'px-2.5'}`}>
+        {/* Bottom Cross-Device Sync Satellite + Logout Actions */}
+        <div
+          className={`relative z-10 flex w-full flex-col items-center gap-1.5 pt-1 ${
+            showExpanded ? 'px-3.5' : 'px-2.5'
+          }`}
+        >
+          {/* Cross-Device Real-Time Sync Button */}
+          <button
+            type="button"
+            onClick={() => {
+              forceCloudResync();
+            }}
+            disabled={isSyncing}
+            title="Sinkronkan seluruh data yang telah diinput agar terbaca di semua perangkat"
+            className={`no-ornament group flex min-h-[40px] items-center justify-center rounded-[18px] border border-white/60 dark:border-[#9E92FF]/22 bg-white/50 dark:bg-white/8 hover:bg-white/80 dark:hover:bg-white/15 text-[#3E356E] dark:text-white/90 active:scale-95 transition-all duration-300 cursor-pointer ${
+              !showExpanded ? 'h-11 w-11' : 'w-full gap-2.5 px-3 py-2 justify-start'
+            }`}
+          >
+            <span className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#7468C4]/15 dark:bg-[#9E92FF]/20 text-[#5B4EB0] dark:text-[#C8C0FF]">
+              <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? 'animate-spin' : 'group-hover:rotate-90 transition-transform duration-300'}`} />
+              <span
+                className={`absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full border border-white dark:border-[#151130] ${
+                  isFirestoreConnected ? 'bg-emerald-400' : 'bg-amber-400'
+                }`}
+              />
+            </span>
+            {showExpanded && (
+              <div className="min-w-0 flex-1 text-left">
+                <span className="block truncate text-[11px] font-extrabold leading-tight">
+                  {isSyncing ? 'Menyinkronkan...' : 'Sinkronkan Device'}
+                </span>
+                <span className="block truncate text-[9.5px] font-medium text-[#6E659B] dark:text-white/65 leading-tight">
+                  {isFirestoreConnected ? 'Live Cloud & Multi-Device' : 'Mode Sinkron Lokal'}
+                </span>
+              </div>
+            )}
+          </button>
+
+          {/* Logout Button */}
           <button
             type="button"
             onClick={() => {
@@ -555,19 +738,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
               setShowLogoutModal(true);
             }}
             title="Keluar Sesi Akun (Log Out)"
-            className={`no-ornament group flex min-h-[44px] items-center justify-center rounded-[16px] text-white/85 hover:bg-[#FF6E96]/25 hover:text-white active:scale-95 transition-all duration-300 cursor-pointer ${
-              !showExpanded ? 'h-11 w-11' : 'w-full gap-2.5 px-4 py-2.5 justify-start'
+            className={`no-ornament group flex min-h-[42px] items-center justify-center rounded-[18px] text-[#5B4E8C] dark:text-white/80 hover:bg-[#FF6E96]/20 hover:text-[#D92B60] dark:hover:text-white active:scale-95 transition-all duration-300 cursor-pointer ${
+              !showExpanded ? 'h-11 w-11' : 'w-full gap-2.5 px-3.5 py-2 justify-start'
             }`}
           >
             <span className="transition-transform duration-300 group-hover:translate-x-0.5">
-              <OrbitaMenuIcon variant="logout" className="h-5.5 w-5.5 shrink-0" />
+              <OrbitaMenuIcon variant="logout" className="h-5 w-5 shrink-0" />
             </span>
-            {showExpanded && <span className="text-xs font-bold whitespace-nowrap">Keluar Sesi</span>}
+            {showExpanded && <span className="text-xs font-extrabold whitespace-nowrap">Keluar Sesi</span>}
           </button>
         </div>
       </aside>
 
-      {/* Portal-rendered Floating Desktop Tooltip Pill (Never clipped by sidebar transform or scroll overflow) */}
+      {/* Portal-rendered Floating Desktop Radial Orbit Tooltip Pill */}
       {!showExpanded &&
         hoveredTooltip &&
         typeof document !== 'undefined' &&
@@ -580,14 +763,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
             className="pointer-events-none fixed z-[70] hidden lg:flex -translate-y-1/2 items-center animate-fade-in"
           >
-            <div className="h-2.5 w-2.5 -mr-1.5 rotate-45 rounded-[2px] border-l border-b border-white/30 dark:border-[#8D81E3]/30 bg-[#6A5DB9]/90 dark:bg-[#2C255E]/95 backdrop-blur-xl" />
-            <div
-              className="orbita-sidebar-glass flex flex-col rounded-[14px] border border-white/30 px-3.5 py-2 text-white backdrop-blur-xl"
-            >
-              <span className="text-xs font-extrabold whitespace-nowrap leading-tight">
-                {hoveredTooltip.label}
-              </span>
-              <span className="text-[10px] font-medium text-white/80 whitespace-nowrap leading-tight mt-0.5">
+            <div className="h-2.5 w-2.5 -mr-1.5 rotate-45 rounded-[2px] border-l border-b border-white/70 dark:border-[#9E92FF]/35 bg-white/85 dark:bg-[#1E1945]/90 backdrop-blur-xl" />
+            <div className="flex flex-col rounded-[16px] border border-white/75 dark:border-[#9E92FF]/35 bg-white/82 dark:bg-[#1E1945]/88 px-3.5 py-2 text-[#241C52] dark:text-white shadow-[0_14px_34px_rgba(68,56,146,0.22)] backdrop-blur-2xl">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-extrabold whitespace-nowrap leading-tight">
+                  {hoveredTooltip.label}
+                </span>
+                <span className="rounded bg-[#7468C4]/15 dark:bg-white/15 px-1 py-0.2 text-[8.5px] font-bold text-[#5B4EB0] dark:text-[#C8C0FF]">
+                  {hoveredTooltip.orbitDeg >= 0
+                    ? `+${hoveredTooltip.orbitDeg}°`
+                    : `${hoveredTooltip.orbitDeg}°`}
+                </span>
+              </div>
+              <span className="text-[10px] font-medium text-[#655C91] dark:text-white/75 whitespace-nowrap leading-tight mt-0.5">
                 {hoveredTooltip.subLabel}
               </span>
             </div>

@@ -45,6 +45,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     setShowLogoutModal,
     visualSettings,
     schoolSettings,
+    isSyncing,
+    forceCloudResync,
   } = useApp();
 
   const [toastOpen, setToastOpen] = useState(false);
@@ -273,19 +275,19 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               })}
             </div>
 
-            {/* Bottom Toast Action Strip: Agenda KBM + Keluar */}
+            {/* Bottom Toast Action Strip: Agenda KBM + Sinkron Device + Keluar */}
             <div className="mt-3 pt-2.5 border-t border-[#ECEAF6] dark:border-[#8D81E3]/18 flex items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={handleOpenAgenda}
-                className={`no-ornament flex flex-1 min-h-[42px] items-center justify-center gap-2 rounded-[14px] px-3.5 py-2 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                className={`no-ornament flex flex-1 min-h-[42px] items-center justify-center gap-1.5 rounded-[14px] px-3 py-2 text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                   rightDrawerOpen
                     ? 'bg-[#FFE4EC] text-[#D93866] dark:bg-rose-950/75 dark:text-rose-300'
                     : 'bg-[#F4F2FC] text-[#4C4298] hover:bg-[#EAE6FA] dark:bg-[#251F52] dark:text-indigo-200 dark:hover:bg-[#2F2866]'
                 }`}
               >
                 <OrbitaMenuIcon variant="agenda" className="h-4 w-4 shrink-0" />
-                <span>Agenda KBM</span>
+                <span>Agenda</span>
                 {pendingCorrectionsCount > 0 && (
                   <span className="font-extrabold tabular-nums text-[#E54574] dark:text-rose-300">
                     ({pendingCorrectionsCount})
@@ -295,8 +297,33 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
               <button
                 type="button"
+                disabled={isSyncing}
+                onClick={() => {
+                  forceCloudResync();
+                }}
+                className="no-ornament inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-[14px] bg-[#EEF9F4] hover:bg-[#DDF3EA] text-[#147A56] dark:bg-emerald-950/55 dark:hover:bg-emerald-900/65 dark:text-emerald-300 px-3 py-2 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className={`h-4 w-4 shrink-0 ${isSyncing ? 'animate-spin' : ''}`}
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>{isSyncing ? 'Sinkron...' : 'Sinkron'}</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={handleLogout}
-                className="no-ornament inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-[14px] bg-[#FFF1F5] hover:bg-[#FFE2EB] text-[#D93866] dark:bg-rose-950/55 dark:hover:bg-rose-900/65 dark:text-rose-300 px-4 py-2 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0"
+                className="no-ornament inline-flex min-h-[42px] items-center justify-center gap-1.5 rounded-[14px] bg-[#FFF1F5] hover:bg-[#FFE2EB] text-[#D93866] dark:bg-rose-950/55 dark:hover:bg-rose-900/65 dark:text-rose-300 px-3.5 py-2 text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0"
               >
                 <OrbitaMenuIcon variant="logout" className="h-4 w-4 shrink-0" />
                 <span>Keluar</span>

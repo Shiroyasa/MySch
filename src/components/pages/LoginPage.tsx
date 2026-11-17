@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { AlumniRespondentCategory } from '../../types';
+import { AlumniRespondentCategory, UserRole } from '../../types';
 import {
   KeyRound,
   ShieldCheck,
@@ -16,6 +16,11 @@ import {
   AlertTriangle,
   X,
   BarChart3,
+  UserPlus,
+  Mail,
+  Hash,
+  RotateCw,
+  CheckCircle2,
 } from 'lucide-react';
 import { AcademyScheduleBoard } from '../common/AcademyScheduleBoard';
 import { TracerStudyPortalForm, TracerPortalStage } from '../common/TracerStudyPortalForm';
@@ -34,6 +39,10 @@ const SHORT_MONTHS_ID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu',
 export const LoginPage: React.FC = () => {
   const {
     loginWithEmail,
+    addUser,
+    addToast,
+    users = [],
+    subjects = [],
     visualSettings,
     schoolSettings,
     activeAcademicYear,
@@ -55,6 +64,21 @@ export const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loginSuccessBanner, setLoginSuccessBanner] = useState<string | null>(null);
+
+  // 3D Flip-Card State (Front = Login, Back = Register)
+  const [isRegisterFlipped, setIsRegisterFlipped] = useState(false);
+  const [regRole, setRegRole] = useState<UserRole>('siswa');
+  const [regFullName, setRegFullName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regNipOrNis, setRegNipOrNis] = useState('');
+  const [regClassId, setRegClassId] = useState('');
+  const [regSubjectName, setRegSubjectName] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regConfirmPassword, setRegConfirmPassword] = useState('');
+  const [showRegPassword, setShowRegPassword] = useState(false);
+  const [regError, setRegError] = useState<string | null>(null);
+  const [isRegSubmitting, setIsRegSubmitting] = useState(false);
   const [activePortalView, setActivePortalView] = useState<'login' | 'gallery' | 'tracer'>('login');
   const [mobileSection, setMobileSection] = useState<'login' | 'overview' | 'gallery' | 'tracer'>('login');
   const [overviewSlide, setOverviewSlide] = useState<0 | 1>(0);
@@ -319,6 +343,7 @@ export const LoginPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    setLoginSuccessBanner(null);
     if (!email.trim()) {
       setErrorMessage('Harap masukkan alamat email atau NIP/NIS akun ORBITA.');
       return;
@@ -338,6 +363,94 @@ export const LoginPage: React.FC = () => {
         );
       }
     }, 350);
+  };
+
+  const handleRegisterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setRegError(null);
+
+    const cleanName = regFullName.trim();
+    const cleanEmail = regEmail.trim().toLowerCase();
+    const cleanId = regNipOrNis.trim();
+    const cleanPass = regPassword.trim();
+    const cleanConfirm = regConfirmPassword.trim();
+
+    if (!cleanName) {
+      setRegError('Harap isi Nama Lengkap sesuai identitas akademik.');
+      return;
+    }
+    if (!cleanEmail || !cleanEmail.includes('@')) {
+      setRegError('Harap masukkan alamat Email aktif yang valid.');
+      return;
+    }
+    if (!cleanId) {
+      setRegError(
+        regRole === 'siswa'
+          ? 'Harap masukkan Nomor Induk Siswa (NIS / NISN).'
+          : 'Harap masukkan Nomor Induk Pegawai (NIP / ID Guru).'
+      );
+      return;
+    }
+    if (cleanPass.length < 4) {
+      setRegError('Kata sandi minimal terdiri dari 4 karakter.');
+      return;
+    }
+    if (cleanPass !== cleanConfirm) {
+      setRegError('Konfirmasi kata sandi tidak cocok.');
+      return;
+    }
+
+    // Check duplicate email or NIP/NIS
+    const duplicateUser = users.find(
+      u =>
+        u.email.toLowerCase() === cleanEmail ||
+        (u.nipOrNis && u.nipOrNis.toLowerCase() === cleanId.toLowerCase())
+    );
+    if (duplicateUser) {
+      setRegError('Email atau Nomor Induk (NIS/NIP) tersebut sudah terdaftar. Silakan langsung masuk.');
+      return;
+    }
+
+    setIsRegSubmitting(true);
+    setTimeout(() => {
+      const targetClass =
+        classes.find(c => c.id === regClassId) || classes[0];
+      const selectedSubj = regSubjectName || subjects[0]?.name || 'Pendidikan Umum';
+
+      addUser({
+        email: cleanEmail,
+        displayName: cleanName,
+        role: regRole,
+        nipOrNis: cleanId,
+        password: cleanPass,
+        isActive: true,
+        ...(regRole === 'siswa' && targetClass
+          ? { classId: targetClass.id, className: targetClass.name }
+          : {}),
+        ...(regRole === 'wali_kelas' && targetClass
+          ? { homeroomClassId: targetClass.id, homeroomClassName: targetClass.name, subjects: [selectedSubj] }
+          : {}),
+        ...(regRole === 'guru' ? { subjects: [selectedSubj] } : {}),
+      });
+
+      setIsRegSubmitting(false);
+      // Pre-fill login credentials and flip back to Login face
+      setEmail(cleanEmail);
+      setPassword(cleanPass);
+      setErrorMessage(null);
+      setLoginSuccessBanner(
+        `Akun ${cleanName} (${cleanId}) berhasil terdaftar & tersinkronisasi! Klik Masuk Dashboard.`
+      );
+      addToast(`Registrasi berhasil! Akun ${cleanName} siap digunakan.`, 'success');
+
+      // Reset register fields & flip back to Login face
+      setRegFullName('');
+      setRegEmail('');
+      setRegNipOrNis('');
+      setRegPassword('');
+      setRegConfirmPassword('');
+      setIsRegisterFlipped(false);
+    }, 380);
   };
 
   return (
@@ -517,185 +630,543 @@ export const LoginPage: React.FC = () => {
                 ) : (
                   /* Main 12-Column Asymmetric Grid */
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-7 xl:gap-8 items-start lg:items-center py-1 pb-4">
-                    {/* LEFT 5 COLS: LOGIN CARD */}
+                    {/* LEFT 5 COLS: 3D FLIP-CARD (FRONT = LOGIN, BACK = REGISTER) */}
                     <div
-                      className={`lg:col-span-5 w-full max-w-[440px] mx-auto pt-6 sm:pt-7 ${
+                      className={`lg:col-span-5 w-full max-w-[440px] mx-auto pt-6 sm:pt-7 [perspective:1500px] ${
                         mobileSection === 'login' ? 'block' : 'hidden md:block'
                       }`}
                     >
-                      <OrbitaOrnateFrame
-                        showTopCrest={true}
-                        stampText="Portal Resmi"
-                        characterIndex={0}
-                        contentClassName="flex flex-col justify-between gap-4 sm:gap-5 px-5 pt-10 pb-6 sm:px-7 sm:pt-11 sm:pb-7"
+                      <div
+                        className={`relative w-full transition-transform duration-700 ease-[cubic-bezier(0.34,1.26,0.64,1)] [transform-style:preserve-3d] ${
+                          isRegisterFlipped
+                            ? '[transform:rotateY(180deg)]'
+                            : '[transform:rotateY(0deg)]'
+                        }`}
                       >
-                        {/* Header inside White Card */}
-                        <div className="text-center">
-                          <h2 className="text-xl sm:text-2xl font-extrabold text-[#3E385B] dark:text-white tracking-tight">
-                            Masuk Akun ORBITA
-                          </h2>
-                          <p className="mt-1 text-xs font-medium text-[#A2A0B4] dark:text-slate-400 leading-relaxed">
-                            Sistem Informasi Akademik, Presensi &amp; Evaluasi KKM
-                          </p>
+                        {/* ========================================================= */}
+                        {/* FRONT FACE: LOGIN CARD                                    */}
+                        {/* ========================================================= */}
+                        <div
+                          aria-hidden={isRegisterFlipped}
+                          className={`w-full [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(0deg)] ${
+                            isRegisterFlipped
+                              ? 'absolute inset-x-0 top-0 z-10 pointer-events-none select-none'
+                              : 'relative z-20 pointer-events-auto'
+                          }`}
+                        >
+                          <OrbitaOrnateFrame
+                            showTopCrest={true}
+                            stampText="Portal Resmi"
+                            characterIndex={0}
+                            contentClassName="flex flex-col justify-between gap-4 sm:gap-5 px-5 pt-10 pb-6 sm:px-7 sm:pt-11 sm:pb-7"
+                          >
+                            {/* Top-Right Flip Trigger Pill on Front Card */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRegError(null);
+                                setIsRegisterFlipped(true);
+                              }}
+                              title="Putar kartu ke halaman Registrasi Akun Baru"
+                              className="no-ornament absolute top-3.5 right-4 z-30 inline-flex items-center gap-1.5 rounded-full border border-[#DDD8F6] dark:border-[#8D81E3]/35 bg-[#F6F5FC] hover:bg-[#ECE8FA] dark:bg-[#251F52] dark:hover:bg-[#302868] px-3 py-1 text-[10.5px] font-extrabold text-[#5D51B2] dark:text-[#C8C0FF] shadow-xs transition-all active:scale-95 cursor-pointer"
+                            >
+                              <RotateCw className="h-3 w-3" />
+                              <span>Daftar Akun</span>
+                            </button>
+
+                            {/* Header inside White Card */}
+                            <div className="text-center">
+                              <h2 className="text-xl sm:text-2xl font-extrabold text-[#3E385B] dark:text-white tracking-tight">
+                                Masuk Akun ORBITA
+                              </h2>
+                              <p className="mt-1 text-xs font-medium text-[#A2A0B4] dark:text-slate-400 leading-relaxed">
+                                Sistem Informasi Akademik, Presensi &amp; Evaluasi KKM
+                              </p>
+                            </div>
+
+                            {/* Form */}
+                            <div>
+                              {loginSuccessBanner && (
+                                <div className="mb-4 flex items-center gap-2.5 rounded-[16px] bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/60 dark:border-emerald-800/70 px-3.5 py-2.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 animate-fade-in">
+                                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                  <span>{loginSuccessBanner}</span>
+                                </div>
+                              )}
+
+                              {errorMessage && (
+                                <div className="mb-4 flex items-center gap-2.5 rounded-[16px] bg-[#FFE4EC] border border-[#FFCCD9] dark:bg-rose-950/60 dark:border-rose-800/70 px-3.5 py-2.5 text-xs font-bold text-[#F25781] dark:text-rose-300 animate-fade-in">
+                                  <AlertCircle className="h-4 w-4 shrink-0 text-[#F25781] dark:text-rose-400" />
+                                  <span>{errorMessage}</span>
+                                </div>
+                              )}
+
+                              <form onSubmit={handleSubmit} noValidate className="space-y-4">
+                                {/* Field 1: Email / NIP / NIS */}
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center justify-between px-1">
+                                    <label className="text-xs font-bold text-[#3E385B] dark:text-slate-200">
+                                      Email / NIP / NIS
+                                    </label>
+                                    <span className="text-[10px] font-semibold text-[#A2A0B4] dark:text-slate-400">
+                                      ID Pengguna
+                                    </span>
+                                  </div>
+
+                                  <div
+                                    className={`orbita-field-underline orbita-white-textfield relative flex items-center rounded-[16px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-4 py-1 transition-all focus-within:border-[#6C60B8]/50 dark:focus-within:border-[#9E92FF] focus-within:bg-white dark:focus-within:bg-[#1F1B44] focus-within:ring-2 focus-within:ring-[#6C60B8]/20 dark:focus-within:ring-[#8D81E3]/25 ${
+                                      emailInvalid ? 'orbita-field-zigzag-error' : ''
+                                    }`}
+                                  >
+                                    <User className="h-4 w-4 text-[#6C60B8] dark:text-[#A599F8] shrink-0 mr-2.5" />
+                                    <input
+                                      type="text"
+                                      value={email}
+                                      aria-invalid={emailInvalid || undefined}
+                                      onChange={e => {
+                                        setEmail(e.target.value);
+                                        if (errorMessage) setErrorMessage(null);
+                                      }}
+                                      placeholder="Masukkan Email atau NIP/NIS..."
+                                      autoComplete="username"
+                                      className="no-ornament select-text w-full bg-transparent py-2.5 text-xs sm:text-sm font-semibold text-[#3E385B] dark:text-[#EAE8F6] caret-[#6C60B8] dark:caret-[#A79BFF] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Field 2: Password */}
+                                <div className="space-y-1.5">
+                                  <div className="flex items-center justify-between px-1">
+                                    <label className="text-xs font-bold text-[#3E385B] dark:text-slate-200">
+                                      Kata Sandi
+                                    </label>
+                                    <span className="text-[10px] font-semibold text-[#A2A0B4] dark:text-slate-400">
+                                      Kredensial Akun
+                                    </span>
+                                  </div>
+
+                                  <div
+                                    className={`orbita-field-underline orbita-white-textfield relative flex items-center rounded-[16px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-4 py-1 transition-all focus-within:border-[#6C60B8]/50 dark:focus-within:border-[#9E92FF] focus-within:bg-white dark:focus-within:bg-[#1F1B44] focus-within:ring-2 focus-within:ring-[#6C60B8]/20 dark:focus-within:ring-[#8D81E3]/25 ${
+                                      passwordInvalid ? 'orbita-field-zigzag-error' : ''
+                                    }`}
+                                  >
+                                    <KeyRound className="h-4 w-4 text-[#6C60B8] dark:text-[#A599F8] shrink-0 mr-2.5" />
+                                    <input
+                                      type={showPassword ? 'text' : 'password'}
+                                      value={password}
+                                      aria-invalid={passwordInvalid || undefined}
+                                      onChange={e => {
+                                        setPassword(e.target.value);
+                                        if (errorMessage) setErrorMessage(null);
+                                      }}
+                                      placeholder="••••••••"
+                                      autoComplete="current-password"
+                                      className="no-ornament select-text w-full bg-transparent pr-8 py-2.5 text-xs sm:text-sm font-semibold text-[#3E385B] dark:text-[#EAE8F6] caret-[#6C60B8] dark:caret-[#A79BFF] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowPassword(!showPassword)}
+                                      className="no-ornament absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#9694A8] hover:text-[#6C60B8] dark:text-[#9893B8] dark:hover:text-[#EAE8F6] cursor-pointer transition-colors"
+                                      title={showPassword ? 'Sembunyikan Kata Sandi' : 'Tampilkan Kata Sandi'}
+                                    >
+                                      {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Remember Me & Proportional Jadwal KBM Jump Button */}
+                                <div className="flex items-center justify-between pt-1 text-xs">
+                                  <label className="flex items-center gap-2 cursor-pointer group">
+                                    <button
+                                      type="button"
+                                      role="checkbox"
+                                      aria-checked={rememberMe}
+                                      onClick={() => setRememberMe(!rememberMe)}
+                                      className={`no-ornament flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-md border transition-all cursor-pointer ${
+                                        rememberMe
+                                          ? 'border-[#6C60B8] bg-[#6C60B8] text-white'
+                                          : 'border-[#C6C4D6] bg-[#F0F1F6] dark:border-slate-600 dark:bg-slate-800 text-transparent group-hover:border-[#6C60B8]'
+                                      }`}
+                                    >
+                                      <Check className="h-3 w-3 stroke-[3]" />
+                                    </button>
+                                    <span className="font-semibold text-[#3E385B] dark:text-slate-200">Ingat Sesi</span>
+                                  </label>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const isMobileViewport =
+                                        typeof window !== 'undefined' && window.innerWidth < 768;
+                                      if (isMobileViewport) {
+                                        switchOverviewSlide(1);
+                                        setMobileSection('overview');
+                                        return;
+                                      }
+                                      const nextSlide: 0 | 1 = overviewSlide === 1 ? 0 : 1;
+                                      switchOverviewSlide(nextSlide);
+                                    }}
+                                    className="no-ornament inline-flex h-8 items-center justify-center gap-2 rounded-full bg-[#FFE4EC] hover:bg-[#FFD4E2] dark:bg-rose-950/70 dark:hover:bg-rose-900/80 px-3.5 text-xs font-extrabold text-[#F25781] dark:text-rose-300 transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none"
+                                  >
+                                    <CalendarDays className="h-4 w-4 shrink-0 stroke-[2]" />
+                                    <span className="md:hidden">Jadwal KBM</span>
+                                    <span className="hidden md:inline">
+                                      {overviewSlide === 1 ? 'Lihat Overview' : 'Jadwal KBM'}
+                                    </span>
+                                  </button>
+                                </div>
+
+                                {/* Submit Button */}
+                                <div className="pt-1.5">
+                                  <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="no-ornament orbita-btn-violet group flex w-full items-center justify-between rounded-[18px] px-5 py-3.5 text-white hover:brightness-105 transition-all duration-200 disabled:opacity-60 cursor-pointer"
+                                  >
+                                    <span className="text-[11px] font-bold tracking-widest uppercase text-white/80">
+                                      ORBITA
+                                    </span>
+                                    <span className="text-sm font-extrabold tracking-wide text-white">
+                                      {isSubmitting ? 'Memverifikasi...' : 'Masuk Dashboard'}
+                                    </span>
+                                    <ChevronRight className="h-4.5 w-4.5 text-white transition-transform group-hover:translate-x-1" />
+                                  </button>
+                                </div>
+
+                                {/* Flip to Register Prompt */}
+                                <div className="pt-1 text-center">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setRegError(null);
+                                      setIsRegisterFlipped(true);
+                                    }}
+                                    className="no-ornament inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[#6C60B8] hover:text-[#4F439C] dark:text-[#B5ABFF] dark:hover:text-white transition-colors cursor-pointer"
+                                  >
+                                    <UserPlus className="h-3.5 w-3.5" />
+                                    <span>Belum punya akun? Daftar Akun Baru</span>
+                                    <ChevronRight className="h-3.5 w-3.5" />
+                                  </button>
+                                </div>
+                              </form>
+                            </div>
+
+                            {/* Clean Typographic Academic Footer — Synced Directly with Admin Academic Year */}
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 pt-3.5 mt-1 border-t border-[#ECEBF6] dark:border-[#8D81E3]/20 text-[11.5px] leading-snug text-center sm:text-left">
+                              <span className="font-semibold text-[#6E698C] dark:text-slate-300">
+                                {schoolSettings?.curriculum || 'Kurikulum Merdeka'}
+                              </span>
+                              <span className="font-bold text-[#5D51B2] dark:text-indigo-300 tabular-nums whitespace-nowrap">
+                                Tahun Pelajaran {activeAcademicYear?.name || '2025/2026'}
+                                <span aria-hidden="true" className="mx-1.5 text-[#B8B3D6] dark:text-slate-500">
+                                  &middot;
+                                </span>
+                                Semester {activeAcademicYear?.activeSemester === 'genap' ? 'Genap' : 'Ganjil'}
+                              </span>
+                            </div>
+                          </OrbitaOrnateFrame>
                         </div>
 
-                        {/* Form */}
-                        <div>
-                          {errorMessage && (
-                            <div className="mb-4 flex items-center gap-2.5 rounded-[16px] bg-[#FFE4EC] border border-[#FFCCD9] dark:bg-rose-950/60 dark:border-rose-800/70 px-3.5 py-2.5 text-xs font-bold text-[#F25781] dark:text-rose-300 animate-fade-in">
-                              <AlertCircle className="h-4 w-4 shrink-0 text-[#F25781] dark:text-rose-400" />
-                              <span>{errorMessage}</span>
+                        {/* ========================================================= */}
+                        {/* BACK FACE: REGISTER CARD (DI BALIK CARD LOGIN)            */}
+                        {/* ========================================================= */}
+                        <div
+                          aria-hidden={!isRegisterFlipped}
+                          className={`w-full [backface-visibility:hidden] [-webkit-backface-visibility:hidden] [transform:rotateY(180deg)] ${
+                            isRegisterFlipped
+                              ? 'relative z-20 pointer-events-auto'
+                              : 'absolute inset-x-0 top-0 z-10 pointer-events-none select-none'
+                          }`}
+                        >
+                          <OrbitaOrnateFrame
+                            showTopCrest={true}
+                            stampText="Registrasi Akun"
+                            characterIndex={2}
+                            contentClassName="flex flex-col justify-between gap-3.5 px-5 pt-10 pb-5 sm:px-7 sm:pt-11 sm:pb-6"
+                          >
+                            {/* Top-Right Flip Back to Login Pill */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRegError(null);
+                                setIsRegisterFlipped(false);
+                              }}
+                              title="Putar kembali ke halaman Login"
+                              className="no-ornament absolute top-3.5 right-4 z-30 inline-flex items-center gap-1.5 rounded-full border border-[#FFCCD9] dark:border-rose-500/35 bg-[#FFE4EC] hover:bg-[#FFD4E2] dark:bg-rose-950/70 dark:hover:bg-rose-900/80 px-3 py-1 text-[10.5px] font-extrabold text-[#F25781] dark:text-rose-300 shadow-xs transition-all active:scale-95 cursor-pointer"
+                            >
+                              <RotateCw className="h-3 w-3 -scale-x-100" />
+                              <span>Ke Login</span>
+                            </button>
+
+                            {/* Header inside Back Card */}
+                            <div className="text-center">
+                              <h2 className="text-xl sm:text-2xl font-extrabold text-[#3E385B] dark:text-white tracking-tight">
+                                Daftar Akun ORBITA
+                              </h2>
+                              <p className="mt-0.5 text-xs font-medium text-[#A2A0B4] dark:text-slate-400 leading-relaxed">
+                                Registrasi akun baru terintegrasi langsung ke database sekolah
+                              </p>
                             </div>
-                          )}
 
-                          <form onSubmit={handleSubmit} noValidate className="space-y-4">
-                            {/* Field 1: Email / NIP / NIS */}
-                            <div className="space-y-1.5">
-                              <div className="flex items-center justify-between px-1">
-                                <label className="text-xs font-bold text-[#3E385B] dark:text-slate-200">
-                                  Email / NIP / NIS
-                                </label>
-                                <span className="text-[10px] font-semibold text-[#A2A0B4] dark:text-slate-400">
-                                  ID Pengguna
-                                </span>
+                            {regError && (
+                              <div className="flex items-center gap-2 rounded-[14px] bg-[#FFE4EC] border border-[#FFCCD9] dark:bg-rose-950/60 dark:border-rose-800/70 px-3 py-2 text-[11.5px] font-bold text-[#F25781] dark:text-rose-300 animate-fade-in">
+                                <AlertCircle className="h-4 w-4 shrink-0 text-[#F25781] dark:text-rose-400" />
+                                <span>{regError}</span>
+                              </div>
+                            )}
+
+                            <form onSubmit={handleRegisterSubmit} noValidate className="space-y-3">
+                              {/* Role Selector Chips */}
+                              <div className="space-y-1">
+                                <div className="flex items-center justify-between px-1">
+                                  <label className="text-[11px] font-bold text-[#3E385B] dark:text-slate-200">
+                                    Pilih Peran Akun
+                                  </label>
+                                  <span className="text-[10px] font-semibold text-[#A2A0B4] dark:text-slate-400">
+                                    Otorisasi Role
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-4 gap-1.5">
+                                  {(
+                                    [
+                                      { id: 'siswa', label: 'Siswa' },
+                                      { id: 'guru', label: 'Guru' },
+                                      { id: 'wali_kelas', label: 'Wali Kls' },
+                                      { id: 'admin', label: 'Admin' },
+                                    ] as { id: UserRole; label: string }[]
+                                  ).map(r => {
+                                    const active = regRole === r.id;
+                                    return (
+                                      <button
+                                        key={r.id}
+                                        type="button"
+                                        onClick={() => {
+                                          setRegRole(r.id);
+                                          setRegError(null);
+                                        }}
+                                        className={`no-ornament rounded-[12px] py-1.5 px-2 text-[11px] font-extrabold transition-all cursor-pointer ${
+                                          active
+                                            ? 'bg-[#6C60B8] text-white shadow-xs'
+                                            : 'bg-[#F0F1F6] text-[#5E5882] hover:bg-[#E5E3F3] dark:bg-[#171434] dark:text-slate-300 dark:hover:bg-[#231E4A]'
+                                        }`}
+                                      >
+                                        {r.label}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
                               </div>
 
-                              <div
-                                className={`orbita-field-underline orbita-white-textfield relative flex items-center rounded-[16px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-4 py-1 transition-all focus-within:border-[#6C60B8]/50 dark:focus-within:border-[#9E92FF] focus-within:bg-white dark:focus-within:bg-[#1F1B44] focus-within:ring-2 focus-within:ring-[#6C60B8]/20 dark:focus-within:ring-[#8D81E3]/25 ${
-                                  emailInvalid ? 'orbita-field-zigzag-error' : ''
-                                }`}
-                              >
-                                <User className="h-4 w-4 text-[#6C60B8] dark:text-[#A599F8] shrink-0 mr-2.5" />
-                                <input
-                                  type="text"
-                                  value={email}
-                                  aria-invalid={emailInvalid || undefined}
-                                  onChange={e => {
-                                    setEmail(e.target.value);
-                                    if (errorMessage) setErrorMessage(null);
-                                  }}
-                                  placeholder="Masukkan Email atau NIP/NIS..."
-                                  autoComplete="username"
-                                  className="no-ornament select-text w-full bg-transparent py-2.5 text-xs sm:text-sm font-semibold text-[#3E385B] dark:text-[#EAE8F6] caret-[#6C60B8] dark:caret-[#A79BFF] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Field 2: Password */}
-                            <div className="space-y-1.5">
-                              <div className="flex items-center justify-between px-1">
-                                <label className="text-xs font-bold text-[#3E385B] dark:text-slate-200">
-                                  Kata Sandi
-                                </label>
-                                <span className="text-[10px] font-semibold text-[#A2A0B4] dark:text-slate-400">
-                                  Kredensial Akun
-                                </span>
+                              {/* Nama Lengkap */}
+                              <div className="space-y-1">
+                                <div className="flex items-center justify-between px-1">
+                                  <label className="text-[11px] font-bold text-[#3E385B] dark:text-slate-200">
+                                    Nama Lengkap
+                                  </label>
+                                  <span className="text-[10px] font-semibold text-[#A2A0B4] dark:text-slate-400">
+                                    Sesuai Identitas
+                                  </span>
+                                </div>
+                                <div className="orbita-field-underline orbita-white-textfield relative flex items-center rounded-[14px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-3.5 py-0.5 transition-all focus-within:border-[#6C60B8]/50 dark:focus-within:border-[#9E92FF] focus-within:bg-white dark:focus-within:bg-[#1F1B44]">
+                                  <User className="h-3.5 w-3.5 text-[#6C60B8] dark:text-[#A599F8] shrink-0 mr-2" />
+                                  <input
+                                    type="text"
+                                    value={regFullName}
+                                    onChange={e => {
+                                      setRegFullName(e.target.value);
+                                      if (regError) setRegError(null);
+                                    }}
+                                    placeholder="Masukkan Nama Lengkap..."
+                                    className="no-ornament select-text w-full bg-transparent py-2 text-xs font-semibold text-[#3E385B] dark:text-[#EAE8F6] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
+                                  />
+                                </div>
                               </div>
 
-                              <div
-                                className={`orbita-field-underline orbita-white-textfield relative flex items-center rounded-[16px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-4 py-1 transition-all focus-within:border-[#6C60B8]/50 dark:focus-within:border-[#9E92FF] focus-within:bg-white dark:focus-within:bg-[#1F1B44] focus-within:ring-2 focus-within:ring-[#6C60B8]/20 dark:focus-within:ring-[#8D81E3]/25 ${
-                                  passwordInvalid ? 'orbita-field-zigzag-error' : ''
-                                }`}
-                              >
-                                <KeyRound className="h-4 w-4 text-[#6C60B8] dark:text-[#A599F8] shrink-0 mr-2.5" />
-                                <input
-                                  type={showPassword ? 'text' : 'password'}
-                                  value={password}
-                                  aria-invalid={passwordInvalid || undefined}
-                                  onChange={e => {
-                                    setPassword(e.target.value);
-                                    if (errorMessage) setErrorMessage(null);
-                                  }}
-                                  placeholder="••••••••"
-                                  autoComplete="current-password"
-                                  className="no-ornament select-text w-full bg-transparent pr-8 py-2.5 text-xs sm:text-sm font-semibold text-[#3E385B] dark:text-[#EAE8F6] caret-[#6C60B8] dark:caret-[#A79BFF] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
-                                />
+                              {/* 2-Column Row: Email & NIS/NIP */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <div className="space-y-1">
+                                  <label className="block px-1 text-[11px] font-bold text-[#3E385B] dark:text-slate-200">
+                                    Email Aktif
+                                  </label>
+                                  <div className="orbita-field-underline orbita-white-textfield relative flex items-center rounded-[14px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-3 py-0.5 transition-all focus-within:border-[#6C60B8]/50 dark:focus-within:border-[#9E92FF] focus-within:bg-white dark:focus-within:bg-[#1F1B44]">
+                                    <Mail className="h-3.5 w-3.5 text-[#6C60B8] dark:text-[#A599F8] shrink-0 mr-2" />
+                                    <input
+                                      type="email"
+                                      value={regEmail}
+                                      onChange={e => {
+                                        setRegEmail(e.target.value);
+                                        if (regError) setRegError(null);
+                                      }}
+                                      placeholder="nama@orbita.sch.id"
+                                      className="no-ornament select-text w-full bg-transparent py-2 text-xs font-semibold text-[#3E385B] dark:text-[#EAE8F6] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <label className="block px-1 text-[11px] font-bold text-[#3E385B] dark:text-slate-200">
+                                    {regRole === 'siswa' ? 'NIS / NISN' : 'NIP / ID Pegawai'}
+                                  </label>
+                                  <div className="orbita-field-underline orbita-white-textfield relative flex items-center rounded-[14px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-3 py-0.5 transition-all focus-within:border-[#6C60B8]/50 dark:focus-within:border-[#9E92FF] focus-within:bg-white dark:focus-within:bg-[#1F1B44]">
+                                    <Hash className="h-3.5 w-3.5 text-[#6C60B8] dark:text-[#A599F8] shrink-0 mr-2" />
+                                    <input
+                                      type="text"
+                                      value={regNipOrNis}
+                                      onChange={e => {
+                                        setRegNipOrNis(e.target.value);
+                                        if (regError) setRegError(null);
+                                      }}
+                                      placeholder={regRole === 'siswa' ? 'Contoh: 24251001' : 'Contoh: 198801...'}
+                                      className="no-ornament select-text w-full bg-transparent py-2 text-xs font-semibold text-[#3E385B] dark:text-[#EAE8F6] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Conditional Class / Subject Selector */}
+                              {(regRole === 'siswa' || regRole === 'wali_kelas') && classes.length > 0 && (
+                                <div className="space-y-1">
+                                  <label className="block px-1 text-[11px] font-bold text-[#3E385B] dark:text-slate-200">
+                                    {regRole === 'siswa' ? 'Kelas / Rombongan Belajar' : 'Kelas Perwalian'}
+                                  </label>
+                                  <div className="orbita-field-underline orbita-white-textfield relative flex items-center rounded-[14px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-3 py-0.5">
+                                    <select
+                                      value={regClassId || classes[0]?.id || ''}
+                                      onChange={e => setRegClassId(e.target.value)}
+                                      className="no-ornament w-full bg-transparent py-2 text-xs font-semibold text-[#3E385B] dark:text-[#EAE8F6] focus:outline-none cursor-pointer"
+                                    >
+                                      {classes.map(cls => (
+                                        <option
+                                          key={cls.id}
+                                          value={cls.id}
+                                          className="bg-white text-[#3E385B] dark:bg-[#171434] dark:text-slate-100"
+                                        >
+                                          Kelas {cls.name} ({cls.majorCode})
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </div>
+                              )}
+
+                              {regRole === 'guru' && subjects.length > 0 && (
+                                <div className="space-y-1">
+                                  <label className="block px-1 text-[11px] font-bold text-[#3E385B] dark:text-slate-200">
+                                    Mata Pelajaran Ampuan
+                                  </label>
+                                  <div className="orbita-field-underline orbita-white-textfield relative flex items-center rounded-[14px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-3 py-0.5">
+                                    <select
+                                      value={regSubjectName || subjects[0]?.name || ''}
+                                      onChange={e => setRegSubjectName(e.target.value)}
+                                      className="no-ornament w-full bg-transparent py-2 text-xs font-semibold text-[#3E385B] dark:text-[#EAE8F6] focus:outline-none cursor-pointer"
+                                    >
+                                      {subjects.map(sub => (
+                                        <option
+                                          key={sub.id}
+                                          value={sub.name}
+                                          className="bg-white text-[#3E385B] dark:bg-[#171434] dark:text-slate-100"
+                                        >
+                                          {sub.name}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* 2-Column Row: Kata Sandi & Konfirmasi */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <div className="space-y-1">
+                                  <label className="block px-1 text-[11px] font-bold text-[#3E385B] dark:text-slate-200">
+                                    Kata Sandi
+                                  </label>
+                                  <div className="orbita-field-underline orbita-white-textfield relative flex items-center rounded-[14px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-3 py-0.5">
+                                    <KeyRound className="h-3.5 w-3.5 text-[#6C60B8] dark:text-[#A599F8] shrink-0 mr-2" />
+                                    <input
+                                      type={showRegPassword ? 'text' : 'password'}
+                                      value={regPassword}
+                                      onChange={e => {
+                                        setRegPassword(e.target.value);
+                                        if (regError) setRegError(null);
+                                      }}
+                                      placeholder="Min. 4 karakter"
+                                      className="no-ornament select-text w-full bg-transparent pr-6 py-2 text-xs font-semibold text-[#3E385B] dark:text-[#EAE8F6] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowRegPassword(!showRegPassword)}
+                                      className="no-ornament absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-[#9694A8] hover:text-[#6C60B8] cursor-pointer"
+                                    >
+                                      {showRegPassword ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                                    </button>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <label className="block px-1 text-[11px] font-bold text-[#3E385B] dark:text-slate-200">
+                                    Ulangi Sandi
+                                  </label>
+                                  <div className="orbita-field-underline orbita-white-textfield relative flex items-center rounded-[14px] bg-[#F0F1F6] dark:bg-[#171434] border border-transparent dark:border-[#8D81E3]/28 px-3 py-0.5">
+                                    <KeyRound className="h-3.5 w-3.5 text-[#6C60B8] dark:text-[#A599F8] shrink-0 mr-2" />
+                                    <input
+                                      type={showRegPassword ? 'text' : 'password'}
+                                      value={regConfirmPassword}
+                                      onChange={e => {
+                                        setRegConfirmPassword(e.target.value);
+                                        if (regError) setRegError(null);
+                                      }}
+                                      placeholder="Konfirmasi sandi"
+                                      className="no-ornament select-text w-full bg-transparent py-2 text-xs font-semibold text-[#3E385B] dark:text-[#EAE8F6] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Submit Register Button */}
+                              <div className="pt-1">
                                 <button
-                                  type="button"
-                                  onClick={() => setShowPassword(!showPassword)}
-                                  className="no-ornament absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[#9694A8] hover:text-[#6C60B8] dark:text-[#9893B8] dark:hover:text-[#EAE8F6] cursor-pointer transition-colors"
-                                  title={showPassword ? 'Sembunyikan Kata Sandi' : 'Tampilkan Kata Sandi'}
+                                  type="submit"
+                                  disabled={isRegSubmitting}
+                                  className="no-ornament orbita-btn-violet group flex w-full items-center justify-between rounded-[16px] px-5 py-3 text-white hover:brightness-105 transition-all duration-200 disabled:opacity-60 cursor-pointer"
                                 >
-                                  {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                                  <span className="text-[10.5px] font-bold tracking-widest uppercase text-white/80">
+                                    REGISTRASI
+                                  </span>
+                                  <span className="text-xs sm:text-sm font-extrabold tracking-wide text-white">
+                                    {isRegSubmitting ? 'Mendaftarkan...' : 'Daftar & Aktifkan Akun'}
+                                  </span>
+                                  <ChevronRight className="h-4 w-4 text-white transition-transform group-hover:translate-x-1" />
                                 </button>
                               </div>
-                            </div>
 
-                            {/* Remember Me & Proportional Jadwal KBM Jump Button */}
-                            <div className="flex items-center justify-between pt-1 text-xs">
-                              <label className="flex items-center gap-2 cursor-pointer group">
+                              {/* Flip Back to Login Prompt */}
+                              <div className="pt-0.5 text-center">
                                 <button
                                   type="button"
-                                  role="checkbox"
-                                  aria-checked={rememberMe}
-                                  onClick={() => setRememberMe(!rememberMe)}
-                                  className={`no-ornament flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-md border transition-all cursor-pointer ${
-                                    rememberMe
-                                      ? 'border-[#6C60B8] bg-[#6C60B8] text-white'
-                                      : 'border-[#C6C4D6] bg-[#F0F1F6] dark:border-slate-600 dark:bg-slate-800 text-transparent group-hover:border-[#6C60B8]'
-                                  }`}
+                                  onClick={() => {
+                                    setRegError(null);
+                                    setIsRegisterFlipped(false);
+                                  }}
+                                  className="no-ornament inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[#F25781] hover:text-[#D43B65] dark:text-rose-300 dark:hover:text-rose-200 transition-colors cursor-pointer"
                                 >
-                                  <Check className="h-3 w-3 stroke-[3]" />
+                                  <ArrowLeft className="h-3.5 w-3.5" />
+                                  <span>Sudah punya akun? Kembali ke Login</span>
                                 </button>
-                                <span className="font-semibold text-[#3E385B] dark:text-slate-200">Ingat Sesi</span>
-                              </label>
+                              </div>
+                            </form>
 
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const isMobileViewport =
-                                    typeof window !== 'undefined' && window.innerWidth < 768;
-                                  if (isMobileViewport) {
-                                    switchOverviewSlide(1);
-                                    setMobileSection('overview');
-                                    return;
-                                  }
-                                  const nextSlide: 0 | 1 = overviewSlide === 1 ? 0 : 1;
-                                  switchOverviewSlide(nextSlide);
-                                }}
-                                className="no-ornament inline-flex h-8 items-center justify-center gap-2 rounded-full bg-[#FFE4EC] hover:bg-[#FFD4E2] dark:bg-rose-950/70 dark:hover:bg-rose-900/80 px-3.5 text-xs font-extrabold text-[#F25781] dark:text-rose-300 transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none"
-                              >
-                                <CalendarDays className="h-4 w-4 shrink-0 stroke-[2]" />
-                                <span className="md:hidden">Jadwal KBM</span>
-                                <span className="hidden md:inline">
-                                  {overviewSlide === 1 ? 'Lihat Overview' : 'Jadwal KBM'}
-                                </span>
-                              </button>
+                            {/* Academic Footer on Back Card */}
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 pt-2.5 border-t border-[#ECEBF6] dark:border-[#8D81E3]/20 text-[11px] leading-snug text-center sm:text-left">
+                              <span className="font-semibold text-[#6E698C] dark:text-slate-300">
+                                Sinkronisasi Multi-Device
+                              </span>
+                              <span className="font-bold text-[#5D51B2] dark:text-indigo-300 tabular-nums whitespace-nowrap">
+                                TP {activeAcademicYear?.name || '2025/2026'} &middot;{' '}
+                                {activeAcademicYear?.activeSemester === 'genap' ? 'Genap' : 'Ganjil'}
+                              </span>
                             </div>
-
-                            {/* Submit Button */}
-                            <div className="pt-1.5">
-                              <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="no-ornament orbita-btn-violet group flex w-full items-center justify-between rounded-[18px] px-5 py-3.5 text-white hover:brightness-105 transition-all duration-200 disabled:opacity-60 cursor-pointer"
-                              >
-                                <span className="text-[11px] font-bold tracking-widest uppercase text-white/80">
-                                  ORBITA
-                                </span>
-                                <span className="text-sm font-extrabold tracking-wide text-white">
-                                  {isSubmitting ? 'Memverifikasi...' : 'Masuk Dashboard'}
-                                </span>
-                                <ChevronRight className="h-4.5 w-4.5 text-white transition-transform group-hover:translate-x-1" />
-                              </button>
-                            </div>
-                          </form>
+                          </OrbitaOrnateFrame>
                         </div>
-
-                        {/* Clean Typographic Academic Footer — Synced Directly with Admin Academic Year */}
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 pt-3.5 mt-1 border-t border-[#ECEBF6] dark:border-[#8D81E3]/20 text-[11.5px] leading-snug text-center sm:text-left">
-                          <span className="font-semibold text-[#6E698C] dark:text-slate-300">
-                            {schoolSettings?.curriculum || 'Kurikulum Merdeka'}
-                          </span>
-                          <span className="font-bold text-[#5D51B2] dark:text-indigo-300 tabular-nums whitespace-nowrap">
-                            Tahun Pelajaran {activeAcademicYear?.name || '2025/2026'}
-                            <span aria-hidden="true" className="mx-1.5 text-[#B8B3D6] dark:text-slate-500">
-                              &middot;
-                            </span>
-                            Semester {activeAcademicYear?.activeSemester === 'genap' ? 'Genap' : 'Ganjil'}
-                          </span>
-                        </div>
-                      </OrbitaOrnateFrame>
+                      </div>
                     </div>
 
                     {/* RIGHT 7 COLS: UNIFIED OVERVIEW + JADWAL KBM CAROUSEL */}
