@@ -541,20 +541,11 @@
   animation: sheetSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-page-enter {
-  animation: liquidWipeIn 0.56s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.animate-liquid-wipe-in {
-  animation: liquidWipeIn 0.56s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.animate-liquid-wipe-curtain {
-  animation: liquidWipeCurtain 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
+.animate-page-enter,
+.animate-liquid-wipe-in,
+.animate-liquid-wipe-curtain,
 .animate-login-reveal {
-  animation: loginGateReveal 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: none;
 }
 
 .animate-dock-pop {
@@ -692,32 +683,14 @@ html.dark div:has(> input[placeholder*="Cari" i]):focus-within svg.lucide-search
   filter: drop-shadow(0 0 8px rgba(167, 156, 255, 0.55));
 }
 
-.animate-stagger-1 {
-  animation: elementRise 0.42s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
-}
-.animate-stagger-2 {
-  animation: elementRise 0.44s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
-}
-.animate-stagger-3 {
-  animation: elementRise 0.46s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
-}
-.animate-stagger-4 {
-  animation: elementRise 0.48s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both;
-}
-.animate-stagger-5 {
-  animation: elementRise 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
-}
-
-/* Automatic Staggered Element Choreography when switching menus */
+.animate-stagger-1,
+.animate-stagger-2,
+.animate-stagger-3,
+.animate-stagger-4,
+.animate-stagger-5,
 .page-transition-stage > div > * {
-  animation: elementRise 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: none;
 }
-.page-transition-stage > div > *:nth-child(1) { animation-delay: 0.02s; }
-.page-transition-stage > div > *:nth-child(2) { animation-delay: 0.07s; }
-.page-transition-stage > div > *:nth-child(3) { animation-delay: 0.12s; }
-.page-transition-stage > div > *:nth-child(4) { animation-delay: 0.17s; }
-.page-transition-stage > div > *:nth-child(5) { animation-delay: 0.22s; }
-.page-transition-stage > div > *:nth-child(6) { animation-delay: 0.27s; }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-page-enter,

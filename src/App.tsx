@@ -27,21 +27,6 @@ const MainContent: React.FC = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [rightDrawerOpen, setRightDrawerOpen] = useState(false);
 
-  // Liquid Wipe screen transition state across Desktop, Mobile, and Tablet
-  const prevNavRef = React.useRef<string>(activeNav);
-  const [wipeKey, setWipeKey] = useState(0);
-  const [isWiping, setIsWiping] = useState(false);
-
-  React.useEffect(() => {
-    if (prevNavRef.current !== activeNav) {
-      prevNavRef.current = activeNav;
-      setWipeKey(k => k + 1);
-      setIsWiping(true);
-      const timer = window.setTimeout(() => setIsWiping(false), 600);
-      return () => window.clearTimeout(timer);
-    }
-  }, [activeNav]);
-
   const handleOpenSidebar = () => {
     setRightDrawerOpen(false);
     setMobileSidebarOpen(true);
@@ -75,31 +60,15 @@ const MainContent: React.FC = () => {
 
           {/* Center Main Content Area */}
           <div className="relative z-10 flex min-w-0 flex-1 flex-col overflow-hidden bg-transparent">
-            {/* Liquid Wipe Screen Transition Curtain (Desktop, Mobile & Tablet) */}
-            {isWiping && (
-              <div
-                key={`liquid-wipe-wave-${wipeKey}`}
-                aria-hidden="true"
-                className="animate-liquid-wipe-curtain pointer-events-none absolute inset-0 z-40 overflow-hidden"
-              >
-                <div className="h-full w-[124%] -ml-[12%] rounded-r-[84px] border-r-2 border-white/45 bg-gradient-to-r from-[#6558B5]/40 via-[#8D81E3]/28 to-[#FF7597]/16 backdrop-blur-[6px] shadow-[16px_0_48px_rgba(101,88,181,0.32)]" />
-              </div>
-            )}
-
             {/* Top Header */}
             <Header
               onToggleMobileSidebar={handleOpenSidebar}
               onToggleRightDrawer={handleToggleRightDrawer}
             />
 
-            {/* Scrollable Page Content with Liquid Wipe Transition */}
+            {/* Scrollable Page Content */}
             <main className="flex-1 overflow-y-auto overflow-x-hidden px-3.5 pb-24 lg:pb-8 pt-1.5 sm:px-6 lg:px-7">
-              <div
-                key={activeNav}
-                className={`page-transition-stage mx-auto max-w-6xl min-w-0 ${
-                  isWiping ? 'animate-liquid-wipe-in' : ''
-                }`}
-              >
+              <div className="mx-auto max-w-6xl min-w-0">
                 {/* Student Specific Views */}
                 {activeNav === 'student-profile' && <StudentModule initialTab="profile" />}
                 {activeNav === 'student-grades' && <StudentModule initialTab="grades" />}

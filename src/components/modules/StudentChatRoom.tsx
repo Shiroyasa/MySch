@@ -227,7 +227,7 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
       {/* VIEW 1: RUANG FORUM DISKUSI PUBLIK                        */}
       {/* ======================================================== */}
       {activeTab === 'public' && (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Left: Category & Topic Sidebar */}
           <div className="lg:col-span-1 space-y-3">
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
@@ -374,7 +374,7 @@ export const StudentChatRoom: React.FC<StudentChatRoomProps> = ({ isAdminView = 
       {/* VIEW 2: CHAT DM PRIBADI PER PROFIL (1-ON-1 DIRECT)       */}
       {/* ======================================================== */}
       {activeTab === 'dm' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Left: Contact List (4 Cols) */}
           <div className="lg:col-span-4 rounded-2xl border border-slate-200 bg-white shadow-xs overflow-hidden dark:border-slate-800 dark:bg-slate-900 flex flex-col h-[580px]">
             <div className="p-3 border-b border-slate-100 dark:border-slate-800 space-y-2">

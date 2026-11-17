@@ -378,15 +378,18 @@ export interface PklStudentReportItem {
   absorbedStatus: 'terserap_kerja' | 'melanjutkan_kuliah' | 'wirausaha' | 'mencari_kerja';
 }
 
+export type AlumniRespondentCategory = 'alumni' | 'kelas_12';
 export type AlumniCareerStatus = 'bekerja' | 'kuliah' | 'wirausaha' | 'mencari_kerja' | 'belum_bekerja';
 export type AlumniRelevanceLevel = 'sangat_sesuai' | 'sesuai' | 'cukup_sesuai' | 'tidak_sesuai';
 export type AlumniWaitingPeriod = '< 3 Bulan' | '3 - 6 Bulan' | '6 - 12 Bulan' | '> 12 Bulan';
 
 export interface AlumniTracerRecord {
   id: string;
+  respondentCategory?: AlumniRespondentCategory;
   studentId?: string;
   nisn: string;
   fullName: string;
+  className?: string;
   gender: 'L' | 'P';
   majorCode: string;
   graduationYear: string;
@@ -399,10 +402,13 @@ export interface AlumniTracerRecord {
   industryRelevance: AlumniRelevanceLevel;
   waitingPeriod: AlumniWaitingPeriod;
   monthlyIncomeRange?: string;
+  bkkSupportNeed?: string;
+  targetPlanDate?: string;
   phone?: string;
   email?: string;
   testimonial?: string;
   verifiedBySchool: boolean;
+  submittedSource?: 'login_portal' | 'admin_panel';
   updatedAt: string;
 }
 

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
+import { AlumniRespondentCategory } from '../../types';
 import {
   Lock,
   Eye,
@@ -8,10 +9,14 @@ import {
   Check,
   Calendar,
   User,
+  ChevronLeft,
   ChevronRight,
-  Search,
+  ArrowLeft,
+  AlertTriangle,
+  X,
 } from 'lucide-react';
 import { AcademyScheduleBoard } from '../common/AcademyScheduleBoard';
+import { TracerStudyPortalForm, TracerPortalStage } from '../common/TracerStudyPortalForm';
 import { OrbitaOrnateFrame } from '../common/OrbitaOrnateFrame';
 import { GenshinElementIcon, OrbitaMenuIcon, buildSmoothWavePath } from '../common/AcademyOrnaments';
 import { AnimeBackground } from '../common/AnimeBackground';
@@ -22,6 +27,7 @@ export const LoginPage: React.FC = () => {
     loginWithEmail,
     visualSettings,
     schoolSettings,
+    activeAcademicYear,
     lessonSchedules = [],
     students = [],
     teachers = [],
@@ -30,6 +36,7 @@ export const LoginPage: React.FC = () => {
     attendanceRecords = [],
     assessmentScores = [],
     pklReports = [],
+    pklTracers = [],
   } = useApp();
 
   const [email, setEmail] = useState('');
@@ -38,10 +45,54 @@ export const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [mobileSection, setMobileSection] = useState<'login' | 'overview' | 'schedule'>('login');
+  const [activePortalView, setActivePortalView] = useState<'login' | 'tracer'>('login');
+  const [mobileSection, setMobileSection] = useState<'login' | 'overview' | 'tracer'>('login');
+  const [overviewSlide, setOverviewSlide] = useState<0 | 1>(0);
+  const overviewTouchStartXRef = React.useRef<number | null>(null);
+  const [tracerStage, setTracerStage] = useState<TracerPortalStage>('verify');
+  const [resolvedTracerCategory, setResolvedTracerCategory] =
+    useState<AlumniRespondentCategory | null>(null);
+  const [pendingPortalExit, setPendingPortalExit] = useState<{
+    view: 'login' | 'tracer';
+    mobile: 'login' | 'overview' | 'tracer';
+  } | null>(null);
   const [activeMonthIdx, setActiveMonthIdx] = useState(3);
   const [selectedClassId, setSelectedClassId] = useState<string>('ALL');
+
+  const alumniTracerCount = useMemo(
+    () => pklTracers.filter(t => (t.respondentCategory || 'alumni') === 'alumni').length,
+    [pklTracers]
+  );
+  const grade12TracerCount = useMemo(
+    () => pklTracers.filter(t => t.respondentCategory === 'kelas_12').length,
+    [pklTracers]
+  );
+
+  const navigatePortal = (
+    nextView: 'login' | 'tracer',
+    nextMobile: 'login' | 'overview' | 'tracer'
+  ) => {
+    const inTracerPortal = activePortalView === 'tracer' || mobileSection === 'tracer';
+    const isLeavingTracerPortal = nextView !== 'tracer';
+
+    if (inTracerPortal && tracerStage !== 'verify' && isLeavingTracerPortal) {
+      setPendingPortalExit({
+        view: nextView,
+        mobile: nextMobile,
+      });
+      return;
+    }
+
+    if (nextView === 'tracer' && !inTracerPortal) {
+      setTracerStage('verify');
+      setResolvedTracerCategory(null);
+    }
+    if (nextView === 'login') {
+      setResolvedTracerCategory(null);
+    }
+    setActivePortalView(nextView);
+    setMobileSection(nextMobile);
+  };
 
   const activeLogo = visualSettings?.appLogoUrl || schoolSettings?.logoUrl || null;
   const monthsList = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul'];
@@ -157,134 +208,182 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="relative flex min-h-[100dvh] w-full items-center justify-center overflow-x-hidden p-0 sm:p-4 lg:p-6 font-sans text-[#3E385B] select-none">
+    <div className="relative flex min-h-[100dvh] md:h-[100dvh] md:overflow-hidden w-full items-center justify-center overflow-x-hidden p-0 sm:p-3 md:p-4 lg:p-6 font-sans text-[#3E385B] select-none">
       {/* Soft Cool Lavender-Slate Outer Backdrop */}
       <AnimeBackground />
 
       {/* Outer Frosted Tablet/Desktop Bezel Frame (Edge-to-Edge on Small Mobile) */}
-      <div className="animate-login-reveal relative z-10 flex min-h-[100dvh] sm:min-h-[680px] w-full max-w-[1480px] overflow-hidden rounded-none sm:rounded-[34px] lg:rounded-[40px] border-0 sm:border sm:border-white/60 bg-transparent sm:bg-[#EAE7F9]/38 p-0 sm:p-2 lg:p-2.5 sm:shadow-[0_32px_80px_-12px_rgba(79,67,156,0.28)] sm:backdrop-blur-xl">
+      <div className="relative z-10 flex min-h-[100dvh] md:h-full md:min-h-0 w-full max-w-[1560px] overflow-hidden rounded-none sm:rounded-[34px] lg:rounded-[40px] border-0 sm:border sm:border-white/60 bg-transparent sm:bg-[#EAE7F9]/38 p-0 sm:p-2 lg:p-2.5 sm:shadow-[0_32px_80px_-12px_rgba(79,67,156,0.28)] sm:backdrop-blur-xl">
         {/* Inner Translucent Lavender-Glass Application Canvas (Matched to Main Sidebar Shell) */}
-        <div className="relative flex w-full overflow-hidden rounded-none sm:rounded-[28px] lg:rounded-[32px] bg-[#F5F4FB]/88 backdrop-blur-md">
+        <div className="relative flex w-full md:h-full overflow-hidden rounded-none sm:rounded-[28px] lg:rounded-[32px] bg-[#F5F4FB]/88 backdrop-blur-md">
           {/* Left Floating Vertical Frosted Violet Glass Pill Sidebar (Desktop & Landscape Tablet) */}
           <aside
             style={{
               background:
-                'linear-gradient(180deg, rgba(116, 104, 196, 0.80) 0%, rgba(101, 88, 181, 0.76) 100%)',
+                'linear-gradient(180deg, rgba(116, 104, 196, 0.84) 0%, rgba(101, 88, 181, 0.78) 100%)',
               boxShadow:
                 '0 20px 44px -8px rgba(84, 70, 172, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.36)',
             }}
-            className="animate-stagger-1 hidden md:flex my-4 ml-4 w-[74px] shrink-0 flex-col items-center justify-between rounded-[28px] border border-white/28 backdrop-blur-2xl backdrop-saturate-150 py-5 text-white"
+            className="relative z-20 hidden md:flex my-3 ml-3 w-[72px] lg:w-[76px] shrink-0 flex-col items-center justify-between rounded-[26px] border border-white/28 backdrop-blur-2xl backdrop-saturate-150 py-4 text-white"
           >
             {/* Top Brand Emblem Circle */}
-            <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/12">
-              {activeLogo ? (
-                <img src={activeLogo} alt="ORBITA" className="h-7 w-7 rounded-full object-contain" />
-              ) : (
-                <OrbitaMenuIcon variant="brand" className="h-5.5 w-5.5 text-white" />
-              )}
+            <div className="flex flex-col items-center gap-3">
+              <button
+                type="button"
+                onClick={() => navigatePortal('login', 'login')}
+                title="ORBITA Akademi · Halaman Login"
+                className="no-ornament flex h-11 w-11 items-center justify-center rounded-[15px] border border-white/30 bg-white/14 hover:bg-white/22 transition-colors cursor-pointer"
+              >
+                {activeLogo ? (
+                  <img src={activeLogo} alt="ORBITA" className="h-7 w-7 rounded-full object-contain" />
+                ) : (
+                  <OrbitaMenuIcon variant="brand" className="h-5.5 w-5.5 text-white" />
+                )}
+              </button>
+              <div className="h-px w-8 bg-white/20" />
             </div>
 
-            {/* Center Icons: Embedded Vertical Liquid Bulge Toggles (Clean Single Glass Layer) */}
+            {/* Center Icons: Login & Single Tracer Study Portal Entry */}
             <LiquidNavBar
               orientation="vertical"
               embedded
               ariaLabel="Navigasi Portal Login"
-              activeId={showScheduleModal ? 'schedule' : 'login'}
+              activeId={activePortalView}
               onSelect={id => {
-                const isSched = id === 'schedule';
-                setShowScheduleModal(isSched);
-                setMobileSection(isSched ? 'schedule' : 'login');
+                const nextView = id as 'login' | 'tracer';
+                navigatePortal(nextView, nextView);
               }}
               items={[
                 {
                   id: 'login',
                   label: 'Login',
-                  title: 'Gerbang Login ORBITA',
-                  icon: <OrbitaMenuIcon variant="dashboard" className="h-5.5 w-5.5" />,
+                  title: 'Gerbang Login & Overview ORBITA',
+                  icon: <OrbitaMenuIcon variant="dashboard" className="h-5 w-5" />,
                 },
                 {
-                  id: 'schedule',
-                  label: 'Jadwal',
-                  title: 'Jadwal Pelajaran KBM',
-                  icon: <OrbitaMenuIcon variant="attendance" className="h-5.5 w-5.5" />,
+                  id: 'tracer',
+                  label: 'Tracer',
+                  title: 'Portal Tracer Study & Rencana Lulus',
+                  icon: <OrbitaMenuIcon variant="grading" className="h-5 w-5" />,
+                  dot: pklTracers.length > 0,
                 },
               ]}
             />
 
-            {/* Bottom Status Indicator */}
-            <div className="flex h-11 w-11 items-center justify-center rounded-[16px] text-white/80" title="ORBITA Secure Portal">
-              <Lock className="h-4.5 w-4.5 text-white/70" />
+            {/* Bottom Security Indicator */}
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-px w-8 bg-white/20" />
+              <div
+                className="flex h-10 w-10 items-center justify-center rounded-[14px] border border-white/20 bg-white/10 text-white/85"
+                title="Portal Terenkripsi ORBITA"
+              >
+                <Lock className="h-4 w-4 text-white/85" />
+              </div>
             </div>
           </aside>
 
           {/* Center Main Area */}
-          <div className="flex flex-1 min-w-0 flex-col justify-between p-4 sm:p-7 lg:p-8 overflow-y-auto">
-            {/* Top Header Row ("Primary / Portal Akademik" + Search Pill + Badge) */}
-            <div className="animate-stagger-1 flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-[#7468C4]/16 bg-[#F4F3FC]/74 px-4 py-3 backdrop-blur-xl mb-4 sm:mb-6 shadow-[0_8px_24px_-6px_rgba(101,88,181,0.10)]">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="flex md:hidden h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-white/30 bg-gradient-to-br from-[#7468C4] to-[#6558B5] text-white shadow-sm">
-                  {activeLogo ? (
-                    <img src={activeLogo} alt="ORBITA" className="h-6 w-6 rounded-full object-contain" />
-                  ) : (
-                    <OrbitaMenuIcon variant="brand" className="h-5 w-5 text-white" />
-                  )}
+          <div className="relative z-10 flex flex-1 min-w-0 flex-col md:h-full overflow-hidden">
+            {/* Fixed Top Header Row */}
+            <div className="px-4 pt-4 pb-2 sm:px-7 sm:pt-6 lg:px-8 lg:pt-6 shrink-0">
+              <div className="flex items-center justify-between gap-3 rounded-[22px] border border-[#7468C4]/16 bg-[#F4F3FC]/74 px-4 py-2.5 sm:py-3 backdrop-blur-xl shadow-[0_8px_24px_-6px_rgba(101,88,181,0.10)]">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex md:hidden h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-white/30 bg-gradient-to-br from-[#7468C4] to-[#6558B5] text-white shadow-sm">
+                    {activeLogo ? (
+                      <img src={activeLogo} alt="ORBITA" className="h-6 w-6 rounded-full object-contain" />
+                    ) : (
+                      <OrbitaMenuIcon variant="brand" className="h-5 w-5 text-white" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <span className="block text-[11px] sm:text-xs font-medium text-[#A2A0B4]">
+                      {activePortalView === 'tracer' || mobileSection === 'tracer'
+                        ? resolvedTracerCategory === 'kelas_12'
+                          ? 'Halaman Siswa Kelas 12'
+                          : resolvedTracerCategory === 'alumni'
+                          ? 'Halaman Tracer Alumni'
+                          : 'Portal Tracer Study & Rencana Lulus'
+                        : 'Primary'}
+                    </span>
+                    <h1 className="text-lg sm:text-2xl font-extrabold text-[#3E385B] tracking-tight truncate">
+                      ORBITA Akademi
+                    </h1>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <span className="block text-[11px] sm:text-xs font-medium text-[#A2A0B4]">Primary</span>
-                  <h1 className="text-lg sm:text-2xl font-extrabold text-[#3E385B] tracking-tight truncate">
-                    ORBITA Akademi
-                  </h1>
+
+                <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+                  {(activePortalView === 'tracer' || mobileSection === 'tracer') &&
+                  tracerStage !== 'verify' ? (
+                    <button
+                      type="button"
+                      onClick={() => navigatePortal('login', 'login')}
+                      style={{
+                        background: 'linear-gradient(135deg, #FF7B9F 0%, #EE4D7A 100%)',
+                      }}
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-3.5 sm:px-4 text-xs font-extrabold text-white shadow-sm transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none"
+                    >
+                      <ArrowLeft className="h-3.5 w-3.5 shrink-0" />
+                      <span>Kembali ke Login</span>
+                    </button>
+                  ) : null}
+
+                  <div
+                    title="Sistem Terverifikasi ORBITA"
+                    className={`${
+                      activePortalView === 'tracer' || mobileSection === 'tracer'
+                        ? 'hidden sm:flex'
+                        : 'flex'
+                    } h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-white/30 bg-gradient-to-br from-[#7468C4] to-[#6558B5] text-white shadow-sm ring-2 ring-white`}
+                  >
+                    <Lock className="h-4 w-4" />
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="flex items-center gap-2 sm:gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const next = !showScheduleModal;
-                    setShowScheduleModal(next);
-                    setMobileSection(next ? 'schedule' : 'login');
+            {/* Scrollable Body Area */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-6 pt-2 sm:px-7 sm:pb-7 lg:px-8 lg:pb-8 flex flex-col">
+              {/* Interactive Mobile Quick-View Switcher (<768px) with Sidebar Glass + Liquid Bulge + Seesaw Tilt */}
+              <div className="md:hidden mb-5 shrink-0">
+                <LiquidNavBar
+                  pill
+                  size="sm"
+                  ariaLabel="Navigasi Portal Login Mobile"
+                  activeId={mobileSection}
+                  onSelect={id => {
+                    const nextTab = id as 'login' | 'overview' | 'tracer';
+                    const nextView = nextTab === 'tracer' ? 'tracer' : 'login';
+                    navigatePortal(nextView, nextTab);
                   }}
-                  className="orbita-searchbar no-ornament hidden sm:inline-flex h-9 items-center justify-center gap-2 rounded-full bg-[#EFEFF6] hover:bg-[#E4E2F5] px-4 text-xs font-semibold text-[#3E385B] transition-colors cursor-pointer whitespace-nowrap shrink-0 leading-none"
-                >
-                  <Search className="h-4 w-4 text-[#4A4368] shrink-0" />
-                  <span>{showScheduleModal ? 'Kembali ke Login' : 'Cari Jadwal KBM...'}</span>
-                </button>
-                <div
-                  title="Sistem Terverifikasi ORBITA"
-                  className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-gradient-to-br from-[#7468C4] to-[#6558B5] text-white shadow-sm ring-2 ring-white"
-                >
-                  <Lock className="h-4 w-4" />
-                </div>
+                  items={[
+                    { id: 'login', label: 'Login' },
+                    { id: 'overview', label: 'Overview & Jadwal' },
+                    { id: 'tracer', label: 'Tracer Study' },
+                  ]}
+                />
               </div>
-            </div>
 
-            {/* Interactive Mobile & Tablet Quick-View Switcher (<768px) with Sidebar Glass + Liquid Bulge + Seesaw Tilt */}
-            <div className="md:hidden mb-5">
-              <LiquidNavBar
-                pill
-                fullWidth
-                size="sm"
-                ariaLabel="Navigasi Portal Login Mobile"
-                activeId={mobileSection}
-                onSelect={id => {
-                  const nextTab = id as 'login' | 'overview' | 'schedule';
-                  setMobileSection(nextTab);
-                  setShowScheduleModal(nextTab === 'schedule');
-                }}
-                items={[
-                  { id: 'login', label: 'Masuk Akun' },
-                  { id: 'overview', label: 'Statistik' },
-                  { id: 'schedule', label: 'Jadwal KBM' },
-                ]}
-              />
-            </div>
-
-            {/* Main 12-Column Asymmetric Grid */}
+              <div className="my-auto w-full">
+                {/* UNIFIED TRACER PORTAL (AUTO-ROUTES TO ALUMNI OR KELAS 12 AFTER NIS/NISN VERIFY) */}
+                {(activePortalView === 'tracer' || mobileSection === 'tracer') ? (
+                  <div className="pb-4">
+                    <TracerStudyPortalForm
+                      key="portal-tracer-unified"
+                      source="login_portal"
+                      autoRouteByIdentity
+                      initialStage="verify"
+                      hideOuterBackButton
+                      onStageChange={setTracerStage}
+                      onResolvedCategory={setResolvedTracerCategory}
+                      onClose={() => navigatePortal('login', 'login')}
+                    />
+                  </div>
+                ) : (
+            /* Main 12-Column Asymmetric Grid */
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-center my-auto pb-4">
               {/* LEFT 5 COLS: CLEAN WHITE LOGIN CARD WITH FLOATING PURPLE SQUIRCLE BADGE */}
               <div
-                className={`animate-stagger-2 lg:col-span-5 w-full max-w-[440px] mx-auto pt-4 ${
+                className={`lg:col-span-5 w-full max-w-[440px] mx-auto pt-4 ${
                   mobileSection === 'login' ? 'block' : 'hidden md:block'
                 }`}
               >
@@ -372,7 +471,7 @@ export const LoginPage: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Remember Me & Schedule Button */}
+                      {/* Remember Me & Schedule Carousel Jump Button */}
                       <div className="flex items-center justify-between pt-1 text-xs">
                         <label className="flex items-center gap-2 cursor-pointer group">
                           <button
@@ -393,11 +492,17 @@ export const LoginPage: React.FC = () => {
 
                         <button
                           type="button"
-                          onClick={() => setShowScheduleModal(!showScheduleModal)}
+                          onClick={() => {
+                            const nextSlide = overviewSlide === 1 ? 0 : 1;
+                            setOverviewSlide(nextSlide);
+                            if (nextSlide === 1) {
+                              setMobileSection('overview');
+                            }
+                          }}
                           className="no-ornament inline-flex h-7 items-center justify-center gap-1.5 rounded-full bg-[#FFE4EC] hover:bg-[#FFD4E2] px-3 text-[11px] font-bold text-[#F25781] transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none"
                         >
                           <Calendar className="h-3 w-3 shrink-0" />
-                          <span>{showScheduleModal ? 'Tutup Jadwal' : 'Jadwal KBM'}</span>
+                          <span>{overviewSlide === 1 ? 'Lihat Overview' : 'Jadwal KBM'}</span>
                         </button>
                       </div>
 
@@ -424,36 +529,85 @@ export const LoginPage: React.FC = () => {
                     </form>
                   </div>
 
-                  {/* Footer Pills */}
-                  <div className="flex items-center justify-between pt-3 border-t border-[#F0F1F6] text-[11px]">
-                    <span className="font-medium text-[#A2A0B4]">
+                  {/* Footer Pills — Synced Directly with Admin Academic Year */}
+                  <div className="flex items-center justify-between gap-2 pt-3 border-t border-[#F0F1F6] text-[11px]">
+                    <span className="font-medium text-[#A2A0B4] truncate">
                       {schoolSettings?.curriculum || 'Kurikulum Merdeka'}
                     </span>
-                    <span className="rounded-full bg-[#EFEFF9] px-3 py-0.5 text-[10px] font-bold text-[#6C60B8]">
-                      Tahun Ajaran 2025/2026
+                    <span className="rounded-full bg-[#EFEFF9] px-3 py-0.5 text-[10px] font-bold text-[#6C60B8] whitespace-nowrap shrink-0">
+                      Tahun Pelajaran {activeAcademicYear?.name || '2025/2026'} &middot;{' '}
+                      {activeAcademicYear?.activeSemester === 'genap' ? 'Genap' : 'Ganjil'}
                     </span>
                   </div>
                 </OrbitaOrnateFrame>
               </div>
 
-              {/* RIGHT 7 COLS: SCHEDULE BOARD OR OVERVIEW BENTO + PROGRESS CARDS */}
+              {/* RIGHT 7 COLS: UNIFIED OVERVIEW + JADWAL KBM CAROUSEL */}
               <div
-                className={`animate-stagger-3 lg:col-span-7 w-full ${
+                className={`lg:col-span-7 w-full space-y-4 ${
                   mobileSection !== 'login' ? 'block' : 'hidden md:block'
                 }`}
               >
-                {showScheduleModal || mobileSection === 'schedule' ? (
-                  <div className="animate-fade-in pt-4">
-                    <AcademyScheduleBoard
-                      maxHeightClass="max-h-[360px]"
-                      onClose={() => {
-                        setShowScheduleModal(false);
-                        setMobileSection('login');
-                      }}
-                    />
+                {/* Carousel Header Switcher & Controls */}
+                <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-[20px] border border-[#DDD8F6]/70 bg-white/75 px-3.5 py-2 backdrop-blur-xl shadow-[0_8px_24px_-8px_rgba(101,88,181,0.12)]">
+                  <LiquidNavBar
+                    size="sm"
+                    pill
+                    ariaLabel="Carousel Overview dan Jadwal KBM"
+                    activeId={overviewSlide === 0 ? 'overview' : 'schedule'}
+                    onSelect={id => setOverviewSlide(id === 'schedule' ? 1 : 0)}
+                    items={[
+                      { id: 'overview', label: 'Overview Akademik' },
+                      { id: 'schedule', label: `Jadwal KBM (${lessonSchedules.length})` },
+                    ]}
+                  />
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setOverviewSlide(0)}
+                      disabled={overviewSlide === 0}
+                      aria-label="Slide Overview"
+                      className="no-ornament inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#DDD8F6] bg-[#FAF9FE] hover:bg-[#EFEBFB] text-[#5D51B2] disabled:opacity-40 cursor-pointer transition-all"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <span className="min-w-[36px] text-center text-[11px] font-extrabold text-[#3E385B] tabular-nums">
+                      {overviewSlide + 1} / 2
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setOverviewSlide(1)}
+                      disabled={overviewSlide === 1}
+                      aria-label="Slide Jadwal KBM"
+                      className="no-ornament inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#DDD8F6] bg-[#FAF9FE] hover:bg-[#EFEBFB] text-[#5D51B2] disabled:opacity-40 cursor-pointer transition-all"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
                   </div>
-                ) : (
-                  <div className="space-y-6">
+                </div>
+
+                {/* Carousel Viewport */}
+                <div
+                  className="overflow-hidden rounded-[28px]"
+                  onTouchStart={e => {
+                    overviewTouchStartXRef.current = e.touches[0]?.clientX ?? null;
+                  }}
+                  onTouchEnd={e => {
+                    if (overviewTouchStartXRef.current === null) return;
+                    const endX = e.changedTouches[0]?.clientX ?? overviewTouchStartXRef.current;
+                    const delta = endX - overviewTouchStartXRef.current;
+                    overviewTouchStartXRef.current = null;
+                    if (delta > 50) setOverviewSlide(0);
+                    else if (delta < -50) setOverviewSlide(1);
+                  }}
+                >
+                  <div
+                    style={{ transform: `translateX(-${overviewSlide * 100}%)` }}
+                    className="flex transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] items-start"
+                  >
+                    {/* SLIDE 0: OVERVIEW BENTO + PROGRESS CARDS */}
+                    <div className="w-full shrink-0 space-y-6 pb-2">
                     {/* Top Row: Purple Overview Wave Card + Right Stacked Purple & Pink-Coral Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-stretch">
                       {/* Purple Overview Wave Card */}
@@ -621,7 +775,7 @@ export const LoginPage: React.FC = () => {
                         </div>
 
                         <div
-                          onClick={() => setShowScheduleModal(true)}
+                          onClick={() => setOverviewSlide(1)}
                           style={{
                             background: 'linear-gradient(145deg, #FF88A8 0%, #F8658E 100%)',
                             boxShadow: '0 16px 32px -6px rgba(248, 101, 142, 0.32)',
@@ -640,7 +794,7 @@ export const LoginPage: React.FC = () => {
                                 Jadwal Pelajaran
                               </h3>
                               <p className="text-[11px] text-white/85 truncate">
-                                Klik untuk lihat KBM
+                                Geser / Klik lihat KBM
                               </p>
                             </div>
                           </div>
@@ -661,7 +815,7 @@ export const LoginPage: React.FC = () => {
                     </div>
 
                     {/* Bottom Row: 3 White Floating Purple-Squircle Progress Cards Synced with Real Database */}
-                    <div className="animate-stagger-4 grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-5 pt-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-5 pt-6">
                       {[
                         {
                           el: 'hydro' as const,
@@ -681,11 +835,11 @@ export const LoginPage: React.FC = () => {
                         },
                         {
                           el: 'anemo' as const,
-                          title: 'Supervisi PKL',
-                          sub: 'Monitoring Industri',
+                          title: 'Tracer & Rencana Lulus',
+                          sub: 'Alumni & Siswa Kelas 12',
                           pct: Math.round(realTimeMetrics.pklPct),
-                          left: `${classes.length} rombel`,
-                          pill: 'Terverifikasi',
+                          left: `${alumniTracerCount} Alumni · ${grade12TracerCount} Kls 12`,
+                          pill: 'BKK Terpadu',
                         },
                       ].map((c, i) => (
                         <div
@@ -693,7 +847,7 @@ export const LoginPage: React.FC = () => {
                           style={{
                             boxShadow: '0 12px 28px -6px rgba(108, 96, 184, 0.08)',
                           }}
-                          className="relative rounded-[24px] border border-[#F0F0F7] bg-white px-4 pt-9 pb-4 text-[#3E385B] transition-all duration-300"
+                          className="relative rounded-[24px] border border-[#F0F0F7] bg-white px-4 pt-9 pb-4 text-[#3E385B]"
                         >
                           <div className="absolute -top-5 left-1/2 -translate-x-1/2 flex h-11 w-11 items-center justify-center rounded-[16px] bg-gradient-to-br from-[#7568C6] to-[#6356B5] text-white shadow-[0_8px_18px_rgba(108,96,184,0.34)]">
                             <GenshinElementIcon element={c.el} className="h-5 w-5" />
@@ -715,8 +869,8 @@ export const LoginPage: React.FC = () => {
                             </div>
                           </div>
                           <div className="mt-3 flex items-center justify-between">
-                            <span className="text-[10px] text-[#A2A0B4]">{c.left}</span>
-                            <span className="rounded-full bg-[#FFE4EC] px-2.5 py-0.5 text-[9.5px] font-bold text-[#F25781]">
+                            <span className="text-[10px] text-[#A2A0B4] truncate pr-1">{c.left}</span>
+                            <span className="rounded-full bg-[#FFE4EC] px-2.5 py-0.5 text-[9.5px] font-bold text-[#F25781] shrink-0">
                               {c.pill}
                             </span>
                           </div>
@@ -724,12 +878,134 @@ export const LoginPage: React.FC = () => {
                       ))}
                     </div>
                   </div>
-                )}
+
+                  {/* SLIDE 1: JADWAL PELAJARAN KBM BOARD */}
+                  <div className="w-full shrink-0 pt-4 pb-2">
+                    <AcademyScheduleBoard maxHeightClass="max-h-[340px]" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Carousel Indicator Dots */}
+              <div className="flex items-center justify-center gap-2 pt-1">
+                {[0, 1].map(idx => (
+                  <button
+                    key={`overview-dot-${idx}`}
+                    type="button"
+                    onClick={() => setOverviewSlide(idx as 0 | 1)}
+                    aria-label={idx === 0 ? 'Slide Overview' : 'Slide Jadwal KBM'}
+                    className={`no-ornament h-2 rounded-full transition-all cursor-pointer ${
+                      overviewSlide === idx
+                        ? 'w-7 bg-gradient-to-r from-[#7468C4] to-[#FF7597]'
+                        : 'w-2 bg-[#D8D3EE] hover:bg-[#BDB5DF]'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+            </div>
+            )}
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog when leaving Portal Pengisian Tracer Study */}
+      {pendingPortalExit && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#42368E]/42 backdrop-blur-md animate-fade-in"
+          onClick={e => {
+            if (e.target === e.currentTarget) setPendingPortalExit(null);
+          }}
+        >
+          <div
+            className="relative w-full max-w-md rounded-[28px] border border-[#7468C4]/30 bg-white/90 p-6 text-[#3E385B] shadow-[0_28px_68px_rgba(64,52,142,0.34)] backdrop-blur-2xl animate-wobble-in"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="portal-exit-confirm-title"
+          >
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-[#E6E8F2] pb-4">
+              <div className="flex items-center gap-3">
+                <div
+                  style={{
+                    background: 'linear-gradient(145deg, #7468C4 0%, #5D51B2 100%)',
+                  }}
+                  className="flex h-11 w-11 items-center justify-center rounded-[16px] text-white shadow-sm"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 id="portal-exit-confirm-title" className="text-base font-extrabold text-[#3E385B]">
+                    {resolvedTracerCategory === 'kelas_12'
+                      ? 'Keluar dari Halaman Siswa Kelas 12'
+                      : resolvedTracerCategory === 'alumni'
+                      ? 'Keluar dari Halaman Tracer Alumni'
+                      : 'Keluar dari Portal Tracer Study'}
+                  </h3>
+                  <p className="text-[11px] font-semibold text-[#8C88A4]">
+                    Konfirmasi Kembali ke Gerbang Login ORBITA
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPendingPortalExit(null)}
+                className="no-ornament rounded-full border border-[#E6E8F2] bg-[#F5F6FA] p-1.5 text-[#6A6584] hover:bg-[#ECEEF7] hover:text-[#3E385B] transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="py-5 space-y-3.5">
+              <div className="flex items-start gap-3 rounded-[18px] border border-[#FFE0E9] bg-[#FFF5F8] p-3.5 text-xs">
+                <AlertTriangle className="h-5 w-5 text-[#FF6E96] shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold text-[#3E385B]">
+                    Apakah Anda yakin ingin kembali ke halaman Login?
+                  </p>
+                  <p className="mt-1 text-[#6A6584]">
+                    {tracerStage === 'form'
+                      ? 'Pengisian formulir yang belum dikirim akan dibatalkan dan Anda perlu memverifikasi NIS/NISN ulang jika ingin masuk kembali.'
+                      : 'Sesi verifikasi NIS/NISN Anda pada halaman ini akan diakhiri.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-[#E6E8F2]">
+              <button
+                type="button"
+                onClick={() => setPendingPortalExit(null)}
+                className="no-ornament inline-flex h-9 items-center justify-center rounded-full border border-[#E6E8F2] bg-[#F5F6FA] px-4 text-xs font-bold text-[#6A6584] hover:bg-[#ECEEF7] hover:text-[#3E385B] whitespace-nowrap shrink-0 transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const target = pendingPortalExit;
+                  setPendingPortalExit(null);
+                  setTracerStage('verify');
+                  setResolvedTracerCategory(null);
+                  setActivePortalView(target.view);
+                  setMobileSection(target.mobile);
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, #FF7597 0%, #FF5C86 100%)',
+                }}
+                className="no-ornament inline-flex h-9 items-center justify-center gap-2 rounded-full px-5 text-xs font-bold text-white shadow-md hover:brightness-105 whitespace-nowrap shrink-0 transition-all cursor-pointer"
+              >
+                <ArrowLeft className="h-4 w-4 shrink-0" />
+                <span>Ya, Kembali ke Login</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

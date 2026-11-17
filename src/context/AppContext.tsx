@@ -3274,10 +3274,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       lastTracerUpdateRef.current = Date.now();
       setIsFirestoreConnected(true);
       setLastSyncTime(new Date());
+      const catLabel = tracer.respondentCategory === 'kelas_12' ? 'Siswa Kelas 12' : 'Alumni';
+      const srcLabel = tracer.submittedSource === 'login_portal' ? ' via Portal Tracer Study' : '';
       addAuditLog(
         isNew ? 'CREATE_TRACER_STUDY' : 'UPDATE_TRACER_STUDY',
-        'Tracer Study Alumni',
-        `${isNew ? 'Menambahkan' : 'Memperbarui'} data tracer study alumni: ${tracer.fullName} (${tracer.careerStatus.toUpperCase()})`
+        'Tracer Study & Perencanaan Lulus',
+        `${isNew ? 'Menambahkan' : 'Memperbarui'} data tracer study (${catLabel}): ${tracer.fullName} (${tracer.careerStatus.toUpperCase()})${srcLabel}`
       );
     } finally {
       isTracerWriteActiveRef.current = false;

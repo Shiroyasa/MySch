@@ -670,11 +670,15 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
             const normalizedMajor = String(raw.majorCode || '').trim().toUpperCase().includes('DPB')
               ? 'DPB'
               : 'RPL';
+            const normalizedCategory =
+              raw.respondentCategory === 'kelas_12' ? 'kelas_12' : 'alumni';
             list.push({
               ...(raw as AlumniTracerRecord),
               id: raw.id || docSnap.id,
+              respondentCategory: normalizedCategory,
               nisn: raw.nisn || '-',
               fullName: raw.fullName || 'Alumni',
+              className: raw.className || undefined,
               gender: raw.gender === 'P' ? 'P' : 'L',
               majorCode: normalizedMajor,
               graduationYear: raw.graduationYear || '2026',
@@ -684,6 +688,9 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
               city: raw.city || 'Sukabumi',
               industryRelevance: raw.industryRelevance || 'sesuai',
               waitingPeriod: raw.waitingPeriod || '< 3 Bulan',
+              bkkSupportNeed: raw.bkkSupportNeed || undefined,
+              targetPlanDate: raw.targetPlanDate || undefined,
+              submittedSource: raw.submittedSource || undefined,
               verifiedBySchool: raw.verifiedBySchool !== false,
               updatedAt: raw.updatedAt || '',
             });

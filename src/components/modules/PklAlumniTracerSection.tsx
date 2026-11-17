@@ -2,12 +2,14 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   AlumniTracerRecord,
+  AlumniRespondentCategory,
   AlumniCareerStatus,
   AlumniRelevanceLevel,
   AlumniWaitingPeriod,
   IndustryPartner,
   Student,
   Major,
+  ClassRoom,
 } from '../../types';
 import {
   GraduationCap,
@@ -42,7 +44,8 @@ import {
   ScrollText,
   Sparkles,
 } from 'lucide-react';
-import { HighlightedChartHeader } from '../common/AcademyOrnaments';
+import { HighlightedChartHeader, OrbitaMenuIcon } from '../common/AcademyOrnaments';
+import { LiquidNavBar } from '../common/LiquidNavBar';
 import {
   ReportCustomConfig,
   defaultReportConfig,
@@ -54,6 +57,7 @@ import {
 interface PklAlumniTracerSectionProps {
   tracers: AlumniTracerRecord[];
   students: Student[];
+  classes?: ClassRoom[];
   partners: IndustryPartner[];
   majors: Major[];
   academicYearName: string;
@@ -176,6 +180,21 @@ const RELEVANCE_LABEL: Record<
 
 const WAITING_PERIODS: AlumniWaitingPeriod[] = ['< 3 Bulan', '3 - 6 Bulan', '6 - 12 Bulan', '> 12 Bulan'];
 
+const BKK_SUPPORT_OPTIONS = [
+  'Info Lowongan Kerja & Rekrutmen Industri (DUDI)',
+  'Bimbingan CV, Psikotes & Simulasi Interview Kerja',
+  'Pendampingan Pendaftaran Kuliah (SNBP/SNBT/PTS/Beasiswa)',
+  'Pelatihan Wirausaha Mandiri & Inkubasi Bisnis',
+  'Konseling Penentuan Arah Karir Pasca Lulus',
+];
+
+const PLAN_TIMELINE_OPTIONS = [
+  'Langsung Setelah Pengumuman Kelulusan',
+  'Dalam 1 - 3 Bulan Setelah Lulus',
+  'Tahun Akademik / Gelombang Masuk Berikutnya',
+  'Masih Mempersiapkan Berkas & Portofolio',
+];
+
 const ACCENT_PRESETS: { label: string; rgb: [number, number, number]; hex: string }[] = [
   { label: 'Navy Resmi', rgb: [15, 23, 42], hex: '#0f172a' },
   { label: 'Ungu ORBITA', rgb: [108, 96, 184], hex: '#6c60b8' },
@@ -225,6 +244,7 @@ const readAndOptimizeImage = (file: File, maxDim: number = 480): Promise<string>
 export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
   tracers,
   students,
+  classes = [],
   partners,
   majors: _majors,
   academicYearName,
@@ -241,6 +261,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
   const [viewMode, setViewMode] = useState<'directory' | 'editable' | 'paper_print'>('directory');
   const [paperEditorTab, setPaperEditorTab] = useState<'kop' | 'dokumen' | 'ttd'>('kop');
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<AlumniRespondentCategory>('alumni');
   const [yearFilter, setYearFilter] = useState<string>('ALL');
   const [majorFilter, setMajorFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<AlumniCareerStatus | 'ALL'>('ALL');
@@ -309,9 +330,11 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
   }, [tracers, isDraftDirty]);
 
   const [formState, setFormState] = useState<{
+    respondentCategory: AlumniRespondentCategory;
     studentId: string;
     nisn: string;
     fullName: string;
+    className: string;
     gender: 'L' | 'P';
     majorCode: TracerMajorCode;
     graduationYear: string;
@@ -324,14 +347,18 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     industryRelevance: AlumniRelevanceLevel;
     waitingPeriod: AlumniWaitingPeriod;
     monthlyIncomeRange: string;
+    bkkSupportNeed: string;
+    targetPlanDate: string;
     phone: string;
     email: string;
     testimonial: string;
     verifiedBySchool: boolean;
   }>({
+    respondentCategory: 'alumni',
     studentId: '',
     nisn: '',
     fullName: '',
+    className: '',
     gender: 'L',
     majorCode: 'RPL',
     graduationYear: '2026',
@@ -344,6 +371,8 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     industryRelevance: 'sangat_sesuai',
     waitingPeriod: '< 3 Bulan',
     monthlyIncomeRange: 'Rp 4.500.000 - Rp 6.000.000',
+    bkkSupportNeed: '',
+    targetPlanDate: '',
     phone: '',
     email: '',
     testimonial: '',
@@ -361,26 +390,110 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     return ['ALL', ...years];
   }, [activeSourceList]);
 
+  const defaultGradYear = useMemo(() => {
+    const match = (academicYearName || '').match(/(\d{4})\s*$/);
+    return match ? match[1] : '2026';
+  }, [academicYearName]);
+
+  const grade12Classes = useMemo(() => {
+    const matched = classes.filter(c => {
+      const n = (c.name || '').trim().toUpperCase();
+      return c.gradeLevel === 'XII' || n.startsWith('XII') || n.startsWith('12');
+    });
+    return matched.length > 0 ? matched : classes;
+  }, [classes]);
+
+  const grade12ClassIds = useMemo(
+    () =>
+      new Set(
+        classes
+          .filter(c => {
+            const n = (c.name || '').trim().toUpperCase();
+            return c.gradeLevel === 'XII' || n.startsWith('XII') || n.startsWith('12');
+          })
+          .map(c => c.id)
+      ),
+    [classes]
+  );
+
+  const grade12Students = useMemo(() => {
+    const activeStudents = students.filter(
+      s => s.status !== 'lulus' && s.status !== 'mutasi' && s.status !== 'keluar'
+    );
+    const g12 = activeStudents.filter(s => {
+      const cls = (s.className || '').trim().toUpperCase();
+      return cls.startsWith('XII') || cls.startsWith('12') || grade12ClassIds.has(s.classId);
+    });
+    const sourceList = g12.length > 0 ? g12 : activeStudents;
+    return [...sourceList].sort((a, b) => a.fullName.localeCompare(b.fullName, 'id'));
+  }, [students, grade12ClassIds]);
+
+  const recordedAlumniTracers = useMemo(
+    () =>
+      tracers
+        .filter(t => (t.respondentCategory || 'alumni') === 'alumni')
+        .sort((a, b) => a.fullName.localeCompare(b.fullName, 'id')),
+    [tracers]
+  );
+
+  const graduatedStudents = useMemo(() => {
+    const normalizeNisn = (v?: string) => (v || '').trim().replace(/\s+/g, '');
+    const alumniNisns = new Set(recordedAlumniTracers.map(t => normalizeNisn(t.nisn)).filter(Boolean));
+    const alumniStudentKeys = new Set(
+      recordedAlumniTracers
+        .filter(t => t.studentId)
+        .map(t => `${t.studentId}::${t.fullName.trim().toLowerCase()}`)
+    );
+    return students
+      .filter(
+        s =>
+          s.status === 'lulus' &&
+          !alumniNisns.has(normalizeNisn(s.nisn)) &&
+          !alumniStudentKeys.has(`${s.id}::${s.fullName.trim().toLowerCase()}`)
+      )
+      .sort((a, b) => a.fullName.localeCompare(b.fullName, 'id'));
+  }, [students, recordedAlumniTracers]);
+
+  const totalAlumniInSource = useMemo(
+    () =>
+      activeSourceList.filter(t => (t.respondentCategory || 'alumni') === 'alumni').length,
+    [activeSourceList]
+  );
+
+  const totalKelas12InSource = useMemo(
+    () => activeSourceList.filter(t => t.respondentCategory === 'kelas_12').length,
+    [activeSourceList]
+  );
+
   const filteredTracers = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return activeSourceList.filter(t => {
       const normalizedMajor = normalizeTracerMajor(t.majorCode);
+      const recCategory: AlumniRespondentCategory =
+        t.respondentCategory === 'kelas_12' ? 'kelas_12' : 'alumni';
       const matchSearch =
         !q ||
         t.fullName.toLowerCase().includes(q) ||
         t.nisn.toLowerCase().includes(q) ||
+        (t.className || '').toLowerCase().includes(q) ||
+        (t.bkkSupportNeed || '').toLowerCase().includes(q) ||
         (t.institutionOrCompany || '').toLowerCase().includes(q) ||
         (t.roleOrStudyProgram || '').toLowerCase().includes(q) ||
         (t.city || '').toLowerCase().includes(q);
+      const matchCategory = recCategory === categoryFilter;
       const matchYear = yearFilter === 'ALL' || t.graduationYear === yearFilter;
       const matchMajor = majorFilter === 'ALL' || normalizedMajor === majorFilter;
       const matchStatus = statusFilter === 'ALL' || t.careerStatus === statusFilter;
-      return matchSearch && matchYear && matchMajor && matchStatus;
+      return matchSearch && matchCategory && matchYear && matchMajor && matchStatus;
     });
-  }, [activeSourceList, searchQuery, yearFilter, majorFilter, statusFilter]);
+  }, [activeSourceList, searchQuery, categoryFilter, yearFilter, majorFilter, statusFilter]);
 
   const stats = useMemo(() => {
     const total = filteredTracers.length;
+    const alumniCount = filteredTracers.filter(
+      t => (t.respondentCategory || 'alumni') === 'alumni'
+    ).length;
+    const kelas12Count = filteredTracers.filter(t => t.respondentCategory === 'kelas_12').length;
     const bekerja = filteredTracers.filter(t => t.careerStatus === 'bekerja').length;
     const kuliah = filteredTracers.filter(t => t.careerStatus === 'kuliah').length;
     const wirausaha = filteredTracers.filter(t => t.careerStatus === 'wirausaha').length;
@@ -398,6 +511,8 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
 
     return {
       total,
+      alumniCount,
+      kelas12Count,
       bekerja,
       kuliah,
       wirausaha,
@@ -431,14 +546,17 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
   }, [filteredTracers]);
 
   const openCreateModal = () => {
+    const isGrade12Tab = categoryFilter === 'kelas_12';
     setEditingTracerId(null);
     setFormState({
+      respondentCategory: isGrade12Tab ? 'kelas_12' : 'alumni',
       studentId: '',
       nisn: '',
       fullName: '',
+      className: isGrade12Tab ? grade12Classes[0]?.name || 'XII RPL 1' : '',
       gender: 'L',
       majorCode: majorFilter === 'DPB' ? 'DPB' : 'RPL',
-      graduationYear: yearFilter !== 'ALL' ? yearFilter : '2026',
+      graduationYear: yearFilter !== 'ALL' ? yearFilter : isGrade12Tab ? defaultGradYear : '2025',
       pklPartnerId: '',
       pklPartnerName: '',
       careerStatus: statusFilter !== 'ALL' ? statusFilter : 'bekerja',
@@ -447,7 +565,9 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
       city: 'Sukabumi',
       industryRelevance: 'sangat_sesuai',
       waitingPeriod: '< 3 Bulan',
-      monthlyIncomeRange: 'Rp 4.500.000 - Rp 6.000.000',
+      monthlyIncomeRange: isGrade12Tab ? '' : 'Rp 4.500.000 - Rp 6.000.000',
+      bkkSupportNeed: isGrade12Tab ? BKK_SUPPORT_OPTIONS[0] : '',
+      targetPlanDate: isGrade12Tab ? PLAN_TIMELINE_OPTIONS[0] : '',
       phone: '',
       email: '',
       testimonial: '',
@@ -457,23 +577,28 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
   };
 
   const openEditModal = (rec: AlumniTracerRecord) => {
+    const isRecGrade12 = rec.respondentCategory === 'kelas_12';
     setEditingTracerId(rec.id);
     setFormState({
+      respondentCategory: isRecGrade12 ? 'kelas_12' : 'alumni',
       studentId: rec.studentId || '',
       nisn: rec.nisn,
       fullName: rec.fullName,
+      className: rec.className || (isRecGrade12 ? grade12Classes[0]?.name || 'XII RPL 1' : ''),
       gender: rec.gender,
       majorCode: normalizeTracerMajor(rec.majorCode),
       graduationYear: rec.graduationYear,
       pklPartnerId: rec.pklPartnerId || '',
       pklPartnerName: rec.pklPartnerName || '',
       careerStatus: rec.careerStatus,
-      institutionOrCompany: rec.institutionOrCompany,
-      roleOrStudyProgram: rec.roleOrStudyProgram,
+      institutionOrCompany: rec.institutionOrCompany === '-' ? '' : rec.institutionOrCompany,
+      roleOrStudyProgram: rec.roleOrStudyProgram === '-' ? '' : rec.roleOrStudyProgram,
       city: rec.city,
       industryRelevance: rec.industryRelevance,
       waitingPeriod: rec.waitingPeriod,
       monthlyIncomeRange: rec.monthlyIncomeRange || '',
+      bkkSupportNeed: rec.bkkSupportNeed || (isRecGrade12 ? BKK_SUPPORT_OPTIONS[0] : ''),
+      targetPlanDate: rec.targetPlanDate || (isRecGrade12 ? PLAN_TIMELINE_OPTIONS[0] : ''),
       phone: rec.phone || '',
       email: rec.email || '',
       testimonial: rec.testimonial || '',
@@ -482,25 +607,51 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     setShowModal(true);
   };
 
-  const handlePrefillFromStudent = (stdId: string) => {
+  const handlePrefillFromStudent = (stdId: string, targetCategory?: AlumniRespondentCategory) => {
     const std = students.find(s => s.id === stdId);
     if (!std) {
+      setEditingTracerId(null);
       setFormState(prev => ({ ...prev, studentId: '' }));
       return;
     }
+
+    const activeCat = targetCategory || formState.respondentCategory;
+    const norm = (v?: string) => (v || '').trim().replace(/\s+/g, '');
+    const existingRecord = tracers.find(
+      t =>
+        (t.respondentCategory || 'alumni') === activeCat &&
+        ((std.nisn && norm(t.nisn) === norm(std.nisn)) ||
+          (t.studentId === std.id &&
+            t.fullName.trim().toLowerCase() === std.fullName.trim().toLowerCase()))
+    );
+    if (existingRecord) {
+      openEditModal(existingRecord);
+      onToast(`Data ${existingRecord.fullName} sudah terdata — dimuat untuk pembaruan.`);
+      return;
+    }
+
     const matchedPartner = partners.find(p =>
       (p.placements || []).some(pl => pl.studentId === std.id)
     );
+    setEditingTracerId(null);
     setFormState(prev => ({
       ...prev,
+      respondentCategory: activeCat,
       studentId: std.id,
       nisn: std.nisn,
       fullName: std.fullName,
+      className:
+        activeCat === 'kelas_12'
+          ? std.className || grade12Classes[0]?.name || prev.className || 'XII RPL 1'
+          : '',
+      graduationYear: activeCat === 'kelas_12' ? defaultGradYear : prev.graduationYear || '2025',
       gender: std.gender,
       majorCode: normalizeTracerMajor(std.majorCode),
       phone: std.phone || prev.phone,
       pklPartnerId: matchedPartner?.id || prev.pklPartnerId,
       pklPartnerName: matchedPartner?.name || prev.pklPartnerName,
+      bkkSupportNeed: activeCat === 'kelas_12' ? prev.bkkSupportNeed || BKK_SUPPORT_OPTIONS[0] : '',
+      targetPlanDate: activeCat === 'kelas_12' ? prev.targetPlanDate || PLAN_TIMELINE_OPTIONS[0] : '',
       institutionOrCompany:
         prev.careerStatus === 'bekerja' && matchedPartner && !prev.institutionOrCompany
           ? matchedPartner.name
@@ -508,12 +659,39 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     }));
   };
 
+  const handlePrefillFromRecordedAlumni = (selectedVal: string) => {
+    if (!selectedVal) {
+      setEditingTracerId(null);
+      setFormState(prev => ({
+        ...prev,
+        respondentCategory: 'alumni',
+        studentId: '',
+        nisn: '',
+        fullName: '',
+        className: '',
+        graduationYear: '2025',
+      }));
+      return;
+    }
+    if (selectedVal.startsWith('trc:')) {
+      const rec = recordedAlumniTracers.find(t => t.id === selectedVal.slice(4));
+      if (rec) {
+        openEditModal(rec);
+        onToast(`Data alumni ${rec.fullName} dimuat dari Database untuk pembaruan.`);
+      }
+      return;
+    }
+    if (selectedVal.startsWith('std:')) {
+      handlePrefillFromStudent(selectedVal.slice(4), 'alumni');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const isUnemployedStatus =
       formState.careerStatus === 'belum_bekerja' || formState.careerStatus === 'mencari_kerja';
     if (!formState.fullName.trim()) {
-      onToast('Nama lengkap alumni wajib diisi.');
+      onToast('Nama lengkap responden wajib diisi.');
       return;
     }
     if (!isUnemployedStatus && !formState.institutionOrCompany.trim()) {
@@ -522,14 +700,20 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     }
 
     const chosenPartner = partners.find(p => p.id === formState.pklPartnerId);
+    const isGrade12Payload = formState.respondentCategory === 'kelas_12';
     const payload: AlumniTracerRecord = {
       id: editingTracerId || `trc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      respondentCategory: formState.respondentCategory,
       studentId: formState.studentId || undefined,
       nisn: formState.nisn.trim() || `00${Date.now().toString().slice(-8)}`,
       fullName: formState.fullName.trim(),
+      className: isGrade12Payload
+        ? formState.className.trim() || grade12Classes[0]?.name || 'XII'
+        : undefined,
       gender: formState.gender,
       majorCode: normalizeTracerMajor(formState.majorCode),
-      graduationYear: formState.graduationYear.trim() || '2026',
+      graduationYear:
+        formState.graduationYear.trim() || (isGrade12Payload ? defaultGradYear : '2025'),
       pklPartnerId: formState.pklPartnerId || undefined,
       pklPartnerName: chosenPartner?.name || formState.pklPartnerName || undefined,
       careerStatus: formState.careerStatus,
@@ -538,11 +722,20 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
       city: formState.city.trim() || 'Sukabumi',
       industryRelevance: formState.industryRelevance,
       waitingPeriod: formState.waitingPeriod,
-      monthlyIncomeRange: formState.monthlyIncomeRange.trim() || undefined,
+      monthlyIncomeRange: !isGrade12Payload
+        ? formState.monthlyIncomeRange.trim() || undefined
+        : undefined,
+      bkkSupportNeed: isGrade12Payload
+        ? formState.bkkSupportNeed.trim() || undefined
+        : undefined,
+      targetPlanDate: isGrade12Payload
+        ? formState.targetPlanDate.trim() || undefined
+        : undefined,
       phone: formState.phone.trim() || undefined,
       email: formState.email.trim() || undefined,
       testimonial: formState.testimonial.trim() || undefined,
       verifiedBySchool: formState.verifiedBySchool,
+      submittedSource: 'admin_panel',
       updatedAt: new Date().toISOString().split('T')[0],
     };
 
@@ -552,7 +745,11 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
       await Promise.resolve(onSaveTracer(payload, !editingTracerId));
       setShowModal(false);
       onToast(
-        editingTracerId
+        isGrade12Payload
+          ? editingTracerId
+            ? `Rencana pasca lulus ${payload.fullName} berhasil diperbarui & tersinkron ke Database.`
+            : `Rencana pasca lulus ${payload.fullName} berhasil disimpan ke Database Cloud.`
+          : editingTracerId
           ? `Data tracer study alumni ${payload.fullName} berhasil diperbarui & tersinkron ke Database.`
           : `Jejak alumni ${payload.fullName} berhasil disimpan ke Database Cloud.`
       );
@@ -588,11 +785,15 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
   const handleAddEditableRow = () => {
     const newRow: AlumniTracerRecord = {
       id: `trc-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      respondentCategory: categoryFilter,
       nisn: `00${Date.now().toString().slice(-8)}`,
       fullName: '',
+      className:
+        categoryFilter === 'kelas_12' ? grade12Classes[0]?.name || 'XII RPL 1' : undefined,
       gender: 'L',
       majorCode: majorFilter === 'DPB' ? 'DPB' : 'RPL',
-      graduationYear: yearFilter !== 'ALL' ? yearFilter : '2026',
+      graduationYear:
+        yearFilter !== 'ALL' ? yearFilter : categoryFilter === 'kelas_12' ? defaultGradYear : '2025',
       careerStatus: statusFilter !== 'ALL' ? statusFilter : 'belum_bekerja',
       institutionOrCompany: '-',
       roleOrStudyProgram: '-',
@@ -605,7 +806,11 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     if (searchQuery.trim()) setSearchQuery('');
     setDraftRows(prev => [newRow, ...prev]);
     setIsDraftDirty(true);
-    onToast('Baris baru ditambahkan pada Laporan Editable. Lengkapi data lalu klik Simpan & Sinkronkan.');
+    onToast(
+      categoryFilter === 'kelas_12'
+        ? 'Baris baru ditambahkan pada Halaman Siswa Kelas 12. Lengkapi data lalu klik Simpan & Sinkronkan.'
+        : 'Baris baru ditambahkan pada Halaman Alumni. Lengkapi data lalu klik Simpan & Sinkronkan.'
+    );
   };
 
   const handleDeleteEditableRow = (rowId: string) => {
@@ -738,49 +943,55 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
   const handleExportExcel = () => {
     const data = filteredTracers.map((t, i) => ({
       No: i + 1,
+      Kategori: t.respondentCategory === 'kelas_12' ? 'Siswa Kelas 12 (Rencana)' : 'Alumni Lulusan',
       NISN: t.nisn,
-      'Nama Alumni': t.fullName,
+      Nama: t.fullName,
+      Kelas: t.className || '-',
       'L/P': t.gender,
       Jurusan: normalizeTracerMajor(t.majorCode),
       'Tahun Lulus': t.graduationYear,
-      'Status Karier': getStatusMeta(t.careerStatus).label,
+      'Status / Rencana Karier': getStatusMeta(t.careerStatus).label,
       'Perusahaan / Kampus / Usaha': t.institutionOrCompany || '-',
       'Jabatan / Program Studi': t.roleOrStudyProgram || '-',
       Kota: t.city || '-',
+      'Pendampingan BKK': t.bkkSupportNeed || '-',
       'Mitra PKL Sebelumnya': t.pklPartnerName || '-',
       'Relevansi Kompetensi': (RELEVANCE_LABEL[t.industryRelevance] || RELEVANCE_LABEL.sesuai).label,
       'Waktu Tunggu': t.waitingPeriod,
-      'Status Verifikasi': t.verifiedBySchool ? 'Terverifikasi BKK' : 'Menunggu Verifikasi',
+      'Status Verifikasi': t.verifiedBySchool ? 'Terverifikasi BKK' : 'Menunggu Review',
     }));
     exportToExcel(data, `Tracer_Study_Alumni_${academicYearName}`, 'Tracer Alumni');
-    onToast('Laporan Tracer Study Alumni berhasil diekspor ke Excel.');
+    onToast('Laporan Tracer Study (Alumni & Kelas 12) berhasil diekspor ke Excel.');
   };
 
   const handleExportCsv = () => {
     const data = filteredTracers.map((t, i) => ({
       No: i + 1,
+      Kategori: t.respondentCategory === 'kelas_12' ? 'Kelas 12' : 'Alumni',
       NISN: t.nisn,
       Nama: t.fullName,
+      Kelas: t.className || '-',
       Jurusan: normalizeTracerMajor(t.majorCode),
       Lulus: t.graduationYear,
       Status: getStatusMeta(t.careerStatus).shortLabel,
       Instansi: t.institutionOrCompany || '-',
       Posisi_Prodi: t.roleOrStudyProgram || '-',
       Kota: t.city || '-',
+      Pendampingan_BKK: t.bkkSupportNeed || '-',
       Waktu_Tunggu: t.waitingPeriod,
     }));
     exportToCsv(data, `Tracer_Study_Alumni_${academicYearName}`);
-    onToast('Data Tracer Study Alumni berhasil diekspor ke CSV.');
+    onToast('Data Tracer Study berhasil diekspor ke CSV.');
   };
 
   const handleExportPdf = () => {
     exportToPdf(
-      ['No', 'NISN', 'Nama Alumni', 'L/P', 'Jurusan', 'Angkatan', 'Status', 'Instansi / Kampus', 'Posisi / Prodi', 'Tunggu'],
+      ['No', 'Kategori', 'NISN', 'Nama & Kelas', 'Jurusan', 'Angkatan', 'Status', 'Instansi / Target', 'Posisi / Prodi', 'Tunggu'],
       filteredTracers.map((t, i) => [
         i + 1,
+        t.respondentCategory === 'kelas_12' ? 'Kelas 12' : 'Alumni',
         t.nisn,
-        t.fullName,
-        t.gender,
+        t.className ? `${t.fullName} (${t.className})` : t.fullName,
         normalizeTracerMajor(t.majorCode),
         t.graduationYear,
         getStatusMeta(t.careerStatus).shortLabel,
@@ -789,7 +1000,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
         t.waitingPeriod,
       ]),
       {
-        title: paperDocTitle || 'LAPORAN TRACER STUDY & PENYERAPAN ALUMNI (DPB & RPL)',
+        title: paperDocTitle || 'LAPORAN TRACER STUDY & PERENCANAAN LULUS (DPB & RPL)',
         subtitle: paperDocSubtitle || undefined,
         academicYear: `Tahun Ajaran ${academicYearName}`,
       },
@@ -801,7 +1012,10 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
   };
 
   const hasActiveFilter =
-    searchQuery.trim() !== '' || yearFilter !== 'ALL' || majorFilter !== 'ALL' || statusFilter !== 'ALL';
+    searchQuery.trim() !== '' ||
+    yearFilter !== 'ALL' ||
+    majorFilter !== 'ALL' ||
+    statusFilter !== 'ALL';
 
   const isModalUnemployed =
     formState.careerStatus === 'belum_bekerja' || formState.careerStatus === 'mencari_kerja';
@@ -961,8 +1175,17 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                   {idx + 1}
                 </td>
                 <td className="border border-slate-400 py-1.5 px-2">
-                  <div className="font-bold text-slate-900">{t.fullName || '-'}</div>
-                  <div className="text-[9.5px] text-slate-500 font-mono">NISN: {t.nisn || '-'}</div>
+                  <div className="font-bold text-slate-900">
+                    {t.fullName || '-'}{' '}
+                    {t.respondentCategory === 'kelas_12' && (
+                      <span className="text-[9px] font-extrabold text-rose-700">
+                        ({t.className || 'Kelas 12'})
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[9.5px] text-slate-500 font-mono">
+                    {t.respondentCategory === 'kelas_12' ? 'Rencana XII' : 'Alumni'} &middot; NISN: {t.nisn || '-'}
+                  </div>
                 </td>
                 <td className="border border-slate-400 py-1.5 px-1.5 text-center">{t.gender}</td>
                 <td className="border border-slate-400 py-1.5 px-1.5 text-center font-bold">
@@ -1050,10 +1273,51 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
     </div>
   );
 
+  const isGrade12Page = categoryFilter === 'kelas_12';
+
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="space-y-5">
       {/* Dynamic Print Page Orientation Rule */}
       <style media="print">{`@page { size: A4 ${paperOrientation}; margin: 12mm; }`}</style>
+
+      {/* Separated Page Switcher: Halaman Alumni vs Halaman Siswa Kelas 12 */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-[#DDD8F6] bg-gradient-to-r from-[#F7F5FD] via-white to-[#FFF5F8] p-3.5 shadow-2xs dark:border-slate-800 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900">
+        <div>
+          <span className="text-[10.5px] font-black uppercase tracking-wider text-[#6C60B8] dark:text-violet-300">
+            Pemisahan Halaman Data BKK
+          </span>
+          <h3 className="text-sm sm:text-base font-black text-[#252042] dark:text-white">
+            {isGrade12Page
+              ? 'Halaman Perencanaan Siswa Kelas 12'
+              : 'Halaman Tracer Study Alumni Lulusan'}
+          </h3>
+        </div>
+
+        <LiquidNavBar
+          size="sm"
+          pill
+          ariaLabel="Pilih Halaman Alumni atau Siswa Kelas 12"
+          activeId={categoryFilter}
+          onSelect={id => {
+            setCategoryFilter(id as AlumniRespondentCategory);
+            setStatusFilter('ALL');
+          }}
+          items={[
+            {
+              id: 'alumni',
+              label: 'Halaman Alumni',
+              icon: <OrbitaMenuIcon variant="grading" className="h-3.5 w-3.5" />,
+              badge: totalAlumniInSource,
+            },
+            {
+              id: 'kelas_12',
+              label: 'Halaman Siswa Kelas 12',
+              icon: <OrbitaMenuIcon variant="students" className="h-3.5 w-3.5" />,
+              badge: totalKelas12InSource,
+            },
+          ]}
+        />
+      </div>
 
       {/* Top Mode Switcher + Live DB Sync Status */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 rounded-2xl border border-[#E6E4F2] bg-white p-3.5 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
@@ -1101,7 +1365,9 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
 
         <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold tabular-nums">
           <span className="no-ornament inline-flex items-center gap-1.5 rounded-xl border border-[#DDD8F6] bg-[#F7F5FD] px-3 py-1.5 text-[#5D51B2] dark:border-violet-800/60 dark:bg-violet-950/50 dark:text-violet-300">
-            <span>Jurusan: DPB ({stats.dpbCount}) &middot; RPL ({stats.rplCount})</span>
+            <span>
+              {isGrade12Page ? 'Siswa Kelas 12' : 'Alumni'} ({stats.total}) &middot; DPB ({stats.dpbCount}) &middot; RPL ({stats.rplCount})
+            </span>
           </span>
           {syncError ? (
             <span className="no-ornament inline-flex items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3 py-1.5 text-rose-700 dark:border-rose-800/70 dark:bg-rose-950/50 dark:text-rose-300">
@@ -1131,7 +1397,9 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 tabular-nums">
         <div className="rounded-2xl border border-[#E6E4F2] bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[11px] font-bold text-[#6E6A86] dark:text-slate-400">Total Alumni Terlacak</span>
+            <span className="text-[11px] font-bold text-[#6E6A86] dark:text-slate-400">
+              {isGrade12Page ? 'Total Siswa Kelas 12 Terdata' : 'Total Alumni Terlacak'}
+            </span>
             <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#F0EEFA] text-[#6C60B8] dark:bg-violet-950/60 dark:text-violet-300">
               <GraduationCap className="h-4 w-4" />
             </span>
@@ -1323,13 +1591,17 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
       <div className="rounded-2xl border border-[#E6E4F2] bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-3">
         {/* Tier 1: Responsive Search & Filter Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 items-center">
-          <div className="relative sm:col-span-2 lg:col-span-4">
+          <div className="relative sm:col-span-2 lg:col-span-5">
             <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8BA3]" />
             <input
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Cari nama alumni, NISN, instansi, atau kota..."
+              placeholder={
+                isGrade12Page
+                  ? 'Cari nama siswa XII, NISN, kelas, atau target...'
+                  : 'Cari nama alumni, NISN, instansi, atau kota...'
+              }
               className="no-ornament h-9 w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] pl-9 pr-3 text-xs font-medium text-[#262341] placeholder:text-[#9694A8] focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400"
             />
           </div>
@@ -1351,13 +1623,13 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
             </div>
           </div>
 
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-2">
             <select
               value={majorFilter}
               onChange={e => setMajorFilter(e.target.value)}
               className="no-ornament h-9 w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] px-3 text-xs font-bold text-[#3E385B] focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 cursor-pointer"
             >
-              <option value="ALL">Semua Jurusan (DPB &amp; RPL)</option>
+              <option value="ALL">Semua Jurusan</option>
               {TRACER_MAJORS.map(mj => (
                 <option key={mj} value={mj}>
                   Jurusan {mj}
@@ -1443,7 +1715,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                 className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-4 text-xs font-extrabold text-white shadow-xs hover:bg-[#5B4FA8] cursor-pointer whitespace-nowrap shrink-0 transition-colors"
               >
                 <Plus className="h-3.5 w-3.5 shrink-0" />
-                <span>Catat Tracer Alumni</span>
+                <span>{isGrade12Page ? 'Catat Rencana Kelas 12' : 'Catat Tracer Alumni'}</span>
               </button>
             )}
           </div>
@@ -1523,12 +1795,20 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
       {viewMode === 'directory' && (
         <div className="rounded-2xl border border-[#E6E4F2] bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
           <HighlightedChartHeader
-            title="Direktori Jejak Karier & Tracer Study Alumni"
-            subtitle="Riwayat penempatan kerja, kuliah, wirausaha, dan status belum bekerja jurusan DPB & RPL"
+            title={
+              isGrade12Page
+                ? 'Direktori Perencanaan Pasca Lulus (Siswa Kelas 12)'
+                : 'Direktori Jejak Karier & Tracer Study Alumni'
+            }
+            subtitle={
+              isGrade12Page
+                ? 'Pemetaan rencana kerja, kuliah, wirausaha & kebutuhan bimbingan BKK siswa Kelas XII DPB & RPL'
+                : 'Riwayat penempatan kerja, kuliah, wirausaha, dan status belum bekerja jurusan DPB & RPL'
+            }
             accent="purple"
             rightSlot={
               <span className="no-ornament rounded-xl bg-[#F0EEFA] border border-[#DDD8F6] px-3 py-1 text-xs font-black text-[#6C60B8] dark:border-violet-800/70 dark:bg-violet-950/50 dark:text-violet-300 tabular-nums whitespace-nowrap">
-                {filteredTracers.length} Alumni Ditampilkan
+                {filteredTracers.length} {isGrade12Page ? 'Siswa XII' : 'Alumni'} Ditampilkan
               </span>
             }
           />
@@ -1537,12 +1817,16 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
             <div className="rounded-2xl border border-dashed border-[#DFDCF2] bg-[#FAF9FE] p-10 text-center dark:border-slate-800 dark:bg-slate-900/50">
               <GraduationCap className="mx-auto h-10 w-10 text-[#6C60B8]/70 dark:text-violet-400" />
               <h4 className="mt-3 text-sm font-extrabold text-[#262341] dark:text-white">
-                {tracers.length === 0
+                {isGrade12Page
+                  ? 'Belum Ada Catatan Perencanaan Siswa Kelas 12 pada Filter Ini'
+                  : tracers.length === 0
                   ? 'Data Alumni Tracer Study Masih Kosong'
                   : 'Tidak Ada Catatan Tracer Study Alumni yang Sesuai Filter'}
               </h4>
               <p className="mt-1 text-xs text-[#7A7596] dark:text-slate-400 max-w-md mx-auto">
-                {tracers.length === 0
+                {isGrade12Page
+                  ? 'Klik Catat Rencana Kelas 12 atau siswa Kelas XII dapat mengisi langsung melalui Halaman Siswa Kelas 12.'
+                  : tracers.length === 0
                   ? 'Database tracer study alumni saat ini bersih (0 catatan). Klik Catat Tracer Alumni atau beralih ke Laporan Editable untuk mengisi banyak baris sekaligus.'
                   : 'Ubah kata kunci pencarian dan filter angkatan/jurusan di atas, atau catat jejak alumni baru.'}
               </p>
@@ -1553,7 +1837,7 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                   className="no-ornament inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#6C60B8] px-4 text-xs font-bold text-white hover:bg-[#5B4FA8] cursor-pointer whitespace-nowrap shrink-0"
                 >
                   <Plus className="h-3.5 w-3.5 shrink-0" />
-                  <span>Tambah Jejak Alumni Baru</span>
+                  <span>{isGrade12Page ? 'Tambah Rencana Kelas 12' : 'Tambah Jejak Alumni Baru'}</span>
                 </button>
                 <button
                   type="button"
@@ -1594,9 +1878,27 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                         <tr key={t.id} className="hover:bg-[#FAF9FE]/70 dark:hover:bg-slate-800/40 align-top">
                           <td className="py-3 px-3 text-center text-[#8E8BA3] font-bold">{idx + 1}</td>
                           <td className="py-3 px-3">
-                            <div className="font-extrabold text-[#252042] dark:text-white">{t.fullName}</div>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="font-extrabold text-[#252042] dark:text-white">
+                                {t.fullName}
+                              </span>
+                              <span
+                                className={`no-ornament rounded-md px-1.5 py-0.5 text-[9.5px] font-extrabold ${
+                                  t.respondentCategory === 'kelas_12'
+                                    ? 'bg-[#FFE8EF] text-[#D9436D] dark:bg-rose-950/60 dark:text-rose-300'
+                                    : 'bg-[#F0EEFA] text-[#6C60B8] dark:bg-violet-950/60 dark:text-violet-300'
+                                }`}
+                              >
+                                {t.respondentCategory === 'kelas_12'
+                                  ? `Kelas 12${t.className ? ` · ${t.className}` : ''}`
+                                  : 'Alumni'}
+                              </span>
+                            </div>
                             <div className="text-[11px] text-[#7A7596] dark:text-slate-400 mt-0.5">
-                              NISN {t.nisn} &middot; {majorDisplay} &middot; Lulus {t.graduationYear}
+                              NISN {t.nisn} &middot; {majorDisplay} &middot;{' '}
+                              {t.respondentCategory === 'kelas_12'
+                                ? `Est. Lulus ${t.graduationYear}`
+                                : `Lulus ${t.graduationYear}`}
                             </div>
                             {(t.phone || t.email) && (
                               <div className="text-[10.5px] text-[#6C60B8] dark:text-violet-300 mt-0.5 flex flex-wrap gap-2">
@@ -1619,6 +1921,11 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                             <div className="text-[11px] text-[#6E6A86] dark:text-slate-400 mt-0.5">
                               {t.roleOrStudyProgram || '-'} &middot; {t.city || '-'}
                             </div>
+                            {t.bkkSupportNeed && (
+                              <div className="text-[10.5px] font-semibold text-[#D9436D] dark:text-rose-300 mt-0.5">
+                                Bimbingan BKK: {t.bkkSupportNeed}
+                              </div>
+                            )}
                             {t.monthlyIncomeRange && t.monthlyIncomeRange !== '-' && (
                               <div className="text-[10.5px] font-semibold text-[#139A4C] dark:text-emerald-400 mt-0.5">
                                 {t.monthlyIncomeRange}
@@ -1727,11 +2034,23 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <h4 className="font-extrabold text-sm text-[#252042] dark:text-white truncate">
-                            {t.fullName}
-                          </h4>
+                          <div className="flex items-center gap-1.5">
+                            <h4 className="font-extrabold text-sm text-[#252042] dark:text-white truncate">
+                              {t.fullName}
+                            </h4>
+                            <span
+                              className={`no-ornament rounded-md px-1.5 py-0.5 text-[9.5px] font-extrabold shrink-0 ${
+                                t.respondentCategory === 'kelas_12'
+                                  ? 'bg-[#FFE8EF] text-[#D9436D] dark:bg-rose-950/60 dark:text-rose-300'
+                                  : 'bg-[#F0EEFA] text-[#6C60B8] dark:bg-violet-950/60 dark:text-violet-300'
+                              }`}
+                            >
+                              {t.respondentCategory === 'kelas_12' ? 'Kelas 12' : 'Alumni'}
+                            </span>
+                          </div>
                           <p className="text-[11px] font-medium text-[#7A7596] dark:text-slate-400">
-                            NISN {t.nisn} &middot; {majorDisplay} &middot; Lulus {t.graduationYear}
+                            NISN {t.nisn} &middot; {majorDisplay} &middot;{' '}
+                            {t.className ? `${t.className} · ` : ''}Lulus {t.graduationYear}
                           </p>
                         </div>
                         <span
@@ -2933,12 +3252,18 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                   </div>
                   <div>
                     <h3 className="font-black text-sm text-[#252042] dark:text-white">
-                      {editingTracerId
+                      {formState.respondentCategory === 'kelas_12'
+                        ? editingTracerId
+                          ? 'Perbarui Rencana Pasca Lulus (Siswa Kelas 12)'
+                          : 'Form Perencanaan Lulusan (Siswa Kelas 12)'
+                        : editingTracerId
                         ? 'Perbarui Data Tracer Study Alumni'
-                        : 'Catat Jejak Alumni Baru (Tracer Study)'}
+                        : 'Catat / Perbarui Jejak Alumni Terdata'}
                     </h3>
                     <p className="text-[11px] text-[#7A7596] dark:text-slate-400">
-                      Pelacakan penempatan kerja, kuliah, wirausaha &amp; status belum bekerja (DPB &amp; RPL)
+                      {formState.respondentCategory === 'kelas_12'
+                        ? 'Pemetaan rencana kerja industri, kuliah, wirausaha & pendampingan BKK untuk Siswa Kelas XII (DPB & RPL)'
+                        : 'Pelacakan penempatan kerja, kuliah, wirausaha & masa tunggu dari data alumni terdata (DPB & RPL)'}
                     </p>
                   </div>
                 </div>
@@ -2952,35 +3277,119 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-                {!editingTracerId && students.length > 0 && (
-                  <div className="rounded-2xl border border-[#DDD8F6] bg-[#F7F5FD] p-3 dark:border-indigo-900/50 dark:bg-indigo-950/30">
-                    <label className="font-bold text-[#4B4188] dark:text-indigo-300 block mb-1.5">
-                      Isi Otomatis dari Master Siswa / Peserta PKL (Opsional)
-                    </label>
-                    <select
-                      value={formState.studentId}
-                      onChange={e => handlePrefillFromStudent(e.target.value)}
-                      className="w-full rounded-xl border border-[#D4CEEF] bg-white py-2 px-3 text-xs font-semibold text-[#262341] focus:border-[#6C60B8] focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                    >
-                      <option value="">-- Input Manual Alumni Angkatan Sebelumnya --</option>
-                      {students.map(s => (
-                        <option key={s.id} value={s.id}>
-                          {s.fullName} ({s.className} - {normalizeTracerMajor(s.majorCode)}) &middot; NISN {s.nisn}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+                <div className="grid grid-cols-2 gap-2 rounded-2xl border border-[#ECEAF6] bg-[#FAF9FE] p-1.5 dark:border-slate-800 dark:bg-slate-800/50">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormState(p => ({
+                        ...p,
+                        respondentCategory: 'alumni',
+                        graduationYear:
+                          p.respondentCategory === 'kelas_12' ? '2025' : p.graduationYear,
+                      }));
+                    }}
+                    className={`no-ornament rounded-xl py-2 px-3 text-xs font-extrabold transition-all cursor-pointer ${
+                      formState.respondentCategory === 'alumni'
+                        ? 'bg-[#6C60B8] text-white shadow-2xs'
+                        : 'text-[#5A537A] hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    Alumni Lulusan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormState(p => ({
+                        ...p,
+                        respondentCategory: 'kelas_12',
+                        className: p.className || grade12Classes[0]?.name || 'XII RPL 1',
+                        graduationYear: defaultGradYear,
+                        bkkSupportNeed: p.bkkSupportNeed || BKK_SUPPORT_OPTIONS[0],
+                        targetPlanDate: p.targetPlanDate || PLAN_TIMELINE_OPTIONS[0],
+                      }));
+                    }}
+                    className={`no-ornament rounded-xl py-2 px-3 text-xs font-extrabold transition-all cursor-pointer ${
+                      formState.respondentCategory === 'kelas_12'
+                        ? 'bg-[#F25781] text-white shadow-2xs'
+                        : 'text-[#5A537A] hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    Siswa Kelas 12 (Rencana Lulus)
+                  </button>
+                </div>
+
+                {formState.respondentCategory === 'kelas_12'
+                  ? !editingTracerId &&
+                    grade12Students.length > 0 && (
+                      <div className="rounded-2xl border border-[#FFC4D4] bg-[#FFF5F8] p-3 dark:border-rose-900/50 dark:bg-rose-950/30">
+                        <label className="font-bold text-[#C2325C] dark:text-rose-300 block mb-1.5">
+                          Pilih dari Data Siswa Kelas 12 (Master Siswa &amp; Penempatan PKL)
+                        </label>
+                        <select
+                          value={formState.studentId}
+                          onChange={e => handlePrefillFromStudent(e.target.value, 'kelas_12')}
+                          className="w-full rounded-xl border border-[#FFD1DF] bg-white py-2 px-3 text-xs font-semibold text-[#262341] focus:border-[#F25781] focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        >
+                          <option value="">-- Pilih Siswa Kelas 12 atau Ketik Manual --</option>
+                          {grade12Students.map(s => (
+                            <option key={s.id} value={s.id}>
+                              {s.fullName} ({s.className} - {normalizeTracerMajor(s.majorCode)})
+                              &middot; NISN {s.nisn}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )
+                  : (recordedAlumniTracers.length > 0 || graduatedStudents.length > 0) && (
+                      <div className="rounded-2xl border border-[#DDD8F6] bg-[#F7F5FD] p-3 dark:border-indigo-900/50 dark:bg-indigo-950/30">
+                        <label className="font-bold text-[#4B4188] dark:text-indigo-300 block mb-1.5">
+                          Pilih dari Data Alumni yang Sudah Terdata (Opsional)
+                        </label>
+                        <select
+                          value={
+                            editingTracerId &&
+                            recordedAlumniTracers.some(r => r.id === editingTracerId)
+                              ? `trc:${editingTracerId}`
+                              : formState.studentId &&
+                                graduatedStudents.some(s => s.id === formState.studentId)
+                              ? `std:${formState.studentId}`
+                              : ''
+                          }
+                          onChange={e => handlePrefillFromRecordedAlumni(e.target.value)}
+                          className="w-full rounded-xl border border-[#D4CEEF] bg-white py-2 px-3 text-xs font-semibold text-[#262341] focus:border-[#6C60B8] focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        >
+                          <option value="">-- Input Manual Alumni Baru --</option>
+                          {recordedAlumniTracers.map(rec => (
+                            <option key={`trc-${rec.id}`} value={`trc:${rec.id}`}>
+                              [Alumni Terdata] {rec.fullName} &middot; Lulus {rec.graduationYear} (
+                              {normalizeTracerMajor(rec.majorCode)}) &middot; NISN {rec.nisn}
+                            </option>
+                          ))}
+                          {graduatedStudents.map(s => (
+                            <option key={`std-${s.id}`} value={`std:${s.id}`}>
+                              [Lulusan DB] {s.fullName} ({s.className} -{' '}
+                              {normalizeTracerMajor(s.majorCode)}) &middot; NISN {s.nisn}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
-                      Nama Lengkap Alumni *
+                      {formState.respondentCategory === 'kelas_12'
+                        ? 'Nama Lengkap Siswa Kelas 12 *'
+                        : 'Nama Lengkap Alumni *'}
                     </label>
                     <input
                       type="text"
                       required
-                      placeholder="Contoh: Aditya Pratama Putra"
+                      placeholder={
+                        formState.respondentCategory === 'kelas_12'
+                          ? 'Contoh: Nabila Putri Lestari'
+                          : 'Contoh: Aditya Pratama Putra'
+                      }
                       value={formState.fullName}
                       onChange={e => setFormState(p => ({ ...p, fullName: e.target.value }))}
                       className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-semibold focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -2997,6 +3406,78 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                       className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-mono focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
                   </div>
+
+                  {formState.respondentCategory === 'kelas_12' && (
+                    <>
+                      <div>
+                        <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
+                          Kelas XII (Rombel)
+                        </label>
+                        {grade12Classes.length > 0 ? (
+                          <select
+                            value={formState.className}
+                            onChange={e => {
+                              const nextClass = e.target.value;
+                              const upper = nextClass.toUpperCase();
+                              setFormState(p => ({
+                                ...p,
+                                className: nextClass,
+                                majorCode:
+                                  upper.includes('DPB') || upper.includes('BUSANA')
+                                    ? 'DPB'
+                                    : upper.includes('RPL')
+                                    ? 'RPL'
+                                    : p.majorCode,
+                              }));
+                            }}
+                            className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-bold focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                          >
+                            {grade12Classes.map(cls => (
+                              <option key={cls.id} value={cls.name}>
+                                {cls.name}
+                              </option>
+                            ))}
+                            {!grade12Classes.some(c => c.name === formState.className) &&
+                              formState.className && (
+                                <option value={formState.className}>{formState.className}</option>
+                              )}
+                          </select>
+                        ) : (
+                          <input
+                            type="text"
+                            placeholder="XII RPL 1 / XII DPB 1"
+                            value={formState.className}
+                            onChange={e => setFormState(p => ({ ...p, className: e.target.value }))}
+                            className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-bold focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                          />
+                        )}
+                      </div>
+                      <div>
+                        <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
+                          Kebutuhan Pendampingan BKK
+                        </label>
+                        <select
+                          value={formState.bkkSupportNeed || BKK_SUPPORT_OPTIONS[0]}
+                          onChange={e =>
+                            setFormState(p => ({ ...p, bkkSupportNeed: e.target.value }))
+                          }
+                          className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-semibold focus:border-[#6C60B8] focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        >
+                          {BKK_SUPPORT_OPTIONS.map(opt => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                          {formState.bkkSupportNeed &&
+                            !BKK_SUPPORT_OPTIONS.includes(formState.bkkSupportNeed) && (
+                              <option value={formState.bkkSupportNeed}>
+                                {formState.bkkSupportNeed}
+                              </option>
+                            )}
+                        </select>
+                      </div>
+                    </>
+                  )}
 
                   <div className="grid grid-cols-3 gap-2">
                     <div>
@@ -3029,11 +3510,13 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                       </select>
                     </div>
                     <div>
-                      <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">Lulus</label>
+                      <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
+                        {formState.respondentCategory === 'kelas_12' ? 'Est. Lulus' : 'Thn Lulus'}
+                      </label>
                       <input
                         type="text"
                         required
-                        placeholder="2026"
+                        placeholder={defaultGradYear}
                         value={formState.graduationYear}
                         onChange={e => setFormState(p => ({ ...p, graduationYear: e.target.value }))}
                         className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-2 text-xs font-bold text-center dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -3043,7 +3526,9 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
 
                   <div>
                     <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
-                      Status Karier *
+                      {formState.respondentCategory === 'kelas_12'
+                        ? 'Rencana Utama Setelah Lulus *'
+                        : 'Status Karier Saat Ini *'}
                     </label>
                     <select
                       value={formState.careerStatus}
@@ -3055,22 +3540,48 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                       }
                       className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-bold text-[#6C60B8] dark:border-slate-700 dark:bg-slate-800 dark:text-indigo-300"
                     >
-                      <option value="bekerja">Bekerja di Industri / Perusahaan</option>
-                      <option value="kuliah">Melanjutkan Kuliah (PTN / PTS)</option>
-                      <option value="wirausaha">Berwirausaha / Freelancer Mandiri</option>
-                      <option value="mencari_kerja">Pelatihan / Penyaluran BKK</option>
-                      <option value="belum_bekerja">Belum Bekerja</option>
+                      <option value="bekerja">
+                        {formState.respondentCategory === 'kelas_12'
+                          ? 'Rencana Bekerja di Industri / DUDI'
+                          : 'Bekerja di Industri / Perusahaan'}
+                      </option>
+                      <option value="kuliah">
+                        {formState.respondentCategory === 'kelas_12'
+                          ? 'Rencana Melanjutkan Kuliah (PTN / PTS)'
+                          : 'Melanjutkan Kuliah (PTN / PTS)'}
+                      </option>
+                      <option value="wirausaha">
+                        {formState.respondentCategory === 'kelas_12'
+                          ? 'Rencana Berwirausaha / Usaha Mandiri'
+                          : 'Berwirausaha / Freelancer Mandiri'}
+                      </option>
+                      <option value="mencari_kerja">
+                        {formState.respondentCategory === 'kelas_12'
+                          ? 'Ikut Program Penyaluran & Pelatihan BKK'
+                          : 'Pelatihan / Penyaluran BKK'}
+                      </option>
+                      <option value="belum_bekerja">
+                        {formState.respondentCategory === 'kelas_12'
+                          ? 'Belum Menentukan / Belum Bekerja'
+                          : 'Belum Bekerja'}
+                      </option>
                     </select>
                   </div>
 
                   <div>
                     <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
                       {formState.careerStatus === 'kuliah'
-                        ? 'Perguruan Tinggi / Kampus *'
+                        ? formState.respondentCategory === 'kelas_12'
+                          ? 'Perguruan Tinggi / Kampus Target *'
+                          : 'Perguruan Tinggi / Kampus *'
                         : formState.careerStatus === 'wirausaha'
-                        ? 'Nama Usaha / Bisnis *'
+                        ? formState.respondentCategory === 'kelas_12'
+                          ? 'Ide / Nama Usaha Target *'
+                          : 'Nama Usaha / Bisnis *'
                         : isModalUnemployed
                         ? 'Keterangan / Target Penempatan (Opsional)'
+                        : formState.respondentCategory === 'kelas_12'
+                        ? 'Perusahaan / DUDI yang Dituju *'
                         : 'Nama Perusahaan / Instansi *'}
                     </label>
                     <input
@@ -3090,7 +3601,11 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                   <div>
                     <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
                       {formState.careerStatus === 'kuliah'
-                        ? 'Program Studi & Jenjang'
+                        ? formState.respondentCategory === 'kelas_12'
+                          ? 'Target Program Studi & Jenjang'
+                          : 'Program Studi & Jenjang'
+                        : formState.respondentCategory === 'kelas_12'
+                        ? 'Target Posisi / Bidang Kerja'
                         : 'Jabatan / Bidang Kerja'}
                     </label>
                     <input
@@ -3129,7 +3644,9 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
 
                   <div>
                     <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
-                      Kota Penempatan
+                      {formState.respondentCategory === 'kelas_12'
+                        ? 'Kota Tujuan Karir / Studi'
+                        : 'Kota Penempatan'}
                     </label>
                     <input
                       type="text"
@@ -3160,27 +3677,63 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                     </select>
                   </div>
 
-                  <div>
-                    <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
-                      Waktu Tunggu Lulusan
-                    </label>
-                    <select
-                      value={formState.waitingPeriod}
-                      onChange={e =>
-                        setFormState(p => ({
-                          ...p,
-                          waitingPeriod: e.target.value as AlumniWaitingPeriod,
-                        }))
-                      }
-                      className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                    >
-                      {WAITING_PERIODS.map(wp => (
-                        <option key={wp} value={wp}>
-                          {wp}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  {formState.respondentCategory === 'kelas_12' ? (
+                    <div>
+                      <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
+                        Target Kesiapan Setelah Kelulusan
+                      </label>
+                      <select
+                        value={formState.targetPlanDate || PLAN_TIMELINE_OPTIONS[0]}
+                        onChange={e => {
+                          const val = e.target.value;
+                          setFormState(p => ({
+                            ...p,
+                            targetPlanDate: val,
+                            waitingPeriod: val.includes('Tahun Akademik')
+                              ? '3 - 6 Bulan'
+                              : val.includes('Berkas')
+                              ? '6 - 12 Bulan'
+                              : '< 3 Bulan',
+                          }));
+                        }}
+                        className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      >
+                        {PLAN_TIMELINE_OPTIONS.map(opt => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                        {formState.targetPlanDate &&
+                          !PLAN_TIMELINE_OPTIONS.includes(formState.targetPlanDate) && (
+                            <option value={formState.targetPlanDate}>
+                              {formState.targetPlanDate}
+                            </option>
+                          )}
+                      </select>
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
+                        Waktu Tunggu Lulusan
+                      </label>
+                      <select
+                        value={formState.waitingPeriod}
+                        onChange={e =>
+                          setFormState(p => ({
+                            ...p,
+                            waitingPeriod: e.target.value as AlumniWaitingPeriod,
+                          }))
+                        }
+                        className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs font-semibold dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      >
+                        {WAITING_PERIODS.map(wp => (
+                          <option key={wp} value={wp}>
+                            {wp}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   <div>
                     <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
@@ -3195,27 +3748,48 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                     />
                   </div>
 
-                  <div>
-                    <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
-                      Rentang Penghasilan / Keterangan
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Rp 4.500.000 - Rp 6.000.000 / Beasiswa"
-                      value={formState.monthlyIncomeRange}
-                      onChange={e => setFormState(p => ({ ...p, monthlyIncomeRange: e.target.value }))}
-                      className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-                    />
-                  </div>
+                  {formState.respondentCategory === 'alumni' ? (
+                    <div>
+                      <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
+                        Rentang Penghasilan / Keterangan
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Rp 4.500.000 - Rp 6.000.000 / Beasiswa"
+                        value={formState.monthlyIncomeRange}
+                        onChange={e => setFormState(p => ({ ...p, monthlyIncomeRange: e.target.value }))}
+                        className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      />
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
+                        Email Aktif (Opsional)
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="siswa@email.com"
+                        value={formState.email}
+                        onChange={e => setFormState(p => ({ ...p, email: e.target.value }))}
+                        className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] py-2 px-3 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
                   <label className="font-bold text-[#3E385B] dark:text-slate-300 block mb-1">
-                    Testimoni / Kesan Manfaat PKL Terhadap Karier
+                    {formState.respondentCategory === 'kelas_12'
+                      ? 'Aspirasi, Kesiapan Portofolio, atau Pesan untuk Tim BKK'
+                      : 'Testimoni / Kesan Manfaat PKL Terhadap Karier'}
                   </label>
                   <textarea
                     rows={2}
-                    placeholder="Contoh: Pengalaman PKL membantu langsung lolos seleksi wawancara..."
+                    placeholder={
+                      formState.respondentCategory === 'kelas_12'
+                        ? 'Contoh: Membutuhkan pendampingan CV & info rekrutmen industri bidang RPL/DPB...'
+                        : 'Contoh: Pengalaman PKL membantu langsung lolos seleksi wawancara...'
+                    }
                     value={formState.testimonial}
                     onChange={e => setFormState(p => ({ ...p, testimonial: e.target.value }))}
                     className="w-full rounded-xl border border-[#E2DFEF] bg-[#FAF9FE] p-2.5 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -3252,8 +3826,12 @@ export const PklAlumniTracerSection: React.FC<PklAlumniTracerSectionProps> = ({
                     <span>
                       {isSavingModal
                         ? 'Menyimpan ke Database...'
+                        : formState.respondentCategory === 'kelas_12'
+                        ? editingTracerId
+                          ? 'Simpan Perubahan Kelas 12'
+                          : 'Simpan Rencana Kelas 12'
                         : editingTracerId
-                        ? 'Simpan Perubahan Tracer'
+                        ? 'Simpan Perubahan Alumni'
                         : 'Simpan Data Tracer Alumni'}
                     </span>
                   </button>

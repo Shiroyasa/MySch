@@ -658,7 +658,6 @@ export const samplePklReports: PklStudentReportItem[] = [
 export const sampleAlumniTracers: AlumniTracerRecord[] = [
   {
     id: 'trc-01',
-    studentId: 'std-001',
     nisn: '0061239801',
     fullName: 'Aditya Pratama Putra',
     gender: 'L',
@@ -681,7 +680,6 @@ export const sampleAlumniTracers: AlumniTracerRecord[] = [
   },
   {
     id: 'trc-02',
-    studentId: 'std-004',
     nisn: '0061239804',
     fullName: 'Dewi Anggraini',
     gender: 'P',

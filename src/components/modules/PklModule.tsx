@@ -2460,6 +2460,7 @@ export const PklModule: React.FC = () => {
         <PklAlumniTracerSection
           tracers={pklTracers}
           students={students}
+          classes={classes}
           partners={partners}
           majors={majors}
           academicYearName={activeAcademicYear.name}

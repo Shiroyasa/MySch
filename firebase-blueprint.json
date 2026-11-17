@@ -294,14 +294,16 @@
       "required": ["id", "title", "message", "type", "createdAt"]
     },
     "pklTracerStudies": {
-      "title": "Alumni Tracer Study Record",
-      "description": "Post-graduation alumni career tracking records integrated with PKL and BKK",
+      "title": "Alumni & Grade 12 Tracer Study Record",
+      "description": "Post-graduation alumni career tracking and Grade 12 post-graduation career planning records integrated with PKL and BKK",
       "type": "object",
       "properties": {
         "id": { "type": "string", "maxLength": 64 },
+        "respondentCategory": { "type": "string", "enum": ["alumni", "kelas_12"] },
         "studentId": { "type": "string", "maxLength": 64 },
         "nisn": { "type": "string", "maxLength": 20 },
         "fullName": { "type": "string", "maxLength": 120 },
+        "className": { "type": "string", "maxLength": 40 },
         "gender": { "type": "string", "enum": ["L", "P"] },
         "majorCode": { "type": "string", "enum": ["DPB", "RPL"] },
         "graduationYear": { "type": "string", "maxLength": 10 },
@@ -314,10 +316,13 @@
         "industryRelevance": { "type": "string", "enum": ["sangat_sesuai", "sesuai", "cukup_sesuai", "tidak_sesuai"] },
         "waitingPeriod": { "type": "string", "enum": ["< 3 Bulan", "3 - 6 Bulan", "6 - 12 Bulan", "> 12 Bulan"] },
         "monthlyIncomeRange": { "type": "string", "maxLength": 60 },
+        "bkkSupportNeed": { "type": "string", "maxLength": 180 },
+        "targetPlanDate": { "type": "string", "maxLength": 60 },
         "phone": { "type": "string", "maxLength": 30 },
         "email": { "type": "string", "maxLength": 120 },
         "testimonial": { "type": "string", "maxLength": 500 },
         "verifiedBySchool": { "type": "boolean" },
+        "submittedSource": { "type": "string", "enum": ["login_portal", "admin_panel"] },
         "updatedAt": { "type": "string" }
       },
       "required": ["id", "nisn", "fullName", "majorCode", "graduationYear", "careerStatus", "institutionOrCompany"]

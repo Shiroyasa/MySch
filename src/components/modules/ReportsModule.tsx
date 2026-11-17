@@ -925,7 +925,7 @@ export const ReportsModule: React.FC = () => {
       {/* TAB 1: EKSPOR LAPORAN (WITH TAILORED REAL PREVIEWS)      */}
       {/* ======================================================== */}
       {activeMainTab === 'export' && (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-6">
           {/* Filter / Generator Control Card */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -1642,7 +1642,7 @@ export const ReportsModule: React.FC = () => {
       {/* TAB 2: EXCEL INTERAKTIF (BERUMUS DINAMIS)                */}
       {/* ======================================================== */}
       {activeMainTab === 'spreadsheet' && (
-        <div className="space-y-4 animate-fade-in">
+        <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900">
             <div>
               <h2 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
@@ -1839,7 +1839,7 @@ export const ReportsModule: React.FC = () => {
       {/* TAB 3: DESAIN & TATA LETAK PDF (NIP GURU & LOGO PROPORSIONAL) */}
       {/* ======================================================== */}
       {activeMainTab === 'designer' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Controls Column (Left) */}
           <div className="lg:col-span-5 space-y-5">
             {/* Action Bar */}

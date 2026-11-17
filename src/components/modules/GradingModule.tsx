@@ -1161,7 +1161,7 @@ export const GradingModule: React.FC = () => {
           </OrnateCard>
 
           {/* Rapid scores entry JRPG table */}
-          <OrnateCard className="overflow-hidden animate-fade-in">
+          <OrnateCard className="overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="whitespace-nowrap">
@@ -1318,7 +1318,7 @@ export const GradingModule: React.FC = () => {
 
       {/* TAB 2: LEGER & REKAP NILAI KELAS */}
       {activeTab === 'leger' && (
-        <div className="space-y-4 animate-fade-in">
+        <div className="space-y-4">
           <OrnateCard className="p-4 sm:p-5">
             <div className="flex flex-col gap-3.5">
               <div className="pr-8">
@@ -1425,7 +1425,7 @@ export const GradingModule: React.FC = () => {
 
       {/* TAB 3: DRAF RAPOR SISWA */}
       {activeTab === 'reportCard' && (
-        <div className="space-y-4 animate-fade-in">
+        <div className="space-y-4">
           {/* Top Bar: Per-Class Selector, Student Selector, Edit Mode, Reset, and Print */}
           <OrnateCard className="p-4 sm:p-5">
             <div className="flex flex-col gap-3.5">
@@ -1633,7 +1633,7 @@ export const GradingModule: React.FC = () => {
 
           {/* PANEL MODE EDIT RAPOR SISWA */}
           {isEditingReport ? (
-            <OrnateCard className="p-6 space-y-6 animate-fade-in">
+            <OrnateCard className="p-6 space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DEC896]/60 pb-3 dark:border-slate-800">
                 <div className="flex items-center gap-2">
                   <Edit3 className="h-5 w-5 text-amber-500" />

@@ -361,7 +361,20 @@ export const LiquidNavBar: React.FC<LiquidNavBarProps> = ({
               )}
 
               {item.dot && (
-                <span className="h-2 w-2 rounded-full bg-[#FF6E96] animate-pulse shrink-0 shadow-[0_0_6px_rgba(255,110,150,0.9)]" />
+                <span
+                  aria-hidden="true"
+                  className={
+                    orientation === 'vertical'
+                      ? 'pointer-events-none absolute top-2 right-2 h-2 w-2 rounded-full bg-[#FF6E96] ring-2 ring-[#5D51B2]/55 animate-pulse shadow-[0_0_6px_rgba(255,110,150,0.9)]'
+                      : 'h-2 w-2 rounded-full bg-[#FF6E96] animate-pulse shrink-0 shadow-[0_0_6px_rgba(255,110,150,0.9)]'
+                  }
+                />
+              )}
+
+              {orientation === 'vertical' && (
+                <span className="pointer-events-none absolute left-full ml-3 hidden lg:group-hover:block whitespace-nowrap rounded-xl bg-[#241B4C]/95 px-3 py-1.5 text-[11px] font-bold text-white shadow-[0_10px_24px_rgba(18,12,48,0.45)] border border-white/15 z-50">
+                  {item.title || item.label}
+                </span>
               )}
             </button>
           );
