@@ -5,12 +5,14 @@ import { useApp } from '../../context/AppContext';
 interface ThemeFlipToggleProps {
   className?: string;
   showLabel?: boolean;
+  hideLabelOnMobile?: boolean;
   size?: 'sm' | 'md';
 }
 
 export const ThemeFlipToggle: React.FC<ThemeFlipToggleProps> = ({
   className = '',
   showLabel = false,
+  hideLabelOnMobile = false,
   size = 'md',
 }) => {
   const { darkMode, toggleDarkMode } = useApp();
@@ -49,7 +51,11 @@ export const ThemeFlipToggle: React.FC<ThemeFlipToggleProps> = ({
       </span>
 
       {showLabel && (
-        <span className="pr-1 text-[11px] font-extrabold whitespace-nowrap">
+        <span
+          className={`pr-1 text-[11px] font-extrabold whitespace-nowrap ${
+            hideLabelOnMobile ? 'hidden sm:inline' : ''
+          }`}
+        >
           {darkMode ? 'Dark' : 'Light'}
         </span>
       )}

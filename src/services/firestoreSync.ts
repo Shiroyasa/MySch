@@ -90,13 +90,28 @@ export interface SyncCallbacks {
 }
 
 let isInitialized = false;
+let hasLoggedQuotaNotice = false;
+
+function isFirestoreQuotaError(error: unknown): boolean {
+  const msg = (error instanceof Error ? error.message : String(error || '')).toLowerCase();
+  const code = (error as { code?: string })?.code?.toLowerCase() || '';
+  return (
+    code === 'resource-exhausted' ||
+    msg.includes('quota limit exceeded') ||
+    msg.includes('quota exceeded') ||
+    msg.includes('free daily read units')
+  );
+}
 
 // Auto-seed Firestore if collections are empty so all devices get real synchronized data
 export async function ensureFirestorePopulated(): Promise<void> {
   if (isInitialized) return;
   isInitialized = true;
   try {
-    const studentsSnap = await getDocs(collection(db, 'students'));
+    if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('orbita_firestore_seeded_v1') === '1') {
+      return;
+    }
+    const studentsSnap = await getDocs(query(collection(db, 'students'), limit(1)));
     if (studentsSnap.empty) {
       console.log('Firestore is empty. Initializing cloud database with authentic ORBITA records...');
       const batch = writeBatch(db);
@@ -179,9 +194,11 @@ export async function ensureFirestorePopulated(): Promise<void> {
       });
 
       await batch.commit();
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('orbita_firestore_seeded_v1', '1');
+      }
       console.log('Cloud Firestore successfully seeded and synchronized!');
     } else {
-      console.log(`Firestore already contains ${studentsSnap.size} students. Verifying lessonSchedules initialization...`);
       const schedulesMetaSnap = await getDoc(doc(db, 'settings', 'schedules_meta'));
       const metaData = schedulesMetaSnap.exists() ? schedulesMetaSnap.data() : null;
       if (!metaData || !Array.isArray(metaData.schedules)) {
@@ -208,9 +225,14 @@ export async function ensureFirestorePopulated(): Promise<void> {
         await schedBatch.commit();
         console.log('Lesson schedules initialized permanently in Firestore.');
       }
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem('orbita_firestore_seeded_v1', '1');
+      }
     }
   } catch (err) {
-    console.warn('Initial seeding encountered notice (may already have records):', err);
+    if (!isFirestoreQuotaError(err)) {
+      console.warn('Initial seeding encountered notice (may already have records):', err);
+    }
   }
 }
 
@@ -219,6 +241,19 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
   const unsubscribers: (() => void)[] = [];
 
   const safeHandleListenerError = (error: unknown, path: string) => {
+    if (isFirestoreQuotaError(error)) {
+      if (!hasLoggedQuotaNotice) {
+        hasLoggedQuotaNotice = true;
+        console.warn('Kuota baca harian Firestore tercapai; menggunakan data lokal sementara hingga kuota direset.');
+      }
+      callbacks.onSyncStatusChange?.({
+        isConnected: false,
+        isSyncing: false,
+        lastSync: new Date(),
+        error: 'Kuota baca harian Firestore tercapai (mode cache lokal aktif).',
+      });
+      return;
+    }
     try {
       handleFirestoreError(error, OperationType.GET, path);
     } catch (err) {

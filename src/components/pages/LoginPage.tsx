@@ -279,12 +279,14 @@ export const LoginPage: React.FC = () => {
   const activeMonth = activeLoginPoint?.month || SHORT_MONTHS_ID[new Date().getMonth()];
   const loginWaveLinePath = useMemo(() => buildSmoothWavePath(loginWavePoints), [loginWavePoints]);
   const loginWaveAreaPath = useMemo(() => buildSmoothWavePath(loginWavePoints, 92), [loginWavePoints]);
-  const activeLoginLeftPct = `${Number((((activeLoginPoint?.x ?? 210) / 420) * 100).toFixed(1))}%`;
+  const activeLoginLeftNum = Number((((activeLoginPoint?.x ?? 210) / 420) * 100).toFixed(1));
+  const activeLoginLeftPct = `${activeLoginLeftNum}%`;
+  const activeLoginTooltipLeftPct = `${Math.min(86, Math.max(14, activeLoginLeftNum))}%`;
 
   const isInGalleryPortal = activePortalView === 'gallery' || mobileSection === 'gallery';
   const isInTracerPortal = activePortalView === 'tracer' || mobileSection === 'tracer';
   const headerKicker = isInGalleryPortal
-    ? 'Dokumentasi Kegiatan Sekolah · Carousel Interaktif'
+    ? 'Dokumentasi Sekolah · Galeri Carousel'
     : isInTracerPortal
     ? tracerStage === 'verify'
       ? 'Portal Verifikasi Identitas Terdaftar ORBITA'
@@ -296,7 +298,7 @@ export const LoginPage: React.FC = () => {
     : 'Primary';
 
   const headerTitle = isInGalleryPortal
-    ? 'Galeri Dokumentasi Kegiatan ORBITA'
+    ? 'Galeri Kegiatan ORBITA'
     : isInTracerPortal
     ? tracerStage === 'verify'
       ? 'Halaman Verifikasi NIS / NISN Siswa & Alumni'
@@ -417,50 +419,52 @@ export const LoginPage: React.FC = () => {
           {/* Center Main Area */}
           <div className="relative z-10 flex flex-1 min-w-0 flex-col md:h-full overflow-hidden">
             {/* Fixed Top Header Row */}
-            <div className="px-4 pt-4 pb-2 sm:px-7 sm:pt-6 lg:px-8 lg:pt-6 shrink-0">
-              <div className="flex items-center justify-between gap-3 rounded-[22px] border border-[#7468C4]/16 dark:border-[#8D81E3]/25 bg-[#F4F3FC]/74 dark:bg-[#1E1A3E]/82 px-4 py-2.5 sm:py-3 backdrop-blur-xl shadow-[0_8px_24px_-6px_rgba(101,88,181,0.10)]">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="orbita-squircle-badge flex md:hidden h-10 w-10 shrink-0 items-center justify-center rounded-[14px] border border-white/30 text-white shadow-sm">
+            <div className="px-3 pt-3 pb-1.5 sm:px-7 sm:pt-5 lg:px-8 lg:pt-6 shrink-0">
+              <div className="flex items-center justify-between gap-2.5 sm:gap-4 rounded-[20px] sm:rounded-[22px] border border-[#7468C4]/16 dark:border-[#8D81E3]/25 bg-[#F4F3FC]/82 dark:bg-[#1E1A3E]/86 px-3.5 py-2 sm:px-5 sm:py-2.5 backdrop-blur-xl shadow-[0_8px_24px_-6px_rgba(101,88,181,0.10)]">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                  <div className="orbita-squircle-badge flex md:hidden h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-[13px] border border-white/30 text-white shadow-sm">
                     {activeLogo ? (
-                      <img src={activeLogo} alt="ORBITA" className="h-6 w-6 rounded-full object-contain" />
+                      <img src={activeLogo} alt="ORBITA" className="h-5.5 w-5.5 rounded-full object-contain" />
                     ) : (
-                      <OrbitaMenuIcon variant="brand" className="h-5 w-5 text-white" />
+                      <OrbitaMenuIcon variant="brand" className="h-4.5 w-4.5 text-white" />
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <span className="block text-[11px] sm:text-xs font-medium text-[#A2A0B4] dark:text-indigo-300/80 truncate">
+                  <div className="min-w-0 flex-1 space-y-0.5">
+                    <span className="block text-[10.5px] sm:text-xs font-semibold text-[#8A85A8] dark:text-indigo-300/80 truncate leading-tight">
                       {headerKicker}
                     </span>
-                    <h1 className="text-base sm:text-xl lg:text-2xl font-extrabold text-[#3E385B] dark:text-white tracking-tight truncate">
+                    <h1 className="text-[15px] sm:text-lg lg:text-[22px] font-extrabold text-[#3E385B] dark:text-white tracking-tight truncate leading-snug">
                       {headerTitle}
                     </h1>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-                  {isInGalleryPortal || (isInTracerPortal && tracerStage !== 'verify') ? (
+                <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+                  {isInTracerPortal && tracerStage !== 'verify' ? (
                     <button
                       type="button"
                       onClick={() => navigatePortal('login', 'login')}
-                      className="no-ornament orbita-btn-coral inline-flex h-9 items-center justify-center gap-1.5 rounded-full px-3.5 sm:px-4 text-xs font-extrabold text-white shadow-sm transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none"
+                      className="no-ornament orbita-btn-coral inline-flex h-8.5 sm:h-9 items-center justify-center gap-1.5 rounded-full px-3 sm:px-4 text-xs font-extrabold text-white shadow-sm transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none"
                     >
                       <ArrowLeft className="h-3.5 w-3.5 shrink-0" />
-                      <span>Kembali ke Login</span>
+                      <span className="hidden sm:inline">Kembali ke Login</span>
+                      <span className="sm:hidden">Login</span>
                     </button>
                   ) : null}
 
                   <LiquidDigitalClock size="md" />
-                  <ThemeFlipToggle showLabel size="md" />
+                  <ThemeFlipToggle showLabel hideLabelOnMobile size="md" />
                 </div>
               </div>
             </div>
 
             {/* Scrollable Body Area */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-6 pt-2 sm:px-7 sm:pb-7 lg:px-8 lg:pb-8 flex flex-col">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden px-3.5 pb-6 pt-2 sm:px-7 sm:pb-7 lg:px-8 lg:pb-8 flex flex-col">
               {/* Interactive Mobile Quick-View Switcher (<768px) */}
-              <div className="md:hidden mb-5 shrink-0">
+              <div className="md:hidden mb-3.5 mt-0.5 shrink-0">
                 <LiquidNavBar
                   pill
+                  fullWidth
                   size="sm"
                   ariaLabel="Navigasi Portal Login Mobile"
                   activeId={mobileSection}
@@ -487,19 +491,18 @@ export const LoginPage: React.FC = () => {
                 />
               </div>
 
-              <div className="my-auto w-full">
+              <div className="mx-auto md:my-auto w-full max-w-[1380px]">
                 {/* GALLERY CAROUSEL PORTAL */}
                 {isInGalleryPortal ? (
-                  <div className="pb-4">
+                  <div className="mx-auto w-full max-w-6xl pb-4">
                     <ActivityGalleryCarousel
                       photos={publishedGalleryPhotos}
                       settings={galleryViewSettings}
-                      onBackToLogin={() => navigatePortal('login', 'login')}
                     />
                   </div>
                 ) : /* UNIFIED TRACER PORTAL */
                 isInTracerPortal ? (
-                  <div className="pb-4">
+                  <div className="mx-auto w-full max-w-5xl pb-4">
                     <TracerStudyPortalForm
                       key="portal-tracer-unified"
                       source="login_portal"
@@ -513,10 +516,10 @@ export const LoginPage: React.FC = () => {
                   </div>
                 ) : (
                   /* Main 12-Column Asymmetric Grid */
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-center my-auto pb-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-7 xl:gap-8 items-start lg:items-center py-1 pb-4">
                     {/* LEFT 5 COLS: LOGIN CARD */}
                     <div
-                      className={`lg:col-span-5 w-full max-w-[440px] mx-auto pt-4 ${
+                      className={`lg:col-span-5 w-full max-w-[440px] mx-auto pt-6 sm:pt-7 ${
                         mobileSection === 'login' ? 'block' : 'hidden md:block'
                       }`}
                     >
@@ -524,7 +527,7 @@ export const LoginPage: React.FC = () => {
                         showTopCrest={true}
                         stampText="Portal Resmi"
                         characterIndex={0}
-                        contentClassName="flex flex-col justify-between gap-5 px-5 pt-11 pb-6 sm:px-8 sm:pt-12 sm:pb-8"
+                        contentClassName="flex flex-col justify-between gap-4 sm:gap-5 px-5 pt-10 pb-6 sm:px-7 sm:pt-11 sm:pb-7"
                       >
                         {/* Header inside White Card */}
                         <div className="text-center">
@@ -573,7 +576,7 @@ export const LoginPage: React.FC = () => {
                                   }}
                                   placeholder="Masukkan Email atau NIP/NIS..."
                                   autoComplete="username"
-                                  className="no-ornament w-full bg-transparent py-2.5 text-xs sm:text-sm font-semibold text-[#3E385B] dark:text-[#EAE8F6] caret-[#6C60B8] dark:caret-[#A79BFF] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
+                                  className="no-ornament select-text w-full bg-transparent py-2.5 text-xs sm:text-sm font-semibold text-[#3E385B] dark:text-[#EAE8F6] caret-[#6C60B8] dark:caret-[#A79BFF] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
                                 />
                               </div>
                             </div>
@@ -605,7 +608,7 @@ export const LoginPage: React.FC = () => {
                                   }}
                                   placeholder="••••••••"
                                   autoComplete="current-password"
-                                  className="no-ornament w-full bg-transparent pr-8 py-2.5 text-xs sm:text-sm font-semibold text-[#3E385B] dark:text-[#EAE8F6] caret-[#6C60B8] dark:caret-[#A79BFF] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
+                                  className="no-ornament select-text w-full bg-transparent pr-8 py-2.5 text-xs sm:text-sm font-semibold text-[#3E385B] dark:text-[#EAE8F6] caret-[#6C60B8] dark:caret-[#A79BFF] placeholder:text-[#A2A0B4] dark:placeholder:text-[#8E89B0] focus:outline-none"
                                 />
                                 <button
                                   type="button"
@@ -640,27 +643,34 @@ export const LoginPage: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => {
+                                  const isMobileViewport =
+                                    typeof window !== 'undefined' && window.innerWidth < 768;
+                                  if (isMobileViewport) {
+                                    switchOverviewSlide(1);
+                                    setMobileSection('overview');
+                                    return;
+                                  }
                                   const nextSlide: 0 | 1 = overviewSlide === 1 ? 0 : 1;
                                   switchOverviewSlide(nextSlide);
-                                  if (nextSlide === 1) {
-                                    setMobileSection('overview');
-                                  }
                                 }}
                                 className="no-ornament inline-flex h-8 items-center justify-center gap-2 rounded-full bg-[#FFE4EC] hover:bg-[#FFD4E2] dark:bg-rose-950/70 dark:hover:bg-rose-900/80 px-3.5 text-xs font-extrabold text-[#F25781] dark:text-rose-300 transition-all cursor-pointer whitespace-nowrap shrink-0 leading-none"
                               >
                                 <CalendarDays className="h-4 w-4 shrink-0 stroke-[2]" />
-                                <span>{overviewSlide === 1 ? 'Lihat Overview' : 'Jadwal KBM'}</span>
+                                <span className="md:hidden">Jadwal KBM</span>
+                                <span className="hidden md:inline">
+                                  {overviewSlide === 1 ? 'Lihat Overview' : 'Jadwal KBM'}
+                                </span>
                               </button>
                             </div>
 
                             {/* Submit Button */}
-                            <div className="pt-2">
+                            <div className="pt-1.5">
                               <button
                                 type="submit"
                                 disabled={isSubmitting}
                                 className="no-ornament orbita-btn-violet group flex w-full items-center justify-between rounded-[18px] px-5 py-3.5 text-white hover:brightness-105 transition-all duration-200 disabled:opacity-60 cursor-pointer"
                               >
-                                <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-bold text-white">
+                                <span className="text-[11px] font-bold tracking-widest uppercase text-white/80">
                                   ORBITA
                                 </span>
                                 <span className="text-sm font-extrabold tracking-wide text-white">
@@ -672,14 +682,17 @@ export const LoginPage: React.FC = () => {
                           </form>
                         </div>
 
-                        {/* Footer Pills — Synced Directly with Admin Academic Year */}
-                        <div className="flex items-center justify-between gap-2 pt-3 border-t border-[#F0F1F6] dark:border-slate-800 text-[11px]">
-                          <span className="font-medium text-[#A2A0B4] dark:text-slate-400 truncate">
+                        {/* Clean Typographic Academic Footer — Synced Directly with Admin Academic Year */}
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 pt-3.5 mt-1 border-t border-[#ECEBF6] dark:border-[#8D81E3]/20 text-[11.5px] leading-snug text-center sm:text-left">
+                          <span className="font-semibold text-[#6E698C] dark:text-slate-300">
                             {schoolSettings?.curriculum || 'Kurikulum Merdeka'}
                           </span>
-                          <span className="rounded-full bg-[#EFEFF9] dark:bg-indigo-950/75 px-3 py-0.5 text-[10px] font-bold text-[#6C60B8] dark:text-indigo-300 whitespace-nowrap shrink-0">
-                            Tahun Pelajaran {activeAcademicYear?.name || '2025/2026'} &middot;{' '}
-                            {activeAcademicYear?.activeSemester === 'genap' ? 'Genap' : 'Ganjil'}
+                          <span className="font-bold text-[#5D51B2] dark:text-indigo-300 tabular-nums whitespace-nowrap">
+                            Tahun Pelajaran {activeAcademicYear?.name || '2025/2026'}
+                            <span aria-hidden="true" className="mx-1.5 text-[#B8B3D6] dark:text-slate-500">
+                              &middot;
+                            </span>
+                            Semester {activeAcademicYear?.activeSemester === 'genap' ? 'Genap' : 'Ganjil'}
                           </span>
                         </div>
                       </OrbitaOrnateFrame>
@@ -812,7 +825,7 @@ export const LoginPage: React.FC = () => {
                                       }}
                                     />
                                     <div
-                                      style={{ left: activeLoginLeftPct }}
+                                      style={{ left: activeLoginTooltipLeftPct }}
                                       className="pointer-events-none absolute top-0 z-20 flex items-center gap-2 -translate-x-1/2 transition-all duration-300"
                                     >
                                       <div className="rounded-[12px] bg-[#443C68] px-2.5 py-1 text-white shadow-lg border border-white/20 whitespace-nowrap">
@@ -1042,7 +1055,7 @@ export const LoginPage: React.FC = () => {
                           </div>
 
                           {/* SLIDE 1: JADWAL PELAJARAN KBM BOARD */}
-                          <div className="w-full shrink-0 pt-4 pb-2">
+                          <div className="w-full shrink-0 pt-7 pb-2">
                             <AcademyScheduleBoard maxHeightClass="max-h-[340px]" />
                           </div>
                         </div>

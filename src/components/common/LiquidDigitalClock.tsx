@@ -52,10 +52,12 @@ export const LiquidDigitalClock: React.FC<LiquidDigitalClockProps> = ({
   const compactDateLabel = `${dayName}, ${dayNum} ${monthName}`;
   const tzLabel = getTimezoneLabel(now);
 
-  // Match ThemeFlipToggle proportions seamlessly: sm -> h-6 w-6 orb, md -> h-7 w-7 orb
-  const orbSize = size === 'sm' ? 'h-6 w-6' : 'h-7 w-7';
-  const timeTextSize = size === 'sm' ? 'text-[11.5px] sm:text-xs' : 'text-xs sm:text-[13px]';
+  // Match ThemeFlipToggle proportions seamlessly: sm -> h-6 w-6 orb, md -> responsive h-6 w-6 sm:h-7 sm:w-7 orb
+  const orbSize = size === 'sm' ? 'h-6 w-6' : 'h-6 w-6 sm:h-7 sm:w-7';
+  const timeTextSize =
+    size === 'sm' ? 'text-[11.5px] sm:text-xs' : 'text-[11.5px] sm:text-[13px]';
   const metaTextSize = size === 'sm' ? 'text-[9.5px]' : 'text-[10px]';
+  const containerGapPad = size === 'sm' ? 'gap-1.5 px-2 py-1' : 'gap-1.5 sm:gap-2 px-1.5 py-0.5 sm:px-2 sm:py-1';
 
   // Fluid fill percentage responds subtly to seconds (38% -> 68% smooth cycle)
   const secondRatio = now.getSeconds() / 59;
@@ -74,7 +76,7 @@ export const LiquidDigitalClock: React.FC<LiquidDigitalClockProps> = ({
         showDateMeta ? 'zona waktu' : 'tanggal'
       })`}
       aria-label={`Jam Digital ${hours} lewat ${minutes} menit ${seconds} detik ${tzLabel}, ${fullDateLabel}`}
-      className={`no-ornament orbita-liquid-clock group relative inline-flex items-center gap-2 overflow-hidden rounded-full border border-[#DDD8F6] bg-white/88 px-2 py-1 text-[#3E385B] shadow-sm backdrop-blur-xl transition-all hover:border-[#6C60B8]/50 hover:shadow-md dark:border-[#6C60B8]/40 dark:bg-[#241F4A]/90 dark:text-[#EDEBF9] cursor-pointer whitespace-nowrap shrink-0 select-none ${className}`}
+      className={`no-ornament orbita-liquid-clock group relative inline-flex items-center ${containerGapPad} overflow-hidden rounded-full border border-[#DDD8F6] bg-white/88 text-[#3E385B] shadow-sm backdrop-blur-xl transition-all hover:border-[#6C60B8]/50 hover:shadow-md dark:border-[#6C60B8]/40 dark:bg-[#241F4A]/90 dark:text-[#EDEBF9] cursor-pointer whitespace-nowrap shrink-0 select-none ${className}`}
     >
       {/* Subtle Ambient Liquid Wave Layer Across Capsule Bottom */}
       <span

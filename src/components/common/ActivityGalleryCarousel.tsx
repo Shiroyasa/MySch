@@ -17,7 +17,6 @@ import {
   Sparkles,
   Camera,
   X,
-  ArrowLeft,
   Tag,
 } from 'lucide-react';
 import { SqueezeLineIndicator } from './CarouselTablePagination';
@@ -60,14 +59,12 @@ interface ActivityGalleryCarouselProps {
   photos: GalleryPhoto[];
   settings: GalleryViewSettings;
   isPreview?: boolean;
-  onBackToLogin?: () => void;
 }
 
 export const ActivityGalleryCarousel: React.FC<ActivityGalleryCarouselProps> = ({
   photos,
   settings,
   isPreview = false,
-  onBackToLogin,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<'Semua' | GalleryCategory>('Semua');
   const [activeIndex, setActiveIndex] = useState(0);
@@ -213,9 +210,9 @@ export const ActivityGalleryCarousel: React.FC<ActivityGalleryCarouselProps> = (
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Top Toolbar: Category Filter Chips + Mode & Playback Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-[#DDD8F6]/70 dark:border-[#8D81E3]/25 bg-white/80 dark:bg-[#1B173D]/85 px-4 py-3 backdrop-blur-xl shadow-[0_8px_24px_-8px_rgba(101,88,181,0.12)]">
-        <div className="flex flex-wrap items-center gap-1.5">
+      {/* Top Toolbar: Category Filter Chips + Playback & Slide Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 rounded-[20px] sm:rounded-[22px] border border-[#DDD8F6]/70 dark:border-[#8D81E3]/25 bg-white/82 dark:bg-[#1B173D]/86 px-3.5 py-2.5 sm:px-4 sm:py-3 backdrop-blur-xl shadow-[0_8px_24px_-8px_rgba(101,88,181,0.12)]">
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5 sm:pb-0 sm:flex-wrap flex-1 min-w-0">
           {ALL_CATEGORIES.map(cat => {
             const count = categoryCounts[cat] || 0;
             if (cat !== 'Semua' && count === 0) return null;
@@ -228,7 +225,7 @@ export const ActivityGalleryCarousel: React.FC<ActivityGalleryCarouselProps> = (
                   setSelectedCategory(cat);
                   setActiveIndex(0);
                 }}
-                className={`no-ornament inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap ${
+                className={`no-ornament inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[11px] font-bold transition-all cursor-pointer whitespace-nowrap leading-none ${
                   isSelected
                     ? 'orbita-btn-violet text-white shadow-sm'
                     : 'border border-[#E4E2F2] bg-[#FAF9FE] text-[#5A537A] hover:bg-[#EFEBFB] dark:border-[#8D81E3]/25 dark:bg-[#231E4F]/70 dark:text-slate-200 dark:hover:bg-[#2E2866]'
@@ -236,7 +233,7 @@ export const ActivityGalleryCarousel: React.FC<ActivityGalleryCarouselProps> = (
               >
                 <span>{cat}</span>
                 <span
-                  className={`rounded-full px-1.5 py-0.5 text-[9.5px] font-extrabold tabular-nums ${
+                  className={`rounded-full px-1.5 py-0.5 text-[9.5px] font-extrabold tabular-nums leading-none ${
                     isSelected
                       ? 'bg-white/20 text-white'
                       : 'bg-[#ECE9F9] text-[#6C60B8] dark:bg-indigo-950/70 dark:text-indigo-300'
@@ -249,61 +246,55 @@ export const ActivityGalleryCarousel: React.FC<ActivityGalleryCarouselProps> = (
           })}
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          {totalSlides > 1 && (
-            <button
-              type="button"
-              onClick={() => setIsPaused(p => !p)}
-              title={isPaused || !settings.autoPlay ? 'Putar Slide Otomatis' : 'Jeda Slide'}
-              className="no-ornament inline-flex h-8 items-center gap-1.5 rounded-full border border-[#DDD8F6] dark:border-[#8D81E3]/28 bg-[#FAF9FE] dark:bg-[#231E4F]/80 px-3 text-[11px] font-bold text-[#5D51B2] dark:text-indigo-300 hover:bg-[#EFEBFB] dark:hover:bg-[#2D2664] transition-colors cursor-pointer whitespace-nowrap"
-            >
-              {settings.autoPlay && !isPaused ? (
-                <>
-                  <Pause className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Auto ({settings.autoPlaySeconds}s)</span>
-                </>
-              ) : (
-                <>
-                  <Play className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Putar</span>
-                </>
-              )}
-            </button>
-          )}
-
-          {totalSlides > 1 && (
-            <div className="flex items-center gap-1">
+        <div className="flex items-center justify-end gap-2 shrink-0 border-t border-[#ECEBF5]/80 dark:border-[#8D81E3]/15 pt-2 sm:border-t-0 sm:pt-0">
+          {totalSlides > 1 ? (
+            <>
               <button
                 type="button"
-                onClick={handlePrev}
-                aria-label="Slide Sebelumnya"
-                className="no-ornament inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#DDD8F6] dark:border-[#8D81E3]/28 bg-[#FAF9FE] dark:bg-[#231E4F]/80 text-[#5D51B2] dark:text-indigo-300 hover:bg-[#EFEBFB] dark:hover:bg-[#2D2664] cursor-pointer transition-all"
+                onClick={() => setIsPaused(p => !p)}
+                title={isPaused || !settings.autoPlay ? 'Putar Slide Otomatis' : 'Jeda Slide'}
+                className="no-ornament inline-flex h-8 items-center gap-1.5 rounded-full border border-[#DDD8F6] dark:border-[#8D81E3]/28 bg-[#FAF9FE] dark:bg-[#231E4F]/80 px-3 text-[11px] font-bold text-[#5D51B2] dark:text-indigo-300 hover:bg-[#EFEBFB] dark:hover:bg-[#2D2664] transition-colors cursor-pointer whitespace-nowrap leading-none"
               >
-                <ChevronLeft className="h-4 w-4" />
+                {settings.autoPlay && !isPaused ? (
+                  <>
+                    <Pause className="h-3.5 w-3.5 shrink-0" />
+                    <span>Auto ({settings.autoPlaySeconds}s)</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-3.5 w-3.5 shrink-0" />
+                    <span>Putar</span>
+                  </>
+                )}
               </button>
-              <span className="min-w-[42px] text-center text-[11px] font-extrabold text-[#3E385B] dark:text-slate-200 tabular-nums">
-                {activeIndex + 1} / {totalSlides}
-              </span>
-              <button
-                type="button"
-                onClick={handleNext}
-                aria-label="Slide Berikutnya"
-                className="no-ornament inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#DDD8F6] dark:border-[#8D81E3]/28 bg-[#FAF9FE] dark:bg-[#231E4F]/80 text-[#5D51B2] dark:text-indigo-300 hover:bg-[#EFEBFB] dark:hover:bg-[#2D2664] cursor-pointer transition-all"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          )}
 
-          {onBackToLogin && (
-            <button
-              type="button"
-              onClick={onBackToLogin}
-              className="no-ornament orbita-btn-coral inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[11px] font-extrabold text-white shadow-sm cursor-pointer whitespace-nowrap"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Login</span>
-            </button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handlePrev}
+                  aria-label="Slide Sebelumnya"
+                  className="no-ornament inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#DDD8F6] dark:border-[#8D81E3]/28 bg-[#FAF9FE] dark:bg-[#231E4F]/80 text-[#5D51B2] dark:text-indigo-300 hover:bg-[#EFEBFB] dark:hover:bg-[#2D2664] cursor-pointer transition-all"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="min-w-[42px] text-center text-[11px] font-extrabold text-[#3E385B] dark:text-slate-200 tabular-nums">
+                  {activeIndex + 1} / {totalSlides}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  aria-label="Slide Berikutnya"
+                  className="no-ornament inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#DDD8F6] dark:border-[#8D81E3]/28 bg-[#FAF9FE] dark:bg-[#231E4F]/80 text-[#5D51B2] dark:text-indigo-300 hover:bg-[#EFEBFB] dark:hover:bg-[#2D2664] cursor-pointer transition-all"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </>
+          ) : (
+            <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[#DDD8F6] dark:border-[#8D81E3]/28 bg-[#FAF9FE] dark:bg-[#231E4F]/80 px-3 text-[11px] font-bold text-[#5D51B2] dark:text-indigo-300 tabular-nums whitespace-nowrap leading-none">
+              <Camera className="h-3.5 w-3.5 shrink-0" />
+              <span>{filteredPhotos.length} Dokumentasi</span>
+            </span>
           )}
         </div>
       </div>

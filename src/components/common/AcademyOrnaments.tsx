@@ -155,6 +155,7 @@ export type OrbitaIconVariant =
   | 'logout'
   | 'brand'
   | 'location'
+  | 'agenda'
   | 'search'
   | 'broadcast'
   | 'bell';
@@ -268,6 +269,15 @@ export const OrbitaMenuIcon: React.FC<{
             strokeLinejoin="round"
           />
           <circle cx="12" cy="9.5" r="2.5" fill="currentColor" />
+        </svg>
+      );
+    case 'agenda':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" className={`shrink-0 ${className}`}>
+          <rect x="4" y="4.5" width="16" height="15.5" rx="3.8" fill="currentColor" fillOpacity="0.16" stroke="currentColor" strokeWidth="1.85" />
+          <path d="M8.5 3V6M15.5 3V6" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" />
+          <path d="M8 10.5H16M8 14.5H13.2" stroke="currentColor" strokeWidth="1.85" strokeLinecap="round" />
+          <circle cx="16" cy="14.5" r="1.4" fill="currentColor" />
         </svg>
       );
     case 'logout':

@@ -9,7 +9,6 @@ import {
   RefreshCw,
   Search,
   Menu,
-  MapPin,
   X,
 } from 'lucide-react';
 import { BroadcastAnnouncementModal } from '../common/BroadcastAnnouncementModal';
@@ -21,7 +20,7 @@ import { LiquidDigitalClock } from '../common/LiquidDigitalClock';
 export const Header: React.FC<{
   onToggleMobileSidebar: () => void;
   onToggleRightDrawer?: () => void;
-}> = ({ onToggleMobileSidebar, onToggleRightDrawer }) => {
+}> = ({ onToggleMobileSidebar }) => {
   const {
     currentUser,
     currentRole,
@@ -130,16 +129,18 @@ export const Header: React.FC<{
     <>
       <header className="relative md:sticky top-0 z-30 w-full bg-[#F4F3FC]/74 dark:bg-[#191636]/76 backdrop-blur-xl px-3.5 sm:px-6 lg:px-8 pt-1.5 pb-1 sm:pt-2 sm:pb-1.5 border-b border-[#7468C4]/14 dark:border-[#8D81E3]/18">
         <div className="flex h-14 sm:h-[70px] w-full items-center justify-between gap-2.5">
-          {/* Left: Mobile/Tablet Menu Button + Title */}
+          {/* Left: Mobile Menu Button (hidden for Admin & on <md mobile since MobileBottomNav provides Menu) + Title */}
           <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
-            <button
-              type="button"
-              onClick={onToggleMobileSidebar}
-              className="no-ornament flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/30 bg-[#6C60B8]/86 backdrop-blur-md text-white shadow-[0_8px_18px_rgba(101,88,181,0.34)] hover:bg-[#5B4FA8]/92 active:scale-95 lg:hidden cursor-pointer"
-              title="Buka Menu"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
+            {!isAdmin && (
+              <button
+                type="button"
+                onClick={onToggleMobileSidebar}
+                className="no-ornament hidden md:flex lg:hidden h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/30 bg-[#6C60B8]/86 backdrop-blur-md text-white shadow-[0_8px_18px_rgba(101,88,181,0.34)] hover:bg-[#5B4FA8]/92 active:scale-95 cursor-pointer"
+                title="Buka Menu"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+            )}
 
             <div className="min-w-0">
               <span className="block text-[10.5px] sm:text-xs font-medium text-[#A2A0B4] dark:text-slate-400 leading-tight truncate">
@@ -151,8 +152,8 @@ export const Header: React.FC<{
             </div>
           </div>
 
-          {/* Right: Tablet/Desktop Search + Mobile Search Trigger + Agenda Drawer + Bell + Avatar */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Right: Tablet/Desktop Search + Mobile Search Trigger + Clock + Theme + Bell + Avatar */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Tablet & Desktop Search Pill (hidden on <640px so title has breathing room) */}
             <div className="relative hidden sm:block">
               <div className="orbita-searchbar orbita-field-underline flex items-center gap-2 rounded-full bg-[#EFEFF6] dark:bg-slate-800/90 px-3.5 py-2 text-[#3E385B] dark:text-slate-100 w-44 md:w-56 lg:w-60 transition-all focus-within:bg-white dark:focus-within:bg-slate-800 focus-within:ring-2 focus-within:ring-[#6C60B8]/25">
@@ -199,7 +200,7 @@ export const Header: React.FC<{
             <button
               type="button"
               onClick={() => setMobileSearchOpen(prev => !prev)}
-              className={`orbita-searchbar no-ornament sm:hidden flex h-10 w-10 items-center justify-center rounded-full transition-colors cursor-pointer ${
+              className={`orbita-searchbar no-ornament sm:hidden flex h-9 w-9 items-center justify-center rounded-full transition-colors cursor-pointer ${
                 mobileSearchOpen
                   ? 'bg-[#6C60B8] text-white'
                   : 'bg-[#EFEFF6] text-[#3E385B] hover:bg-[#E4E2F5] dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700'
@@ -208,24 +209,6 @@ export const Header: React.FC<{
             >
               {mobileSearchOpen ? <X className="h-4 w-4" /> : <Search className="h-4 w-4" />}
             </button>
-
-            {/* Tablet & Mobile Agenda KBM + Live Map Drawer Trigger (hidden on xl+) */}
-            {onToggleRightDrawer && (
-              <button
-                type="button"
-                onClick={onToggleRightDrawer}
-                className="no-ornament relative xl:hidden inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-[#EFEFF6] hover:bg-[#E4E2F5] dark:bg-slate-800 dark:hover:bg-slate-700 px-2.5 sm:px-3.5 text-xs font-extrabold text-[#6C60B8] dark:text-indigo-300 transition-colors cursor-pointer whitespace-nowrap shrink-0"
-                title="Buka Agenda KBM & Live Map GPS"
-              >
-                <MapPin className="h-4 w-4 text-[#F25781] shrink-0" />
-                <span className="hidden md:inline">Agenda &amp; GPS</span>
-                {pendingCorrCount > 0 && (
-                  <span className="flex h-4.5 min-w-[18px] items-center justify-center rounded-full bg-[#FF6E96] px-1 text-[9px] font-black text-white">
-                    {pendingCorrCount}
-                  </span>
-                )}
-              </button>
-            )}
 
             {/* Cloud Sync Pill (xl+ desktop) */}
             <div
@@ -270,7 +253,7 @@ export const Header: React.FC<{
               <button
                 type="button"
                 onClick={() => setShowNotifMenu(!showNotifMenu)}
-                className="no-ornament relative flex h-10 w-10 items-center justify-center rounded-full bg-[#EFEFF6] text-[#3E385B] hover:bg-[#E4E2F5] dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                className="no-ornament relative flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-[#EFEFF6] text-[#3E385B] hover:bg-[#E4E2F5] dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                 title="Pemberitahuan"
               >
                 <Bell className="h-4 w-4" />
@@ -404,10 +387,10 @@ export const Header: React.FC<{
             )}
           </div>
 
-          {/* Circular User Profile Avatar (Exact Top-Right Avatar from Reference Image) */}
+          {/* Circular User Profile Avatar */}
           <button
             onClick={() => setShowProfileModal(true)}
-            className="no-ornament group relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E6E4F4] dark:bg-slate-800 ring-2 ring-white dark:ring-slate-700 shadow-[0_6px_16px_rgba(62,56,91,0.14)] cursor-pointer"
+            className="no-ornament group relative flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E6E4F4] dark:bg-slate-800 ring-2 ring-white dark:ring-slate-700 shadow-[0_6px_16px_rgba(62,56,91,0.14)] cursor-pointer"
             title={`${currentUser.displayName} • Klik untuk buka profil`}
           >
             {currentUser.photoURL ? (
