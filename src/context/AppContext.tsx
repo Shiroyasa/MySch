@@ -61,6 +61,7 @@ import {
   firestoreAddStudent,
   firestoreUpdateStudent,
   firestoreDeleteStudent,
+  firestoreDeleteStudentCascade,
   firestoreBatchImportStudents,
   firestoreAddTeacher,
   firestoreUpdateTeacher,
@@ -68,9 +69,11 @@ import {
   firestoreAddClass,
   firestoreUpdateClass,
   firestoreDeleteClass,
+  firestoreDeleteClassCascade,
   firestoreAddSubject,
   firestoreUpdateSubject,
   firestoreDeleteSubject,
+  firestoreDeleteSubjectCascade,
   firestoreAddMajor,
   firestoreUpdateMajor,
   firestoreDeleteMajor,
@@ -1036,7 +1039,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     idbGet<LessonSchedule[]>('myschool_lesson_schedules_full')
       .then(idbSchedules => {
-        if (Array.isArray(idbSchedules) && idbSchedules.length > 0) {
+        if (!isInitialSyncDoneRef.current && Array.isArray(idbSchedules) && idbSchedules.length > 0) {
           setLessonSchedules(idbSchedules);
           try {
             localStorage.setItem('myschool_lesson_schedules', JSON.stringify(idbSchedules));
@@ -1069,62 +1072,78 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // 2. Subscribe to real-time snapshot listeners across all collections
     const unsubscribe = subscribeAllCollections({
       onStudentsChange: data => {
+        lastSyncedHashesRef.current.students = computeCollectionHash(data);
         setStudents(data);
         localStorage.setItem('myschool_students', JSON.stringify(data));
       },
       onTeachersChange: data => {
+        lastSyncedHashesRef.current.teachers = computeCollectionHash(data);
         setTeachers(data);
         localStorage.setItem('myschool_teachers', JSON.stringify(data));
       },
       onClassesChange: data => {
+        lastSyncedHashesRef.current.classes = computeCollectionHash(data);
         setClasses(data);
         localStorage.setItem('myschool_classes', JSON.stringify(data));
       },
       onMajorsChange: data => {
+        lastSyncedHashesRef.current.majors = computeCollectionHash(data);
         setMajors(data);
         localStorage.setItem('myschool_majors', JSON.stringify(data));
       },
       onSubjectsChange: data => {
+        lastSyncedHashesRef.current.subjects = computeCollectionHash(data);
         setSubjects(data);
         localStorage.setItem('myschool_subjects', JSON.stringify(data));
       },
       onAcademicYearsChange: data => {
+        lastSyncedHashesRef.current.academicYears = computeCollectionHash(data);
         setAcademicYears(data);
         localStorage.setItem('myschool_academic_years', JSON.stringify(data));
       },
       onAttendanceSessionsChange: data => {
+        lastSyncedHashesRef.current.attendanceSessions = computeCollectionHash(data);
         setAttendanceSessions(data);
         localStorage.setItem('myschool_attendance_sessions', JSON.stringify(data));
       },
       onAttendanceRecordsChange: data => {
+        lastSyncedHashesRef.current.attendanceRecords = computeCollectionHash(data);
         setAttendanceRecords(data);
         localStorage.setItem('myschool_attendance_records', JSON.stringify(data));
       },
       onAttendanceCorrectionsChange: data => {
+        lastSyncedHashesRef.current.attendanceCorrections = computeCollectionHash(data);
         setAttendanceCorrections(data);
         localStorage.setItem('myschool_attendance_corrections', JSON.stringify(data));
       },
       onAssessmentsChange: data => {
+        lastSyncedHashesRef.current.assessments = computeCollectionHash(data);
+        assessmentsRef.current = data;
         setAssessments(data);
         localStorage.setItem('myschool_assessments', JSON.stringify(data));
       },
       onAssessmentScoresChange: data => {
+        lastSyncedHashesRef.current.assessmentScores = computeCollectionHash(data);
         setAssessmentScores(data);
         localStorage.setItem('myschool_assessment_scores', JSON.stringify(data));
       },
       onAuditLogsChange: data => {
+        lastSyncedHashesRef.current.auditLogs = computeCollectionHash(data);
         setAuditLogs(data);
         localStorage.setItem('myschool_audit_logs', JSON.stringify(data));
       },
       onNotificationsChange: data => {
+        lastSyncedHashesRef.current.notifications = computeCollectionHash(data);
         setNotifications(data);
         localStorage.setItem('myschool_notifications', JSON.stringify(data));
       },
       onChatMessagesChange: data => {
+        lastSyncedHashesRef.current.chatMessages = computeCollectionHash(data);
         setChatMessages(data);
         localStorage.setItem('myschool_chat_messages', JSON.stringify(data));
       },
       onDirectMessagesChange: data => {
+        lastSyncedHashesRef.current.directMessages = computeCollectionHash(data);
         setDirectMessages(data);
         localStorage.setItem('myschool_direct_messages', JSON.stringify(data));
       },
@@ -1460,6 +1479,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             break;
           case 'assessments':
             if (Array.isArray(incoming)) {
+              assessmentsRef.current = incoming as Assessment[];
               setAssessments(incoming as Assessment[]);
               try { localStorage.setItem('myschool_assessments', JSON.stringify(incoming)); } catch {}
             }
@@ -1588,7 +1608,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const performInitialCrossDeviceSync = async () => {
       // Wait briefly for IndexedDB hydration (visualSettings, lessonSchedules, galleryPhotos) to complete
-      await new Promise(resolve => setTimeout(resolve, 400));
+      await new Promise(resolve => setTimeout(resolve, 350));
       if (cancelled) return;
 
       const localSnapshot = latestCollectionsRef.current;
@@ -1598,39 +1618,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         lastSyncedHashesRef.current[k] = computeCollectionHash(localSnapshot[k]);
       }
 
-      // 1. Upload this device's state to Cross-Device Sync Hub (any customized/inputted collections upgrade the hub)
-      await pushStateToSyncHub(localSnapshot, 'hydrate');
+      // 1. Pull authoritative state from BOTH the Cross-Device Sync Hub and Cloud Firestore public bundles first
+      const [pulled, bundleData] = await Promise.all([
+        pullStateFromSyncHub(),
+        pullPublicBundlesFromFirestore(),
+      ]);
 
-      // 2. If this device has custom inputted data, also push it to Cloud Firestore in the background
-      const hasAnyCustomLocalData = ALL_SYNC_KEYS.some(k =>
-        isCollectionCustomized(k, localSnapshot[k])
-      );
-      if (hasAnyCustomLocalData) {
-        syncCurrentStateToFirestore(localSnapshot).catch(() => {});
+      // 2. If Cloud Firestore has persisted bundles that are customized/newer than an empty or non-custom Hub, upgrade the Hub with Firestore's state
+      if (bundleData && typeof bundleData === 'object') {
+        const firestoreUpgradesForHub: Partial<AllSyncCollections> = {};
+        for (const k of ALL_SYNC_KEYS) {
+          const bVal = (bundleData as any)[k];
+          if (bVal !== undefined && bVal !== null) {
+            const hubHasCustom = Boolean(pulled?.meta?.[k]?.isCustom);
+            if (!hubHasCustom && isCollectionCustomized(k, bVal)) {
+              (firestoreUpgradesForHub as any)[k] = bVal;
+            }
+          }
+        }
+        if (Object.keys(firestoreUpgradesForHub).length > 0) {
+          await pushStateToSyncHub(firestoreUpgradesForHub, 'auto');
+        }
       }
 
-      // 3. Pull authoritative merged state from Cross-Device Sync Hub so this device reads all data inputted on other devices
-      const pulled = await pullStateFromSyncHub();
-      if (!cancelled && pulled && pulled.collections && Object.keys(pulled.collections).length > 0) {
-        lastRemoteVersionRef.current = pulled.version || 0;
-        applyRemoteCollections(pulled.collections, pulled.meta, true);
+      // 3. Upload this device's state to Cross-Device Sync Hub in 'hydrate' mode (only fills keys missing on hub or upgrades non-custom keys if this device has custom data)
+      await pushStateToSyncHub(localSnapshot, 'hydrate');
 
-        // If local had custom data that wasn't on server yet, push it in 'auto' mode to ensure full convergence
+      // 4. Re-pull converged state from Sync Hub (or fall back to Firestore bundleData on static deployments)
+      const converged = await pullStateFromSyncHub();
+      if (!cancelled && converged && converged.collections && Object.keys(converged.collections).length > 0) {
+        lastRemoteVersionRef.current = converged.version || 0;
+        applyRemoteCollections(converged.collections, converged.meta, true);
+
+        // If local device had custom data that wasn't marked custom on server yet, push it in 'auto' mode and sync to Firestore
         const missingCustomCols: Partial<AllSyncCollections> = {};
         for (const k of ALL_SYNC_KEYS) {
-          if (isCollectionCustomized(k, localSnapshot[k]) && !pulled.meta?.[k]?.isCustom) {
+          if (isCollectionCustomized(k, localSnapshot[k]) && !converged.meta?.[k]?.isCustom) {
             (missingCustomCols as any)[k] = localSnapshot[k];
           }
         }
         if (Object.keys(missingCustomCols).length > 0) {
           await pushStateToSyncHub(missingCustomCols, 'auto');
+          syncCurrentStateToFirestore(latestCollectionsRef.current).catch(() => {});
         }
-      } else if (!cancelled) {
-        // Fallback for external static public domains (e.g. Vercel): read the 3 ultra-low-read Firestore public bundles
-        const bundleData = await pullPublicBundlesFromFirestore();
-        if (!cancelled && bundleData) {
-          applyRemoteCollections(bundleData as Partial<AllSyncCollections>, undefined, true);
-        }
+      } else if (!cancelled && bundleData) {
+        applyRemoteCollections(bundleData as Partial<AllSyncCollections>, undefined, true);
       }
 
       if (!cancelled) {
@@ -2127,7 +2159,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
     firestoreAddUser(studentUser).catch(() => {});
 
-    // Update class student count
+    // Update class student count in state & Firestore
+    const targetCls = classes.find(c => c.id === data.classId || c.name === data.className);
+    if (targetCls) {
+      firestoreUpdateClass(targetCls.id, { studentCount: targetCls.studentCount + 1 }).catch(() => {});
+    }
     setClasses(prev =>
       prev.map(c =>
         c.id === data.classId || c.name === data.className
@@ -2250,22 +2286,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const target = students.find(s => s.id === id);
     if (!target) return;
 
+    const recordIdsToDelete = attendanceRecords.filter(r => r.studentId === id).map(r => r.id);
+    const scoreIdsToDelete = assessmentScores.filter(sc => sc.studentId === id).map(sc => sc.id);
+    const correctionIdsToDelete = attendanceCorrections.filter(c => c.studentId === id).map(c => c.id);
+    const matchedUser = users.find(
+      u => u.id === id || u.id === `usr-${id}` || (target.nis && u.nipOrNis === target.nis)
+    );
+    const targetCls = classes.find(c => c.id === target.classId || c.name === target.className);
+    const updatedClassInfo = targetCls
+      ? { id: targetCls.id, studentCount: Math.max(0, targetCls.studentCount - 1) }
+      : undefined;
+
     // Clean cascade: remove student, records, scores, corrections
     setStudents(prev => prev.filter(s => s.id !== id));
     setAttendanceRecords(prev => prev.filter(r => r.studentId !== id));
     setAssessmentScores(prev => prev.filter(sc => sc.studentId !== id));
     setAttendanceCorrections(prev => prev.filter(c => c.studentId !== id));
 
-    // Cascade delete student account from users & Firestore
-    setUsers(prev => {
-      const matched = prev.find(
-        u => u.id === id || u.id === `usr-${id}` || (target.nis && u.nipOrNis === target.nis)
-      );
-      if (matched) {
-        firestoreDeleteUser(matched.id).catch(() => {});
-      }
-      return prev.filter(u => u.id !== id && u.id !== `usr-${id}` && u.nipOrNis !== target.nis);
-    });
+    // Cascade delete student account from users
+    setUsers(prev => prev.filter(u => u.id !== id && u.id !== `usr-${id}` && u.nipOrNis !== target.nis));
 
     // Update class student count
     if (target.classId || target.className) {
@@ -2280,7 +2319,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     addAuditLog('DELETE_STUDENT', 'Master Siswa', `Menghapus data siswa & akun: ${target.fullName} (${target.nisn})`);
     pushNotification('Data Siswa Dihapus', `Data siswa ${target.fullName} (${target.nisn}) dan akun terkait telah dihapus permanen dari sistem.`, 'alert');
-    firestoreDeleteStudent(id).catch(() => {});
+    firestoreDeleteStudentCascade(
+      id,
+      recordIdsToDelete,
+      scoreIdsToDelete,
+      correctionIdsToDelete,
+      matchedUser?.id,
+      updatedClassInfo
+    ).catch(() => {});
   };
 
   const importStudents = (imported: Partial<Student>[]): number => {
@@ -2450,7 +2496,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setTeachers(prev => prev.filter(t => t.id !== id));
 
-    // Clear homeroom assignment
+    // Clear homeroom assignment in state & Firestore
+    classes
+      .filter(c => c.homeroomTeacherId === id)
+      .forEach(c => {
+        firestoreUpdateClass(c.id, {
+          homeroomTeacherId: '',
+          homeroomTeacherName: 'Belum Ditentukan',
+        }).catch(() => {});
+      });
     setClasses(prev =>
       prev.map(c =>
         c.homeroomTeacherId === id
@@ -2529,6 +2583,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const target = classes.find(c => c.id === id);
     if (!target) return;
 
+    const sessionIdsToDelete = attendanceSessions.filter(s => s.classId === id).map(s => s.id);
+    const recordIdsToDelete = attendanceRecords
+      .filter(r => sessionIdsToDelete.includes(r.sessionId) || r.classId === id)
+      .map(r => r.id);
+    const assessmentIdsToDelete = assessments.filter(a => a.classId === id).map(a => a.id);
+    const scoreIdsToDelete = assessmentScores
+      .filter(sc => assessmentIdsToDelete.includes(sc.assessmentId) || sc.classId === id)
+      .map(sc => sc.id);
+    const affectedStudents = students
+      .filter(s => s.classId === id || s.className === target.name)
+      .map(s => ({ id: s.id, className: 'Belum Ada Kelas' }));
+    const affectedUsers = users
+      .filter(u => u.classId === id)
+      .map(u => ({ id: u.id }));
+
     setClasses(prev => prev.filter(c => c.id !== id));
 
     // Update students belonging to this class
@@ -2541,13 +2610,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     // Clean attendance sessions & records for this class
-    const sessionIdsToDelete = attendanceSessions.filter(s => s.classId === id).map(s => s.id);
     setAttendanceSessions(prev => prev.filter(s => s.classId !== id));
     setAttendanceRecords(prev => prev.filter(r => !sessionIdsToDelete.includes(r.sessionId) && r.classId !== id));
 
     // Clean assessments & scores for this class
-    const assessmentIdsToDelete = assessments.filter(a => a.classId === id).map(a => a.id);
-    setAssessments(prev => prev.filter(a => a.classId !== id));
+    setAssessments(prev => {
+      const next = prev.filter(a => a.classId !== id);
+      assessmentsRef.current = next;
+      return next;
+    });
     setAssessmentScores(prev => prev.filter(sc => !assessmentIdsToDelete.includes(sc.assessmentId) && sc.classId !== id));
 
     // Update users who were assigned to this class
@@ -2557,7 +2628,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     addAuditLog('DELETE_CLASS', 'Master Kelas', `Menghapus data rombel kelas: ${target.name}`);
     pushNotification('Kelas Dihapus', `Rombel ${target.name} dan data terkait telah dihapus dari sistem.`, 'alert');
-    firestoreDeleteClass(id).catch(() => {});
+    firestoreDeleteClassCascade(
+      id,
+      sessionIdsToDelete,
+      recordIdsToDelete,
+      assessmentIdsToDelete,
+      scoreIdsToDelete,
+      affectedStudents,
+      affectedUsers
+    ).catch(() => {});
   };
 
   const addSubject = (subj: Omit<Subject, 'id'>) => {
@@ -2577,18 +2656,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Cascade update subject name & code across assessments & scores
     if (prevSubj && (subj.name || subj.code || subj.kkm)) {
-      setAssessments(prev =>
-        prev.map(a =>
-          a.subjectId === id
-            ? {
-                ...a,
-                ...(subj.name ? { subjectName: subj.name } : {}),
-                ...(subj.code ? { subjectCode: subj.code } : {}),
-                ...(subj.kkm ? { kkm: subj.kkm } : {}),
-              }
-            : a
-        )
-      );
+      setAssessments(prev => {
+        const next = prev.map(a => {
+          if (a.subjectId === id) {
+            const updatedAsm = {
+              ...a,
+              ...(subj.name ? { subjectName: subj.name } : {}),
+              ...(subj.code ? { subjectCode: subj.code } : {}),
+              ...(subj.kkm ? { kkm: subj.kkm } : {}),
+            };
+            firestoreSaveAssessment(updatedAsm, []).catch(() => {});
+            return updatedAsm;
+          }
+          return a;
+        });
+        assessmentsRef.current = next;
+        return next;
+      });
       setAssessmentScores(prev =>
         prev.map(sc => (sc.subjectId === id && subj.name ? { ...sc, subjectName: subj.name } : sc))
       );
@@ -2602,16 +2686,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const target = subjects.find(s => s.id === id);
     if (!target) return;
 
+    const affectedAssessmentIds = assessments.filter(a => a.subjectId === id).map(a => a.id);
+    const affectedScoreIds = assessmentScores
+      .filter(sc => affectedAssessmentIds.includes(sc.assessmentId) || sc.subjectId === id)
+      .map(sc => sc.id);
+
     setSubjects(prev => prev.filter(s => s.id !== id));
 
-    // Cascade clean assessments and scores for this subject to prevent null subject reference crash in grading calculations!
-    const affectedAssessmentIds = assessments.filter(a => a.subjectId === id).map(a => a.id);
-    setAssessments(prev => prev.filter(a => a.subjectId !== id));
+    // Cascade clean assessments and scores for this subject
+    setAssessments(prev => {
+      const next = prev.filter(a => a.subjectId !== id);
+      assessmentsRef.current = next;
+      return next;
+    });
     setAssessmentScores(prev => prev.filter(sc => !affectedAssessmentIds.includes(sc.assessmentId) && sc.subjectId !== id));
 
     addAuditLog('DELETE_SUBJECT', 'Master Mapel', `Menghapus mata pelajaran: ${target.name}`);
     pushNotification('Mata Pelajaran Dihapus', `Mapel ${target.name} (${target.code}) telah dihapus dari kurikulum.`, 'alert');
-    firestoreDeleteSubject(id).catch(() => {});
+    firestoreDeleteSubjectCascade(id, affectedAssessmentIds, affectedScoreIds).catch(() => {});
   };
 
   const addMajor = (data: Omit<Major, 'id'>) => {
@@ -3155,15 +3247,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addAssessment = createAssessment;
 
   const updateAssessment = (id: string, data: Partial<Assessment>) => {
-    let updated: Assessment | undefined;
+    const existing =
+      assessmentsRef.current.find(a => a.id === id) || assessments.find(a => a.id === id);
+    const updated: Assessment | undefined = existing
+      ? { ...existing, ...data, updatedAt: new Date().toISOString() }
+      : undefined;
+
     setAssessments(prev => {
-      const next = prev.map(a => {
-        if (a.id === id) {
-          updated = { ...a, ...data, updatedAt: new Date().toISOString() };
-          return updated;
-        }
-        return a;
-      });
+      const next = prev.map(a => (a.id === id && updated ? updated : a));
       assessmentsRef.current = next;
       try {
         localStorage.setItem('myschool_assessments', JSON.stringify(next));

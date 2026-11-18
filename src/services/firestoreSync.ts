@@ -464,12 +464,13 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     const unsubAssessments = onSnapshot(
       collection(db, 'assessments'),
       snapshot => {
-        if (!snapshot.empty) {
-          const list: Assessment[] = [];
-          snapshot.forEach(docSnap => list.push(docSnap.data() as Assessment));
-          callbacks.onAssessmentsChange(list);
-          handleUpdate();
+        if (snapshot.metadata.fromCache && snapshot.empty && !snapshot.metadata.hasPendingWrites) {
+          return;
         }
+        const list: Assessment[] = [];
+        snapshot.forEach(docSnap => list.push(docSnap.data() as Assessment));
+        callbacks.onAssessmentsChange(list);
+        handleUpdate();
       },
       error => {
         safeHandleListenerError(error, 'assessments');
@@ -485,12 +486,13 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     const unsubScores = onSnapshot(
       collection(db, 'assessmentScores'),
       snapshot => {
-        if (!snapshot.empty) {
-          const list: AssessmentScore[] = [];
-          snapshot.forEach(docSnap => list.push(docSnap.data() as AssessmentScore));
-          callbacks.onAssessmentScoresChange(list);
-          handleUpdate();
+        if (snapshot.metadata.fromCache && snapshot.empty && !snapshot.metadata.hasPendingWrites) {
+          return;
         }
+        const list: AssessmentScore[] = [];
+        snapshot.forEach(docSnap => list.push(docSnap.data() as AssessmentScore));
+        callbacks.onAssessmentScoresChange(list);
+        handleUpdate();
       },
       error => {
         safeHandleListenerError(error, 'assessmentScores');
@@ -506,13 +508,14 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     const unsubLogs = onSnapshot(
       collection(db, 'auditLogs'),
       snapshot => {
-        if (!snapshot.empty) {
-          const list: AuditLog[] = [];
-          snapshot.forEach(docSnap => list.push(docSnap.data() as AuditLog));
-          list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-          callbacks.onAuditLogsChange(list);
-          handleUpdate();
+        if (snapshot.metadata.fromCache && snapshot.empty && !snapshot.metadata.hasPendingWrites) {
+          return;
         }
+        const list: AuditLog[] = [];
+        snapshot.forEach(docSnap => list.push(docSnap.data() as AuditLog));
+        list.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        callbacks.onAuditLogsChange(list);
+        handleUpdate();
       },
       error => {
         safeHandleListenerError(error, 'auditLogs');
@@ -528,13 +531,14 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     const unsubNotifs = onSnapshot(
       collection(db, 'notifications'),
       snapshot => {
-        if (!snapshot.empty) {
-          const list: NotificationItem[] = [];
-          snapshot.forEach(docSnap => list.push(docSnap.data() as NotificationItem));
-          list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          callbacks.onNotificationsChange(list);
-          handleUpdate();
+        if (snapshot.metadata.fromCache && snapshot.empty && !snapshot.metadata.hasPendingWrites) {
+          return;
         }
+        const list: NotificationItem[] = [];
+        snapshot.forEach(docSnap => list.push(docSnap.data() as NotificationItem));
+        list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        callbacks.onNotificationsChange(list);
+        handleUpdate();
       },
       error => {
         safeHandleListenerError(error, 'notifications');
@@ -550,13 +554,14 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     const unsubChat = onSnapshot(
       collection(db, 'chatMessages'),
       snapshot => {
-        if (!snapshot.empty) {
-          const list: ChatMessage[] = [];
-          snapshot.forEach(docSnap => list.push(docSnap.data() as ChatMessage));
-          list.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-          callbacks.onChatMessagesChange(list);
-          handleUpdate();
+        if (snapshot.metadata.fromCache && snapshot.empty && !snapshot.metadata.hasPendingWrites) {
+          return;
         }
+        const list: ChatMessage[] = [];
+        snapshot.forEach(docSnap => list.push(docSnap.data() as ChatMessage));
+        list.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        callbacks.onChatMessagesChange(list);
+        handleUpdate();
       },
       error => {
         safeHandleListenerError(error, 'chatMessages');
@@ -593,6 +598,9 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     const unsubDM = onSnapshot(
       collection(db, 'directMessages'),
       snapshot => {
+        if (snapshot.metadata.fromCache && snapshot.empty && !snapshot.metadata.hasPendingWrites) {
+          return;
+        }
         const list: ChatMessage[] = [];
         snapshot.forEach(docSnap => list.push(docSnap.data() as ChatMessage));
         list.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
@@ -635,6 +643,9 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
       const unsubPklPartners = onSnapshot(
         collection(db, 'pklPartners'),
         snapshot => {
+          if (snapshot.metadata.fromCache && snapshot.empty && !snapshot.metadata.hasPendingWrites) {
+            return;
+          }
           const list: IndustryPartner[] = [];
           snapshot.forEach(docSnap => list.push(docSnap.data() as IndustryPartner));
           callbacks.onPklPartnersChange?.(list);
@@ -656,6 +667,9 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
       const unsubPklVisits = onSnapshot(
         collection(db, 'pklVisits'),
         snapshot => {
+          if (snapshot.metadata.fromCache && snapshot.empty && !snapshot.metadata.hasPendingWrites) {
+            return;
+          }
           const list: PklVisitRecord[] = [];
           snapshot.forEach(docSnap => list.push(docSnap.data() as PklVisitRecord));
           callbacks.onPklVisitsChange?.(list);
@@ -677,6 +691,9 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
       const unsubPklReports = onSnapshot(
         collection(db, 'pklReports'),
         snapshot => {
+          if (snapshot.metadata.fromCache && snapshot.empty && !snapshot.metadata.hasPendingWrites) {
+            return;
+          }
           const list: PklStudentReportItem[] = [];
           snapshot.forEach(docSnap => list.push(docSnap.data() as PklStudentReportItem));
           callbacks.onPklReportsChange?.(list);
@@ -1048,6 +1065,125 @@ export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
     }
   }
 
+  // 27. Real-Time Ultra-Low-Read Bundle Listeners (3 documents synchronize all collections across devices in real time)
+  try {
+    const unsubMasterBundle = onSnapshot(
+      doc(db, 'settings', 'orbita_bundle_master'),
+      docSnap => {
+        if (docSnap.exists()) {
+          const data = docSnap.data() as Record<string, any>;
+          if (Array.isArray(data.classes) && data.classes.length > 0) {
+            callbacks.onClassesChange(data.classes as ClassRoom[]);
+          }
+          if (Array.isArray(data.majors) && data.majors.length > 0) {
+            callbacks.onMajorsChange(data.majors as Major[]);
+          }
+          if (Array.isArray(data.subjects) && data.subjects.length > 0) {
+            callbacks.onSubjectsChange(data.subjects as Subject[]);
+          }
+          if (Array.isArray(data.academicYears) && data.academicYears.length > 0) {
+            callbacks.onAcademicYearsChange(data.academicYears as AcademicYear[]);
+          }
+          if (Array.isArray(data.teachers) && data.teachers.length > 0) {
+            callbacks.onTeachersChange(data.teachers as Teacher[]);
+          }
+          if (Array.isArray(data.users) && data.users.length > 0) {
+            callbacks.onUsersChange(data.users as User[]);
+          }
+          if (Array.isArray(data.lessonSchedules) && data.lessonSchedules.length > 0) {
+            callbacks.onLessonSchedulesChange?.(data.lessonSchedules as LessonSchedule[]);
+          }
+          if (data.schoolSettings && typeof data.schoolSettings === 'object') {
+            callbacks.onSchoolSettingsChange?.(data.schoolSettings as SchoolSettings);
+          }
+          if (data.galleryViewSettings && typeof data.galleryViewSettings === 'object') {
+            callbacks.onGalleryViewSettingsChange?.(data.galleryViewSettings as GalleryViewSettings);
+          }
+          if (Array.isArray(data.pklPartners)) {
+            callbacks.onPklPartnersChange?.(data.pklPartners as IndustryPartner[]);
+          }
+          if (Array.isArray(data.pklVisits)) {
+            callbacks.onPklVisitsChange?.(data.pklVisits as PklVisitRecord[]);
+          }
+          if (Array.isArray(data.pklReports)) {
+            callbacks.onPklReportsChange?.(data.pklReports as PklStudentReportItem[]);
+          }
+          if (Array.isArray(data.pklTracers)) {
+            callbacks.onPklTracersChange?.(data.pklTracers as AlumniTracerRecord[]);
+          }
+          if (Array.isArray(data.assessments)) {
+            callbacks.onAssessmentsChange(data.assessments as Assessment[]);
+          }
+          if (Array.isArray(data.attendanceSessions)) {
+            callbacks.onAttendanceSessionsChange(data.attendanceSessions as AttendanceSession[]);
+          }
+          if (data.customStudentReports && typeof data.customStudentReports === 'object') {
+            callbacks.onStudentReportsMapChange?.(data.customStudentReports as Record<string, any>);
+          }
+          handleUpdate();
+        }
+      },
+      error => {
+        safeHandleListenerError(error, 'settings/orbita_bundle_master');
+      }
+    );
+    unsubscribers.push(unsubMasterBundle);
+
+    const unsubStudentsBundle = onSnapshot(
+      doc(db, 'settings', 'orbita_bundle_students'),
+      docSnap => {
+        if (docSnap.exists()) {
+          const data = docSnap.data() as Record<string, any>;
+          if (Array.isArray(data.students) && data.students.length > 0) {
+            callbacks.onStudentsChange(data.students as Student[]);
+            handleUpdate();
+          }
+        }
+      },
+      error => {
+        safeHandleListenerError(error, 'settings/orbita_bundle_students');
+      }
+    );
+    unsubscribers.push(unsubStudentsBundle);
+
+    const unsubRecordsBundle = onSnapshot(
+      doc(db, 'settings', 'orbita_bundle_records'),
+      docSnap => {
+        if (docSnap.exists()) {
+          const data = docSnap.data() as Record<string, any>;
+          if (Array.isArray(data.attendanceRecords)) {
+            callbacks.onAttendanceRecordsChange(data.attendanceRecords as AttendanceRecord[]);
+          }
+          if (Array.isArray(data.attendanceCorrections)) {
+            callbacks.onAttendanceCorrectionsChange(data.attendanceCorrections as AttendanceCorrection[]);
+          }
+          if (Array.isArray(data.assessmentScores)) {
+            callbacks.onAssessmentScoresChange(data.assessmentScores as AssessmentScore[]);
+          }
+          if (Array.isArray(data.notifications)) {
+            callbacks.onNotificationsChange(data.notifications as NotificationItem[]);
+          }
+          if (Array.isArray(data.chatMessages)) {
+            callbacks.onChatMessagesChange(data.chatMessages as ChatMessage[]);
+          }
+          if (Array.isArray(data.directMessages)) {
+            callbacks.onDirectMessagesChange?.(data.directMessages as ChatMessage[]);
+          }
+          if (Array.isArray(data.auditLogs)) {
+            callbacks.onAuditLogsChange(data.auditLogs as AuditLog[]);
+          }
+          handleUpdate();
+        }
+      },
+      error => {
+        safeHandleListenerError(error, 'settings/orbita_bundle_records');
+      }
+    );
+    unsubscribers.push(unsubRecordsBundle);
+  } catch (err) {
+    console.error('Error attaching real-time bundle listeners:', err);
+  }
+
   return () => {
     unsubscribers.forEach(u => u());
   };
@@ -1075,6 +1211,80 @@ export async function firestoreDeleteStudent(id: string): Promise<void> {
     await deleteDoc(doc(db, 'students', id));
   } catch (err) {
     handleFirestoreError(err, OperationType.DELETE, `students/${id}`);
+  }
+}
+
+export async function firestoreDeleteStudentCascade(
+  studentId: string,
+  recordIds: string[],
+  scoreIds: string[],
+  correctionIds: string[],
+  userIdToDelete?: string,
+  updatedClass?: { id: string; studentCount: number }
+): Promise<void> {
+  try {
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'students', studentId));
+    if (userIdToDelete) {
+      batch.delete(doc(db, 'users', userIdToDelete));
+    }
+    if (updatedClass) {
+      batch.set(
+        doc(db, 'classes', updatedClass.id),
+        sanitizeForFirestore({ studentCount: updatedClass.studentCount }),
+        { merge: true }
+      );
+    }
+    recordIds.slice(0, 150).forEach(rid => batch.delete(doc(db, 'attendanceRecords', rid)));
+    scoreIds.slice(0, 150).forEach(sid => batch.delete(doc(db, 'assessmentScores', sid)));
+    correctionIds.slice(0, 100).forEach(cid => batch.delete(doc(db, 'attendanceCorrections', cid)));
+    await batch.commit();
+  } catch (err) {
+    handleFirestoreError(err, OperationType.DELETE, `students/${studentId}`);
+  }
+}
+
+export async function firestoreDeleteClassCascade(
+  classId: string,
+  sessionIds: string[],
+  recordIds: string[],
+  assessmentIds: string[],
+  scoreIds: string[],
+  updatedStudents: { id: string; className: string }[],
+  updatedUsers: { id: string }[]
+): Promise<void> {
+  try {
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'classes', classId));
+    sessionIds.slice(0, 100).forEach(sid => batch.delete(doc(db, 'attendanceSessions', sid)));
+    recordIds.slice(0, 120).forEach(rid => batch.delete(doc(db, 'attendanceRecords', rid)));
+    assessmentIds.slice(0, 100).forEach(aid => batch.delete(doc(db, 'assessments', aid)));
+    scoreIds.slice(0, 120).forEach(scid => batch.delete(doc(db, 'assessmentScores', scid)));
+    updatedStudents.slice(0, 60).forEach(st =>
+      batch.set(doc(db, 'students', st.id), { className: st.className }, { merge: true })
+    );
+    updatedUsers.slice(0, 60).forEach(u =>
+      batch.set(doc(db, 'users', u.id), { classId: '', className: '' }, { merge: true })
+    );
+    await batch.commit();
+  } catch (err) {
+    handleFirestoreError(err, OperationType.DELETE, `classes/${classId}`);
+  }
+}
+
+export async function firestoreDeleteSubjectCascade(
+  subjectId: string,
+  assessmentIds: string[],
+  scoreIds: string[]
+): Promise<void> {
+  try {
+    const batch = writeBatch(db);
+    batch.delete(doc(db, 'subjects', subjectId));
+    assessmentIds.slice(0, 150).forEach(aid => batch.delete(doc(db, 'assessments', aid)));
+    scoreIds.slice(0, 250).forEach(scid => batch.delete(doc(db, 'assessmentScores', scid)));
+    await batch.commit();
+  } catch (err) {
+    handleFirestoreError(err, OperationType.DELETE, `subjects/${subjectId}`);
   }
 }
 
@@ -1545,6 +1755,10 @@ export async function pushPublicBundlesToFirestore(state: Record<string, any>): 
       attendanceRecords: (state.attendanceRecords ?? []).slice(0, 1200),
       attendanceCorrections: (state.attendanceCorrections ?? []).slice(0, 300),
       assessmentScores: (state.assessmentScores ?? []).slice(0, 1500),
+      notifications: (state.notifications ?? []).slice(0, 100),
+      chatMessages: (state.chatMessages ?? []).slice(0, 150),
+      directMessages: (state.directMessages ?? []).slice(0, 150),
+      auditLogs: (state.auditLogs ?? []).slice(0, 100),
     });
 
     await Promise.allSettled([

@@ -2,166 +2,219 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Default deny catch-all
+    // Default deny catch-all (tidak ada akses ke collection yang tidak terdaftar)
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Helper functions
+    // Helper functions untuk validasi identitas dokumen, struktur payload, dan proteksi hak akses
     function isValidId(id) {
       return id is string && id.size() > 0 && id.size() <= 128;
     }
 
-    // Users and Profiles (synced across all devices & browsers)
-    match /users/{userId} {
-      allow read: if true;
-      allow write: if isValidId(userId);
+    function isValidPayload() {
+      return request.resource != null
+        && request.resource.data is map
+        && request.resource.data.keys().size() > 0
+        && request.resource.data.keys().size() <= 100;
     }
 
-    // Admins collection
+    function isValidRole() {
+      return !('role' in request.resource.data)
+        || request.resource.data.role in ['super_admin', 'kepala_sekolah', 'guru', 'wali_kelas', 'siswa'];
+    }
+
+    function isProtectedRootAdmin(userId) {
+      return userId == 'usr-1'
+        || (resource != null && 'email' in resource.data && resource.data.email == 'kkaito447@gmail.com');
+    }
+
+    function preservesRootAdminRole(userId) {
+      return !isProtectedRootAdmin(userId)
+        || !('role' in request.resource.data)
+        || request.resource.data.role == 'super_admin';
+    }
+
+    // Users and Profiles (sinkronisasi akun pengguna lintas perangkat dengan proteksi Super Admin utama)
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isValidId(userId) && isValidPayload() && isValidRole() && preservesRootAdminRole(userId);
+      allow delete: if isValidId(userId) && !isProtectedRootAdmin(userId);
+    }
+
+    // Admins collection (khusus pencatatan administrator)
     match /admins/{adminId} {
       allow read: if true;
-      allow write: if isValidId(adminId);
+      allow create, update: if isValidId(adminId) && isValidPayload();
+      allow delete: if isValidId(adminId) && adminId != 'usr-1';
     }
 
     // Students master collection
     match /students/{studentId} {
       allow read: if true;
-      allow write: if isValidId(studentId);
+      allow create, update: if isValidId(studentId) && isValidPayload();
+      allow delete: if isValidId(studentId);
     }
 
     // Teachers master collection
     match /teachers/{teacherId} {
       allow read: if true;
-      allow write: if isValidId(teacherId);
+      allow create, update: if isValidId(teacherId) && isValidPayload();
+      allow delete: if isValidId(teacherId);
     }
 
     // Classes collection
     match /classes/{classId} {
       allow read: if true;
-      allow write: if isValidId(classId);
+      allow create, update: if isValidId(classId) && isValidPayload();
+      allow delete: if isValidId(classId);
     }
 
     // Majors (Jurusan) collection
     match /majors/{majorId} {
       allow read: if true;
-      allow write: if isValidId(majorId);
+      allow create, update: if isValidId(majorId) && isValidPayload();
+      allow delete: if isValidId(majorId);
     }
 
     // Subjects (Mata Pelajaran) collection
     match /subjects/{subjectId} {
       allow read: if true;
-      allow write: if isValidId(subjectId);
+      allow create, update: if isValidId(subjectId) && isValidPayload();
+      allow delete: if isValidId(subjectId);
     }
 
     // Academic Years collection
     match /academicYears/{yearId} {
       allow read: if true;
-      allow write: if isValidId(yearId);
+      allow create, update: if isValidId(yearId) && isValidPayload();
+      allow delete: if isValidId(yearId);
     }
 
     // Attendance sessions
     match /attendanceSessions/{sessionId} {
       allow read: if true;
-      allow write: if isValidId(sessionId);
+      allow create, update: if isValidId(sessionId) && isValidPayload();
+      allow delete: if isValidId(sessionId);
     }
 
-    // Attendance records
+    // Attendance records (validasi status kehadiran H/S/I/A/T)
     match /attendanceRecords/{recordId} {
       allow read: if true;
-      allow write: if isValidId(recordId);
+      allow create, update: if isValidId(recordId)
+        && isValidPayload()
+        && (!('status' in request.resource.data) || request.resource.data.status in ['H', 'S', 'I', 'A', 'T']);
+      allow delete: if isValidId(recordId);
     }
 
     // Attendance corrections
     match /attendanceCorrections/{correctionId} {
       allow read: if true;
-      allow write: if isValidId(correctionId);
+      allow create, update: if isValidId(correctionId) && isValidPayload();
+      allow delete: if isValidId(correctionId);
     }
 
     // Assessments
     match /assessments/{assessmentId} {
       allow read: if true;
-      allow write: if isValidId(assessmentId);
+      allow create, update: if isValidId(assessmentId) && isValidPayload();
+      allow delete: if isValidId(assessmentId);
     }
 
-    // Assessment scores
+    // Assessment scores (validasi rentang nilai 0-100)
     match /assessmentScores/{scoreId} {
       allow read: if true;
-      allow write: if isValidId(scoreId);
+      allow create, update: if isValidId(scoreId)
+        && isValidPayload()
+        && (!('score' in request.resource.data) || (request.resource.data.score is number && request.resource.data.score >= 0 && request.resource.data.score <= 100));
+      allow delete: if isValidId(scoreId);
     }
 
     // Audit logs
     match /auditLogs/{logId} {
       allow read: if true;
-      allow write: if isValidId(logId);
+      allow create, update: if isValidId(logId) && isValidPayload();
+      allow delete: if isValidId(logId);
     }
 
     // Chat messages (Real-time student chat room & admin monitoring)
     match /chatMessages/{messageId} {
       allow read: if true;
-      allow write: if isValidId(messageId);
+      allow create, update: if isValidId(messageId) && isValidPayload();
+      allow delete: if isValidId(messageId);
     }
 
-    // Direct Messages (1-on-1 DM between profiles across all devices)
+    // Direct Messages (1-on-1 DM antar pengguna lintas perangkat)
     match /directMessages/{messageId} {
       allow read: if true;
-      allow write: if isValidId(messageId);
+      allow create, update: if isValidId(messageId) && isValidPayload();
+      allow delete: if isValidId(messageId);
     }
 
     // Custom Report Templates / Customizer Settings (PDF Kop, Logo, TTD)
     match /reportTemplates/{templateId} {
       allow read: if true;
-      allow write: if isValidId(templateId);
+      allow create, update: if isValidId(templateId) && isValidPayload();
+      allow delete: if isValidId(templateId);
     }
 
     // Notifications (Targeted & Broadcast)
     match /notifications/{notificationId} {
       allow read: if true;
-      allow write: if isValidId(notificationId);
+      allow create, update: if isValidId(notificationId) && isValidPayload();
+      allow delete: if isValidId(notificationId);
     }
 
-    // System & Visual Settings (Login & Header Banner backgrounds)
+    // System, Bundle & Visual Settings
     match /settings/{settingId} {
       allow read: if true;
-      allow write: if isValidId(settingId);
+      allow create, update: if isValidId(settingId) && isValidPayload();
+      allow delete: if isValidId(settingId);
     }
 
-    // PKL Administration (Industry Partners, Visits, and Student Reports)
+    // PKL Administration (Industry Partners, Visits, Student Reports & Tracer Studies)
     match /pklPartners/{partnerId} {
       allow read: if true;
-      allow write: if isValidId(partnerId);
+      allow create, update: if isValidId(partnerId) && isValidPayload();
+      allow delete: if isValidId(partnerId);
     }
 
     match /pklVisits/{visitId} {
       allow read: if true;
-      allow write: if isValidId(visitId);
+      allow create, update: if isValidId(visitId) && isValidPayload();
+      allow delete: if isValidId(visitId);
     }
 
     match /pklReports/{reportId} {
       allow read: if true;
-      allow write: if isValidId(reportId);
+      allow create, update: if isValidId(reportId) && isValidPayload();
+      allow delete: if isValidId(reportId);
     }
 
     match /pklTracerStudies/{tracerId} {
       allow read: if true;
-      allow write: if isValidId(tracerId);
+      allow create, update: if isValidId(tracerId) && isValidPayload();
+      allow delete: if isValidId(tracerId);
     }
 
     // Lesson Schedules (Jadwal Pelajaran di Data Pokok)
     match /lessonSchedules/{scheduleId} {
       allow read: if true;
-      allow write: if isValidId(scheduleId);
+      allow create, update: if isValidId(scheduleId) && isValidPayload();
+      allow delete: if isValidId(scheduleId);
     }
 
     // Gallery Photos (Activity documentation managed by Admin, shown in Login Gallery)
     match /galleryPhotos/{photoId} {
       allow read: if true;
-      allow write: if isValidId(photoId);
+      allow create, update: if isValidId(photoId) && isValidPayload();
+      allow delete: if isValidId(photoId);
     }
 
     // Connection test document
     match /test/{testId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isValidId(testId);
     }
   }
 }
