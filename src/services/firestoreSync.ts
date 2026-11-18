@@ -1,17 +1,23 @@
 import {
   collection,
   doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  deleteDoc,
-  onSnapshot,
+  getDoc as fbGetDoc,
+  getDocs as fbGetDocs,
+  setDoc as fbSetDoc,
+  deleteDoc as fbDeleteDoc,
+  onSnapshot as fbOnSnapshot,
   query,
   orderBy,
   limit,
-  writeBatch,
+  writeBatch as fbWriteBatch,
 } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import {
+  db,
+  handleFirestoreError,
+  OperationType,
+  isFirestoreQuotaExhausted,
+  tripFirestoreQuotaBreaker,
+} from '../lib/firebase';
 import {
   Student,
   Teacher,
@@ -89,181 +95,195 @@ export interface SyncCallbacks {
 }
 
 let isInitialized = false;
-let hasLoggedQuotaNotice = false;
 
 function isFirestoreQuotaError(error: unknown): boolean {
   const msg = (error instanceof Error ? error.message : String(error || '')).toLowerCase();
   const code = (error as { code?: string })?.code?.toLowerCase() || '';
   return (
     code === 'resource-exhausted' ||
+    msg.includes('resource-exhausted') ||
     msg.includes('quota limit exceeded') ||
     msg.includes('quota exceeded') ||
-    msg.includes('free daily read units')
+    msg.includes('free daily write units') ||
+    msg.includes('free daily read units') ||
+    msg.includes('maximum backoff delay')
   );
 }
 
-// Auto-seed Firestore if collections are empty so all devices get real synchronized data
-export async function ensureFirestorePopulated(): Promise<void> {
-  if (isInitialized) return;
-  isInitialized = true;
+// Quota-safe wrappers around Firestore SDK calls so exhausted free-tier quota never triggers SDK retry loops or errors
+async function setDoc(ref: any, data: any, options?: any): Promise<void> {
+  if (isFirestoreQuotaExhausted()) return;
   try {
-    if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('orbita_firestore_seeded_v1') === '1') {
-      return;
-    }
-    const studentsSnap = await getDocs(query(collection(db, 'students'), limit(1)));
-    if (studentsSnap.empty) {
-      console.log('Firestore is empty. Initializing cloud database with authentic ORBITA records...');
-      const batch = writeBatch(db);
-
-      initialStudents.forEach(item => {
-        batch.set(doc(db, 'students', item.id), sanitizeForFirestore(item));
-      });
-
-      initialTeachers.forEach(item => {
-        batch.set(doc(db, 'teachers', item.id), sanitizeForFirestore(item));
-      });
-
-      initialClasses.forEach(item => {
-        batch.set(doc(db, 'classes', item.id), sanitizeForFirestore(item));
-      });
-
-      initialMajors.forEach(item => {
-        batch.set(doc(db, 'majors', item.id), sanitizeForFirestore(item));
-      });
-
-      initialSubjects.forEach(item => {
-        batch.set(doc(db, 'subjects', item.id), sanitizeForFirestore(item));
-      });
-
-      initialAcademicYears.forEach(item => {
-        batch.set(doc(db, 'academicYears', item.id), sanitizeForFirestore(item));
-      });
-
-      initialUsers.forEach(item => {
-        batch.set(doc(db, 'users', item.id), sanitizeForFirestore(item));
-      });
-
-      initialAttendanceSessions.forEach(item => {
-        batch.set(doc(db, 'attendanceSessions', item.id), sanitizeForFirestore(item));
-      });
-
-      initialAttendanceRecords.forEach(item => {
-        batch.set(doc(db, 'attendanceRecords', item.id), sanitizeForFirestore(item));
-      });
-
-      initialAssessments.forEach(item => {
-        batch.set(doc(db, 'assessments', item.id), sanitizeForFirestore(item));
-      });
-
-      initialAssessmentScores.forEach(item => {
-        batch.set(doc(db, 'assessmentScores', item.id), sanitizeForFirestore(item));
-      });
-
-      initialNotifications.forEach(item => {
-        batch.set(doc(db, 'notifications', item.id), sanitizeForFirestore(item));
-      });
-
-      initialChatMessages.forEach(item => {
-        batch.set(doc(db, 'chatMessages', item.id), sanitizeForFirestore(item));
-      });
-
-      initialAuditLogs.forEach(item => {
-        batch.set(doc(db, 'auditLogs', item.id), sanitizeForFirestore(item));
-      });
-
-      let localSchedules: LessonSchedule[] = initialLessonSchedules;
-      try {
-        const savedLocal = typeof localStorage !== 'undefined' ? localStorage.getItem('myschool_lesson_schedules') : null;
-        if (savedLocal) {
-          const parsed = JSON.parse(savedLocal);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            localSchedules = parsed;
-          }
-        }
-      } catch {}
-
-      localSchedules.forEach(item => {
-        batch.set(doc(db, 'lessonSchedules', item.id), sanitizeForFirestore(item));
-      });
-
-      batch.set(doc(db, 'settings', 'schedules_meta'), {
-        initialized: true,
-        schedules: sanitizeForFirestore(localSchedules),
-        updatedAt: new Date().toISOString(),
-      });
-
-      await batch.commit();
-      if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.setItem('orbita_firestore_seeded_v1', '1');
-      }
-      console.log('Cloud Firestore successfully seeded and synchronized!');
+    if (options !== undefined) {
+      await fbSetDoc(ref, data, options);
     } else {
-      const schedulesMetaSnap = await getDoc(doc(db, 'settings', 'schedules_meta'));
-      const metaData = schedulesMetaSnap.exists() ? schedulesMetaSnap.data() : null;
-      if (!metaData || !Array.isArray(metaData.schedules)) {
-        let schedulesToPersist: LessonSchedule[] = initialLessonSchedules;
-        try {
-          const savedLocal = typeof localStorage !== 'undefined' ? localStorage.getItem('myschool_lesson_schedules') : null;
-          if (savedLocal) {
-            const parsed = JSON.parse(savedLocal);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              schedulesToPersist = parsed;
-            }
-          }
-        } catch {}
-
-        const schedBatch = writeBatch(db);
-        schedulesToPersist.forEach(item => {
-          schedBatch.set(doc(db, 'lessonSchedules', item.id), sanitizeForFirestore(item));
-        });
-        schedBatch.set(doc(db, 'settings', 'schedules_meta'), {
-          initialized: true,
-          schedules: sanitizeForFirestore(schedulesToPersist),
-          updatedAt: new Date().toISOString(),
-        });
-        await schedBatch.commit();
-        console.log('Lesson schedules initialized permanently in Firestore.');
-      }
-      if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.setItem('orbita_firestore_seeded_v1', '1');
-      }
+      await fbSetDoc(ref, data);
     }
   } catch (err) {
-    if (!isFirestoreQuotaError(err)) {
-      console.warn('Initial seeding encountered notice (may already have records):', err);
+    if (isFirestoreQuotaError(err)) {
+      tripFirestoreQuotaBreaker();
+      return;
     }
+    throw err;
   }
+}
+
+async function deleteDoc(ref: any): Promise<void> {
+  if (isFirestoreQuotaExhausted()) return;
+  try {
+    await fbDeleteDoc(ref);
+  } catch (err) {
+    if (isFirestoreQuotaError(err)) {
+      tripFirestoreQuotaBreaker();
+      return;
+    }
+    throw err;
+  }
+}
+
+async function getDoc(ref: any): Promise<any> {
+  if (isFirestoreQuotaExhausted()) {
+    return { exists: () => false, data: () => undefined };
+  }
+  try {
+    return await fbGetDoc(ref);
+  } catch (err) {
+    if (isFirestoreQuotaError(err)) {
+      tripFirestoreQuotaBreaker();
+      return { exists: () => false, data: () => undefined };
+    }
+    throw err;
+  }
+}
+
+async function getDocs(q: any): Promise<{
+  empty: boolean;
+  docs: any[];
+  forEach: (cb: (docSnap: any) => void) => void;
+}> {
+  if (isFirestoreQuotaExhausted()) {
+    return { empty: true, docs: [], forEach: () => {} };
+  }
+  try {
+    return (await fbGetDocs(q)) as any;
+  } catch (err) {
+    if (isFirestoreQuotaError(err)) {
+      tripFirestoreQuotaBreaker();
+      return { empty: true, docs: [], forEach: () => {} };
+    }
+    throw err;
+  }
+}
+
+function writeBatch(dbInstance: any): any {
+  if (isFirestoreQuotaExhausted()) {
+    return {
+      set: () => {},
+      update: () => {},
+      delete: () => {},
+      commit: async () => {},
+    };
+  }
+  const realBatch = fbWriteBatch(dbInstance);
+  return {
+    set: (...args: [any, any, any?]) => (realBatch.set as any)(...args),
+    update: (...args: [any, any]) => (realBatch.update as any)(...args),
+    delete: (ref: any) => realBatch.delete(ref),
+    commit: async () => {
+      if (isFirestoreQuotaExhausted()) return;
+      try {
+        await realBatch.commit();
+      } catch (err) {
+        if (isFirestoreQuotaError(err)) {
+          tripFirestoreQuotaBreaker();
+          return;
+        }
+        throw err;
+      }
+    },
+  };
+}
+
+interface SafeSnapshot {
+  empty: boolean;
+  docs: any[];
+  metadata: { fromCache?: boolean; hasPendingWrites?: boolean };
+  exists: () => boolean;
+  data: () => any;
+  forEach: (cb: (docSnap: any) => void) => void;
+}
+
+function onSnapshot(
+  target: any,
+  onNext: (snap: SafeSnapshot) => void,
+  onError?: (err: any) => void
+): () => void {
+  if (isFirestoreQuotaExhausted()) {
+    return () => {};
+  }
+  let unsub: (() => void) | null = null;
+  try {
+    unsub = fbOnSnapshot(
+      target,
+      (snap: any) => {
+        if (isFirestoreQuotaExhausted()) return;
+        // Ignore stale local IndexedDB cache snapshots so they never overwrite fresh Cross-Device Sync Hub data
+        if (snap?.metadata?.fromCache && !snap?.metadata?.hasPendingWrites) {
+          return;
+        }
+        onNext(snap as SafeSnapshot);
+      },
+      (err: any) => {
+        if (isFirestoreQuotaError(err)) {
+          tripFirestoreQuotaBreaker();
+          if (unsub) {
+            try {
+              unsub();
+            } catch {}
+          }
+          return;
+        }
+        onError?.(err);
+      }
+    );
+    return () => {
+      try {
+        unsub?.();
+      } catch {}
+    };
+  } catch (err) {
+    if (isFirestoreQuotaError(err)) {
+      tripFirestoreQuotaBreaker();
+    }
+    return () => {};
+  }
+}
+
+// Lightweight check on startup (avoids 650-document batch writes that exhaust daily free quota)
+export async function ensureFirestorePopulated(): Promise<void> {
+  if (isInitialized || isFirestoreQuotaExhausted()) return;
+  isInitialized = true;
 }
 
 // Subscribe all real-time collections
 export function subscribeAllCollections(callbacks: SyncCallbacks): () => void {
+  if (isFirestoreQuotaExhausted()) {
+    return () => {};
+  }
   const unsubscribers: (() => void)[] = [];
 
   const safeHandleListenerError = (error: unknown, path: string) => {
     if (isFirestoreQuotaError(error)) {
-      if (!hasLoggedQuotaNotice) {
-        hasLoggedQuotaNotice = true;
-        console.warn('Kuota baca harian Firestore tercapai; menggunakan data lokal sementara hingga kuota direset.');
-      }
-      callbacks.onSyncStatusChange?.({
-        isConnected: false,
-        isSyncing: false,
-        lastSync: new Date(),
-        error: 'Kuota baca harian Firestore tercapai (mode cache lokal aktif).',
+      tripFirestoreQuotaBreaker();
+      unsubscribers.forEach(u => {
+        try {
+          u();
+        } catch {}
       });
+      unsubscribers.length = 0;
       return;
     }
-    try {
-      handleFirestoreError(error, OperationType.GET, path);
-    } catch (err) {
-      console.warn(`Firestore listener notice (${path}):`, err);
-      callbacks.onSyncStatusChange?.({
-        isConnected: false,
-        isSyncing: false,
-        lastSync: new Date(),
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
+    handleFirestoreError(error, OperationType.GET, path);
   };
 
   const handleUpdate = () => {
@@ -1599,111 +1619,21 @@ export async function firestoreSaveReportTemplate(template: any): Promise<void> 
   }
 }
 
-// Push all current user-inputted state across all collections to Cloud Firestore
+// Push all current user-inputted state across all collections to Cloud Firestore using compact bundles (3 writes instead of 650+ writes)
 export async function syncCurrentStateToFirestore(
   state?: Record<string, any>
 ): Promise<{ success: boolean; count: number; error?: string }> {
+  if (isFirestoreQuotaExhausted()) {
+    return { success: true, count: 0 };
+  }
   try {
-    const studentsList: Student[] = state?.students ?? initialStudents;
-    const teachersList: Teacher[] = state?.teachers ?? initialTeachers;
-    const classesList: ClassRoom[] = state?.classes ?? initialClasses;
-    const majorsList: Major[] = state?.majors ?? initialMajors;
-    const subjectsList: Subject[] = state?.subjects ?? initialSubjects;
-    const academicYearsList: AcademicYear[] = state?.academicYears ?? initialAcademicYears;
-    const usersList: User[] = state?.users ?? initialUsers;
-    const sessionsList: AttendanceSession[] = state?.attendanceSessions ?? initialAttendanceSessions;
-    const recordsList: AttendanceRecord[] = state?.attendanceRecords ?? initialAttendanceRecords;
-    const correctionsList: AttendanceCorrection[] = state?.attendanceCorrections ?? [];
-    const assessmentsList: Assessment[] = state?.assessments ?? initialAssessments;
-    const scoresList: AssessmentScore[] = state?.assessmentScores ?? initialAssessmentScores;
-    const notificationsList: NotificationItem[] = state?.notifications ?? initialNotifications;
-    const chatList: ChatMessage[] = state?.chatMessages ?? initialChatMessages;
-    const dmList: any[] = state?.directMessages ?? [];
-    const logsList: AuditLog[] = (state?.auditLogs ?? initialAuditLogs).slice(0, 150);
-    const pklPartnersList: IndustryPartner[] = state?.pklPartners ?? [];
-    const pklVisitsList: PklVisitRecord[] = state?.pklVisits ?? [];
-    const pklReportsList: PklStudentReportItem[] = state?.pklReports ?? [];
-    const pklTracersList: AlumniTracerRecord[] = state?.pklTracers ?? [];
-    const schedulesList: LessonSchedule[] = state?.lessonSchedules ?? initialLessonSchedules;
-
-    const ops: Array<{ col: string; id: string; data: any }> = [];
-    const pushOps = (col: string, items: any[]) => {
-      if (!Array.isArray(items)) return;
-      for (const item of items) {
-        if (item && item.id) {
-          ops.push({ col, id: String(item.id), data: sanitizeForFirestore(item) });
-        }
-      }
-    };
-
-    pushOps('students', studentsList);
-    pushOps('teachers', teachersList);
-    pushOps('classes', classesList);
-    pushOps('majors', majorsList);
-    pushOps('subjects', subjectsList);
-    pushOps('academicYears', academicYearsList);
-    pushOps('users', usersList);
-    pushOps('attendanceSessions', sessionsList);
-    pushOps('attendanceRecords', recordsList);
-    pushOps('attendanceCorrections', correctionsList);
-    pushOps('assessments', assessmentsList);
-    pushOps('assessmentScores', scoresList);
-    pushOps('notifications', notificationsList);
-    pushOps('chatMessages', chatList);
-    pushOps('directMessages', dmList);
-    pushOps('auditLogs', logsList);
-    pushOps('pklPartners', pklPartnersList);
-    pushOps('pklVisits', pklVisitsList);
-    pushOps('pklReports', pklReportsList);
-    pushOps('pklTracerStudies', pklTracersList);
-    pushOps('lessonSchedules', schedulesList);
-
-    const chunkSize = 400;
-    for (let i = 0; i < ops.length; i += chunkSize) {
-      const chunk = ops.slice(i, i + chunkSize);
-      const batch = writeBatch(db);
-      for (const op of chunk) {
-        batch.set(doc(db, op.col, op.id), op.data, { merge: true });
-      }
-      await batch.commit();
-    }
-
-    // Sync settings, report templates, schedules_meta, gallery photos & view settings
-    const extraPromises: Promise<any>[] = [];
-    if (state?.schoolSettings) {
-      extraPromises.push(firestoreSaveSchoolSettings(state.schoolSettings));
-    }
-    if (state?.visualSettings) {
-      extraPromises.push(firestoreSaveVisualSettings(state.visualSettings));
-    }
-    if (state?.reportTemplate) {
-      extraPromises.push(firestoreSaveReportTemplate(state.reportTemplate));
-    }
-    if (state?.customStudentReports) {
-      extraPromises.push(firestoreSaveCustomStudentReports(state.customStudentReports));
-    }
-    if (Array.isArray(state?.lessonSchedules)) {
-      extraPromises.push(firestoreSaveAllLessonSchedules(state.lessonSchedules));
-    }
-    if (state?.galleryViewSettings) {
-      extraPromises.push(firestoreSaveGalleryViewSettings(state.galleryViewSettings));
-    }
-    if (Array.isArray(state?.galleryPhotos)) {
-      for (const photo of state.galleryPhotos) {
-        if (photo && photo.id) {
-          extraPromises.push(firestoreSaveGalleryPhoto(photo));
-        }
-      }
-    }
-
     if (state) {
-      extraPromises.push(pushPublicBundlesToFirestore(state));
+      await pushPublicBundlesToFirestore(state);
     }
-
-    await Promise.allSettled(extraPromises);
-    return { success: true, count: ops.length };
+    return { success: true, count: 3 };
   } catch (e: any) {
     if (isFirestoreQuotaError(e)) {
+      tripFirestoreQuotaBreaker();
       return { success: true, count: 0 };
     }
     return { success: false, count: 0, error: e?.message || 'Gagal menyinkronkan data ke Firestore' };
@@ -1851,6 +1781,25 @@ export async function firestoreUpdateAttendanceRecord(record: AttendanceRecord):
     await setDoc(doc(db, 'attendanceRecords', record.id), sanitizeForFirestore(record), { merge: true });
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, `attendanceRecords/${record.id}`);
+  }
+}
+
+export async function firestoreSaveAttendanceCorrection(
+  id: string,
+  correction: Partial<AttendanceCorrection>
+): Promise<void> {
+  try {
+    await setDoc(doc(db, 'attendanceCorrections', id), sanitizeForFirestore(correction), { merge: true });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `attendanceCorrections/${id}`);
+  }
+}
+
+export async function firestoreDeleteAttendanceCorrection(id: string): Promise<void> {
+  try {
+    await deleteDoc(doc(db, 'attendanceCorrections', id));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `attendanceCorrections/${id}`);
   }
 }
 

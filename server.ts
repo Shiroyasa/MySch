@@ -27,15 +27,26 @@ export interface SyncStoreState {
 function computeQuickHash(val: any): string {
   try {
     const str = JSON.stringify(val);
-    let h = 2166136261;
-    const step = Math.max(1, Math.floor(str.length / 500));
-    for (let i = 0; i < str.length; i += step) {
-      h ^= str.charCodeAt(i);
-      h = Math.imul(h, 16777619);
+    if (!str) return '0:0:0';
+    let h1 = 2166136261;
+    let h2 = 5381;
+    const len = str.length;
+    const limit = Math.min(len, 150000);
+    for (let i = 0; i < limit; i++) {
+      const c = str.charCodeAt(i);
+      h1 ^= c;
+      h1 = Math.imul(h1, 16777619);
+      h2 = (Math.imul(h2, 33) ^ c) | 0;
     }
-    return `${str.length}:${(h >>> 0).toString(36)}`;
+    for (let i = limit; i < len; i += 7) {
+      const c = str.charCodeAt(i);
+      h1 ^= c;
+      h1 = Math.imul(h1, 16777619);
+      h2 = (Math.imul(h2, 33) ^ c) | 0;
+    }
+    return `${len}:${(h1 >>> 0).toString(36)}:${(h2 >>> 0).toString(36)}`;
   } catch {
-    return `0:0`;
+    return '0:0:0';
   }
 }
 
@@ -241,16 +252,12 @@ async function startServer() {
         }
 
         // For 'auto' (live user mutation) or 'force' (explicit manual sync):
-        // Avoid overwriting customized server data with non-custom seed data unless mode === 'force' AND incomingIsCustom
-        if (mode === 'auto' && existingMeta?.isCustom && !incomingIsCustom) {
-          continue;
-        }
-
+        // Accept any change where the hash differs (or when forced) and mark as customized
         if (!existingMeta || existingMeta.hash !== incomingHash || mode === 'force') {
           syncStore.collections[key] = value;
           syncStore.meta[key] = {
             updatedAt: nowIso,
-            isCustom: incomingIsCustom || Boolean(existingMeta?.isCustom),
+            isCustom: true,
             clientId,
             hash: incomingHash,
           };
@@ -261,7 +268,7 @@ async function startServer() {
       if (changedKeys.length > 0) {
         syncStore.version += 1;
         syncStore.updatedAt = nowIso;
-        persistStoreToDisk(mode === 'force');
+        persistStoreToDisk(true);
         broadcastSyncUpdate(changedKeys, clientId);
       }
 

@@ -52,9 +52,8 @@ import {
   samplePklReports,
   sampleAlumniTracers,
 } from '../data/pklSeedData';
-import { auth, db } from '../lib/firebase';
+import { auth } from '../lib/firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 import {
   ensureFirestorePopulated,
   subscribeAllCollections,
@@ -83,6 +82,8 @@ import {
   firestoreSaveAttendance,
   firestoreDeleteAttendanceSessionAndRecords,
   firestoreUpdateAttendanceRecord,
+  firestoreSaveAttendanceCorrection,
+  firestoreDeleteAttendanceCorrection,
   firestoreSyncClassAttendanceRecap,
   firestoreSaveAssessment,
   firestoreAddUser,
@@ -124,7 +125,6 @@ import {
   syncCurrentStateToFirestore,
   pushPublicBundlesToFirestore,
   pullPublicBundlesFromFirestore,
-  sanitizeForFirestore,
 } from '../services/firestoreSync';
 import {
   AllSyncCollections,
@@ -132,6 +132,7 @@ import {
   ALL_SYNC_KEYS,
   computeCollectionHash,
   isCollectionCustomized,
+  pingSyncHubVersion,
   pullStateFromSyncHub,
   pushStateToSyncHub,
   subscribeToSyncHubStream,
@@ -1069,80 +1070,95 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.warn('Firestore initial populate notice:', err);
     });
 
-    // 2. Subscribe to real-time snapshot listeners across all collections
+    // 2. Subscribe to real-time snapshot listeners across all collections (only used when Cross-Device Sync Hub is not the active primary store)
     const unsubscribe = subscribeAllCollections({
       onStudentsChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.students = computeCollectionHash(data);
         setStudents(data);
         localStorage.setItem('myschool_students', JSON.stringify(data));
       },
       onTeachersChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.teachers = computeCollectionHash(data);
         setTeachers(data);
         localStorage.setItem('myschool_teachers', JSON.stringify(data));
       },
       onClassesChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.classes = computeCollectionHash(data);
         setClasses(data);
         localStorage.setItem('myschool_classes', JSON.stringify(data));
       },
       onMajorsChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.majors = computeCollectionHash(data);
         setMajors(data);
         localStorage.setItem('myschool_majors', JSON.stringify(data));
       },
       onSubjectsChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.subjects = computeCollectionHash(data);
         setSubjects(data);
         localStorage.setItem('myschool_subjects', JSON.stringify(data));
       },
       onAcademicYearsChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.academicYears = computeCollectionHash(data);
         setAcademicYears(data);
         localStorage.setItem('myschool_academic_years', JSON.stringify(data));
       },
       onAttendanceSessionsChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.attendanceSessions = computeCollectionHash(data);
         setAttendanceSessions(data);
         localStorage.setItem('myschool_attendance_sessions', JSON.stringify(data));
       },
       onAttendanceRecordsChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.attendanceRecords = computeCollectionHash(data);
         setAttendanceRecords(data);
         localStorage.setItem('myschool_attendance_records', JSON.stringify(data));
       },
       onAttendanceCorrectionsChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.attendanceCorrections = computeCollectionHash(data);
         setAttendanceCorrections(data);
         localStorage.setItem('myschool_attendance_corrections', JSON.stringify(data));
       },
       onAssessmentsChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.assessments = computeCollectionHash(data);
         assessmentsRef.current = data;
         setAssessments(data);
         localStorage.setItem('myschool_assessments', JSON.stringify(data));
       },
       onAssessmentScoresChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.assessmentScores = computeCollectionHash(data);
         setAssessmentScores(data);
         localStorage.setItem('myschool_assessment_scores', JSON.stringify(data));
       },
       onAuditLogsChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.auditLogs = computeCollectionHash(data);
         setAuditLogs(data);
         localStorage.setItem('myschool_audit_logs', JSON.stringify(data));
       },
       onNotificationsChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.notifications = computeCollectionHash(data);
         setNotifications(data);
         localStorage.setItem('myschool_notifications', JSON.stringify(data));
       },
       onChatMessagesChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.chatMessages = computeCollectionHash(data);
         setChatMessages(data);
         localStorage.setItem('myschool_chat_messages', JSON.stringify(data));
       },
       onDirectMessagesChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         lastSyncedHashesRef.current.directMessages = computeCollectionHash(data);
         setDirectMessages(data);
         localStorage.setItem('myschool_direct_messages', JSON.stringify(data));
@@ -1251,6 +1267,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       },
       onSchoolSettingsChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         setSchoolSettings(prev => {
           const next = sanitizeSchoolIdentity({ ...prev, ...data });
           try {
@@ -1260,6 +1277,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       },
       onLessonSchedulesChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         if (Date.now() - lastScheduleUpdateRef.current < 3000) {
           return;
         }
@@ -1269,10 +1287,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       },
       onStudentReportsMapChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         setCustomStudentReports(data);
         localStorage.setItem('myschool_student_reports_custom', JSON.stringify(data));
       },
       onGalleryPhotosChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         if (Date.now() - lastGalleryUpdateRef.current < 2000) {
           return;
         }
@@ -1283,6 +1303,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         } catch {}
       },
       onGalleryViewSettingsChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         if (Date.now() - lastGalleryViewUpdateRef.current < 2000) {
           return;
         }
@@ -1295,6 +1316,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         });
       },
       onUsersChange: data => {
+        if (isSyncHubAuthoritativeRef.current) return;
         setUsers(data);
         localStorage.setItem('myschool_users', JSON.stringify(data));
         setCurrentUser(curr => {
@@ -1381,6 +1403,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const lastSyncedHashesRef = React.useRef<Partial<Record<SyncCollectionKey, string>>>({});
   const isInitialSyncDoneRef = React.useRef<boolean>(false);
   const lastRemoteVersionRef = React.useRef<number>(0);
+  const isSyncHubAuthoritativeRef = React.useRef<boolean>(false);
 
   // Apply remote collections from Cross-Device Sync Hub into local React state, localStorage, and IndexedDB
   const applyRemoteCollections = React.useCallback(
@@ -1608,7 +1631,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const performInitialCrossDeviceSync = async () => {
       // Wait briefly for IndexedDB hydration (visualSettings, lessonSchedules, galleryPhotos) to complete
-      await new Promise(resolve => setTimeout(resolve, 350));
+      await new Promise(resolve => setTimeout(resolve, 250));
       if (cancelled) return;
 
       const localSnapshot = latestCollectionsRef.current;
@@ -1618,51 +1641,47 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         lastSyncedHashesRef.current[k] = computeCollectionHash(localSnapshot[k]);
       }
 
-      // 1. Pull authoritative state from BOTH the Cross-Device Sync Hub and Cloud Firestore public bundles first
-      const [pulled, bundleData] = await Promise.all([
-        pullStateFromSyncHub(),
-        pullPublicBundlesFromFirestore(),
-      ]);
+      // 1. Pull authoritative state from Cross-Device Sync Hub first
+      const pulled = await pullStateFromSyncHub();
 
-      // 2. If Cloud Firestore has persisted bundles that are customized/newer than an empty or non-custom Hub, upgrade the Hub with Firestore's state
-      if (bundleData && typeof bundleData === 'object') {
-        const firestoreUpgradesForHub: Partial<AllSyncCollections> = {};
-        for (const k of ALL_SYNC_KEYS) {
-          const bVal = (bundleData as any)[k];
-          if (bVal !== undefined && bVal !== null) {
-            const hubHasCustom = Boolean(pulled?.meta?.[k]?.isCustom);
-            if (!hubHasCustom && isCollectionCustomized(k, bVal)) {
-              (firestoreUpgradesForHub as any)[k] = bVal;
+      if (!cancelled && pulled && pulled.ok) {
+        isSyncHubAuthoritativeRef.current = true;
+        const existingServerKeys = Object.keys(pulled.collections || {});
+
+        if (existingServerKeys.length > 0) {
+          // Server already has synchronized state: apply it unconditionally as Single Source of Truth across all devices!
+          lastRemoteVersionRef.current = pulled.version || 0;
+          applyRemoteCollections(pulled.collections, pulled.meta, false);
+
+          // Only fill any collection key that is completely missing on the server
+          const missingKeysToHydrate: Partial<AllSyncCollections> = {};
+          for (const k of ALL_SYNC_KEYS) {
+            if ((pulled.collections as any)[k] === undefined) {
+              (missingKeysToHydrate as any)[k] = localSnapshot[k];
             }
           }
-        }
-        if (Object.keys(firestoreUpgradesForHub).length > 0) {
-          await pushStateToSyncHub(firestoreUpgradesForHub, 'auto');
-        }
-      }
-
-      // 3. Upload this device's state to Cross-Device Sync Hub in 'hydrate' mode (only fills keys missing on hub or upgrades non-custom keys if this device has custom data)
-      await pushStateToSyncHub(localSnapshot, 'hydrate');
-
-      // 4. Re-pull converged state from Sync Hub (or fall back to Firestore bundleData on static deployments)
-      const converged = await pullStateFromSyncHub();
-      if (!cancelled && converged && converged.collections && Object.keys(converged.collections).length > 0) {
-        lastRemoteVersionRef.current = converged.version || 0;
-        applyRemoteCollections(converged.collections, converged.meta, true);
-
-        // If local device had custom data that wasn't marked custom on server yet, push it in 'auto' mode and sync to Firestore
-        const missingCustomCols: Partial<AllSyncCollections> = {};
-        for (const k of ALL_SYNC_KEYS) {
-          if (isCollectionCustomized(k, localSnapshot[k]) && !converged.meta?.[k]?.isCustom) {
-            (missingCustomCols as any)[k] = localSnapshot[k];
+          if (Object.keys(missingKeysToHydrate).length > 0) {
+            const hydRes = await pushStateToSyncHub(missingKeysToHydrate, 'hydrate');
+            if (hydRes.version) lastRemoteVersionRef.current = hydRes.version;
+          }
+        } else {
+          // Server store is completely empty (very first boot): check Firestore bundles first, then hydrate server
+          const bundleData = await pullPublicBundlesFromFirestore();
+          const initialToHydrate = bundleData
+            ? { ...localSnapshot, ...(bundleData as Partial<AllSyncCollections>) }
+            : localSnapshot;
+          const hydRes = await pushStateToSyncHub(initialToHydrate, 'hydrate');
+          if (hydRes.version) lastRemoteVersionRef.current = hydRes.version;
+          if (!cancelled && bundleData) {
+            applyRemoteCollections(bundleData as Partial<AllSyncCollections>, undefined, false);
           }
         }
-        if (Object.keys(missingCustomCols).length > 0) {
-          await pushStateToSyncHub(missingCustomCols, 'auto');
-          syncCurrentStateToFirestore(latestCollectionsRef.current).catch(() => {});
+      } else if (!cancelled) {
+        // Fallback for static-only hosting without Express server: read Firestore public bundles
+        const bundleData = await pullPublicBundlesFromFirestore();
+        if (!cancelled && bundleData) {
+          applyRemoteCollections(bundleData as Partial<AllSyncCollections>, undefined, false);
         }
-      } else if (!cancelled && bundleData) {
-        applyRemoteCollections(bundleData as Partial<AllSyncCollections>, undefined, true);
       }
 
       if (!cancelled) {
@@ -1678,18 +1697,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (version > 0 && version <= lastRemoteVersionRef.current) return;
       const pulled = await pullStateFromSyncHub(changedKeys);
       if (!cancelled && pulled && pulled.collections) {
+        isSyncHubAuthoritativeRef.current = true;
         if (pulled.version) lastRemoteVersionRef.current = pulled.version;
         applyRemoteCollections(pulled.collections, pulled.meta, false);
       }
     });
 
-    // Pull updates when tab/app regains focus or visibility, plus periodic 7s check
+    // Fast 2-second lightweight version check + focus/visibility sync so mobile & desktop browsers always stay in lockstep
     const checkRemoteUpdates = async () => {
       if (cancelled || !isInitialSyncDoneRef.current) return;
-      const pulled = await pullStateFromSyncHub();
-      if (!cancelled && pulled && pulled.collections) {
-        if (pulled.version && pulled.version !== lastRemoteVersionRef.current) {
-          lastRemoteVersionRef.current = pulled.version;
+      const ping = await pingSyncHubVersion();
+      if (!cancelled && ping && ping.version !== lastRemoteVersionRef.current) {
+        const pulled = await pullStateFromSyncHub();
+        if (!cancelled && pulled && pulled.collections) {
+          isSyncHubAuthoritativeRef.current = true;
+          lastRemoteVersionRef.current = pulled.version || ping.version;
           applyRemoteCollections(pulled.collections, pulled.meta, false);
         }
       }
@@ -1703,7 +1725,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     window.addEventListener('focus', checkRemoteUpdates);
     document.addEventListener('visibilitychange', handleVisibility);
-    const pollInterval = setInterval(checkRemoteUpdates, 7000);
+    const pollInterval = setInterval(checkRemoteUpdates, 2000);
 
     return () => {
       cancelled = true;
@@ -1737,6 +1759,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       pushStateToSyncHub(changedToPush, 'auto')
         .then(res => {
           if (res.ok) {
+            isSyncHubAuthoritativeRef.current = true;
             if (res.version) lastRemoteVersionRef.current = res.version;
             setLastSyncTime(new Date());
             setIsFirestoreConnected(true);
@@ -1744,9 +1767,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         })
         .catch(() => {});
 
-      // Also update the 3 ultra-low-read public Firestore bundles so any public domain (including Vercel) reads the latest data
+      // Also update the 3 ultra-low-read public Firestore bundles when quota permits
       pushPublicBundlesToFirestore(latestCollectionsRef.current).catch(() => {});
-    }, 280);
+    }, 120);
 
     return () => clearTimeout(timer);
   }, [
@@ -3128,7 +3151,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAttendanceCorrections(prev => [newCorrection, ...prev]);
     addAuditLog('REQUEST_CORRECTION', 'Koreksi Absensi', `Siswa ${req.studentName} mengajukan koreksi status ${req.currentStatus} -> ${req.requestedStatus} pada tgl ${req.date}`);
     pushNotification('Permohonan Koreksi Presensi', `${req.studentName} (${req.className}) mengajukan koreksi absensi tanggal ${req.date}.`, 'warning');
-    setDoc(doc(db, 'attendanceCorrections', newCorrection.id), sanitizeForFirestore(newCorrection)).catch(() => {});
+    firestoreSaveAttendanceCorrection(newCorrection.id, newCorrection).catch(() => {});
   };
 
   const reviewAttendanceCorrection = (id: string, status: 'approved' | 'rejected', reviewerNote?: string) => {
@@ -3186,16 +3209,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       `Permohonan koreksi presensi siswa ${target.studentName} (${target.date}) telah ${status === 'approved' ? 'disetujui' : 'ditolak'}.`,
       status === 'approved' ? 'success' : 'alert'
     );
-    setDoc(
-      doc(db, 'attendanceCorrections', id),
-      sanitizeForFirestore({
-        status,
-        reviewerNote: reviewerNote || (status === 'approved' ? 'Disetujui oleh Wali Kelas / Guru' : 'Ditolak'),
-        reviewedBy: currentUser.displayName,
-        reviewedAt: new Date().toISOString(),
-      }),
-      { merge: true }
-    ).catch(() => {});
+    firestoreSaveAttendanceCorrection(id, {
+      status,
+      reviewerNote: reviewerNote || (status === 'approved' ? 'Disetujui oleh Wali Kelas / Guru' : 'Ditolak'),
+      reviewedBy: currentUser.displayName,
+      reviewedAt: new Date().toISOString(),
+    }).catch(() => {});
   };
 
   const deleteAttendanceCorrection = (id: string) => {
@@ -3205,7 +3224,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAttendanceCorrections(prev => prev.filter(c => c.id !== id));
     addAuditLog('DELETE_CORRECTION', 'Koreksi Absensi', `Menghapus permohonan koreksi absensi: ${target.studentName}`);
     pushNotification('Permohonan Koreksi Dihapus', `Permohonan koreksi absensi ${target.studentName} telah dihapus.`, 'info');
-    deleteDoc(doc(db, 'attendanceCorrections', id)).catch(() => {});
+    firestoreDeleteAttendanceCorrection(id).catch(() => {});
   };
 
   // Assessment Operations

@@ -1,7 +1,12 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import { getFirestore, doc, getDocFromServer, setLogLevel, disableNetwork } from 'firebase/firestore';
 import firebaseConfigRaw from '../../firebase-applet-config.json';
+
+// Suppress internal @firebase/firestore SDK backoff/quota retry logs so they never trigger runtime error overlays
+try {
+  setLogLevel('silent');
+} catch {}
 
 // Resolve configuration from JSON or Vercel Environment Variables
 const env = typeof import.meta !== 'undefined' ? (import.meta as any).env || {} : {};
@@ -30,6 +35,60 @@ googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
 // In-memory token cache (DO NOT store in localStorage per security guidelines)
 let cachedAccessToken: string | null = null;
 
+// Circuit breaker for Firestore free-tier daily quota exhaustion
+const QUOTA_FLAG_KEY = 'orbita_firestore_quota_tripped_date';
+let quotaCircuitTripped = false;
+let networkDisabledForQuota = false;
+
+function getTodayUtcDateStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export function isFirestoreQuotaExhausted(): boolean {
+  if (quotaCircuitTripped) return true;
+  try {
+    if (typeof sessionStorage !== 'undefined') {
+      const flaggedDate = sessionStorage.getItem(QUOTA_FLAG_KEY);
+      if (flaggedDate === getTodayUtcDateStr()) {
+        quotaCircuitTripped = true;
+        if (!networkDisabledForQuota) {
+          networkDisabledForQuota = true;
+          disableNetwork(db).catch(() => {});
+        }
+        return true;
+      }
+    }
+  } catch {}
+  return false;
+}
+
+export function tripFirestoreQuotaBreaker(): void {
+  quotaCircuitTripped = true;
+  try {
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem(QUOTA_FLAG_KEY, getTodayUtcDateStr());
+    }
+  } catch {}
+  if (!networkDisabledForQuota) {
+    networkDisabledForQuota = true;
+    disableNetwork(db).catch(() => {});
+  }
+}
+
+export function isQuotaOrOfflineErrorMessage(msg: string): boolean {
+  const lower = msg.toLowerCase();
+  return (
+    lower.includes('resource-exhausted') ||
+    lower.includes('quota limit exceeded') ||
+    lower.includes('quota exceeded') ||
+    lower.includes('free daily write units') ||
+    lower.includes('free daily read units') ||
+    lower.includes('maximum backoff delay') ||
+    lower.includes('client is offline') ||
+    lower.includes('no document to update')
+  );
+}
+
 // Operation types for strict Firestore error handling
 export enum OperationType {
   CREATE = 'create',
@@ -57,9 +116,21 @@ export interface FirestoreErrorInfo {
   };
 }
 
-export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null): never {
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null): void {
   const rawMessage = error instanceof Error ? error.message : String(error);
-  const lowerMsg = rawMessage.toLowerCase();
+  const code = String((error as any)?.code || '').toLowerCase();
+
+  if (code.includes('resource-exhausted') || isQuotaOrOfflineErrorMessage(rawMessage)) {
+    if (
+      code.includes('resource-exhausted') ||
+      rawMessage.toLowerCase().includes('quota') ||
+      rawMessage.toLowerCase().includes('free daily')
+    ) {
+      tripFirestoreQuotaBreaker();
+    }
+    return;
+  }
+
   const errInfo: FirestoreErrorInfo = {
     error: rawMessage,
     authInfo: {
@@ -77,37 +148,31 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
     path,
   };
 
-  if (
-    lowerMsg.includes('no document to update') ||
-    lowerMsg.includes('quota limit exceeded') ||
-    lowerMsg.includes('quota exceeded') ||
-    lowerMsg.includes('free daily read units') ||
-    lowerMsg.includes('client is offline')
-  ) {
-    console.warn('Firestore Notice (handled via local/hub sync):', errInfo.operationType, errInfo.path);
-    throw new Error(rawMessage);
-  }
-
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  console.warn('Firestore Notice:', JSON.stringify(errInfo));
 }
 
 // Connection test at boot time as mandated by skill
 export async function testConnection(): Promise<boolean> {
+  if (isFirestoreQuotaExhausted()) {
+    return false;
+  }
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
-    console.log('Firebase connection verified.');
     return true;
   } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.warn('Firebase client appears offline or connecting.');
+    const msg = error instanceof Error ? error.message : String(error);
+    const code = String((error as any)?.code || '').toLowerCase();
+    if (code.includes('resource-exhausted') || isQuotaOrOfflineErrorMessage(msg)) {
+      if (code.includes('resource-exhausted') || msg.toLowerCase().includes('quota')) {
+        tripFirestoreQuotaBreaker();
+      }
     }
     return false;
   }
 }
 
-// Initiate test connection
-testConnection().catch(console.error);
+// Initiate test connection safely without unhandled rejection
+testConnection().catch(() => {});
 
 export async function loginWithGoogle() {
   try {

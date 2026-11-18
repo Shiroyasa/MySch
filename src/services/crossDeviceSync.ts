@@ -125,16 +125,26 @@ export function getDeviceClientId(): string {
 export function computeCollectionHash(val: any): string {
   try {
     const str = JSON.stringify(val);
-    if (!str) return '0:0';
-    let h = 2166136261;
-    const step = Math.max(1, Math.floor(str.length / 500));
-    for (let i = 0; i < str.length; i += step) {
-      h ^= str.charCodeAt(i);
-      h = Math.imul(h, 16777619);
+    if (!str) return '0:0:0';
+    let h1 = 2166136261;
+    let h2 = 5381;
+    const len = str.length;
+    const limit = Math.min(len, 150000);
+    for (let i = 0; i < limit; i++) {
+      const c = str.charCodeAt(i);
+      h1 ^= c;
+      h1 = Math.imul(h1, 16777619);
+      h2 = (Math.imul(h2, 33) ^ c) | 0;
     }
-    return `${str.length}:${(h >>> 0).toString(36)}`;
+    for (let i = limit; i < len; i += 7) {
+      const c = str.charCodeAt(i);
+      h1 ^= c;
+      h1 = Math.imul(h1, 16777619);
+      h2 = (Math.imul(h2, 33) ^ c) | 0;
+    }
+    return `${len}:${(h1 >>> 0).toString(36)}:${(h2 >>> 0).toString(36)}`;
   } catch {
-    return '0:0';
+    return '0:0:0';
   }
 }
 
@@ -194,13 +204,20 @@ export function isCollectionCustomized(key: SyncCollectionKey, value: any): bool
     const s = value as SchoolSettings;
     return Boolean(
       s &&
-        ((s.schoolName && s.schoolName !== 'SMKN 69 JAKARTA') ||
+        ((s.schoolName && s.schoolName !== 'SMKS Muhammadiyah 1 Cikembar') ||
           s.logoUrl ||
-          (s.principalName && s.principalName !== 'Drs. H. Ahmad Fauzi, M.Pd.'))
+          (s.principalName && s.principalName !== 'Nia Kurniasari, S.Pd'))
     );
   }
+  if (key === 'reportTemplate') {
+    const r = value as ReportCustomConfig;
+    return Boolean(r && (r.logoDataUrl || r.leftSignerSignatureUrl || r.rightSignerSignatureUrl));
+  }
+  if (key === 'galleryViewSettings') {
+    return false;
+  }
   const seedHash = SEED_BASELINE_HASHES[key];
-  if (!seedHash) return true;
+  if (!seedHash) return false;
   return computeCollectionHash(value) !== seedHash;
 }
 
@@ -254,6 +271,28 @@ async function resolveWorkingEndpoints(): Promise<string[]> {
   }
 
   return uniqueEndpoints;
+}
+
+export async function pingSyncHubVersion(): Promise<{ version: number; updatedAt: string } | null> {
+  const endpoints = await resolveWorkingEndpoints();
+  for (const base of endpoints) {
+    try {
+      const res = await fetch(`${base}/api/sync/ping`, {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        cache: 'no-store',
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data && data.ok && typeof data.version === 'number') {
+        resolvedBaseUrl = base;
+        return { version: data.version, updatedAt: data.updatedAt || '' };
+      }
+    } catch {
+      // Try next
+    }
+  }
+  return null;
 }
 
 export interface PullSyncResult {
