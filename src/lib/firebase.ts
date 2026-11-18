@@ -13,13 +13,12 @@ const env = typeof import.meta !== 'undefined' ? (import.meta as any).env || {} 
 const rawConfig = (firebaseConfigRaw || {}) as any;
 
 export const resolvedFirebaseConfig = {
-  apiKey: env.VITE_FIREBASE_API_KEY || rawConfig.apiKey || '',
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || rawConfig.authDomain || '',
-  projectId: env.VITE_FIREBASE_PROJECT_ID || rawConfig.projectId || '',
-  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || rawConfig.storageBucket || '',
-  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || rawConfig.messagingSenderId || '',
-  appId: env.VITE_FIREBASE_APP_ID || rawConfig.appId || '',
-  firestoreDatabaseId: env.VITE_FIREBASE_DATABASE_ID || rawConfig.firestoreDatabaseId || 'ai-studio-adfbdbed-ac2d-4a06-bd2a-91d598030ae4',
+  apiKey: "AIzaSyDnPJ_I9_kkoWzJ4K1aI3zSGoGq563ZEGI",
+  authDomain: "gen-lang-client-0159880459.firebaseapp.com",
+  projectId: "gen-lang-client-0159880459",
+  storageBucket: "gen-lang-client-0159880459.firebasestorage.app",
+  messagingSenderId: "324008280807",
+  appId: "1:324008280807:web:cd7145cdad91035f4e5842"
 };
 
 // Initialize Firebase safely
